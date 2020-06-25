@@ -103,6 +103,9 @@ import net.minecraft.server.WorldMap;
 import net.minecraft.server.WorldNBTStorage;
 import net.minecraft.server.WorldServer;
 import net.minecraft.server.WorldSettings;
+import net.minecraft.server.dedicated.DedicatedPlayerManager;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.world.ServerWorld;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -232,7 +235,7 @@ public final class CraftServer implements Server {
     private final StandardMessenger messenger = new StandardMessenger();
     private final SimplePluginManager pluginManager = new SimplePluginManager(this, commandMap);
     protected final DedicatedServer console;
-    protected final DedicatedPlayerList playerList;
+    protected final DedicatedPlayerManager playerList;
     private final Map<String, World> worlds = new LinkedHashMap<String, World>();
     private YamlConfiguration configuration;
     private YamlConfiguration commandsConfiguration;
@@ -1044,7 +1047,7 @@ public final class CraftServer implements Server {
             return false;
         }
 
-        WorldServer handle = ((CraftWorld) world).getHandle();
+        ServerWorld handle = ((CraftWorld) world).getHandle();
 
         if (!(console.worldServer.containsKey(handle.getDimensionKey()))) {
             return false;

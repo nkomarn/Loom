@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
-public final class CraftReed extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Ageable {
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SugarCaneBlock;
+import net.minecraft.state.property.IntProperty;
 
-    public CraftReed() {
+public final class CraftSugarcane extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Ageable {
+
+    public CraftSugarcane() {
         super();
     }
 
-    public CraftReed(net.minecraft.server.IBlockData state) {
+    public CraftSugarcane(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftAgeable
 
-    private static final net.minecraft.server.BlockStateInteger AGE = getInteger(net.minecraft.server.BlockReed.class, "age");
+    private static final IntProperty AGE = getInteger(SugarCaneBlock.class, "age");
 
     @Override
     public int getAge() {

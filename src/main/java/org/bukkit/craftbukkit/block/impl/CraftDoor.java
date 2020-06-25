@@ -3,19 +3,24 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftDoor extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Door, org.bukkit.block.data.Bisected, org.bukkit.block.data.Directional, org.bukkit.block.data.Openable, org.bukkit.block.data.Powerable {
 
     public CraftDoor() {
         super();
     }
 
-    public CraftDoor(net.minecraft.server.IBlockData state) {
+    public CraftDoor(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftDoor
 
-    private static final net.minecraft.server.BlockStateEnum<?> HINGE = getEnum(net.minecraft.server.BlockDoor.class, "hinge");
+    private static final EnumProperty<?> HINGE = getEnum(DoorBlock.class, "hinge");
 
     @Override
     public Hinge getHinge() {
@@ -29,7 +34,7 @@ public final class CraftDoor extends org.bukkit.craftbukkit.block.data.CraftBloc
 
     // org.bukkit.craftbukkit.block.data.CraftBisected
 
-    private static final net.minecraft.server.BlockStateEnum<?> HALF = getEnum(net.minecraft.server.BlockDoor.class, "half");
+    private static final EnumProperty<?> HALF = getEnum(DoorBlock.class, "half");
 
     @Override
     public Half getHalf() {
@@ -43,7 +48,7 @@ public final class CraftDoor extends org.bukkit.craftbukkit.block.data.CraftBloc
 
     // org.bukkit.craftbukkit.block.data.CraftDirectional
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACING = getEnum(net.minecraft.server.BlockDoor.class, "facing");
+    private static final EnumProperty<?> FACING = getEnum(DoorBlock.class, "facing");
 
     @Override
     public org.bukkit.block.BlockFace getFacing() {
@@ -62,7 +67,7 @@ public final class CraftDoor extends org.bukkit.craftbukkit.block.data.CraftBloc
 
     // org.bukkit.craftbukkit.block.data.CraftOpenable
 
-    private static final net.minecraft.server.BlockStateBoolean OPEN = getBoolean(net.minecraft.server.BlockDoor.class, "open");
+    private static final BooleanProperty OPEN = getBoolean(DoorBlock.class, "open");
 
     @Override
     public boolean isOpen() {
@@ -76,7 +81,7 @@ public final class CraftDoor extends org.bukkit.craftbukkit.block.data.CraftBloc
 
     // org.bukkit.craftbukkit.block.data.CraftPowerable
 
-    private static final net.minecraft.server.BlockStateBoolean POWERED = getBoolean(net.minecraft.server.BlockDoor.class, "powered");
+    private static final BooleanProperty POWERED = getBoolean(DoorBlock.class, "powered");
 
     @Override
     public boolean isPowered() {

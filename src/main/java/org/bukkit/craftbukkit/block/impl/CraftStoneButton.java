@@ -3,19 +3,24 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.StoneButtonBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftStoneButton extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Switch, org.bukkit.block.data.Directional, org.bukkit.block.data.FaceAttachable, org.bukkit.block.data.Powerable {
 
     public CraftStoneButton() {
         super();
     }
 
-    public CraftStoneButton(net.minecraft.server.IBlockData state) {
+    public CraftStoneButton(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftSwitch
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACE = getEnum(net.minecraft.server.BlockStoneButton.class, "face");
+    private static final EnumProperty<?> FACE = getEnum(StoneButtonBlock.class, "face");
 
     @Override
     public Face getFace() {
@@ -29,7 +34,7 @@ public final class CraftStoneButton extends org.bukkit.craftbukkit.block.data.Cr
 
     // org.bukkit.craftbukkit.block.data.CraftDirectional
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACING = getEnum(net.minecraft.server.BlockStoneButton.class, "facing");
+    private static final EnumProperty<?> FACING = getEnum(StoneButtonBlock.class, "facing");
 
     @Override
     public org.bukkit.block.BlockFace getFacing() {
@@ -48,7 +53,7 @@ public final class CraftStoneButton extends org.bukkit.craftbukkit.block.data.Cr
 
     // org.bukkit.craftbukkit.block.data.CraftFaceAttachable
 
-    private static final net.minecraft.server.BlockStateEnum<?> ATTACH_FACE = getEnum(net.minecraft.server.BlockStoneButton.class, "face");
+    private static final EnumProperty<?> ATTACH_FACE = getEnum(StoneButtonBlock.class, "face");
 
     @Override
     public AttachedFace getAttachedFace() {
@@ -62,7 +67,7 @@ public final class CraftStoneButton extends org.bukkit.craftbukkit.block.data.Cr
 
     // org.bukkit.craftbukkit.block.data.CraftPowerable
 
-    private static final net.minecraft.server.BlockStateBoolean POWERED = getBoolean(net.minecraft.server.BlockStoneButton.class, "powered");
+    private static final BooleanProperty POWERED = getBoolean(StoneButtonBlock.class, "powered");
 
     @Override
     public boolean isPowered() {

@@ -4,22 +4,22 @@
 package org.bukkit.craftbukkit.block.impl;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.GrassBlock;
+import net.minecraft.block.MyceliumBlock;
 import net.minecraft.state.property.BooleanProperty;
 
-public final class CraftGrass extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Snowable {
+public final class CraftMycelium extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Snowable {
 
-    public CraftGrass() {
+    public CraftMycelium() {
         super();
     }
 
-    public CraftGrass(BlockState state) {
+    public CraftMycelium(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftSnowable
 
-    private static final BooleanProperty SNOWY = getBoolean(GrassBlock.class, "snowy");
+    private static final BooleanProperty SNOWY = getBoolean(MyceliumBlock.class, "snowy");
 
     @Override
     public boolean isSnowy() {

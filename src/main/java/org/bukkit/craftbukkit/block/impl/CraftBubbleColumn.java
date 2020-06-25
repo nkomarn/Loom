@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BubbleColumnBlock;
+import net.minecraft.state.property.BooleanProperty;
+
 public final class CraftBubbleColumn extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.BubbleColumn {
 
     public CraftBubbleColumn() {
         super();
     }
 
-    public CraftBubbleColumn(net.minecraft.server.IBlockData state) {
+    public CraftBubbleColumn(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftBubbleColumn
 
-    private static final net.minecraft.server.BlockStateBoolean DRAG = getBoolean(net.minecraft.server.BlockBubbleColumn.class, "drag");
+    private static final BooleanProperty DRAG = getBoolean(BubbleColumnBlock.class, "drag");
 
     @Override
     public boolean isDrag() {

@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CoralBlock;
+import net.minecraft.state.property.BooleanProperty;
+
 public final class CraftCoralPlant extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Waterlogged {
 
     public CraftCoralPlant() {
         super();
     }
 
-    public CraftCoralPlant(net.minecraft.server.IBlockData state) {
+    public CraftCoralPlant(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftWaterlogged
 
-    private static final net.minecraft.server.BlockStateBoolean WATERLOGGED = getBoolean(net.minecraft.server.BlockCoralPlant.class, "waterlogged");
+    private static final BooleanProperty WATERLOGGED = getBoolean(CoralBlock.class, "waterlogged");
 
     @Override
     public boolean isWaterlogged() {

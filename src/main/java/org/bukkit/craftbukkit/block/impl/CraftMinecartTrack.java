@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.RailBlock;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftMinecartTrack extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Rail {
 
     public CraftMinecartTrack() {
         super();
     }
 
-    public CraftMinecartTrack(net.minecraft.server.IBlockData state) {
+    public CraftMinecartTrack(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftRail
 
-    private static final net.minecraft.server.BlockStateEnum<?> SHAPE = getEnum(net.minecraft.server.BlockMinecartTrack.class, "shape");
+    private static final EnumProperty<?> SHAPE = getEnum(RailBlock.class, "shape");
 
     @Override
     public Shape getShape() {

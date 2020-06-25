@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SkullBlock;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftSkull extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Rotatable {
 
     public CraftSkull() {
         super();
     }
 
-    public CraftSkull(net.minecraft.server.IBlockData state) {
+    public CraftSkull(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftRotatable
 
-    private static final net.minecraft.server.BlockStateInteger ROTATION = getInteger(net.minecraft.server.BlockSkull.class, "rotation");
+    private static final IntProperty ROTATION = getInteger(SkullBlock.class, "rotation");
 
     @Override
     public org.bukkit.block.BlockFace getRotation() {

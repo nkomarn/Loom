@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ComposterBlock;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftComposter extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Levelled {
 
     public CraftComposter() {
         super();
     }
 
-    public CraftComposter(net.minecraft.server.IBlockData state) {
+    public CraftComposter(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftLevelled
 
-    private static final net.minecraft.server.BlockStateInteger LEVEL = getInteger(net.minecraft.server.BlockComposter.class, "level");
+    private static final IntProperty LEVEL = getInteger(ComposterBlock.class, "level");
 
     @Override
     public int getLevel() {

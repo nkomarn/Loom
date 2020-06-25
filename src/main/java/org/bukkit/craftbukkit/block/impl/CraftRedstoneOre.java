@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.RedstoneOreBlock;
+import net.minecraft.state.property.BooleanProperty;
+
 public final class CraftRedstoneOre extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Lightable {
 
     public CraftRedstoneOre() {
         super();
     }
 
-    public CraftRedstoneOre(net.minecraft.server.IBlockData state) {
+    public CraftRedstoneOre(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftLightable
 
-    private static final net.minecraft.server.BlockStateBoolean LIT = getBoolean(net.minecraft.server.BlockRedstoneOre.class, "lit");
+    private static final BooleanProperty LIT = getBoolean(RedstoneOreBlock.class, "lit");
 
     @Override
     public boolean isLit() {

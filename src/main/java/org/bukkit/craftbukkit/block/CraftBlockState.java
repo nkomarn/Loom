@@ -2,15 +2,15 @@ package org.bukkit.craftbukkit.block;
 
 import com.google.common.base.Preconditions;
 import java.util.List;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.GeneratorAccess;
-import net.minecraft.server.IBlockData;
+
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ServerWorldAccess;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -21,11 +21,11 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
-public class CraftBlockState implements BlockState {
+public class CraftBlockState implements org.bukkit.block.BlockState {
     protected final CraftWorld world;
     private final CraftChunk chunk;
-    private final BlockPosition position;
-    protected IBlockData data;
+    private final BlockPos position;
+    protected BlockState data;
     protected int flag;
 
     public CraftBlockState(final Block block) {
@@ -43,16 +43,16 @@ public class CraftBlockState implements BlockState {
 
     public CraftBlockState(Material material) {
         world = null;
-        data = CraftMagicNumbers.getBlock(material).getBlockData();
+        data = CraftMagicNumbers.getBlock(material).getDefaultState();
         chunk = null;
-        position = BlockPosition.ZERO;
+        position = BlockPos.ZERO;
     }
 
-    public static CraftBlockState getBlockState(GeneratorAccess world, net.minecraft.server.BlockPosition pos) {
+    public static CraftBlockState getBlockState(ServerWorldAccess world, BlockPos pos) {
         return new CraftBlockState(CraftBlock.at(world, pos));
     }
 
-    public static CraftBlockState getBlockState(net.minecraft.server.World world, net.minecraft.server.BlockPosition pos, int flag) {
+    public static CraftBlockState getBlockState(net.minecraft.world.World world, BlockPos pos, int flag) {
         return new CraftBlockState(world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), flag);
     }
 
@@ -83,15 +83,15 @@ public class CraftBlockState implements BlockState {
         return chunk;
     }
 
-    public void setData(IBlockData data) {
+    public void setData(BlockState data) {
         this.data = data;
     }
 
-    public BlockPosition getPosition() {
+    public BlockPos getPosition() {
         return this.position;
     }
 
-    public IBlockData getHandle() {
+    public BlockState getHandle() {
         return this.data;
     }
 
@@ -184,7 +184,7 @@ public class CraftBlockState implements BlockState {
             }
         }
 
-        IBlockData newBlock = this.data;
+        BlockState newBlock = this.data;
         block.setTypeAndData(newBlock, applyPhysics);
         world.getHandle().notify(
                 position,

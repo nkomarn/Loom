@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BeetrootsBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftBeetroot extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Ageable {
 
     public CraftBeetroot() {
         super();
     }
 
-    public CraftBeetroot(net.minecraft.server.IBlockData state) {
+    public CraftBeetroot(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftAgeable
 
-    private static final net.minecraft.server.BlockStateInteger AGE = getInteger(net.minecraft.server.BlockBeetroot.class, "age");
+    private static final IntProperty AGE = getInteger(BeetrootsBlock.class, "age");
 
     @Override
     public int getAge() {

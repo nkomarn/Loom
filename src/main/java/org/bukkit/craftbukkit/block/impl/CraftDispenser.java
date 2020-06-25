@@ -3,19 +3,24 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.DispenserBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftDispenser extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Dispenser, org.bukkit.block.data.Directional {
 
     public CraftDispenser() {
         super();
     }
 
-    public CraftDispenser(net.minecraft.server.IBlockData state) {
+    public CraftDispenser(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftDispenser
 
-    private static final net.minecraft.server.BlockStateBoolean TRIGGERED = getBoolean(net.minecraft.server.BlockDispenser.class, "triggered");
+    private static final BooleanProperty TRIGGERED = getBoolean(DispenserBlock.class, "triggered");
 
     @Override
     public boolean isTriggered() {
@@ -29,7 +34,7 @@ public final class CraftDispenser extends org.bukkit.craftbukkit.block.data.Craf
 
     // org.bukkit.craftbukkit.block.data.CraftDirectional
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACING = getEnum(net.minecraft.server.BlockDispenser.class, "facing");
+    private static final EnumProperty<?> FACING = getEnum(DispenserBlock.class, "facing");
 
     @Override
     public org.bukkit.block.BlockFace getFacing() {

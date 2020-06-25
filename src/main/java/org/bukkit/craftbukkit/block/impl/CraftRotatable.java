@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.PillarBlock;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftRotatable extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Orientable {
 
     public CraftRotatable() {
         super();
     }
 
-    public CraftRotatable(net.minecraft.server.IBlockData state) {
+    public CraftRotatable(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftOrientable
 
-    private static final net.minecraft.server.BlockStateEnum<?> AXIS = getEnum(net.minecraft.server.BlockRotatable.class, "axis");
+    private static final EnumProperty<?> AXIS = getEnum(PillarBlock.class, "axis");
 
     @Override
     public org.bukkit.Axis getAxis() {

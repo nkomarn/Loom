@@ -3,20 +3,25 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftLeaves extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Leaves {
 
     public CraftLeaves() {
         super();
     }
 
-    public CraftLeaves(net.minecraft.server.IBlockData state) {
+    public CraftLeaves(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftLeaves
 
-    private static final net.minecraft.server.BlockStateInteger DISTANCE = getInteger(net.minecraft.server.BlockLeaves.class, "distance");
-    private static final net.minecraft.server.BlockStateBoolean PERSISTENT = getBoolean(net.minecraft.server.BlockLeaves.class, "persistent");
+    private static final IntProperty DISTANCE = getInteger(LeavesBlock.class, "distance");
+    private static final BooleanProperty PERSISTENT = getBoolean(LeavesBlock.class, "persistent");
 
     @Override
     public boolean isPersistent() {

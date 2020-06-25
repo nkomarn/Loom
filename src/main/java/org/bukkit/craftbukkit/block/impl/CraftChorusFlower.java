@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChorusFlowerBlock;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftChorusFlower extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Ageable {
 
     public CraftChorusFlower() {
         super();
     }
 
-    public CraftChorusFlower(net.minecraft.server.IBlockData state) {
+    public CraftChorusFlower(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftAgeable
 
-    private static final net.minecraft.server.BlockStateInteger AGE = getInteger(net.minecraft.server.BlockChorusFlower.class, "age");
+    private static final IntProperty AGE = getInteger(ChorusFlowerBlock.class, "age");
 
     @Override
     public int getAge() {

@@ -3,20 +3,26 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.WallBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftCobbleWall extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Wall, org.bukkit.block.data.Waterlogged {
 
     public CraftCobbleWall() {
         super();
     }
 
-    public CraftCobbleWall(net.minecraft.server.IBlockData state) {
+    public CraftCobbleWall(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftWall
 
-    private static final net.minecraft.server.BlockStateEnum<?>[] HEIGHTS = new net.minecraft.server.BlockStateEnum[]{
-        getEnum(net.minecraft.server.BlockCobbleWall.class, "north"), getEnum(net.minecraft.server.BlockCobbleWall.class, "east"), getEnum(net.minecraft.server.BlockCobbleWall.class, "south"), getEnum(net.minecraft.server.BlockCobbleWall.class, "west")
+    private static final EnumProperty<?>[] HEIGHTS = new EnumProperty[]{
+        getEnum(WallBlock.class, "north"), getEnum(WallBlock.class, "east"), getEnum(WallBlock.class, "south"),
+            getEnum(WallBlock.class, "west")
     };
 
     @Override
@@ -31,7 +37,7 @@ public final class CraftCobbleWall extends org.bukkit.craftbukkit.block.data.Cra
 
     // org.bukkit.craftbukkit.block.data.CraftWaterlogged
 
-    private static final net.minecraft.server.BlockStateBoolean WATERLOGGED = getBoolean(net.minecraft.server.BlockCobbleWall.class, "waterlogged");
+    private static final BooleanProperty WATERLOGGED = getBoolean(WallBlock.class, "waterlogged");
 
     @Override
     public boolean isWaterlogged() {

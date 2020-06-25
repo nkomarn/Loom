@@ -3,20 +3,24 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.TurtleEggBlock;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftTurtleEgg extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.TurtleEgg {
 
     public CraftTurtleEgg() {
         super();
     }
 
-    public CraftTurtleEgg(net.minecraft.server.IBlockData state) {
+    public CraftTurtleEgg(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftTurtleEgg
 
-    private static final net.minecraft.server.BlockStateInteger EGGS = getInteger(net.minecraft.server.BlockTurtleEgg.class, "eggs");
-    private static final net.minecraft.server.BlockStateInteger HATCH = getInteger(net.minecraft.server.BlockTurtleEgg.class, "hatch");
+    private static final IntProperty EGGS = getInteger(TurtleEggBlock.class, "eggs");
+    private static final IntProperty HATCH = getInteger(TurtleEggBlock.class, "hatch");
 
     @Override
     public int getEggs() {

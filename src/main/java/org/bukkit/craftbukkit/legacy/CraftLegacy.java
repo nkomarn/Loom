@@ -8,6 +8,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import net.minecraft.block.BlockState;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.Block;
 import net.minecraft.server.BlockStateList;
 import net.minecraft.server.Blocks;
@@ -112,7 +116,7 @@ public final class CraftLegacy {
         return Blocks.AIR.getBlockData();
     }
 
-    public static Item fromLegacyData(Material material, short data) {
+    public static ItemStack fromLegacyData(Material material, short data) {
         Preconditions.checkArgument(material.isLegacy(), "fromLegacyData on modern Material. Did you forget to define a modern (1.13+) api-version in your plugin.yml?");
 
         MaterialData materialData = new MaterialData(material, (byte) data);
@@ -126,7 +130,7 @@ public final class CraftLegacy {
         // Fallback to matching block
         if (material.isBlock()) {
             // Try exact match first
-            IBlockData converted = materialToData.get(materialData);
+            BlockState converted = materialToData.get(materialData);
             if (converted != null) {
                 return converted.getBlock().getItem();
             }

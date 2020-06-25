@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.WeepingVinesBlock;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftWeepingVines extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Ageable {
 
     public CraftWeepingVines() {
         super();
     }
 
-    public CraftWeepingVines(net.minecraft.server.IBlockData state) {
+    public CraftWeepingVines(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftAgeable
 
-    private static final net.minecraft.server.BlockStateInteger AGE = getInteger(net.minecraft.server.BlockWeepingVines.class, "age");
+    private static final IntProperty AGE = getInteger(WeepingVinesBlock.class, "age");
 
     @Override
     public int getAge() {

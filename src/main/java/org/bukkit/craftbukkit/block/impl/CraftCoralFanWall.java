@@ -3,19 +3,24 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CoralWallFanBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftCoralFanWall extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.CoralWallFan, org.bukkit.block.data.Directional, org.bukkit.block.data.Waterlogged {
 
     public CraftCoralFanWall() {
         super();
     }
 
-    public CraftCoralFanWall(net.minecraft.server.IBlockData state) {
+    public CraftCoralFanWall(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftDirectional
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACING = getEnum(net.minecraft.server.BlockCoralFanWall.class, "facing");
+    private static final EnumProperty<?> FACING = getEnum(CoralWallFanBlock.class, "facing");
 
     @Override
     public org.bukkit.block.BlockFace getFacing() {
@@ -34,7 +39,7 @@ public final class CraftCoralFanWall extends org.bukkit.craftbukkit.block.data.C
 
     // org.bukkit.craftbukkit.block.data.CraftWaterlogged
 
-    private static final net.minecraft.server.BlockStateBoolean WATERLOGGED = getBoolean(net.minecraft.server.BlockCoralFanWall.class, "waterlogged");
+    private static final BooleanProperty WATERLOGGED = getBoolean(CoralWallFanBlock.class, "waterlogged");
 
     @Override
     public boolean isWaterlogged() {

@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SaplingBlock;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftSapling extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Sapling {
 
     public CraftSapling() {
         super();
     }
 
-    public CraftSapling(net.minecraft.server.IBlockData state) {
+    public CraftSapling(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftSapling
 
-    private static final net.minecraft.server.BlockStateInteger STAGE = getInteger(net.minecraft.server.BlockSapling.class, "stage");
+    private static final IntProperty STAGE = getInteger(SaplingBlock.class, "stage");
 
     @Override
     public int getStage() {

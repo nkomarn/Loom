@@ -19,77 +19,27 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import net.minecraft.server.ArraySetSorted;
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.BiomeDecoratorGroups;
-import net.minecraft.server.BlockChorusFlower;
-import net.minecraft.server.BlockDiodeAbstract;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.ChunkCoordIntPair;
-import net.minecraft.server.ChunkMapDistance;
-import net.minecraft.server.ChunkStatus;
-import net.minecraft.server.EntityAreaEffectCloud;
-import net.minecraft.server.EntityArmorStand;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityBoat;
-import net.minecraft.server.EntityEgg;
-import net.minecraft.server.EntityEnderSignal;
-import net.minecraft.server.EntityEvokerFangs;
-import net.minecraft.server.EntityExperienceOrb;
-import net.minecraft.server.EntityFallingBlock;
-import net.minecraft.server.EntityFireball;
-import net.minecraft.server.EntityFireworks;
-import net.minecraft.server.EntityHanging;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityInsentient;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.EntityItemFrame;
-import net.minecraft.server.EntityLeash;
-import net.minecraft.server.EntityLightning;
-import net.minecraft.server.EntityMinecartChest;
-import net.minecraft.server.EntityMinecartCommandBlock;
-import net.minecraft.server.EntityMinecartFurnace;
-import net.minecraft.server.EntityMinecartHopper;
-import net.minecraft.server.EntityMinecartMobSpawner;
-import net.minecraft.server.EntityMinecartRideable;
-import net.minecraft.server.EntityMinecartTNT;
-import net.minecraft.server.EntityPainting;
-import net.minecraft.server.EntityPotion;
-import net.minecraft.server.EntitySnowball;
-import net.minecraft.server.EntityTNTPrimed;
-import net.minecraft.server.EntityTippedArrow;
-import net.minecraft.server.EntityTypes;
-import net.minecraft.server.EntityZombie;
-import net.minecraft.server.EnumDifficulty;
-import net.minecraft.server.EnumDirection;
-import net.minecraft.server.EnumMobSpawn;
-import net.minecraft.server.Explosion;
-import net.minecraft.server.GameRules;
-import net.minecraft.server.GroupDataEntity;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.IChunkAccess;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.MovingObjectPosition;
-import net.minecraft.server.PacketPlayOutCustomSoundEffect;
-import net.minecraft.server.PacketPlayOutUpdateTime;
-import net.minecraft.server.PacketPlayOutWorldEvent;
-import net.minecraft.server.PersistentRaid;
-import net.minecraft.server.PlayerChunk;
-import net.minecraft.server.ProtoChunkExtension;
-import net.minecraft.server.RayTrace;
-import net.minecraft.server.SavedFile;
-import net.minecraft.server.SoundCategory;
-import net.minecraft.server.StructureGenerator;
-import net.minecraft.server.Ticket;
-import net.minecraft.server.TicketType;
-import net.minecraft.server.Unit;
-import net.minecraft.server.Vec3D;
-import net.minecraft.server.WorldGenerator;
-import net.minecraft.server.WorldServer;
+
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.WorldEventS2CPacket;
+import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ChunkTicketType;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Unit;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
@@ -267,7 +217,7 @@ import org.bukkit.util.Vector;
 public class CraftWorld implements World {
     public static final int CUSTOM_DIMENSION_OFFSET = 10;
 
-    private final WorldServer world;
+    private final ServerWorld world;
     private WorldBorder worldBorder;
     private Environment environment;
     private final CraftServer server = (CraftServer) Bukkit.getServer();
@@ -281,7 +231,7 @@ public class CraftWorld implements World {
 
     private static final Random rand = new Random();
 
-    public CraftWorld(WorldServer world, ChunkGenerator gen, Environment env) {
+    public CraftWorld(ServerWorld world, ChunkGenerator gen, Environment env) {
         this.world = world;
         this.generator = gen;
 
@@ -290,7 +240,7 @@ public class CraftWorld implements World {
 
     @Override
     public Block getBlockAt(int x, int y, int z) {
-        return CraftBlock.at(world, new BlockPosition(x, y, z));
+        return CraftBlock.at(world, new BlockPos(x, y, z));
     }
 
     @Override
@@ -300,7 +250,7 @@ public class CraftWorld implements World {
 
     @Override
     public Location getSpawnLocation() {
-        BlockPosition spawn = world.getSpawn();
+        BlockPos spawn = world.getSpawnPos();
         return new Location(this, spawn.getX(), spawn.getY(), spawn.getZ());
     }
 
@@ -308,14 +258,15 @@ public class CraftWorld implements World {
     public boolean setSpawnLocation(Location location) {
         Preconditions.checkArgument(location != null, "location");
 
-        return equals(location.getWorld()) ? setSpawnLocation(location.getBlockX(), location.getBlockY(), location.getBlockZ()) : false;
+        return equals(location.getWorld()) ? setSpawnLocation(location.getBlockX(),
+                location.getBlockY(), location.getBlockZ()) : false;
     }
 
     @Override
     public boolean setSpawnLocation(int x, int y, int z) {
         try {
             Location previousLocation = getSpawnLocation();
-            world.worldData.setSpawn(new BlockPosition(x, y, z));
+            world.setSpawnPos(new BlockPos(x, y, z));
 
             // Notify anyone who's listening.
             SpawnChangeEvent event = new SpawnChangeEvent(this, previousLocation);
@@ -329,7 +280,7 @@ public class CraftWorld implements World {
 
     @Override
     public Chunk getChunkAt(int x, int z) {
-        return this.world.getChunkProvider().getChunkAt(x, z, true).bukkitChunk;
+        return this.world.getChunkManager().getWorldChunk(x, z, true).bukkitChunk;
     }
 
     @Override
@@ -341,13 +292,14 @@ public class CraftWorld implements World {
 
     @Override
     public boolean isChunkLoaded(int x, int z) {
-        return world.getChunkProvider().isChunkLoaded(x, z);
+        return world.getChunkManager().isChunkLoaded(x, z);
     }
 
     @Override
     public boolean isChunkGenerated(int x, int z) {
         try {
-            return isChunkLoaded(x, z) || world.getChunkProvider().playerChunkMap.read(new ChunkCoordIntPair(x, z)) != null;
+            return isChunkLoaded(x, z) || world.getChunkManager().threadedAnvilChunkStorage
+                    .getNbt(new ChunkPos(x, z)) != null;
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -355,8 +307,9 @@ public class CraftWorld implements World {
 
     @Override
     public Chunk[] getLoadedChunks() {
-        Long2ObjectLinkedOpenHashMap<PlayerChunk> chunks = world.getChunkProvider().playerChunkMap.visibleChunks;
-        return chunks.values().stream().map(PlayerChunk::getFullChunk).filter(Objects::nonNull).map(net.minecraft.server.Chunk::getBukkitChunk).toArray(Chunk[]::new);
+        Long2ObjectLinkedOpenHashMap<ChunkHolder> chunks = world.getChunkManager().threadedAnvilChunkStorage.;
+        return chunks.values().stream().map(ChunkHolder::getFullChunk).filter(Objects::nonNull)
+                .map(WorldChunk::getBukkitChunk).toArray(Chunk[]::new);
     }
 
     @Override
@@ -382,7 +335,7 @@ public class CraftWorld implements World {
     @Override
     public boolean unloadChunkRequest(int x, int z) {
         if (isChunkLoaded(x, z)) {
-            world.getChunkProvider().removeTicket(TicketType.PLUGIN, new ChunkCoordIntPair(x, z), 1, Unit.INSTANCE);
+            world.getChunkManager().removeTicket(ChunkTicketType.PLUGIN, new ChunkPos(x, z), 1, Unit.INSTANCE);
         }
 
         return true;
@@ -392,12 +345,12 @@ public class CraftWorld implements World {
         if (!isChunkLoaded(x, z)) {
             return true;
         }
-        net.minecraft.server.Chunk chunk = world.getChunkAt(x, z);
+        WorldChunk chunk = world.getChunk(x, z);
 
         chunk.mustNotSave = !save;
         unloadChunkRequest(x, z);
 
-        world.getChunkProvider().purgeUnload();
+        world.getChunkManager().tick();
         return !isChunkLoaded(x, z);
     }
 
@@ -440,9 +393,11 @@ public class CraftWorld implements World {
         // This flags 65 blocks distributed across all the sections of the chunk, so that everything is sent, including biomes
         int height = getMaxHeight() / 16;
         for (int idx = 0; idx < 64; idx++) {
-            world.notify(new BlockPosition(px + (idx / height), ((idx % height) * 16), pz), Blocks.AIR.getBlockData(), Blocks.STONE.getBlockData(), 3);
+            world.notify(new BlockPos(px + (idx / height), ((idx % height) * 16), pz), Blocks.AIR.getDefaultState(),
+                    Blocks.STONE.getDefaultState(), 3);
         }
-        world.notify(new BlockPosition(px + 15, (height * 16) - 1, pz + 15), Blocks.AIR.getBlockData(), Blocks.STONE.getBlockData(), 3);
+        world.notify(new BlockPos(px + 15, (height * 16) - 1, pz + 15), Blocks.AIR.getDefaultState(),
+                Blocks.STONE.getDefaultState(), 3);
 
         return true;
     }
@@ -582,7 +537,7 @@ public class CraftWorld implements World {
         return Collections.unmodifiableCollection(chunks);
     }
 
-    public WorldServer getHandle() {
+    public ServerWorld getHandle() {
         return world;
     }
 
@@ -810,9 +765,10 @@ public class CraftWorld implements World {
         // Forces the client to update to the new time immediately
         for (Player p : getPlayers()) {
             CraftPlayer cp = (CraftPlayer) p;
-            if (cp.getHandle().playerConnection == null) continue;
+            if (cp.getHandle().networkHandler == null) continue;
 
-            cp.getHandle().playerConnection.sendPacket(new PacketPlayOutUpdateTime(cp.getHandle().world.getTime(), cp.getHandle().getPlayerTime(), cp.getHandle().world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
+            cp.getHandle().networkHandler.sendPacket(new WorldTimeUpdateS2CPacket(cp.getHandle().world.getTime(),
+                    cp.getHandle().getPlayerTime(), cp.getHandle().world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
         }
     }
 
@@ -902,7 +858,7 @@ public class CraftWorld implements World {
     @Override
     public int getHighestBlockYAt(int x, int z, org.bukkit.HeightMap heightMap) {
         // Transient load for this tick
-        return world.getChunkAt(x >> 4, z >> 4).getHighestBlock(CraftHeightMap.toNMS(heightMap), x, z);
+        return world.getChunk(x >> 4, z >> 4).sampleHeightmap(CraftHeightMap.toNMS(heightMap), x, z);
     }
 
     @Override
@@ -927,7 +883,7 @@ public class CraftWorld implements World {
 
     @Override
     public Biome getBiome(int x, int y, int z) {
-        return CraftBlock.biomeBaseToBiome(this.world.getBiome(x >> 2, y >> 2, z >> 2));
+        return CraftBlock.biomeBaseToBiome(this.world.getBiome(new BlockPos(x >> 2, y >> 2, z >> 2)));
     }
 
     @Override
@@ -939,10 +895,10 @@ public class CraftWorld implements World {
 
     @Override
     public void setBiome(int x, int y, int z, Biome bio) {
-        BiomeBase bb = CraftBlock.biomeToBiomeBase(bio);
-        BlockPosition pos = new BlockPosition(x, 0, z);
-        if (this.world.isLoaded(pos)) {
-            net.minecraft.server.Chunk chunk = this.world.getChunkAtWorldCoords(pos);
+        Biome bb = CraftBlock.biomeToBiomeBase(bio);
+        BlockPos pos = new BlockPos(x, 0, z);
+        if (this.world.isChunkLoaded(pos)) {
+            WorldChunk chunk = this.world.getWorldChunk(pos);
 
             if (chunk != null) {
                 chunk.getBiomeIndex().setBiome(x >> 2, y >> 2, z >> 2, bb);
@@ -959,8 +915,8 @@ public class CraftWorld implements World {
 
     @Override
     public double getTemperature(int x, int y, int z) {
-        BlockPosition pos = new BlockPosition(x, y, z);
-        return this.world.getBiome(x >> 2, y >> 2, z >> 2).getAdjustedTemperature(pos);
+        BlockPos pos = new BlockPos(x, y, z);
+        return this.world.getGeneratorStoredBiome(x >> 2, y >> 2, z >> 2).getTemperature(pos);
     }
 
     @Override
@@ -970,7 +926,7 @@ public class CraftWorld implements World {
 
     @Override
     public double getHumidity(int x, int y, int z) {
-        return this.world.getBiome(x >> 2, y >> 2, z >> 2).getHumidity();
+        return this.world.getGeneratorStoredBiome(x >> 2, y >> 2, z >> 2).getRainfall();
     }
 
     @Override
@@ -978,8 +934,8 @@ public class CraftWorld implements World {
         List<Entity> list = new ArrayList<Entity>();
 
         for (Object o : world.entitiesById.values()) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof net.minecraft.entity.Entity) {
+                net.minecraft.entity.Entity mcEnt = (net.minecraft.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -994,11 +950,11 @@ public class CraftWorld implements World {
 
     @Override
     public List<LivingEntity> getLivingEntities() {
-        List<LivingEntity> list = new ArrayList<LivingEntity>();
+        List<LivingEntity> list = new ArrayList<>();
 
         for (Object o : world.entitiesById.values()) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof net.minecraft.entity.Entity) {
+                net.minecraft.entity.Entity mcEnt = (net.minecraft.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -1024,8 +980,8 @@ public class CraftWorld implements World {
         Collection<T> list = new ArrayList<T>();
 
         for (Object entity: world.entitiesById.values()) {
-            if (entity instanceof net.minecraft.server.Entity) {
-                Entity bukkitEntity = ((net.minecraft.server.Entity) entity).getBukkitEntity();
+            if (entity instanceof net.minecraft.entity.Entity) {
+                Entity bukkitEntity = ((net.minecraft.entity.Entity) entity).getBukkitEntity();
 
                 if (bukkitEntity == null) {
                     continue;
@@ -1047,8 +1003,8 @@ public class CraftWorld implements World {
         Collection<Entity> list = new ArrayList<Entity>();
 
         for (Object entity: world.entitiesById.values()) {
-            if (entity instanceof net.minecraft.server.Entity) {
-                Entity bukkitEntity = ((net.minecraft.server.Entity) entity).getBukkitEntity();
+            if (entity instanceof net.minecraft.entity.Entity) {
+                Entity bukkitEntity = ((net.minecraft.entity.Entity) entity).getBukkitEntity();
 
                 if (bukkitEntity == null) {
                     continue;
@@ -1093,11 +1049,12 @@ public class CraftWorld implements World {
     public Collection<Entity> getNearbyEntities(BoundingBox boundingBox, Predicate<Entity> filter) {
         Validate.notNull(boundingBox, "Bounding box is null!");
 
-        AxisAlignedBB bb = new AxisAlignedBB(boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(), boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ());
-        List<net.minecraft.server.Entity> entityList = getHandle().getEntities((net.minecraft.server.Entity) null, bb, null);
+        Box bb = new Box(boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(), boundingBox.getMaxX(),
+                boundingBox.getMaxY(), boundingBox.getMaxZ());
+        List<net.minecraft.entity.Entity> entityList = getHandle().getEntities((net.minecraft.entity.Entity) null, bb, null);
         List<Entity> bukkitEntityList = new ArrayList<org.bukkit.entity.Entity>(entityList.size());
 
-        for (net.minecraft.server.Entity entity : entityList) {
+        for (net.minecraft.entity.Entity entity : entityList) {
             Entity bukkitEntity = entity.getBukkitEntity();
             if (filter == null || filter.test(bukkitEntity)) {
                 bukkitEntityList.add(bukkitEntity);
@@ -1161,7 +1118,8 @@ public class CraftWorld implements World {
             }
         }
 
-        return (nearestHitEntity == null) ? null : new RayTraceResult(nearestHitResult.getHitPosition(), nearestHitEntity, nearestHitResult.getHitBlockFace());
+        return (nearestHitEntity == null) ? null : new RayTraceResult(nearestHitResult.getHitPosition(), nearestHitEntity,
+                nearestHitResult.getHitBlockFace());
     }
 
     @Override
@@ -1170,12 +1128,14 @@ public class CraftWorld implements World {
     }
 
     @Override
-    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode) {
+    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance, FluidCollisionMode
+            fluidCollisionMode) {
         return this.rayTraceBlocks(start, direction, maxDistance, fluidCollisionMode, false);
     }
 
     @Override
-    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode, boolean ignorePassableBlocks) {
+    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance, FluidCollisionMode
+            fluidCollisionMode, boolean ignorePassableBlocks) {
         Validate.notNull(start, "Start location is null!");
         Validate.isTrue(this.equals(start.getWorld()), "Start location is from different world!");
         start.checkFinite();
@@ -1191,15 +1151,18 @@ public class CraftWorld implements World {
         }
 
         Vector dir = direction.clone().normalize().multiply(maxDistance);
-        Vec3D startPos = new Vec3D(start.getX(), start.getY(), start.getZ());
-        Vec3D endPos = new Vec3D(start.getX() + dir.getX(), start.getY() + dir.getY(), start.getZ() + dir.getZ());
-        MovingObjectPosition nmsHitResult = this.getHandle().rayTrace(new RayTrace(startPos, endPos, ignorePassableBlocks ? RayTrace.BlockCollisionOption.COLLIDER : RayTrace.BlockCollisionOption.OUTLINE, CraftFluidCollisionMode.toNMS(fluidCollisionMode), null));
+        Vec3d startPos = new Vec3d(start.getX(), start.getY(), start.getZ());
+        Vec3d endPos = new Vec3d(start.getX() + dir.getX(), start.getY() + dir.getY(), start.getZ() + dir.getZ());
+        HitResult nmsHitResult = this.getHandle().rayTrace(new RayTraceContext(startPos, endPos, ignorePassableBlocks ?
+                RayTraceContext.ShapeType.COLLIDER : RayTraceContext.ShapeType.OUTLINE,
+                CraftFluidCollisionMode.toNMS(fluidCollisionMode), null));
 
         return CraftRayTraceResult.fromNMS(this, nmsHitResult);
     }
 
     @Override
-    public RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode, boolean ignorePassableBlocks, double raySize, Predicate<Entity> filter) {
+    public RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, FluidCollisionMode
+            fluidCollisionMode, boolean ignorePassableBlocks, double raySize, Predicate<Entity> filter) {
         RayTraceResult blockHit = this.rayTraceBlocks(start, direction, maxDistance, fluidCollisionMode, ignorePassableBlocks);
         Vector startVec = null;
         double blockHitDistance = maxDistance;
@@ -1232,7 +1195,7 @@ public class CraftWorld implements World {
     public List<Player> getPlayers() {
         List<Player> list = new ArrayList<Player>(world.getPlayers().size());
 
-        for (EntityHuman human : world.getPlayers()) {
+        for (PlayerEntity human : world.getPlayers()) {
             HumanEntity bukkitEntity = human.getBukkitEntity();
 
             if ((bukkitEntity != null) && (bukkitEntity instanceof Player)) {
@@ -1266,7 +1229,7 @@ public class CraftWorld implements World {
 
     @Override
     public void setDifficulty(Difficulty difficulty) {
-        this.getHandle().worldDataServer.setDifficulty(EnumDifficulty.getById(difficulty.getValue()));
+        this.getHandle().field_24456.setDifficulty(Difficulty.getByValue(difficulty.getValue())); // TODO
     }
 
     @Override
@@ -1280,44 +1243,44 @@ public class CraftWorld implements World {
 
     @Override
     public boolean hasStorm() {
-        return world.worldData.hasStorm();
+        return world.getLevelProperties().isThundering(); // TODO ????
     }
 
     @Override
     public void setStorm(boolean hasStorm) {
-        world.worldData.setStorm(hasStorm);
+        world.getLevelProperties().setStorm(hasStorm);
         setWeatherDuration(0); // Reset weather duration (legacy behaviour)
     }
 
     @Override
     public int getWeatherDuration() {
-        return world.worldDataServer.getWeatherDuration();
+        return world.field_24456.getWeatherDuration();
     }
 
     @Override
     public void setWeatherDuration(int duration) {
-        world.worldDataServer.setWeatherDuration(duration);
+        world.field_24456.setWeatherDuration(duration);
     }
 
     @Override
     public boolean isThundering() {
-        return world.worldData.isThundering();
+        return world.getLevelProperties().isThundering();
     }
 
     @Override
     public void setThundering(boolean thundering) {
-        world.worldDataServer.setThundering(thundering);
+        world.getLevelProperties().setThundering(thundering);
         setThunderDuration(0); // Reset weather duration (legacy behaviour)
     }
 
     @Override
     public int getThunderDuration() {
-        return world.worldDataServer.getThunderDuration();
+        return world.field_24456.getThunderDuration();
     }
 
     @Override
     public void setThunderDuration(int duration) {
-        world.worldDataServer.setThunderDuration(duration);
+        world.field_24456.setThunderDuration(duration);
     }
 
     @Override
@@ -1367,17 +1330,18 @@ public class CraftWorld implements World {
         Validate.notNull(effect, "Effect cannot be null");
         Validate.notNull(location.getWorld(), "World cannot be null");
         int packetData = effect.getId();
-        PacketPlayOutWorldEvent packet = new PacketPlayOutWorldEvent(packetData, new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()), data, false);
+        WorldEventS2CPacket packet = new WorldEventS2CPacket(packetData, new BlockPos(location.getBlockX(),
+                location.getBlockY(), location.getBlockZ()), data, false);
         int distance;
         radius *= radius;
 
         for (Player player : getPlayers()) {
-            if (((CraftPlayer) player).getHandle().playerConnection == null) continue;
+            if (((CraftPlayer) player).getHandle().networkHandler == null) continue;
             if (!location.getWorld().equals(player.getWorld())) continue;
 
             distance = (int) player.getLocation().distanceSquared(location);
             if (distance <= radius) {
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+                ((CraftPlayer) player).getHandle().networkHandler.sendPacket(packet);
             }
         }
     }
@@ -1404,8 +1368,9 @@ public class CraftWorld implements World {
         Validate.notNull(material, "Material cannot be null");
         Validate.isTrue(material.isBlock(), "Material must be a block");
 
-        EntityFallingBlock entity = new EntityFallingBlock(world, location.getX(), location.getY(), location.getZ(), CraftMagicNumbers.getBlock(material).getBlockData());
-        entity.ticksLived = 1;
+        FallingBlockEntity entity = new FallingBlockEntity(world, location.getX(), location.getY(), location.getZ(),
+                CraftMagicNumbers.getBlock(material).getDefaultState());
+        entity.age = 1;
 
         world.addEntity(entity, SpawnReason.CUSTOM);
         return (FallingBlock) entity.getBukkitEntity();
@@ -1416,8 +1381,9 @@ public class CraftWorld implements World {
         Validate.notNull(location, "Location cannot be null");
         Validate.notNull(data, "Material cannot be null");
 
-        EntityFallingBlock entity = new EntityFallingBlock(world, location.getX(), location.getY(), location.getZ(), ((CraftBlockData) data).getState());
-        entity.ticksLived = 1;
+        FallingBlockEntity entity = new FallingBlockEntity(world, location.getX(), location.getY(), location.getZ(),
+                ((CraftBlockData) data).getState());
+        entity.age = 1;
 
         world.addEntity(entity, SpawnReason.CUSTOM);
         return (FallingBlock) entity.getBukkitEntity();

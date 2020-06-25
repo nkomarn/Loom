@@ -3,19 +3,24 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BeehiveBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftBeehive extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Beehive, org.bukkit.block.data.Directional {
 
     public CraftBeehive() {
         super();
     }
 
-    public CraftBeehive(net.minecraft.server.IBlockData state) {
+    public CraftBeehive(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftBeehive
 
-    private static final net.minecraft.server.BlockStateInteger HONEY_LEVEL = getInteger(net.minecraft.server.BlockBeehive.class, "honey_level");
+    private static final IntProperty HONEY_LEVEL = getInteger(BeehiveBlock.class, "honey_level");
 
     @Override
     public int getHoneyLevel() {
@@ -34,7 +39,7 @@ public final class CraftBeehive extends org.bukkit.craftbukkit.block.data.CraftB
 
     // org.bukkit.craftbukkit.block.data.CraftDirectional
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACING = getEnum(net.minecraft.server.BlockBeehive.class, "facing");
+    private static final EnumProperty<?> FACING = getEnum(BeehiveBlock.class, "facing");
 
     @Override
     public org.bukkit.block.BlockFace getFacing() {

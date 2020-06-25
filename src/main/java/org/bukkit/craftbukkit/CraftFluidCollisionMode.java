@@ -1,22 +1,22 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.RayTrace.FluidCollisionOption;
+import net.minecraft.world.RayTraceContext;
 import org.bukkit.FluidCollisionMode;
 
 public final class CraftFluidCollisionMode {
 
     private CraftFluidCollisionMode() {}
 
-    public static FluidCollisionOption toNMS(FluidCollisionMode fluidCollisionMode) {
+    public static RayTraceContext.FluidHandling toNMS(FluidCollisionMode fluidCollisionMode) {
         if (fluidCollisionMode == null) return null;
 
         switch (fluidCollisionMode) {
             case ALWAYS:
-                return FluidCollisionOption.ANY;
+                return RayTraceContext.FluidHandling.ANY;
             case SOURCE_ONLY:
-                return FluidCollisionOption.SOURCE_ONLY;
+                return RayTraceContext.FluidHandling.SOURCE_ONLY;
             case NEVER:
-                return FluidCollisionOption.NONE;
+                return RayTraceContext.FluidHandling.NONE;
             default:
                 return null;
         }

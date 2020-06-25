@@ -3,20 +3,26 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.RepeaterBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.IntProperty;
+
 public final class CraftRepeater extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Repeater, org.bukkit.block.data.Directional, org.bukkit.block.data.Powerable {
 
     public CraftRepeater() {
         super();
     }
 
-    public CraftRepeater(net.minecraft.server.IBlockData state) {
+    public CraftRepeater(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftRepeater
 
-    private static final net.minecraft.server.BlockStateInteger DELAY = getInteger(net.minecraft.server.BlockRepeater.class, "delay");
-    private static final net.minecraft.server.BlockStateBoolean LOCKED = getBoolean(net.minecraft.server.BlockRepeater.class, "locked");
+    private static final IntProperty DELAY = getInteger(RepeaterBlock.class, "delay");
+    private static final BooleanProperty LOCKED = getBoolean(RepeaterBlock.class, "locked");
 
     @Override
     public int getDelay() {
@@ -50,7 +56,7 @@ public final class CraftRepeater extends org.bukkit.craftbukkit.block.data.Craft
 
     // org.bukkit.craftbukkit.block.data.CraftDirectional
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACING = getEnum(net.minecraft.server.BlockRepeater.class, "facing");
+    private static final EnumProperty<?> FACING = getEnum(RepeaterBlock.class, "facing");
 
     @Override
     public org.bukkit.block.BlockFace getFacing() {
@@ -69,7 +75,7 @@ public final class CraftRepeater extends org.bukkit.craftbukkit.block.data.Craft
 
     // org.bukkit.craftbukkit.block.data.CraftPowerable
 
-    private static final net.minecraft.server.BlockStateBoolean POWERED = getBoolean(net.minecraft.server.BlockRepeater.class, "powered");
+    private static final BooleanProperty POWERED = getBoolean(RepeaterBlock.class, "powered");
 
     @Override
     public boolean isPowered() {

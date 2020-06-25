@@ -5,24 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.BlockRedstoneWire;
-import net.minecraft.server.BlockTileEntity;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.EnumDirection;
-import net.minecraft.server.EnumSkyBlock;
-import net.minecraft.server.GeneratorAccess;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.MovingObjectPosition;
-import net.minecraft.server.RayTrace;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.Vec3D;
-import net.minecraft.server.VoxelShape;
-import net.minecraft.server.WorldServer;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Chunk;
 import org.bukkit.FluidCollisionMode;
@@ -52,27 +40,27 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 public class CraftBlock implements Block {
-    private final net.minecraft.server.GeneratorAccess world;
-    private final BlockPosition position;
+    private final WorldAccess world;
+    private final BlockPos position;
 
-    public CraftBlock(GeneratorAccess world, BlockPosition position) {
+    public CraftBlock(WorldAccess world, BlockPos position) {
         this.world = world;
-        this.position = position.immutableCopy();
+        this.position = position.mutableCopy();
     }
 
-    public static CraftBlock at(GeneratorAccess world, BlockPosition position) {
+    public static CraftBlock at(ServerWorldAccess world, BlockPos position) {
         return new CraftBlock(world, position);
     }
 
-    private net.minecraft.server.Block getNMSBlock() {
+    private net.minecraft.block.Block getNMSBlock() {
         return getNMS().getBlock();
     }
 
-    public net.minecraft.server.IBlockData getNMS() {
-        return world.getType(position);
+    public net.minecraft.block.BlockState getNMS() {
+        return world.getBlockState(position);
     }
 
-    public BlockPosition getPosition() {
+    public BlockPos getPosition() {
         return position;
     }
 
@@ -267,7 +255,7 @@ public class CraftBlock implements Block {
         return "CraftBlock{pos=" + position + ",type=" + getType() + ",data=" + getNMS() + ",fluid=" + world.getFluid(position) + '}';
     }
 
-    public static BlockFace notchToBlockFace(EnumDirection notch) {
+    public static BlockFace notchToBlockFace(Direction notch) {
         if (notch == null) return BlockFace.SELF;
         switch (notch) {
         case DOWN:
@@ -287,20 +275,20 @@ public class CraftBlock implements Block {
         }
     }
 
-    public static EnumDirection blockFaceToNotch(BlockFace face) {
+    public static Direction blockFaceToNotch(BlockFace face) {
         switch (face) {
         case DOWN:
-            return EnumDirection.DOWN;
+            return Direction.DOWN;
         case UP:
-            return EnumDirection.UP;
+            return Direction.UP;
         case NORTH:
-            return EnumDirection.NORTH;
+            return Direction.NORTH;
         case SOUTH:
-            return EnumDirection.SOUTH;
+            return Direction.SOUTH;
         case WEST:
-            return EnumDirection.WEST;
+            return Direction.WEST;
         case EAST:
-            return EnumDirection.EAST;
+            return Direction.EAST;
         default:
             return null;
         }
@@ -481,20 +469,20 @@ public class CraftBlock implements Block {
         getWorld().setBiome(getX(), getY(), getZ(), bio);
     }
 
-    public static Biome biomeBaseToBiome(BiomeBase base) {
+    public static Biome biomeBaseToBiome(net.minecraft.world.biome.Biome base) {
         if (base == null) {
             return null;
         }
 
-        return Biome.valueOf(IRegistry.BIOME.getKey(base).getKey().toUpperCase(java.util.Locale.ENGLISH));
+        return Biome.valueOf(Registry.BIOME.getKey(base).getKey().toUpperCase(java.util.Locale.ENGLISH));
     }
 
-    public static BiomeBase biomeToBiomeBase(Biome bio) {
+    public static Biome biomeToBiomeBase(Biome bio) {
         if (bio == null) {
             return null;
         }
 
-        return IRegistry.BIOME.get(new MinecraftKey(bio.name().toLowerCase(java.util.Locale.ENGLISH)));
+        return Registry.BIOME.get(new Identifier(bio.name().toLowerCase(java.util.Locale.ENGLISH)));
     }
 
     @Override

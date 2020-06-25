@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
-public final class CraftSoil extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Farmland {
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FarmlandBlock;
+import net.minecraft.state.property.IntProperty;
 
-    public CraftSoil() {
+public final class CraftFarmland extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Farmland {
+
+    public CraftFarmland() {
         super();
     }
 
-    public CraftSoil(net.minecraft.server.IBlockData state) {
+    public CraftFarmland(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.type.CraftFarmland
 
-    private static final net.minecraft.server.BlockStateInteger MOISTURE = getInteger(net.minecraft.server.BlockSoil.class, "moisture");
+    private static final IntProperty MOISTURE = getInteger(FarmlandBlock.class, "moisture");
 
     @Override
     public int getMoisture() {

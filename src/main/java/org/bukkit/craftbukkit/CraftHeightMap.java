@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit;
 
+import net.minecraft.world.Heightmap;
 import org.bukkit.HeightMap;
 
 final class CraftHeightMap {
@@ -7,26 +8,26 @@ final class CraftHeightMap {
     private CraftHeightMap() {
     }
 
-    public static net.minecraft.server.HeightMap.Type toNMS(HeightMap bukkitHeightMap) {
+    public static Heightmap.Type toNMS(HeightMap bukkitHeightMap) {
         switch (bukkitHeightMap) {
             case MOTION_BLOCKING_NO_LEAVES:
-                return net.minecraft.server.HeightMap.Type.MOTION_BLOCKING_NO_LEAVES;
+                return Heightmap.Type.MOTION_BLOCKING_NO_LEAVES;
             case OCEAN_FLOOR:
-                return net.minecraft.server.HeightMap.Type.OCEAN_FLOOR;
+                return Heightmap.Type.OCEAN_FLOOR;
             case OCEAN_FLOOR_WG:
-                return net.minecraft.server.HeightMap.Type.OCEAN_FLOOR_WG;
+                return Heightmap.Type.OCEAN_FLOOR_WG;
             case WORLD_SURFACE:
-                return net.minecraft.server.HeightMap.Type.WORLD_SURFACE;
+                return Heightmap.Type.WORLD_SURFACE;
             case WORLD_SURFACE_WG:
-                return net.minecraft.server.HeightMap.Type.WORLD_SURFACE_WG;
+                return Heightmap.Type.WORLD_SURFACE_WG;
             case MOTION_BLOCKING:
-                return net.minecraft.server.HeightMap.Type.MOTION_BLOCKING;
+                return Heightmap.Type.MOTION_BLOCKING;
             default:
-                throw new EnumConstantNotPresentException(net.minecraft.server.HeightMap.Type.class, bukkitHeightMap.name());
+                throw new EnumConstantNotPresentException(Heightmap.Type.class, bukkitHeightMap.name());
         }
     }
 
-    public static HeightMap fromNMS(net.minecraft.server.HeightMap.Type nmsHeightMapType) {
+    public static HeightMap fromNMS(Heightmap.Type nmsHeightMapType) {
         switch (nmsHeightMapType) {
             case WORLD_SURFACE_WG:
                 return HeightMap.WORLD_SURFACE_WG;
