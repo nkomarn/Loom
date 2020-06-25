@@ -67,6 +67,7 @@ import net.minecraft.server.TileEntitySign;
 import net.minecraft.server.Vec3D;
 import net.minecraft.server.WhiteListEntry;
 import net.minecraft.server.WorldServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanList;
@@ -1129,8 +1130,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     @Override
-    public EntityPlayer getHandle() {
-        return (EntityPlayer) entity;
+    public ServerPlayerEntity getHandle() {
+        return (ServerPlayerEntity) entity;
     }
 
     public void setHandle(final EntityPlayer entity) {
