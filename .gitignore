@@ -37,3 +37,6 @@ dependency-reduced-pom.xml
 
 /src/main/resources/achievement
 /src/main/resources/lang
+
+/decompiled
+/src/main/java/net/minecraft/

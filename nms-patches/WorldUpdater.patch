@@ -1,0 +1,18 @@
+--- a/net/minecraft/world/updater/WorldUpdater.java
++++ b/net/minecraft/world/updater/WorldUpdater.java
+@@ -132,12 +132,12 @@
+ 
+                             if (compoundtag != null) {
+                                 int j = VersionedChunkStorage.getDataVersion(compoundtag);
+-                                CompoundTag compoundtag1 = versionedchunkstorage.updateChunkTag(registrykey2, () -> {
+-                                    return this.persistentStateManager;
+-                                }, compoundtag);
++                                CompoundTag compoundtag1 = versionedchunkstorage.updateChunkTag(registrykey2, () -> this.persistentStateManager, compoundtag, chunkpos, null); // CraftBukkit
+                                 CompoundTag compoundtag2 = compoundtag1.getCompound("Level");
+                                 ChunkPos chunkpos1 = new ChunkPos(compoundtag2.getInt("xPos"), compoundtag2.getInt("zPos"));
+ 
++                                // --
++
+                                 if (!chunkpos1.equals(chunkpos)) {
+                                     WorldUpdater.LOGGER.warn("Chunk {} has invalid position {}", (Object) chunkpos, (Object) chunkpos1);
+                                 }
