@@ -55,17 +55,7 @@
          }
  
      }
-@@ -394,7 +412,8 @@
-         this.world.playSound(this, this.getX(), this.getY(), this.getZ(), soundevent, this.getSoundCategory(), f, f1);
-     }
- 
--    public void playSound(SoundEvent soundevent, SoundCategory soundcategory, float f, float f1) {}
-+    public void playSound(SoundEvent soundevent, SoundCategory soundcategory, float f, float f1) {
-+    }
- 
-     public SoundCategory getSoundCategory() {
-         return SoundCategory.PLAYERS;
-@@ -437,7 +456,8 @@
+@@ -437,7 +455,8 @@
  
          if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {
              if (this.getHealth() < this.getMaxHealth() && this.age % 20 == 0) {
@@ -75,7 +65,7 @@
              }
  
              if (this.hungerManager.isNotFull() && this.age % 10 == 0) {
-@@ -618,6 +638,30 @@
+@@ -618,6 +637,30 @@
                  itementity.setVelocity((double) (-f3 * f2 * 0.3F) + Math.cos((double) f5) * (double) f6, (double) (-f1 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double) (f4 * f2 * 0.3F) + Math.sin((double) f5) * (double) f6);
              }
  
@@ -106,7 +96,7 @@
              return itementity;
          }
      }
-@@ -740,16 +784,17 @@
+@@ -740,16 +783,17 @@
          if (this.isInvulnerableTo(damagesource)) {
              return false;
          } else if (this.abilities.invulnerable && !damagesource.isOutOfWorld()) {
@@ -126,7 +116,7 @@
                      }
  
                      if (this.world.getDifficulty() == Difficulty.EASY) {
-@@ -761,7 +806,13 @@
+@@ -761,7 +805,13 @@
                      }
                  }
  
@@ -141,109 +131,7 @@
              }
          }
      }
-@@ -845,25 +896,33 @@
-         return !this.abilities.flying && super.isOnSoulSpeedBlock();
-     }
- 
--    public void openEditSignScreen(SignBlockEntity signblockentity) {}
-+    public void openEditSignScreen(SignBlockEntity signblockentity) {
-+    }
- 
--    public void openCommandBlockMinecartScreen(CommandBlockExecutor commandblockexecutor) {}
-+    public void openCommandBlockMinecartScreen(CommandBlockExecutor commandblockexecutor) {
-+    }
- 
--    public void openCommandBlockScreen(CommandBlockBlockEntity commandblockblockentity) {}
-+    public void openCommandBlockScreen(CommandBlockBlockEntity commandblockblockentity) {
-+    }
- 
--    public void openStructureBlockScreen(StructureBlockBlockEntity structureblockblockentity) {}
-+    public void openStructureBlockScreen(StructureBlockBlockEntity structureblockblockentity) {
-+    }
- 
--    public void openJigsawScreen(JigsawBlockEntity jigsawblockentity) {}
-+    public void openJigsawScreen(JigsawBlockEntity jigsawblockentity) {
-+    }
- 
--    public void openHorseInventory(HorseBaseEntity horsebaseentity, Inventory inventory) {}
-+    public void openHorseInventory(HorseBaseEntity horsebaseentity, Inventory inventory) {
-+    }
- 
-     public OptionalInt openHandledScreen(@Nullable NamedScreenHandlerFactory namedscreenhandlerfactory) {
-         return OptionalInt.empty();
-     }
- 
--    public void sendTradeOffers(int i, TraderOfferList traderofferlist, int j, int k, boolean flag, boolean flag1) {}
-+    public void sendTradeOffers(int i, TraderOfferList traderofferlist, int j, int k, boolean flag, boolean flag1) {
-+    }
- 
--    public void openEditBookScreen(ItemStack itemstack, Hand hand) {}
-+    public void openEditBookScreen(ItemStack itemstack, Hand hand) {
-+    }
- 
-     public ActionResult interact(Entity entity, Hand hand) {
-         if (this.isSpectator()) {
-@@ -1155,9 +1214,11 @@
- 
-     }
- 
--    public void addCritParticles(Entity entity) {}
-+    public void addCritParticles(Entity entity) {
-+    }
- 
--    public void addEnchantedHitParticles(Entity entity) {}
-+    public void addEnchantedHitParticles(Entity entity) {
-+    }
- 
-     public void spawnSweepAttackParticles() {
-         double d0 = (double) (-MathHelper.sin(this.yaw * 0.017453292F));
-@@ -1237,7 +1298,8 @@
-         return this.sleepTimer;
-     }
- 
--    public void sendMessage(Text text, boolean flag) {}
-+    public void sendMessage(Text text, boolean flag) {
-+    }
- 
-     public void incrementStat(Identifier identifier) {
-         this.incrementStat(Stats.CUSTOM.getOrCreateStat(identifier));
-@@ -1251,15 +1313,18 @@
-         this.increaseStat(stat, 1);
-     }
- 
--    public void increaseStat(Stat<?> stat, int i) {}
-+    public void increaseStat(Stat<?> stat, int i) {
-+    }
- 
--    public void resetStat(Stat<?> stat) {}
-+    public void resetStat(Stat<?> stat) {
-+    }
- 
-     public int unlockRecipes(Collection<Recipe<?>> collection) {
-         return 0;
-     }
- 
--    public void unlockRecipes(Identifier[] aidentifier) {}
-+    public void unlockRecipes(Identifier[] aidentifier) {
-+    }
- 
-     public int lockRecipes(Collection<Recipe<?>> collection) {
-         return 0;
-@@ -1576,9 +1641,11 @@
-         return !this.abilities.flying && (!this.onGround || !this.isSneaky());
-     }
- 
--    public void sendAbilitiesUpdate() {}
-+    public void sendAbilitiesUpdate() {
-+    }
- 
--    public void setGameMode(GameMode gamemode) {}
-+    public void setGameMode(GameMode gamemode) {
-+    }
- 
-     public Text getName() {
-         return new LiteralText(this.gameProfile.getName());
-@@ -1612,7 +1679,7 @@
+@@ -1612,7 +1662,7 @@
      }
  
      public Iterable<ItemStack> getItemsHand() {
