@@ -46,7 +46,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import jline.console.ConsoleReader;
-import net.minecraft.server.Advancement;
+import net.minecraft.advancement.Advancement;
 import net.minecraft.server.ArgumentEntity;
 import net.minecraft.server.BiomeManager;
 import net.minecraft.server.Block;

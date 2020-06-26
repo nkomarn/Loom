@@ -3,19 +3,23 @@
  */
 package org.bukkit.craftbukkit.block.impl;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.NetherPortalBlock;
+import net.minecraft.state.property.EnumProperty;
+
 public final class CraftPortal extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.Orientable {
 
     public CraftPortal() {
         super();
     }
 
-    public CraftPortal(net.minecraft.server.BlockState state) {
+    public CraftPortal(BlockState state) {
         super(state);
     }
 
     // org.bukkit.craftbukkit.block.data.CraftOrientable
 
-    private static final net.minecraft.server.EnumProperty<?> AXIS = getEnum(net.minecraft.server.NetherPortalBlock.class, "axis");
+    private static final EnumProperty<?> AXIS = getEnum(NetherPortalBlock.class, "axis");
 
     @Override
     public org.bukkit.Axis getAxis() {

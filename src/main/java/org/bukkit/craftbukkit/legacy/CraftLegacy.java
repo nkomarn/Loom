@@ -9,27 +9,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import net.minecraft.Bootstrap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.datafixer.Schemas;
+import net.minecraft.datafixer.TypeReferences;
+import net.minecraft.datafixer.fix.BlockStateFlattening;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockStateList;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.DataConverterFlattenData;
-import net.minecraft.server.DataConverterMaterialId;
-import net.minecraft.server.DataConverterRegistry;
-import net.minecraft.server.DataConverterTypes;
-import net.minecraft.server.DispenserRegistry;
-import net.minecraft.server.DynamicOpsNBT;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.IBlockState;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.Item;
-import net.minecraft.server.Items;
-import net.minecraft.server.MinecraftKey;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
+import net.minecraft.state.StateManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.EntityType;
@@ -52,8 +46,8 @@ public final class CraftLegacy {
     private static final Set<String> whitelistedStates = new HashSet<>(Arrays.asList("explode", "check_decay", "decayable", "facing"));
     private static final Map<MaterialData, Item> materialToItem = new HashMap<>(16384);
     private static final Map<Item, MaterialData> itemToMaterial = new HashMap<>(1024);
-    private static final Map<MaterialData, IBlockData> materialToData = new HashMap<>(4096);
-    private static final Map<IBlockData, MaterialData> dataToMaterial = new HashMap<>(4096);
+    private static final Map<MaterialData, BlockState> materialToData = new HashMap<>(4096);
+    private static final Map<BlockState, MaterialData> dataToMaterial = new HashMap<>(4096);
     private static final Map<MaterialData, Block> materialToBlock = new HashMap<>(4096);
     private static final Map<Block, MaterialData> blockToMaterial = new HashMap<>(1024);
 
@@ -75,7 +69,7 @@ public final class CraftLegacy {
 
         if (material.isBlock()) {
             Block block = CraftMagicNumbers.getBlock(material);
-            IBlockData blockData = block.getBlockData();
+            BlockState blockData = block.getDefaultState();
 
             // Try exact match first
             mappedData = dataToMaterial.get(blockData);
@@ -84,7 +78,7 @@ public final class CraftLegacy {
                 mappedData = blockToMaterial.get(block);
                 // Fallback to matching item
                 if (mappedData == null) {
-                    mappedData = itemToMaterial.get(block.getItem());
+                    mappedData = itemToMaterial.get(block.asItem());
                 }
             }
         } else {
@@ -95,13 +89,13 @@ public final class CraftLegacy {
         return (mappedData == null) ? new MaterialData(Material.LEGACY_AIR) : mappedData;
     }
 
-    public static IBlockData fromLegacyData(Material material, byte data) {
+    public static BlockState fromLegacyData(Material material, byte data) {
         Preconditions.checkArgument(material.isLegacy(), "fromLegacyData on modern Material");
 
         MaterialData materialData = new MaterialData(material, data);
 
         // Try exact match first
-        IBlockData converted = materialToData.get(materialData);
+        BlockState converted = materialToData.get(materialData);
         if (converted != null) {
             return converted;
         }
@@ -109,14 +103,14 @@ public final class CraftLegacy {
         // Fallback to any block
         Block convertedBlock = materialToBlock.get(materialData);
         if (convertedBlock != null) {
-            return convertedBlock.getBlockData();
+            return convertedBlock.getDefaultState();
         }
 
         // Return air
-        return Blocks.AIR.getBlockData();
+        return Blocks.AIR.getDefaultState();
     }
 
-    public static ItemStack fromLegacyData(Material material, short data) {
+    public static Item fromLegacyData(Material material, short data) {
         Preconditions.checkArgument(material.isLegacy(), "fromLegacyData on modern Material. Did you forget to define a modern (1.13+) api-version in your plugin.yml?");
 
         MaterialData materialData = new MaterialData(material, (byte) data);
@@ -132,13 +126,13 @@ public final class CraftLegacy {
             // Try exact match first
             BlockState converted = materialToData.get(materialData);
             if (converted != null) {
-                return converted.getBlock().getItem();
+                return converted.getBlock().asItem();
             }
 
             // Fallback to any block
             Block convertedBlock = materialToBlock.get(materialData);
             if (convertedBlock != null) {
-                return convertedBlock.getItem();
+                return convertedBlock.asItem();
             }
         }
 
@@ -146,15 +140,15 @@ public final class CraftLegacy {
         return Items.AIR;
     }
 
-    public static byte toLegacyData(IBlockData blockData) {
+    public static byte toLegacyData(BlockState blockData) {
         return toLegacy(blockData).getData();
     }
 
-    public static Material toLegacyMaterial(IBlockData blockData) {
+    public static Material toLegacyMaterial(BlockState blockData) {
         return toLegacy(blockData).getItemType();
     }
 
-    public static MaterialData toLegacy(IBlockData blockData) {
+    public static MaterialData toLegacy(BlockState blockData) {
         MaterialData mappedData;
 
         // Try exact match first
@@ -197,7 +191,7 @@ public final class CraftLegacy {
 
         if (mappedData == null && material.isBlock()) {
             // Try exact match first
-            IBlockData iblock = materialToData.get(materialData);
+            BlockState iblock = materialToData.get(materialData);
             if (iblock != null) {
                 mappedData = CraftMagicNumbers.getMaterial(iblock.getBlock());
             }
@@ -316,7 +310,7 @@ public final class CraftLegacy {
         SPAWN_EGGS.put((byte) EntityType.ZOMBIFIED_PIGLIN.getTypeId(), Material.ZOMBIFIED_PIGLIN_SPAWN_EGG);
         SPAWN_EGGS.put((byte) EntityType.ZOMBIE_VILLAGER.getTypeId(), Material.ZOMBIE_VILLAGER_SPAWN_EGG);
 
-        DispenserRegistry.init();
+        Bootstrap.initialize();
 
         for (Material material : Material.values()) {
             if (!material.isLegacy()) {
@@ -327,24 +321,24 @@ public final class CraftLegacy {
             if (material.isBlock()) {
                 for (byte data = 0; data < 16; data++) {
                     MaterialData matData = new MaterialData(material, data);
-                    Dynamic blockTag = DataConverterFlattenData.b(material.getId() << 4 | data);
-                    blockTag = DataConverterRegistry.a().update(DataConverterTypes.BLOCK_STATE, blockTag, 100, CraftMagicNumbers.INSTANCE.getDataVersion());
+                    Dynamic blockTag = BlockStateFlattening.b(material.getId() << 4 | data);
+                    blockTag = Schemas.a().update(TypeReferences.BLOCK_STATE, blockTag, 100, CraftMagicNumbers.INSTANCE.getDataVersion());
                     // TODO: better skull conversion, chests
                     if (blockTag.get("Name").asString("").contains("%%FILTER_ME%%")) {
                         continue;
                     }
 
                     String name = blockTag.get("Name").asString("");
-                    Block block = IRegistry.BLOCK.get(new MinecraftKey(name));
+                    Block block = Registry.BLOCK.get(new Identifier(name));
                     if (block == null) {
                         continue;
                     }
-                    IBlockData blockData = block.getBlockData();
-                    BlockStateList states = block.getStates();
+                    BlockState blockData = block.getDefaultState();
+                    StateManager states = block.getStateManager();
 
-                    Optional<NBTTagCompound> propMap = blockTag.getElement("Properties").result();
+                    Optional<CompoundTag> propMap = blockTag.getElement("Properties").result();
                     if (propMap.isPresent()) {
-                        NBTTagCompound properties = propMap.get();
+                        CompoundTag properties = propMap.get();
                         for (String dataKey : properties.getKeys()) {
                             IBlockState state = states.a(dataKey);
 
