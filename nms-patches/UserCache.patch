@@ -1,11 +1,11 @@
---- a/net/minecraft/server/UserCache.java
-+++ b/net/minecraft/server/UserCache.java
-@@ -45,7 +45,7 @@
-     private static boolean c;
-     private final Map<String, UserCache.UserCacheEntry> d = Maps.newHashMap();
-     private final Map<UUID, UserCache.UserCacheEntry> e = Maps.newHashMap();
--    private final Deque<GameProfile> f = Lists.newLinkedList();
-+    private final Deque<GameProfile> f = new java.util.concurrent.LinkedBlockingDeque<GameProfile>(); // CraftBukkit
-     private final GameProfileRepository g;
-     protected final Gson b;
-     private final File h;
+--- a/net/minecraft/util/UserCache.java
++++ b/net/minecraft/util/UserCache.java
+@@ -46,7 +46,7 @@
+     private static boolean useRemote;
+     private final Map<String, UserCache.Entry> byName = Maps.newHashMap();
+     private final Map<UUID, UserCache.Entry> byUuid = Maps.newHashMap();
+-    private final Deque<GameProfile> byAccessTime = Lists.newLinkedList();
++    private final Deque<GameProfile> byAccessTime = new java.util.concurrent.LinkedBlockingDeque<GameProfile>(); // CraftBukkit
+     private final GameProfileRepository profileRepository;
+     protected final Gson gson;
+     private final File cacheFile;

@@ -1,0 +1,119 @@
+--- a/net/minecraft/block/entity/BrewingStandBlockEntity.java
++++ b/net/minecraft/block/entity/BrewingStandBlockEntity.java
+@@ -17,6 +17,7 @@
+ import net.minecraft.screen.BrewingStandScreenHandler;
+ import net.minecraft.screen.PropertyDelegate;
+ import net.minecraft.screen.ScreenHandler;
++import net.minecraft.server.dedicated.DedicatedServer;
+ import net.minecraft.text.Text;
+ import net.minecraft.text.TranslatableText;
+ import net.minecraft.util.ItemScatterer;
+@@ -24,6 +25,15 @@
+ import net.minecraft.util.collection.DefaultedList;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.Direction;
++// CraftBukkit start
++import java.util.List;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.event.inventory.BrewEvent;
++import org.bukkit.event.inventory.BrewingStandFuelEvent;
++import org.bukkit.inventory.InventoryHolder;
++// CraftBukkit end
+ 
+ public class BrewingStandBlockEntity extends LockableContainerBlockEntity implements SidedInventory, Tickable {
+ 
+@@ -97,18 +107,34 @@
+         ItemStack itemstack = (ItemStack) this.inventory.get(4);
+ 
+         if (this.fuel <= 0 && itemstack.getItem() == Items.BLAZE_POWDER) {
+-            this.fuel = 20;
+-            itemstack.decrement(1);
++            // CraftBukkit start
++            BrewingStandFuelEvent event = new BrewingStandFuelEvent(world.getCraftWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), CraftItemStack.asCraftMirror(itemstack), 20);
++            this.world.getCraftServer().getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return;
++            }
++
++            this.fuel = event.getFuelPower();
++            if (this.fuel > 0 && event.isConsuming()) {
++                itemstack.decrement(1);
++            }
++            // CraftBukkit end
+             this.markDirty();
+         }
+ 
+         boolean flag = this.canCraft();
+         boolean flag1 = this.brewTime > 0;
+-        ItemStack itemstack1 = (ItemStack) this.inventory.get(3);
++       ItemStack itemstack1 = (ItemStack) this.inventory.get(3);
++
++        // CraftBukkit start - Use wall time instead of ticks for brewing
++        int elapsedTicks = DedicatedServer.currentTick - this.lastTick;
++        this.lastTick = DedicatedServer.currentTick;
+ 
+         if (flag1) {
+-            --this.brewTime;
+-            boolean flag2 = this.brewTime == 0;
++            this.brewTime -= elapsedTicks;
++            boolean flag2 = this.brewTime <= 0; // == -> <=
++            // CraftBukkit end
+ 
+             if (flag2 && flag) {
+                 this.craft();
+@@ -182,6 +208,16 @@
+ 
+     private void craft() {
+         ItemStack itemstack = (ItemStack) this.inventory.get(3);
++        // CraftBukkit start
++        InventoryHolder owner = this.getOwner();
++        if (owner != null) {
++            BrewEvent event = new BrewEvent(world.getCraftWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), (org.bukkit.inventory.BrewerInventory) owner.getInventory(), this.fuel);
++            org.bukkit.Bukkit.getPluginManager().callEvent(event);
++            if (event.isCancelled()) {
++                return;
++            }
++        }
++        // CraftBukkit end
+ 
+         for (int i = 0; i < 3; ++i) {
+             this.inventory.set(i, BrewingRecipeRegistry.craft(itemstack, (ItemStack) this.inventory.get(i)));
+@@ -272,4 +308,35 @@
+     protected ScreenHandler createScreenHandler(int i, PlayerInventory playerinventory) {
+         return new BrewingStandScreenHandler(i, playerinventory, this, this.propertyDelegate);
+     }
++
++    // CraftBukkit start - add fields and methods
++    private int lastTick = DedicatedServer.currentTick;
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = 64;
++
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    public List<ItemStack> getContents() {
++        return this.inventory;
++    }
++
++    @Override
++    public int getMaxStackSize() {
++        return maxStack;
++    }
++
++    public void setMaxStackSize(int size) {
++        maxStack = size;
++    }
++    // CraftBukkit end
+ }

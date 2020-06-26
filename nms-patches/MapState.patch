@@ -1,0 +1,126 @@
+--- a/net/minecraft/item/map/MapState.java
++++ b/net/minecraft/item/map/MapState.java
+@@ -15,6 +15,7 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.ListTag;
++import net.minecraft.nbt.Tag;
+ import net.minecraft.network.Packet;
+ import net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket;
+ import net.minecraft.text.Text;
+@@ -56,8 +57,18 @@
+     public final Map<String, MapIcon> icons = Maps.newLinkedHashMap();
+     private final Map<String, MapFrameMarker> frames = Maps.newHashMap();
+ 
++    // CraftBukkit start
++    public final CraftMapView mapView;
++    private CraftServer server;
++    private UUID uniqueId = null;
++    // CraftBukkit end
++
+     public MapState(String s) {
+         super(s);
++        // CraftBukkit start
++        mapView = new CraftMapView(this);
++        server = (CraftServer) org.bukkit.Bukkit.getServer();
++        // CraftBukkit end
+     }
+ 
+     public void init(int i, int j, int k, boolean flag, boolean flag1, RegistryKey<World> registrykey) {
+@@ -79,13 +90,31 @@
+     }
+ 
+     public void fromTag(CompoundTag compoundtag) {
+-        DataResult dataresult = DimensionType.method_28521(new Dynamic<>(NbtOps.INSTANCE, compoundtag.get("dimension")));
++        DataResult<RegistryKey<World>> dataResult = DimensionType.method_28521(new Dynamic<>(NbtOps.INSTANCE, compoundtag.get("dimension"))); // CraftBukkit - decompile error
+         Logger logger = MapState.field_25019;
+ 
+         logger.getClass();
+-        this.dimension = (RegistryKey) dataresult.resultOrPartial(logger::error).orElseThrow(() -> {
+-            return new IllegalArgumentException("Invalid map dimension: " + compoundtag.get("dimension"));
+-        });
++        this.dimension = (RegistryKey<World>) dataResult.resultOrPartial(logger::error).orElseGet(() -> {
++            // CraftBukkit start
++            long least = compoundtag.getLong("UUIDLeast");
++            long most = compoundtag.getLong("UUIDMost");
++
++            if (least != 0L && most != 0L) {
++                this.uniqueId = new UUID(most, least);
++
++                CraftWorld world = (CraftWorld) server.getWorld(this.uniqueId);
++                // Check if the stored world details are correct.
++                if (world == null) {
++                    /* All Maps which do not have their valid world loaded are set to a dimension which hopefully won't be reached.
++                       This is to prevent them being corrupted with the wrong map data. */
++                    // PAIL: Use Vanilla exception handling for now
++                } else {
++                    return world.getHandle().getRegistryKey();
++                }
++            }
++            // CraftBukkit end
++            throw new IllegalArgumentException("Invalid map dimension: " + compoundtag.get("dimension"));
++        }) ;
+         this.xCenter = compoundtag.getInt("xCenter");
+         this.zCenter = compoundtag.getInt("zCenter");
+         this.scale = (byte) MathHelper.clamp(compoundtag.getByte("scale"), 0, 4);
+@@ -118,13 +147,32 @@
+     }
+ 
+     public CompoundTag toTag(CompoundTag compoundtag) {
+-        DataResult dataresult = Identifier.CODEC.encodeStart(NbtOps.INSTANCE, this.dimension.getValue());
++        DataResult<Tag> dataresult = Identifier.CODEC.encodeStart(NbtOps.INSTANCE, this.dimension.getValue());
+         Logger logger = MapState.field_25019;
+ 
+         logger.getClass();
+         dataresult.resultOrPartial(logger::error).ifPresent((tag) -> {
+             compoundtag.put("dimension", tag);
+         });
++        // CraftBukkit start
++        if (true) {
++            if (this.uniqueId == null) {
++                for (org.bukkit.World world : server.getWorlds()) {
++                    CraftWorld cWorld = (CraftWorld) world;
++                    if (cWorld.getHandle().getRegistryKey() == this.dimension) {
++                        this.uniqueId = cWorld.getUID();
++                        break;
++                    }
++                }
++            }
++            /* Perform a second check to see if a matching world was found, this is a necessary
++               change incase Maps are forcefully unlinked from a World and lack a UID.*/
++            if (this.uniqueId != null) {
++                compoundtag.putLong("UUIDLeast", this.uniqueId.getLeastSignificantBits());
++                compoundtag.putLong("UUIDMost", this.uniqueId.getMostSignificantBits());
++            }
++        }
++        // CraftBukkit end
+         compoundtag.putInt("xCenter", this.xCenter);
+         compoundtag.putInt("zCenter", this.zCenter);
+         compoundtag.putByte("scale", this.scale);
+@@ -415,12 +463,24 @@
+ 
+         @Nullable
+         public Packet<?> getPacket(ItemStack itemstack) {
++            // CraftBukkit start
++            org.bukkit.craftbukkit.map.RenderData render = MapState.this.mapView.render((org.bukkit.craftbukkit.entity.CraftPlayer) this.player.getBukkitEntity()); // CraftBukkit
++
++            java.util.Collection<MapIcon> icons = new java.util.ArrayList<MapIcon>();
++
++            for ( org.bukkit.map.MapCursor cursor : render.cursors) {
++
++                if (cursor.isVisible()) {
++                    icons.add(new MapIcon(MapIcon.Type.a(cursor.getRawType()), cursor.getX(), cursor.getY(), cursor.getDirection(), CraftChatMessage.fromStringOrNull(cursor.getCaption())));
++                }
++            }
+             if (this.dirty) {
+                 this.dirty = false;
+-                return new MapUpdateS2CPacket(FilledMapItem.getMapId(itemstack), MapState.this.scale, MapState.this.showIcons, MapState.this.locked, MapState.this.icons.values(), MapState.this.colors, this.startX, this.startZ, this.endX + 1 - this.startX, this.endZ + 1 - this.startZ);
++                return new MapUpdateS2CPacket(FilledMapItem.getMapId(itemstack), MapState.this.scale, MapState.this.showIcons, MapState.this.locked, icons, render.buffer, this.startX, this.startZ, this.endX + 1 - this.startX, this.endZ + 1 - this.startZ);
+             } else {
+-                return this.emptyPacketsRequested++ % 5 == 0 ? new MapUpdateS2CPacket(FilledMapItem.getMapId(itemstack), MapState.this.scale, MapState.this.showIcons, MapState.this.locked, MapState.this.icons.values(), MapState.this.colors, 0, 0, 0, 0) : null;
++                return this.emptyPacketsRequested++ % 5 == 0 ? new MapUpdateS2CPacket(FilledMapItem.getMapId(itemstack), MapState.this.scale, MapState.this.showIcons, MapState.this.locked, icons, render.buffer, 0, 0, 0, 0) : null;
+             }
++            // CraftBukkit end
+         }
+ 
+         public void markDirty(int i, int j) {

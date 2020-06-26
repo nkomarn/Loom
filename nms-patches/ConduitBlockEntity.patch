@@ -1,0 +1,30 @@
+--- a/net/minecraft/block/entity/ConduitBlockEntity.java
++++ b/net/minecraft/block/entity/ConduitBlockEntity.java
+@@ -27,6 +27,11 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.util.math.Vec3i;
++// CraftBukkit start
++import net.minecraft.world.ServerWorldAccess;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++// CraftBukkit end
+ 
+ public class ConduitBlockEntity extends BlockEntity implements Tickable {
+ 
+@@ -203,8 +208,13 @@
+         }
+ 
+         if (this.targetEntity != null) {
+-            this.world.playSound((PlayerEntity) null, this.targetEntity.getX(), this.targetEntity.getY(), this.targetEntity.getZ(), SoundEvents.BLOCK_CONDUIT_ATTACK_TARGET, SoundCategory.BLOCKS, 1.0F, 1.0F);
+-            this.targetEntity.damage(DamageSource.MAGIC, 4.0F);
++            // CraftBukkit start
++            CraftEventFactory.blockDamage = CraftBlock.at((ServerWorldAccess) this.world, this.pos);
++            if (this.targetEntity.damage(DamageSource.MAGIC, 4.0F)) {
++                this.world.playSound((PlayerEntity) null, this.targetEntity.getX(), this.targetEntity.getY(), this.targetEntity.getZ(), SoundEvents.BLOCK_CONDUIT_ATTACK_TARGET, SoundCategory.BLOCKS, 1.0F, 1.0F);
++            }
++            CraftEventFactory.blockDamage = null;
++            // CraftBukkit end
+         }
+ 
+         if (livingentity != this.targetEntity) {
