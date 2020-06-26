@@ -18,6 +18,9 @@ for root, dirs, files in os.walk(craftbukkit_source):
         if (stderr):
             print(stderr)
             exit()
+
+        if not (stdout):
+            continue  # no changes to the given java file, don't make a patch file
             
         patch_output = open("./nms-patches/%s" % file_name.replace(".java", ".patch"), 'w')
         patch_output.write(stdout)
