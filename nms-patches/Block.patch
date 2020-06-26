@@ -1,30 +1,105 @@
---- a/net/minecraft/server/Block.java
-+++ b/net/minecraft/server/Block.java
-@@ -217,7 +217,13 @@
-             EntityItem entityitem = new EntityItem(world, (double) blockposition.getX() + d0, (double) blockposition.getY() + d1, (double) blockposition.getZ() + d2, itemstack);
+--- a/net/minecraft/block/Block.java
++++ b/net/minecraft/block/Block.java
+@@ -4,10 +4,12 @@
+ import com.google.common.cache.CacheLoader;
+ import com.google.common.cache.LoadingCache;
+ import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
++
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
++
+ import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.ExperienceOrbEntity;
+@@ -70,7 +72,8 @@
+     private Item cachedItem;
+     private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.NeighborGroup>> FACE_CULL_MAP = ThreadLocal.withInitial(() -> {
+         Object2ByteLinkedOpenHashMap<Block.NeighborGroup> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<Block.NeighborGroup>(2048, 0.25F) {
+-            protected void rehash(int i) {}
++            protected void rehash(int i) {
++            }
+         };
  
-             entityitem.defaultPickupDelay();
--            world.addEntity(entityitem);
+         object2bytelinkedopenhashmap.defaultReturnValue((byte) 127);
+@@ -204,7 +207,8 @@
+         return !isShapeFullCube(blockstate.getOutlineShape(blockview, blockpos)) && blockstate.getFluidState().isEmpty();
+     }
+ 
+-    public void onBroken(WorldAccess worldaccess, BlockPos blockpos, BlockState blockstate) {}
++    public void onBroken(WorldAccess worldaccess, BlockPos blockpos, BlockState blockstate) {
++    }
+ 
+     public static List<ItemStack> getDroppedStacks(BlockState blockstate, ServerWorld serverworld, BlockPos blockpos, @Nullable BlockEntity blockentity) {
+         LootContext.Builder lootcontext_builder = (new LootContext.Builder(serverworld)).random(serverworld.random).parameter(LootContextParameters.POSITION, blockpos).parameter(LootContextParameters.TOOL, ItemStack.EMPTY).optionalParameter(LootContextParameters.BLOCK_ENTITY, blockentity);
+@@ -257,7 +261,13 @@
+             ItemEntity itementity = new ItemEntity(world, (double) blockpos.getX() + d0, (double) blockpos.getY() + d1, (double) blockpos.getZ() + d2, itemstack);
+ 
+             itementity.setToDefaultPickupDelay();
+-            world.spawnEntity(itementity);
 +            // CraftBukkit start
 +            if (world.captureDrops != null) {
-+                world.captureDrops.add(entityitem);
++                world.captureDrops.add(itementity);
 +            } else {
-+                world.addEntity(entityitem);
++                world.spawnEntity(itementity);
 +            }
 +            // CraftBukkit end
          }
      }
  
-@@ -344,6 +350,12 @@
+@@ -277,9 +287,11 @@
+         return this.resistance;
+     }
+ 
+-    public void onDestroyedByExplosion(World world, BlockPos blockpos, Explosion explosion) {}
++    public void onDestroyedByExplosion(World world, BlockPos blockpos, Explosion explosion) {
++    }
+ 
+-    public void onSteppedOn(World world, BlockPos blockpos, Entity entity) {}
++    public void onSteppedOn(World world, BlockPos blockpos, Entity entity) {
++    }
+ 
+     @Nullable
+     public BlockState getPlacementState(ItemPlacementContext itemplacementcontext) {
+@@ -292,7 +304,8 @@
+         dropStacks(blockstate, world, blockpos, blockentity, playerentity, itemstack);
+     }
+ 
+-    public void onPlaced(World world, BlockPos blockpos, BlockState blockstate, @Nullable LivingEntity livingentity, ItemStack itemstack) {}
++    public void onPlaced(World world, BlockPos blockpos, BlockState blockstate, @Nullable LivingEntity livingentity, ItemStack itemstack) {
++    }
+ 
+     public boolean canMobSpawnInside() {
+         return !this.material.isSolid() && !this.material.isLiquid();
+@@ -338,13 +351,15 @@
+ 
+     }
+ 
+-    public void rainTick(World world, BlockPos blockpos) {}
++    public void rainTick(World world, BlockPos blockpos) {
++    }
+ 
+     public boolean shouldDropItemsOnExplosion(Explosion explosion) {
+         return true;
+     }
+ 
+-    protected void appendProperties(StateManager.Builder<Block, BlockState> statemanager_builder) {}
++    protected void appendProperties(StateManager.Builder<Block, BlockState> statemanager_builder) {
++    }
+ 
+     public StateManager<Block, BlockState> getStateManager() {
+         return this.stateManager;
+@@ -382,6 +397,12 @@
          return this;
      }
  
 +    // CraftBukkit start
-+    public int getExpDrop(IBlockData iblockdata, World world, BlockPosition blockposition, ItemStack itemstack) {
++    public int getExpDrop(BlockState iblockdata, World world, BlockPos blockposition, ItemStack itemstack) {
 +        return 0;
 +    }
 +    // CraftBukkit end
 +
-     public static final class a {
+     public static final class NeighborGroup {
  
-         private final IBlockData a;
+         private final BlockState self;
