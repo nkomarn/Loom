@@ -1,0 +1,16 @@
+--- a/net/minecraft/block/entity/LockableContainerBlockEntity.java
++++ b/net/minecraft/block/entity/LockableContainerBlockEntity.java
+@@ -83,4 +83,13 @@
+     }
+ 
+     protected abstract ScreenHandler createScreenHandler(int i, PlayerInventory arg);
++
++
++    // CraftBukkit start
++    @Override
++    public org.bukkit.Location getLocation() {
++        if (world == null) return null;
++        return new org.bukkit.Location(world.getWorld(), pos.getX(), pos.getY(), pos.getZ());
++    }
++    // CraftBukkit end
+ }

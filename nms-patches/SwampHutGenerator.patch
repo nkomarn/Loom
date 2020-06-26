@@ -1,0 +1,10 @@
+--- a/net/minecraft/structure/SwampHutGenerator.java
++++ b/net/minecraft/structure/SwampHutGenerator.java
+@@ -102,6 +102,7 @@
+                     witchentity.refreshPositionAndAngles((double) j + 0.5D, (double) i, (double) k + 0.5D, 0.0F, 0.0F);
+                     witchentity.initialize(serverworldaccess, serverworldaccess.getLocalDifficulty(new BlockPos(j, i, k)), SpawnReason.STRUCTURE, (EntityData) null, (CompoundTag) null);
+                     serverworldaccess.spawnEntity(witchentity);
++                    serverworldaccess.spawnEntity(witchentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CHUNK_GEN); // CraftBukkit - add SpawnReason
+                 }
+             }
+ 

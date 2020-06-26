@@ -1,0 +1,36 @@
+--- a/net/minecraft/block/entity/CampfireBlockEntity.java
++++ b/net/minecraft/block/entity/CampfireBlockEntity.java
+@@ -21,6 +21,11 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.World;
++// CraftBukkit start
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.block.BlockCookEvent;
++// CraftBukkit end
+ 
+ public class CampfireBlockEntity extends BlockEntity implements Clearable, Tickable {
+ 
+@@ -72,6 +77,21 @@
+                     }).orElse(itemstack);
+                     BlockPos blockpos = this.getPos();
+ 
++                    // CraftBukkit start - fire BlockCookEvent
++                    CraftItemStack source = CraftItemStack.asCraftMirror(itemstack);
++                    org.bukkit.inventory.ItemStack result = CraftItemStack.asBukkitCopy(itemstack1);
++
++                    BlockCookEvent blockCookEvent = new BlockCookEvent(CraftBlock.at(this.world, this.pos), source, result);
++                    this.world.getCraftServer().getPluginManager().callEvent(blockCookEvent);
++
++                    if (blockCookEvent.isCancelled()) {
++                        return;
++                    }
++
++                    result = blockCookEvent.getResult();
++                    itemstack1 = CraftItemStack.asNMSCopy(result);
++                    // CraftBukkit end
++
+                     ItemScatterer.spawn(this.world, (double) blockpos.getX(), (double) blockpos.getY(), (double) blockpos.getZ(), itemstack1);
+                     this.itemsBeingCooked.set(i, ItemStack.EMPTY);
+                     this.updateListeners();

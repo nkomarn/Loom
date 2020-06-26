@@ -1,0 +1,143 @@
+--- a/net/minecraft/block/entity/HopperBlockEntity.java
++++ b/net/minecraft/block/entity/HopperBlockEntity.java
+@@ -15,6 +15,8 @@
+ import net.minecraft.entity.ItemEntity;
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.entity.player.PlayerInventory;
++import net.minecraft.entity.vehicle.HopperMinecartEntity;
++import net.minecraft.inventory.DoubleInventory;
+ import net.minecraft.inventory.Inventories;
+ import net.minecraft.inventory.Inventory;
+ import net.minecraft.inventory.SidedInventory;
+@@ -34,6 +36,14 @@
+ import net.minecraft.util.shape.VoxelShapes;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.event.inventory.InventoryMoveItemEvent;
++import org.bukkit.event.inventory.InventoryPickupItemEvent;
++// CraftBukkit end
++
+ public class HopperBlockEntity extends LootableContainerBlockEntity implements Hopper, Tickable {
+ 
+     private DefaultedList<ItemStack> inventory;
+@@ -158,7 +168,29 @@
+                 for (int i = 0; i < this.size(); ++i) {
+                     if (!this.getStack(i).isEmpty()) {
+                         ItemStack itemstack = this.getStack(i).copy();
+-                        ItemStack itemstack1 = transfer(this, inventory, this.removeStack(i, 1), direction);
++                        // ItemStack itemstack1 = addItem(this, iinventory, this.splitStack(i, 1), enumdirection);
++
++                        // CraftBukkit start - Call event when pushing items into other inventories
++                        CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.removeStack(i, 1));
++
++                        org.bukkit.inventory.Inventory destinationInventory;
++                        // Have to special case large chests as they work oddly
++                        if (inventory instanceof DoubleInventory) {
++                            destinationInventory = new org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest((DoubleInventory) inventory);
++                        } else {
++                            destinationInventory = inventory.getOwner().getInventory();
++                        }
++
++                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(this.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
++                        this.getWorld().getCraftServer().getPluginManager().callEvent(event);
++                        if (event.isCancelled()) {
++                            this.setStack(i, itemstack);
++                            this.setCooldown(8); // Delay hopper checks
++                            return false;
++                        }
++
++                        ItemStack itemstack1 = transfer(this, inventory, CraftItemStack.asNMSCopy(event.getItem()), direction);
++                        // CraftBukkit end
+ 
+                         if (itemstack1.isEmpty()) {
+                             inventory.markDirty();
+@@ -223,7 +255,34 @@
+ 
+         if (!itemstack.isEmpty() && canExtract(inventory, itemstack, i, direction)) {
+             ItemStack itemstack1 = itemstack.copy();
+-            ItemStack itemstack2 = transfer(inventory, hopper, inventory.removeStack(i, 1), (Direction) null);
++            //ItemStack itemstack2 = transfer(inventory, hopper, inventory.removeStack(i, 1), (Direction) null);
++            // CraftBukkit start - Call event on collection of items from inventories into the hopper
++            CraftItemStack oitemstack = CraftItemStack.asCraftMirror(inventory.removeStack(i, 1));
++
++            org.bukkit.inventory.Inventory sourceInventory;
++            // Have to special case large chests as they work oddly
++            if (inventory instanceof DoubleInventory) {
++                sourceInventory = new org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest((DoubleInventory) inventory);
++            } else {
++                sourceInventory = inventory.getOwner().getInventory();
++            }
++
++            InventoryMoveItemEvent event = new InventoryMoveItemEvent(sourceInventory, oitemstack.clone(), hopper.getOwner().getInventory(), false);
++
++            hopper.getWorld().getCraftServer().getPluginManager().callEvent(event);
++            if (event.isCancelled()) {
++                inventory.setStack(i, itemstack1);
++
++                if (hopper instanceof HopperBlockEntity) {
++                    ((HopperBlockEntity) hopper).setCooldown(8); // Delay hopper checks
++                } else if (hopper instanceof HopperMinecartEntity) {
++                    ((HopperMinecartEntity) hopper).setTransferCooldown(4); // Delay hopper minecart checks
++                }
++
++                return false;
++            }
++            ItemStack itemstack2 = transfer(inventory, hopper, CraftItemStack.asNMSCopy(event.getItem()), null);
++            // CraftBukkit end
+ 
+             if (itemstack2.isEmpty()) {
+                 inventory.markDirty();
+@@ -238,6 +297,13 @@
+ 
+     public static boolean extract(Inventory inventory, ItemEntity itementity) {
+         boolean flag = false;
++        // CraftBukkit start
++        InventoryPickupItemEvent event = new InventoryPickupItemEvent(inventory.getOwner().getInventory(), (org.bukkit.entity.Item) itementity.getBukkitEntity());
++        itementity.world.getCraftServer().getPluginManager().callEvent(event);
++        if (event.isCancelled()) {
++            return false;
++        }
++        // CraftBukkit end
+         ItemStack itemstack = itementity.getStack().copy();
+         ItemStack itemstack1 = transfer((Inventory) null, inventory, itemstack, (Direction) null);
+ 
+@@ -430,4 +496,35 @@
+     protected ScreenHandler createScreenHandler(int i, PlayerInventory playerinventory) {
+         return new HopperScreenHandler(i, playerinventory, this);
+     }
++
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++
++    public List<ItemStack> getContents() {
++        return this.inventory;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    @Override
++    public int getMaxStackSize() {
++       return maxStack;
++    }
++
++    public void setMaxStackSize(int size) {
++        maxStack = size;
++    }
++    // CraftBukkit end
++
+ }
