@@ -88,6 +88,7 @@ import net.minecraft.server.MobSpawnerPhantom;
 import net.minecraft.server.MobSpawnerTrader;
 import net.minecraft.server.NBTBase;
 import net.minecraft.server.PlayerList;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.RegistryMaterials;
 import net.minecraft.server.RegistryReadOps;
 import net.minecraft.server.ResourceKey;
@@ -105,6 +106,7 @@ import net.minecraft.server.WorldServer;
 import net.minecraft.server.WorldSettings;
 import net.minecraft.server.dedicated.DedicatedPlayerManager;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanList;
@@ -265,9 +267,9 @@ public final class CraftServer implements Server {
         CraftItemFactory.instance();
     }
 
-    public CraftServer(DedicatedServer console, PlayerList playerList) {
+    public CraftServer(DedicatedServer console, PlayerManager playerList) {
         this.console = console;
-        this.playerList = (DedicatedPlayerList) playerList;
+        this.playerList = (DedicatedPlayerManager) playerList;
         this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, new Function<EntityPlayer, CraftPlayer>() {
             @Override
             public CraftPlayer apply(EntityPlayer player) {
@@ -551,7 +553,7 @@ public final class CraftServer implements Server {
         return broadcast(message, BROADCAST_CHANNEL_USERS);
     }
 
-    public Player getPlayer(final EntityPlayer entity) {
+    public Player getPlayer(final ServerPlayerEntity entity) {
         return entity.getBukkitEntity();
     }
 

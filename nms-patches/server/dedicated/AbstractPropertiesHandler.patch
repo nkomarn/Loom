@@ -1,0 +1,95 @@
+--- a/net/minecraft/server/dedicated/AbstractPropertiesHandler.java
++++ b/net/minecraft/server/dedicated/AbstractPropertiesHandler.java
+@@ -16,15 +16,29 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import joptsimple.OptionSet; // CraftBukkit
++
+ public abstract class AbstractPropertiesHandler<T extends AbstractPropertiesHandler<T>> {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+     private final Properties properties;
+ 
+-    public AbstractPropertiesHandler(Properties properties) {
++    // CraftBukkit start
++    private OptionSet options = null;
++
++    public AbstractPropertiesHandler(Properties properties, final OptionSet options) {
+         this.properties = properties;
+     }
+ 
++    private String getOverride(String name, String value) {
++        if ((this.options != null) && (this.options.has(name))) {
++            return String.valueOf(this.options.valueOf(name));
++        }
++
++        return value;
++    }
++    // CraftBukkit end
++
+     public static Properties loadProperties(Path path) {
+         Properties properties = new Properties();
+ 
+@@ -60,6 +74,11 @@
+ 
+     public void saveProperties(Path path) {
+         try {
++            // CraftBukkit start - Don't attempt writing to file if it's read only
++            if (path.toFile().exists() && !path.toFile().canWrite()) {
++                return;
++            }
++            // CraftBukkit end
+             OutputStream outputstream = Files.newOutputStream(path);
+             Throwable throwable = null;
+ 
+@@ -91,7 +110,7 @@
+     private static <V extends Number> Function<String, V> wrapNumberParser(Function<String, V> function) {
+         return (s) -> {
+             try {
+-                return (Number) function.apply(s);
++                return (V) function.apply(s); // CraftBukkit - decompile error
+             } catch (NumberFormatException numberformatexception) {
+                 return null;
+             }
+@@ -110,7 +129,7 @@
+ 
+     @Nullable
+     private String getStringValue(String s) {
+-        return (String) this.properties.get(s);
++        return (String) getOverride(s, this.properties.getProperty(s)); // CraftBukkit
+     }
+ 
+     @Nullable
+@@ -138,7 +157,7 @@
+         V v1 = MoreObjects.firstNonNull(s1 != null ? function.apply(s1) : null, v0);
+ 
+         this.properties.put(s, function1.apply(v1));
+-        return new AbstractPropertiesHandler.PropertyAccessor<>(s, v1, function1);
++        return new AbstractPropertiesHandler.PropertyAccessor(s, v1, function1); // CraftBukkit - decompile error
+     }
+ 
+     protected <V> V get(String s, Function<String, V> function, UnaryOperator<V> unaryoperator, Function<V, String> function1, V v0) {
+@@ -202,7 +221,7 @@
+         return properties;
+     }
+ 
+-    protected abstract T create(Properties properties);
++    protected abstract T create(Properties properties, OptionSet optionset); // CraftBukkit
+ 
+     public class PropertyAccessor<V> implements Supplier<V> {
+ 
+@@ -224,11 +243,9 @@
+             Properties properties = AbstractPropertiesHandler.this.copyProperties();
+ 
+             properties.put(this.key, this.stringifier.apply(v0));
+-            return AbstractPropertiesHandler.this.create(properties);
++            return AbstractPropertiesHandler.this.create(properties, AbstractPropertiesHandler.this.options); // CraftBukkit
+         }
+ 
+-        PropertyAccessor(String s, Object object, Function function, Object object1) {
+-            this(s, object, function);
+-        }
++        // Loom - decompile error
+     }
+ }

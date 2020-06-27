@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/entity/LecternBlockEntity.java
 +++ b/net/minecraft/block/entity/LecternBlockEntity.java
-@@ -25,10 +25,65 @@
+@@ -24,10 +24,65 @@
  import net.minecraft.util.math.MathHelper;
  import net.minecraft.util.math.Vec2f;
  import net.minecraft.util.math.Vec3d;
@@ -68,7 +68,7 @@
          public int size() {
              return 1;
          }
-@@ -67,10 +122,19 @@
+@@ -66,10 +121,19 @@
              }
          }
  
@@ -90,7 +90,7 @@
          }
  
          public void markDirty() {
-@@ -87,6 +151,7 @@
+@@ -86,6 +150,7 @@
  
          public void clear() {}
      };
@@ -98,7 +98,7 @@
      private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
          public int get(int i) {
              return i == 0 ? LecternBlockEntity.this.currentPage : 0;
-@@ -145,7 +210,7 @@
+@@ -144,7 +209,7 @@
          if (j != this.currentPage) {
              this.currentPage = j;
              this.markDirty();
@@ -107,7 +107,7 @@
          }
  
      }
-@@ -168,6 +233,34 @@
+@@ -167,6 +232,34 @@
          return itemstack;
      }
  

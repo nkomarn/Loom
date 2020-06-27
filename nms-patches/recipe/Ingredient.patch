@@ -1,0 +1,38 @@
+--- a/net/minecraft/recipe/Ingredient.java
++++ b/net/minecraft/recipe/Ingredient.java
+@@ -34,6 +34,7 @@
+     private final Ingredient.Entry[] entries;
+     private ItemStack[] matchingStacks;
+     private IntList ids;
++    public boolean exact; // CraftBukkit
+ 
+     private Ingredient(Stream<? extends Ingredient.Entry> stream) {
+         this.entries = (Ingredient.Entry[]) stream.toArray((i) -> {
+@@ -66,6 +67,16 @@
+                 for (int j = 0; j < i; ++j) {
+                     ItemStack itemstack1 = aitemstack[j];
+ 
++                    // CraftBukkit start
++                    if (exact) {
++                        if (itemstack1.getItem() == itemstack.getItem() && ItemStack.areEqual(itemstack, itemstack1)) {
++                            return true;
++                        }
++
++                        continue;
++                    }
++                    // CraftBukkit end
++
+                     if (itemstack1.getItem() == itemstack.getItem()) {
+                         return true;
+                     }
+@@ -207,9 +218,7 @@
+         }
+     }
+ 
+-    public boolean test(@Nullable Object object) {
+-        return this.test((ItemStack) object);
+-    }
++    // Loom - decompile error
+ 
+     static class TagEntry implements Ingredient.Entry {
+ 

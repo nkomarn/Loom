@@ -1,0 +1,14 @@
+--- a/net/minecraft/network/packet/s2c/play/PlayerSpawnPositionS2CPacket.java
++++ b/net/minecraft/network/packet/s2c/play/PlayerSpawnPositionS2CPacket.java
+@@ -29,7 +29,9 @@
+         clientplaypacketlistener.onPlayerSpawnPosition(this);
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ClientPlayPacketListener) packetlistener);
++    public BlockPos getPos() {
++        return pos;
+     }
++
++    // Loom - decompile errors
+ }

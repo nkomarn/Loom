@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/entity/EndGatewayBlockEntity.java
 +++ b/net/minecraft/block/entity/EndGatewayBlockEntity.java
-@@ -28,6 +28,12 @@
+@@ -27,6 +27,12 @@
  import net.minecraft.world.gen.feature.FeatureConfig;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -13,7 +13,7 @@
  
  public class EndGatewayBlockEntity extends EndPortalBlockEntity implements Tickable {
  
-@@ -154,6 +160,26 @@
+@@ -153,6 +159,26 @@
                      entity1 = entity.getRootVehicle();
                  }
  

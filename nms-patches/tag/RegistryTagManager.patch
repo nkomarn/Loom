@@ -1,0 +1,15 @@
+--- a/net/minecraft/tag/RegistryTagManager.java
++++ b/net/minecraft/tag/RegistryTagManager.java
+@@ -78,6 +78,12 @@
+             this.items.applyReload((Map) completablefuture1.join());
+             this.fluids.applyReload((Map) completablefuture2.join());
+             this.entityTypes.applyReload((Map) completablefuture3.join());
++            // CraftBukkit start
++            this.blocks.version++;
++            this.items.version++;
++            this.fluids.version++;
++            this.entityTypes.version++;
++            // CraftBukkit end
+             TagContainers.method_29219(this.blocks, this.items, this.fluids, this.entityTypes);
+             Multimap<String, Identifier> multimap = HashMultimap.create();
+ 

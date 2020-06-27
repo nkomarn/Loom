@@ -1,0 +1,11 @@
+--- a/net/minecraft/screen/slot/FurnaceOutputSlot.java
++++ b/net/minecraft/screen/slot/FurnaceOutputSlot.java
+@@ -41,7 +41,7 @@
+     protected void onCrafted(ItemStack itemstack) {
+         itemstack.onCraft(this.player.world, this.player, this.amount);
+         if (!this.player.world.isClient && this.inventory instanceof AbstractFurnaceBlockEntity) {
+-            ((AbstractFurnaceBlockEntity) this.inventory).dropExperience(this.player);
++            ((AbstractFurnaceBlockEntity) this.inventory).dropExperience(this.player, itemstack, this.amount); // CraftBukkit
+         }
+ 
+         this.amount = 0;

@@ -1,0 +1,10 @@
+--- a/net/minecraft/recipe/RecipeSerializer.java
++++ b/net/minecraft/recipe/RecipeSerializer.java
+@@ -36,6 +36,6 @@
+     void write(PacketByteBuf arg, T arg2);
+ 
+     static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(String s, S s0) {
+-        return (RecipeSerializer) Registry.register(Registry.RECIPE_SERIALIZER, s, s0);
++        return (S) Registry.register(Registry.RECIPE_SERIALIZER, s, s0); // Loom -- decompile error
+     }
+ }

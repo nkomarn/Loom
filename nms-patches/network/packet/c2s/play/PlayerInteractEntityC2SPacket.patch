@@ -1,0 +1,13 @@
+--- a/net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket.java
+@@ -76,9 +76,7 @@
+         return this.playerSneaking;
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ 
+     public static enum InteractionType {
+ 

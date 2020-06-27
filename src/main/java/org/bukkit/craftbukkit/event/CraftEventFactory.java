@@ -17,7 +17,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.MerchantScreenHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.village.raid.Raid;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.bukkit.Bukkit;
@@ -217,7 +222,7 @@ public class CraftEventFactory {
         if (result == Result.ALLOW) {
             return Either.right(Unit.INSTANCE);
         } else if (result == Result.DENY) {
-            return Either.left(EntityHuman.EnumBedResult.OTHER_PROBLEM);
+            return Either.left(PlayerEntity.SleepFailureReason.OTHER_PROBLEM);
         }
 
         return nmsBedResult;
@@ -226,7 +231,7 @@ public class CraftEventFactory {
     /**
      * Trade Index Change Event
      */
-    public static TradeSelectEvent callTradeSelectEvent(EntityPlayer player, int newIndex, ContainerMerchant merchant) {
+    public static TradeSelectEvent callTradeSelectEvent(ServerPlayerEntity player, int newIndex, MerchantScreenHandler merchant) {
         TradeSelectEvent tradeSelectEvent = new TradeSelectEvent(merchant.getBukkitView(), newIndex);
         Bukkit.getPluginManager().callEvent(tradeSelectEvent);
         return tradeSelectEvent;
@@ -355,11 +360,11 @@ public class CraftEventFactory {
     /**
      * Player Interact event
      */
-    public static PlayerInteractEvent callPlayerInteractEvent(EntityHuman who, Action action, ItemStack itemstack, EnumHand hand) {
+    public static PlayerInteractEvent callPlayerInteractEvent(PlayerEntity who, Action action, ItemStack itemstack, Hand hand) {
         if (action != Action.LEFT_CLICK_AIR && action != Action.RIGHT_CLICK_AIR) {
             throw new AssertionError(String.format("%s performing %s with %s", who, action, itemstack));
         }
-        return callPlayerInteractEvent(who, action, null, EnumDirection.SOUTH, itemstack, hand);
+        return callPlayerInteractEvent(who, action, null, Direction.SOUTH, itemstack, hand);
     }
 
     public static PlayerInteractEvent callPlayerInteractEvent(EntityHuman who, Action action, BlockPosition position, EnumDirection direction, ItemStack itemstack, EnumHand hand) {
@@ -1186,7 +1191,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static void handleInventoryCloseEvent(EntityHuman human) {
+    public static void handleInventoryCloseEvent(PlayerEntity human) {
         // SPIGOT-5799 - no need to fire for when no inventory open
         if (human.activeContainer == human.defaultContainer) {
             return;
@@ -1196,7 +1201,7 @@ public class CraftEventFactory {
         human.activeContainer.transferTo(human.defaultContainer, human.getBukkitEntity());
     }
 
-    public static ItemStack handleEditBookEvent(EntityPlayer player, EnumItemSlot slot, ItemStack itemInHand, ItemStack newBookItem) {
+    public static ItemStack handleEditBookEvent(ServerPlayerEntity player, EquipmentSlot slot, ItemStack itemInHand, ItemStack newBookItem) {
         int itemInHandIndex = (slot == EnumItemSlot.MAINHAND) ? player.inventory.itemInHandIndex : -1;
 
         PlayerEditBookEvent editBookEvent = new PlayerEditBookEvent(player.getBukkitEntity(), itemInHandIndex, (BookMeta) CraftItemStack.getItemMeta(itemInHand), (BookMeta) CraftItemStack.getItemMeta(newBookItem), newBookItem.getItem() == Items.WRITTEN_BOOK);

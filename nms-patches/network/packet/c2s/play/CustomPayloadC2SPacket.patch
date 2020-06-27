@@ -1,0 +1,18 @@
+--- a/net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket.java
+@@ -40,7 +40,13 @@
+ 
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
++    public Identifier getChannel() {
++        return channel;
+     }
++
++    public PacketByteBuf getData() {
++        return data;
++    }
++
++    // Loom - decompile errors
+ }

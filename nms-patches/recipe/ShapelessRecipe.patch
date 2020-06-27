@@ -1,0 +1,59 @@
+--- a/net/minecraft/recipe/ShapelessRecipe.java
++++ b/net/minecraft/recipe/ShapelessRecipe.java
+@@ -13,6 +13,11 @@
+ import net.minecraft.util.JsonHelper;
+ import net.minecraft.util.collection.DefaultedList;
+ import net.minecraft.world.World;
++// CraftBukkit start
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.inventory.CraftRecipe;
++import org.bukkit.craftbukkit.inventory.CraftShapelessRecipe;
++// CraftBukkit end
+ 
+ public class ShapelessRecipe implements CraftingRecipe {
+ 
+@@ -64,13 +69,21 @@
+         return this.output.copy();
+     }
+ 
+-    public ItemStack craft(Inventory inventory) {
+-        return this.craft((CraftingInventory) inventory);
+-    }
++    // Loom -- decompile error
++
++    // CraftBukkit start
++    @SuppressWarnings("unchecked")
++    public org.bukkit.inventory.ShapelessRecipe toBukkitRecipe() {
++        CraftItemStack result = CraftItemStack.asCraftMirror(this.output);
++        CraftShapelessRecipe recipe = new CraftShapelessRecipe(result, this);
++        recipe.setGroup(this.group);
+ 
+-    public boolean matches(Inventory inventory, World world) {
+-        return this.matches((CraftingInventory) inventory, world);
++        for (Ingredient list : this.input) {
++            recipe.addIngredient(CraftRecipe.toBukkit(list));
++        }
++        return recipe;
+     }
++    // CraftBukkit end
+ 
+     public static class Serializer implements RecipeSerializer<ShapelessRecipe> {
+ 
+@@ -133,16 +146,6 @@
+             packetbytebuf.writeItemStack(shapelessrecipe.output);
+         }
+ 
+-        public void write(PacketByteBuf packetbytebuf, Recipe recipe) {
+-            this.write(packetbytebuf, (ShapelessRecipe) recipe);
+-        }
+-
+-        public Recipe read(Identifier identifier, PacketByteBuf packetbytebuf) {
+-            return this.read(identifier, packetbytebuf);
+-        }
+-
+-        public Recipe read(Identifier identifier, JsonObject jsonobject) {
+-            return this.read(identifier, jsonobject);
+-        }
++        // Loom -- decompile error
+     }
+ }

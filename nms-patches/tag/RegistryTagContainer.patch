@@ -1,0 +1,19 @@
+--- a/net/minecraft/tag/RegistryTagContainer.java
++++ b/net/minecraft/tag/RegistryTagContainer.java
+@@ -12,6 +12,7 @@
+ public class RegistryTagContainer<T> extends TagContainer<T> {
+ 
+     private final Registry<T> registry;
++    public int version; // CraftBukkit
+ 
+     public RegistryTagContainer(Registry<T> registry, String s, String s1) {
+         super(registry::getOrEmpty, s, s1);
+@@ -32,7 +33,7 @@
+             Iterator iterator1 = ((Tag) entry.getValue()).values().iterator();
+ 
+             while (iterator1.hasNext()) {
+-                T t0 = iterator1.next();
++                T t0 = (T) iterator1.next(); // CraftBukkit - decompile error
+ 
+                 packetbytebuf.writeVarInt(this.registry.getRawId(t0));
+             }

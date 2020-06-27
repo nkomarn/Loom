@@ -1,0 +1,171 @@
+--- a/net/minecraft/world/PortalForcer.java
++++ b/net/minecraft/world/PortalForcer.java
+@@ -13,6 +13,7 @@
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.server.world.ChunkTicketType;
++import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.ChunkPos;
+ import net.minecraft.util.math.Direction;
+@@ -22,6 +23,8 @@
+ import net.minecraft.world.poi.PointOfInterestStorage;
+ import net.minecraft.world.poi.PointOfInterestType;
+ 
++import org.bukkit.Bukkit; // CraftBukkit
++
+ public class PortalForcer {
+ 
+     private final ServerWorld world;
+@@ -33,12 +36,17 @@
+     }
+ 
+     public boolean usePortal(Entity entity, float f) {
++        return this.usePortal(entity, entity.getBlockPos(), f, 128, false) != null;
++    }
++
++    public BlockPattern.TeleportTarget usePortal(Entity entity, BlockPos findPosition, float f, int searchRadius, boolean searchOnly) {
+         Vec3d vec3d = entity.getLastNetherPortalDirectionVector();
+         Direction direction = entity.getLastNetherPortalDirection();
+-        BlockPattern.TeleportTarget blockpattern_teleporttarget = this.getPortal(entity.getBlockPos(), entity.getVelocity(), direction, vec3d.x, vec3d.y, entity instanceof PlayerEntity);
++        BlockPattern.TeleportTarget blockpattern_teleporttarget = this.getPortal(findPosition, entity.getVelocity(), direction, vec3d.x, vec3d.y, entity instanceof PlayerEntity, searchRadius); // CraftBukkit - add location and searchRadius
++        if (searchOnly) return blockpattern_teleporttarget; // CraftBukkit - optional teleporting
+ 
+         if (blockpattern_teleporttarget == null) {
+-            return false;
++            return null; // CraftBukkit - return shape
+         } else {
+             Vec3d vec3d1 = blockpattern_teleporttarget.pos;
+             Vec3d vec3d2 = blockpattern_teleporttarget.velocity;
+@@ -46,19 +54,26 @@
+             entity.setVelocity(vec3d2);
+             entity.yaw = f + (float) blockpattern_teleporttarget.yaw;
+             entity.refreshPositionAfterTeleport(vec3d1.x, vec3d1.y, vec3d1.z);
+-            return true;
++            return blockpattern_teleporttarget;
+         }
+     }
+ 
+     @Nullable
+     public BlockPattern.TeleportTarget getPortal(BlockPos blockpos, Vec3d vec3d, Direction direction, double d0, double d1, boolean flag) {
++        // CraftBukkit start
++        return getPortal(blockpos, vec3d, direction, d0, d1, flag, 128);
++    }
++
++    @Nullable
++    public BlockPattern.TeleportTarget getPortal(BlockPos blockpos, Vec3d vec3d, Direction direction, double d0, double d1, boolean flag, int searchRadius) {
++        // CraftBukkit end
+         PointOfInterestStorage pointofintereststorage = this.world.getPointOfInterestStorage();
+ 
+         pointofintereststorage.preloadChunks(this.world, blockpos, 128);
+         List<PointOfInterest> list = (List) pointofintereststorage.getInSquare((pointofinteresttype) -> {
+             return pointofinteresttype == PointOfInterestType.NETHER_PORTAL;
+-        }, blockpos, 128, PointOfInterestStorage.OccupationStatus.ANY).collect(Collectors.toList());
+-        Optional<PointOfInterest> optional = list.stream().min(Comparator.comparingDouble((pointofinterest) -> {
++        }, blockpos, searchRadius, PointOfInterestStorage.OccupationStatus.ANY).collect(Collectors.toList());  // CraftBukkit - searchRadius
++        Optional<PointOfInterest> optional = list.stream().min(Comparator.<PointOfInterest>comparingDouble((pointofinterest) -> { // CraftBukkit - decompile error
+             return pointofinterest.getPos().getSquaredDistance(blockpos);
+         }).thenComparingInt((pointofinterest) -> {
+             return pointofinterest.getPos().getY();
+@@ -75,11 +90,19 @@
+     }
+ 
+     public boolean createPortal(Entity entity) {
++        // CraftBukkit start - providable position and creation radius
++        return this.createPortal(entity, entity.getBlockPos(), 16);
++    }
++
++    public boolean createPortal(Entity entity, BlockPos createPosition, int createRadius) {
++        // CraftBukkit end
+         boolean flag = true;
+         double d0 = -1.0D;
+-        int i = MathHelper.floor(entity.getX());
+-        int j = MathHelper.floor(entity.getY());
+-        int k = MathHelper.floor(entity.getZ());
++        // CraftBukkit start - providable position
++        int i = createPosition.getX();
++        int j = createPosition.getY();
++        int k = createPosition.getZ();
++        // CraftBukkit end
+         int l = i;
+         int i1 = j;
+         int j1 = k;
+@@ -103,11 +126,11 @@
+         double d3;
+         double d4;
+ 
+-        for (i2 = i - 16; i2 <= i + 16; ++i2) {
+-            d1 = (double) i2 + 0.5D - entity.getX();
++        for (i2 = i - createRadius; i2 <= i + createRadius; ++i2) { // CraftBukkit - createRadius
++            d1 = (double) i2 + 0.5D - createPosition.getX(); // CraftBukkit - providable position
+ 
+-            for (j2 = k - 16; j2 <= k + 16; ++j2) {
+-                d2 = (double) j2 + 0.5D - entity.getZ();
++            for (j2 = k - createRadius; j2 <= k + createRadius; ++j2) { // CraftBukkit - createRadius
++                d2 = (double) j2 + 0.5D - createPosition.getZ(); // CraftBukkit - providable position
+ 
+                 label257:
+                 for (k2 = this.world.getDimensionHeight() - 1; k2 >= 0; --k2) {
+@@ -155,11 +178,11 @@
+         }
+ 
+         if (d0 < 0.0D) {
+-            for (i2 = i - 16; i2 <= i + 16; ++i2) {
+-                d1 = (double) i2 + 0.5D - entity.getX();
++            for (i2 = i - createRadius; i2 <= i + createRadius; ++i2) {
++                d1 = (double) i2 + 0.5D - createPosition.getX();
+ 
+-                for (j2 = k - 16; j2 <= k + 16; ++j2) {
+-                    d2 = (double) j2 + 0.5D - entity.getZ();
++                for (j2 = k - createRadius; j2 <= k + createRadius; ++j2) {
++                    d2 = (double) j2 + 0.5D - createPosition.getZ();
+ 
+                     label205:
+                     for (k2 = this.world.getDimensionHeight() - 1; k2 >= 0; --k2) {
+@@ -212,6 +235,7 @@
+             l5 = -l5;
+         }
+ 
++        org.bukkit.craftbukkit.util.BlockStateListPopulator blockList = new org.bukkit.craftbukkit.util.BlockStateListPopulator(this.world); // CraftBukkit - Use BlockStateListPopulator
+         if (d0 < 0.0D) {
+             i1 = MathHelper.clamp(i1, 70, this.world.getDimensionHeight() - 10);
+             j5 = i1;
+@@ -225,7 +249,7 @@
+                         boolean flag1 = l2 < 0;
+ 
+                         blockpos_mutable.set(j3, l3, i4);
+-                        this.world.setBlockState(blockpos_mutable, flag1 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
++                        blockList.setTypeAndData(blockpos_mutable, flag1 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState(), 3); // CraftBukkit
+                     }
+                 }
+             }
+@@ -235,7 +259,7 @@
+             for (i3 = -1; i3 < 4; ++i3) {
+                 if (k2 == -1 || k2 == 2 || i3 == -1 || i3 == 3) {
+                     blockpos_mutable.set(i5 + k2 * k5, j5 + i3, j2 + k2 * l5);
+-                    this.world.setBlockState(blockpos_mutable, Blocks.OBSIDIAN.getDefaultState(), 3);
++                    blockList.setTypeAndData(blockpos_mutable, Blocks.OBSIDIAN.getDefaultState(), 3); // CraftBukkit
+                 }
+             }
+         }
+@@ -245,10 +269,19 @@
+         for (i3 = 0; i3 < 2; ++i3) {
+             for (l2 = 0; l2 < 3; ++l2) {
+                 blockpos_mutable.set(i5 + i3 * k5, j5 + l2, j2 + i3 * l5);
+-                this.world.setBlockState(blockpos_mutable, blockstate, 18);
++                blockList.setTypeAndData(blockpos_mutable, blockstate, 18); // CraftBukkit
+             }
+         }
+ 
++        // CraftBukkit start
++        org.bukkit.World bworld = this.world.getCraftWorld();
++        org.bukkit.event.world.PortalCreateEvent event = new org.bukkit.event.world.PortalCreateEvent((java.util.List<org.bukkit.block.BlockState>) (java.util.List) blockList.getList(), bworld, entity.getBukkitEntity(), org.bukkit.event.world.PortalCreateEvent.CreateReason.NETHER_PAIR);
++
++        Bukkit.getPluginManager().callEvent(event);
++        if (!event.isCancelled()) {
++            blockList.updateList();
++        }
++        // CraftBukkit end
+         return true;
+     }
+ }

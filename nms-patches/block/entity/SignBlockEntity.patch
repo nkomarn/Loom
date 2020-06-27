@@ -7,18 +7,23 @@
  import com.mojang.brigadier.exceptions.CommandSyntaxException;
  import javax.annotation.Nullable;
  import net.minecraft.block.BlockState;
-@@ -22,7 +23,9 @@
+@@ -21,10 +22,12 @@
  import net.minecraft.util.math.Vec2f;
  import net.minecraft.util.math.Vec3d;
  
 -public class SignBlockEntity extends BlockEntity {
 +import java.util.UUID;
-+
-+public class SignBlockEntity extends BlockEntity implements CommandOutput { // CraftBukkit - implements
  
-     private final Text[] text;
-     private boolean editable;
-@@ -47,6 +50,12 @@
+-    private final Text[] text;
+-    private boolean editable;
++public class SignBlockEntity extends BlockEntity implements CommandOutput { // CraftBukkit - implements
++
++    public final Text[] text;
++    public boolean editable;
+     private PlayerEntity editor;
+     private final StringRenderable[] textBeingEdited;
+     private DyeColor textColor;
+@@ -46,6 +49,12 @@
              compoundtag.putString("Text" + (i + 1), s);
          }
  
@@ -31,7 +36,7 @@
          compoundtag.putString("Color", this.textColor.getName());
          return compoundtag;
      }
-@@ -56,18 +65,37 @@
+@@ -55,18 +64,37 @@
          super.fromTag(blockstate, compoundtag);
          this.textColor = DyeColor.byName(compoundtag.getString("Color"), DyeColor.BLACK);
  
@@ -76,7 +81,7 @@
              }
  
              this.textBeingEdited[i] = null;
-@@ -129,7 +157,8 @@
+@@ -128,7 +156,8 @@
          String s = serverplayerentity == null ? "Sign" : serverplayerentity.getName().getString();
          Object object = serverplayerentity == null ? new LiteralText("Sign") : serverplayerentity.getDisplayName();
  
@@ -86,7 +91,7 @@
      }
  
      public DyeColor getTextColor() {
-@@ -140,10 +169,34 @@
+@@ -139,10 +168,34 @@
          if (dyecolor != this.getTextColor()) {
              this.textColor = dyecolor;
              this.markDirty();

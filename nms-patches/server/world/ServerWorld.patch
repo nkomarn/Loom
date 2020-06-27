@@ -1,0 +1,23 @@
+--- a/net/minecraft/server/world/ServerWorld.java
++++ b/net/minecraft/server/world/ServerWorld.java
+@@ -1528,19 +1528,5 @@
+         });
+     }
+ 
+-    public Scoreboard getScoreboard() {
+-        return this.getScoreboard();
+-    }
+-
+-    public ChunkManager getChunkManager() {
+-        return this.getChunkManager();
+-    }
+-
+-    public TickScheduler getFluidTickScheduler() {
+-        return this.getFluidTickScheduler();
+-    }
+-
+-    public TickScheduler getBlockTickScheduler() {
+-        return this.getBlockTickScheduler();
+-    }
++    // Loom - decompile error
+ }

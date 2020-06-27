@@ -1,0 +1,28 @@
+--- a/net/minecraft/server/network/ServerRecipeBook.java
++++ b/net/minecraft/server/network/ServerRecipeBook.java
+@@ -20,6 +20,8 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import org.bukkit.craftbukkit.event.CraftEventFactory; // CraftBukkit
++
+ public class ServerRecipeBook extends RecipeBook {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+@@ -35,7 +37,7 @@
+             Recipe<?> recipe = (Recipe) iterator.next();
+             Identifier identifier = recipe.getId();
+ 
+-            if (!this.recipes.contains(identifier) && !recipe.isIgnoredInRecipeBook()) {
++            if (!this.recipes.contains(identifier) && !recipe.isIgnoredInRecipeBook() && CraftEventFactory.handlePlayerRecipeListUpdateEvent(serverplayerentity, identifier)) { // CraftBukkit
+                 this.add(identifier);
+                 this.display(identifier);
+                 list.add(identifier);
+@@ -69,6 +71,7 @@
+     }
+ 
+     private void sendUnlockRecipesPacket(UnlockRecipesS2CPacket.Action unlockrecipess2cpacket_action, ServerPlayerEntity serverplayerentity, List<Identifier> list) {
++        if (serverplayerentity.networkHandler == null) return; // SPIGOT-4478 during PlayerLoginEvent
+         serverplayerentity.networkHandler.sendPacket(new UnlockRecipesS2CPacket(unlockrecipess2cpacket_action, list, Collections.emptyList(), this.guiOpen, this.filteringCraftable, this.furnaceGuiOpen, this.furnaceFilteringCraftable));
+     }
+ 

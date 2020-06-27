@@ -3,8 +3,10 @@ package org.bukkit.craftbukkit.inventory;
 import static org.bukkit.craftbukkit.inventory.CraftMetaItem.*;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+
+import net.minecraft.item.Item;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.EnchantmentManager;
-import net.minecraft.server.Item;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.NBTTagList;
 import org.apache.commons.lang.Validate;
@@ -22,30 +24,30 @@ import org.bukkit.material.MaterialData;
 @DelegateDeserialization(ItemStack.class)
 public final class CraftItemStack extends ItemStack {
 
-    public static ItemStack asNMSCopy(ItemStack original) {
+    public static net.minecraft.item.ItemStack asNMSCopy(ItemStack original) {
         if (original instanceof CraftItemStack) {
             CraftItemStack stack = (CraftItemStack) original;
-            return stack.handle == null ? net.minecraft.server.ItemStack.b : stack.handle.cloneItemStack();
+            return stack.handle == null ? net.minecraft.item.ItemStack.EMPTY : stack.handle.copy();
         }
         if (original == null || original.getType() == Material.AIR) {
-            return net.minecraft.server.ItemStack.b;
+            return net.minecraft.item.ItemStack.EMPTY;
         }
 
         Item item = CraftMagicNumbers.getItem(original.getType(), original.getDurability());
 
         if (item == null) {
-            return net.minecraft.server.ItemStack.b;
+            return net.minecraft.item.ItemStack.EMPTY;
         }
 
-        net.minecraft.server.ItemStack stack = new net.minecraft.server.ItemStack(item, original.getAmount());
+        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item, original.getAmount());
         if (original.hasItemMeta()) {
             setItemMeta(stack, original.getItemMeta());
         }
         return stack;
     }
 
-    public static net.minecraft.server.ItemStack copyNMSStack(net.minecraft.server.ItemStack original, int amount) {
-        net.minecraft.server.ItemStack stack = original.cloneItemStack();
+    public static net.minecraft.item.ItemStack copyNMSStack(net.minecraft.item.ItemStack original, int amount) {
+        net.minecraft.item.ItemStack stack = original.copy();
         stack.setCount(amount);
         return stack;
     }
@@ -84,7 +86,7 @@ public final class CraftItemStack extends ItemStack {
         return new CraftItemStack(CraftMagicNumbers.getMaterial(item), amount, (short) 0, null);
     }
 
-    net.minecraft.server.ItemStack handle;
+    net.minecraft.item.ItemStack handle;
 
     /**
      * Mirror
@@ -537,7 +539,7 @@ public final class CraftItemStack extends ItemStack {
         return setItemMeta(handle, itemMeta);
     }
 
-    public static boolean setItemMeta(net.minecraft.server.ItemStack item, ItemMeta itemMeta) {
+    public static boolean setItemMeta(net.minecraft.item.ItemStack item, ItemMeta itemMeta) {
         if (item == null) {
             return false;
         }
@@ -558,7 +560,7 @@ public final class CraftItemStack extends ItemStack {
             item.setItem(newItem);
         }
 
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundTag tag = new CompoundTag();
         item.setTag(tag);
 
         ((CraftMetaItem) itemMeta).applyToItem(tag);

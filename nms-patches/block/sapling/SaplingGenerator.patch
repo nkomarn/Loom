@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/sapling/SaplingGenerator.java
 +++ b/net/minecraft/block/sapling/SaplingGenerator.java
-@@ -13,6 +13,12 @@
+@@ -12,6 +12,12 @@
  import net.minecraft.world.gen.feature.ConfiguredFeature;
  import net.minecraft.world.gen.feature.TreeFeatureConfig;
  
@@ -13,7 +13,7 @@
  public abstract class SaplingGenerator {
  
      public SaplingGenerator() {}
-@@ -26,6 +32,7 @@
+@@ -25,6 +31,7 @@
          if (configuredfeature == null) {
              return false;
          } else {
@@ -21,7 +21,7 @@
              serverworld.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 4);
              ((TreeFeatureConfig) configuredfeature.config).ignoreFluidCheck();
              if (configuredfeature.generate(serverworld, serverworld.getStructureAccessor(), chunkgenerator, random, blockpos)) {
-@@ -52,4 +59,46 @@
+@@ -51,4 +58,46 @@
  
          return true;
      }
