@@ -1,0 +1,182 @@
+--- a/net/minecraft/block/CauldronBlock.java
++++ b/net/minecraft/block/CauldronBlock.java
+@@ -30,6 +30,8 @@
+ import net.minecraft.util.shape.VoxelShapes;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.CauldronLevelChangeEvent;
+ 
+ public class CauldronBlock extends Block {
+ 
+@@ -55,8 +57,14 @@
+         float f = (float) blockpos.getY() + (6.0F + (float) (3 * i)) / 16.0F;
+ 
+         if (!world.isClient && entity.isOnFire() && i > 0 && entity.getY() <= (double) f) {
++            // CraftBukkit start
++            if (!this.changeLevel(world, blockpos, blockstate, i - 1, entity, CauldronLevelChangeEvent.ChangeReason.EXTINGUISH)) {
++                return;
++            }
++
+             entity.extinguish();
+-            this.setLevel(world, blockpos, blockstate, i - 1);
++            //this.setLevel(world, blockpos, blockstate, i - 1);
++            // CraftBukkit end
+         }
+ 
+     }
+@@ -72,18 +80,29 @@
+ 
+             if (item == Items.WATER_BUCKET) {
+                 if (i < 3 && !world.isClient) {
++                    // CraftBukkit start
++                    if (!this.changeLevel(world, blockpos, blockstate, 3, playerentity, CauldronLevelChangeEvent.ChangeReason.BUCKET_EMPTY)) {
++                        return ActionResult.SUCCESS;
++                    }
++
+                     if (!playerentity.abilities.creativeMode) {
+                         playerentity.setStackInHand(hand, new ItemStack(Items.BUCKET));
+                     }
+ 
+                     playerentity.incrementStat(Stats.FILL_CAULDRON);
+-                    this.setLevel(world, blockpos, blockstate, 3);
++                    //this.setLevel(world, blockpos, blockstate, 3);
++                    // CraftBukkit end
+                     world.playSound((PlayerEntity) null, blockpos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                 }
+ 
+                 return ActionResult.success(world.isClient);
+             } else if (item == Items.BUCKET) {
+                 if (i == 3 && !world.isClient) {
++                    // CraftBukkit start
++                    if (!this.changeLevel(world, blockpos, blockstate, 0, playerentity, CauldronLevelChangeEvent.ChangeReason.BUCKET_FILL)) {
++                        return ActionResult.SUCCESS;
++                    }
++
+                     if (!playerentity.abilities.creativeMode) {
+                         itemstack.decrement(1);
+                         if (itemstack.isEmpty()) {
+@@ -94,7 +113,8 @@
+                     }
+ 
+                     playerentity.incrementStat(Stats.USE_CAULDRON);
+-                    this.setLevel(world, blockpos, blockstate, 0);
++                    //this.setLevel(world, blockpos, blockstate, 0);
++                    // CraftBukkit end
+                     world.playSound((PlayerEntity) null, blockpos, SoundEvents.ITEM_BUCKET_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                 }
+ 
+@@ -104,6 +124,11 @@
+ 
+                 if (item == Items.GLASS_BOTTLE) {
+                     if (i > 0 && !world.isClient) {
++                        // CraftBukkit start
++                        if (!this.changeLevel(world, blockpos, blockstate, i - 1, playerentity, CauldronLevelChangeEvent.ChangeReason.BOTTLE_FILL)) {
++                            return ActionResult.SUCCESS;
++                        }
++
+                         if (!playerentity.abilities.creativeMode) {
+                             itemstack1 = PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+                             playerentity.incrementStat(Stats.USE_CAULDRON);
+@@ -118,12 +143,18 @@
+                         }
+ 
+                         world.playSound((PlayerEntity) null, blockpos, SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
+-                        this.setLevel(world, blockpos, blockstate, i - 1);
++                        //this.setLevel(world, blockpos, blockstate, i - 1);
++                        // CraftBukkit end
+                     }
+ 
+                     return ActionResult.success(world.isClient);
+                 } else if (item == Items.POTION && PotionUtil.getPotion(itemstack) == Potions.WATER) {
+                     if (i < 3 && !world.isClient) {
++                        // CraftBukkit start
++                        if (!this.changeLevel(world, blockpos, blockstate, i + 1, playerentity, CauldronLevelChangeEvent.ChangeReason.BOTTLE_EMPTY)) {
++                            return ActionResult.SUCCESS;
++                        }
++
+                         if (!playerentity.abilities.creativeMode) {
+                             itemstack1 = new ItemStack(Items.GLASS_BOTTLE);
+                             playerentity.incrementStat(Stats.USE_CAULDRON);
+@@ -134,7 +165,8 @@
+                         }
+ 
+                         world.playSound((PlayerEntity) null, blockpos, SoundEvents.ITEM_BOTTLE_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+-                        this.setLevel(world, blockpos, blockstate, i + 1);
++                        //this.setLevel(world, blockpos, blockstate, i + 1);
++                        // CraftBukkit end
+                     }
+ 
+                     return ActionResult.success(world.isClient);
+@@ -143,8 +175,14 @@
+                         DyeableItem dyeableitem = (DyeableItem) item;
+ 
+                         if (dyeableitem.hasColor(itemstack) && !world.isClient) {
++                            // CraftBukkit start
++                            if (!this.changeLevel(world, blockpos, blockstate, i - 1, playerentity, CauldronLevelChangeEvent.ChangeReason.ARMOR_WASH)) {
++                                return ActionResult.SUCCESS;
++                            }
++
+                             dyeableitem.removeColor(itemstack);
+-                            this.setLevel(world, blockpos, blockstate, i - 1);
++                            //this.setLevel(world, blockpos, blockstate, i - 1);
++                            // CraftBukkit end
+                             playerentity.incrementStat(Stats.CLEAN_ARMOR);
+                             return ActionResult.SUCCESS;
+                         }
+@@ -152,13 +190,19 @@
+ 
+                     if (i > 0 && item instanceof BannerItem) {
+                         if (BannerBlockEntity.getPatternCount(itemstack) > 0 && !world.isClient) {
++                            // CraftBukkit start
++                            if (!this.changeLevel(world, blockpos, blockstate, i - 1, playerentity, CauldronLevelChangeEvent.ChangeReason.BANNER_WASH)) {
++                                return ActionResult.SUCCESS;
++                            }
++
+                             itemstack1 = itemstack.copy();
+                             itemstack1.setCount(1);
+                             BannerBlockEntity.loadFromItemStack(itemstack1);
+                             playerentity.incrementStat(Stats.CLEAN_BANNER);
+                             if (!playerentity.abilities.creativeMode) {
+                                 itemstack.decrement(1);
+-                                this.setLevel(world, blockpos, blockstate, i - 1);
++                                //this.setLevel(world, blockpos, blockstate, i - 1);
++                                // CraftBukkit end
+                             }
+ 
+                             if (itemstack.isEmpty()) {
+@@ -196,9 +240,25 @@
+         }
+     }
+ 
++    // CraftBukkit start
+     public void setLevel(World world, BlockPos blockpos, BlockState blockstate, int i) {
++        this.changeLevel(world, blockpos, blockstate, i, null, CauldronLevelChangeEvent.ChangeReason.UNKNOWN);
++    }
++
++    private boolean changeLevel(World world, BlockPos blockpos, BlockState blockstate, int i, Entity entity, CauldronLevelChangeEvent.ChangeReason reason) {
++        int newLevel = MathHelper.clamp(i, 0, 3);
++        CauldronLevelChangeEvent event = new CauldronLevelChangeEvent(
++                world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()),
++                (entity == null) ? null : entity.getBukkitEntity(), reason, blockstate.get(LEVEL), newLevel
++        );
++        Bukkit.getPluginManager().callEvent(event);
++        if (event.isCancelled()) {
++            return false;
++        }
+         world.setBlockState(blockpos, (BlockState) blockstate.with(CauldronBlock.LEVEL, MathHelper.clamp(i, 0, 3)), 2);
+         world.updateComparators(blockpos, this);
++        return true;
++        // CraftBukkit end
+     }
+ 
+     public void rainTick(World world, BlockPos blockpos) {
+@@ -209,7 +269,7 @@
+                 BlockState blockstate = world.getBlockState(blockpos);
+ 
+                 if ((Integer) blockstate.get(CauldronBlock.LEVEL) < 3) {
+-                    world.setBlockState(blockpos, (BlockState) blockstate.cycle(CauldronBlock.LEVEL), 2);
++                    this.setLevel(world, blockpos, blockstate.cycle(LEVEL), 2); // CraftBukkit
+                 }
+ 
+             }

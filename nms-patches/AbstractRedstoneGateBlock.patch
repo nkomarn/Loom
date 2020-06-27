@@ -1,0 +1,29 @@
+--- a/net/minecraft/block/AbstractRedstoneGateBlock.java
++++ b/net/minecraft/block/AbstractRedstoneGateBlock.java
+@@ -15,6 +15,7 @@
+ import net.minecraft.world.TickPriority;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public abstract class AbstractRedstoneGateBlock extends HorizontalFacingBlock {
+ 
+@@ -39,8 +40,18 @@
+             boolean flag1 = this.hasPower(serverworld, blockpos, blockstate);
+ 
+             if (flag && !flag1) {
++                // CraftBukkit start
++                if (CraftEventFactory.callRedstoneChange(serverworld, blockpos, 15, 0).getNewCurrent() != 0) {
++                    return;
++                }
++                // CraftBukkit end
+                 serverworld.setBlockState(blockpos, (BlockState) blockstate.with(AbstractRedstoneGateBlock.POWERED, false), 2);
+             } else if (!flag) {
++                // CraftBukkit start
++                if (CraftEventFactory.callRedstoneChange(serverworld, blockpos, 0, 15).getNewCurrent() != 15) {
++                    return;
++                }
++                // CraftBukkit end
+                 serverworld.setBlockState(blockpos, (BlockState) blockstate.with(AbstractRedstoneGateBlock.POWERED, true), 2);
+                 if (!flag1) {
+                     serverworld.getBlockTickScheduler().schedule(blockpos, this, this.getUpdateDelayInternal(blockstate), TickPriority.VERY_HIGH);

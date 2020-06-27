@@ -1,0 +1,50 @@
+--- a/net/minecraft/block/DropperBlock.java
++++ b/net/minecraft/block/DropperBlock.java
+@@ -6,6 +6,7 @@
+ import net.minecraft.block.entity.DispenserBlockEntity;
+ import net.minecraft.block.entity.DropperBlockEntity;
+ import net.minecraft.block.entity.HopperBlockEntity;
++import net.minecraft.inventory.DoubleInventory;
+ import net.minecraft.inventory.Inventory;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.math.BlockPointerImpl;
+@@ -13,6 +14,10 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.inventory.InventoryMoveItemEvent;
+ 
+ public class DropperBlock extends DispenserBlock {
+ 
+@@ -48,8 +53,26 @@
+                 if (inventory == null) {
+                     itemstack1 = DropperBlock.BEHAVIOR.dispense(blockpointerimpl, itemstack);
+                 } else {
+-                    itemstack1 = HopperBlockEntity.transfer(dispenserblockentity, inventory, itemstack.copy().split(1), direction.getOpposite());
+-                    if (itemstack1.isEmpty()) {
++                    // CraftBukkit start - Fire event when pushing items into other inventories
++                    CraftItemStack oitemstack = CraftItemStack.asCraftMirror(itemstack.copy().split(1));
++
++                    org.bukkit.inventory.Inventory destinationInventory;
++                    // Have to special case large chests as they work oddly
++                    if (inventory instanceof DoubleInventory) {
++                        destinationInventory = new CraftInventoryDoubleChest((DoubleInventory) inventory);
++                    } else {
++                        destinationInventory = inventory.getOwner().getInventory();
++                    }
++
++                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(dispenserblockentity.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
++                    Bukkit.getPluginManager().callEvent(event);
++                    if (event.isCancelled()) {
++                        return;
++                    }
++
++                    itemstack1 = HopperBlockEntity.transfer(dispenserblockentity, inventory, CraftItemStack.asNMSCopy(event.getItem()), direction.opposite());
++                    if (event.getItem().equals(oitemstack) && itemstack1.isEmpty()) {
++                        // CraftBukkit end
+                         itemstack1 = itemstack.copy();
+                         itemstack1.decrement(1);
+                     } else {
