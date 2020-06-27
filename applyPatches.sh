@@ -2,7 +2,7 @@
 
 if [ -z "$1" ]
 then
-    echo "Please run this script again with the clean decompile sources as an argument. In most cases this will be ../work/decompile-XXXX"
+    echo "Please run this script again with the clean decompile sources as an argument. In most cases this will be ./decompiled"
     exit
 fi
 
@@ -18,19 +18,29 @@ else
   }
 fi
 
-nms=$1/net/minecraft/server
-cb=src/main/java/net/minecraft/server
-#clean up and rebuild
-rm -rf $cb
-mkdir -p $cb
-for file in $(/bin/ls nms-patches)
+# 1=${1%"/"} # remove trailing '/' if present
+
+src="src/main/java/net/minecraft/"
+minecraftSource="$1/net/minecraft/"
+
+rm -rf "$src" # remove existing nms source from /src/main/java
+mkdir -p "$src" # make sure the nms folder exists
+
+for patchFile in $(/bin/find "nms-patches" -name '*.patch')
 do
-    patchFile="nms-patches/$file"
-    file="$(echo $file | cut -d. -f1).java"
+  patchFileClean=${patchFile#"nms-patches/"}
+  file="$(echo $patchFileClean | cut -d. -f1).java"
 
-    echo "Patching $file < $patchFile"
-    strip_cr "$nms/$file" > /dev/null
+  if [ -f "$minecraftSource$file" ]
+  then
+    echo "Patching $file < $patchFileClean"
+    strip_cr "$minecraftSource$file"
+    mkdir -p "$(dirname "$src$file")"
+    cp "$minecraftSource$file" "$src$file"
+    patch -d "src/main/java/" "net/minecraft/$file" < "$patchFile" > /dev/null
+  else
+    echo "Unable to apply $patchFileClean."
+    echo "  $file not found."
+  fi
 
-    cp "$nms/$file" "$cb/$file"
-    patch -d src/main/java/ "net/minecraft/server/$file" < "$patchFile"
 done
