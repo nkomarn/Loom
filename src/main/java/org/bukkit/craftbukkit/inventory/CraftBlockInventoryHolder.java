@@ -1,8 +1,7 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.GeneratorAccess;
-import net.minecraft.server.IInventory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.inventory.BlockInventoryHolder;
@@ -13,7 +12,7 @@ public class CraftBlockInventoryHolder implements BlockInventoryHolder {
     private final Block block;
     private final Inventory inventory;
 
-    public CraftBlockInventoryHolder(GeneratorAccess world, BlockPosition pos, IInventory inv) {
+    public CraftBlockInventoryHolder(WorldAccess world, BlockPos pos, net.minecraft.inventory.Inventory inv) {
         this.block = CraftBlock.at(world, pos);
         this.inventory = new CraftInventory(inv);
     }

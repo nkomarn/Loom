@@ -3,21 +3,6 @@ package org.bukkit.craftbukkit.inventory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import net.minecraft.server.IHopper;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.InventoryCrafting;
-import net.minecraft.server.InventoryEnderChest;
-import net.minecraft.server.InventoryMerchant;
-import net.minecraft.server.PlayerInventory;
-import net.minecraft.server.TileEntityBarrel;
-import net.minecraft.server.TileEntityBlastFurnace;
-import net.minecraft.server.TileEntityBrewingStand;
-import net.minecraft.server.TileEntityDispenser;
-import net.minecraft.server.TileEntityDropper;
-import net.minecraft.server.TileEntityFurnace;
-import net.minecraft.server.TileEntityLectern;
-import net.minecraft.server.TileEntityShulkerBox;
-import net.minecraft.server.TileEntitySmoker;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,13 +14,13 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftInventory implements Inventory {
-    protected final IInventory inventory;
+    protected final net.minecraft.inventory.Inventory inventory;
 
-    public CraftInventory(IInventory inventory) {
+    public CraftInventory(net.minecraft.inventory.Inventory inventory) {
         this.inventory = inventory;
     }
 
-    public IInventory getInventory() {
+    public net.minecraft.inventory.Inventory getInventory() {
         return inventory;
     }
 
@@ -46,16 +31,16 @@ public class CraftInventory implements Inventory {
 
     @Override
     public ItemStack getItem(int index) {
-        net.minecraft.server.ItemStack item = getInventory().getItem(index);
+        ItemStack item = getInventory().getItem(index);
         return item.isEmpty() ? null : CraftItemStack.asCraftMirror(item);
     }
 
-    protected ItemStack[] asCraftMirror(List<net.minecraft.server.ItemStack> mcItems) {
+    protected ItemStack[] asCraftMirror(List<net.minecraft.item.ItemStack> mcItems) {
         int size = mcItems.size();
         ItemStack[] items = new ItemStack[size];
 
         for (int i = 0; i < size; i++) {
-            net.minecraft.server.ItemStack mcItem = mcItems.get(i);
+            net.minecraft.item.ItemStack mcItem = mcItems.get(i);
             items[i] = (mcItem.isEmpty()) ? null : CraftItemStack.asCraftMirror(mcItem);
         }
 
@@ -74,7 +59,7 @@ public class CraftInventory implements Inventory {
 
     @Override
     public ItemStack[] getContents() {
-        List<net.minecraft.server.ItemStack> mcItems = getInventory().getContents();
+        List<net.minecraft.item.ItemStack> mcItems = getInventory().getContents();
 
         return asCraftMirror(mcItems);
     }

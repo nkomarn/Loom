@@ -48,7 +48,7 @@ public class CraftBlock implements Block {
         this.position = position.mutableCopy();
     }
 
-    public static CraftBlock at(ServerWorldAccess world, BlockPos position) {
+    public static CraftBlock at(WorldAccess world, BlockPos position) {
         return new CraftBlock(world, position);
     }
 

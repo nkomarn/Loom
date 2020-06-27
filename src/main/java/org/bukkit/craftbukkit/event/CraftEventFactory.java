@@ -12,61 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.BlockPropertyInstrument;
-import net.minecraft.server.ChatMessage;
-import net.minecraft.server.ChatModifier;
-import net.minecraft.server.Container;
-import net.minecraft.server.ContainerMerchant;
-import net.minecraft.server.DamageSource;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityAnimal;
-import net.minecraft.server.EntityAreaEffectCloud;
-import net.minecraft.server.EntityDamageSource;
-import net.minecraft.server.EntityDamageSourceIndirect;
-import net.minecraft.server.EntityEnderCrystal;
-import net.minecraft.server.EntityEnderDragon;
-import net.minecraft.server.EntityExperienceOrb;
-import net.minecraft.server.EntityFireworks;
-import net.minecraft.server.EntityGhast;
-import net.minecraft.server.EntityGolem;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityInsentient;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityMonster;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.EntityPotion;
-import net.minecraft.server.EntityRaider;
-import net.minecraft.server.EntitySlime;
-import net.minecraft.server.EntityTypes;
-import net.minecraft.server.EntityVillager;
-import net.minecraft.server.EntityWaterAnimal;
-import net.minecraft.server.EnumDirection;
-import net.minecraft.server.EnumHand;
-import net.minecraft.server.EnumItemSlot;
-import net.minecraft.server.Explosion;
-import net.minecraft.server.GeneratorAccess;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.ItemActionContext;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Items;
-import net.minecraft.server.LootContextParameters;
-import net.minecraft.server.LootTable;
-import net.minecraft.server.LootTableInfo;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MovingObjectPosition;
-import net.minecraft.server.MovingObjectPositionBlock;
-import net.minecraft.server.MovingObjectPositionEntity;
-import net.minecraft.server.NPC;
-import net.minecraft.server.PacketPlayInCloseWindow;
-import net.minecraft.server.Raid;
-import net.minecraft.server.Unit;
-import net.minecraft.server.World;
-import net.minecraft.server.WorldServer;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -491,7 +444,7 @@ public class CraftEventFactory {
     /**
      * VillagerCareerChangeEvent
      */
-    public static VillagerCareerChangeEvent callVillagerCareerChangeEvent(EntityVillager vilager, Profession future, VillagerCareerChangeEvent.ChangeReason reason) {
+    public static VillagerCareerChangeEvent callVillagerCareerChangeEvent(VillagerEntity vilager, Profession future, VillagerCareerChangeEvent.ChangeReason reason) {
         VillagerCareerChangeEvent event = new VillagerCareerChangeEvent((Villager) vilager.getBukkitEntity(), future, reason);
         Bukkit.getPluginManager().callEvent(event);
 
@@ -658,7 +611,7 @@ public class CraftEventFactory {
     /**
      * BlockFadeEvent
      */
-    public static BlockFadeEvent callBlockFadeEvent(GeneratorAccess world, BlockPosition pos, IBlockData newBlock) {
+    public static BlockFadeEvent callBlockFadeEvent(WorldAccess world, BlockPos pos, net.minecraft.block.BlockState newBlock) {
         CraftBlockState state = CraftBlockState.getBlockState(world, pos);
         state.setData(newBlock);
 
@@ -680,11 +633,11 @@ public class CraftEventFactory {
         return !event.isCancelled();
     }
 
-    public static boolean handleBlockSpreadEvent(World world, BlockPosition source, BlockPosition target, IBlockData block) {
+    public static boolean handleBlockSpreadEvent(World world, BlockPos source, BlockPos target, net.minecraft.block.BlockState block) {
         return handleBlockSpreadEvent(world, source, target, block, 2);
     }
 
-    public static boolean handleBlockSpreadEvent(World world, BlockPosition source, BlockPosition target, IBlockData block, int flag) {
+    public static boolean handleBlockSpreadEvent(World world, BlockPos source, BlockPos target, net.minecraft.block.BlockState block, int flag) {
         CraftBlockState state = CraftBlockState.getBlockState(world, target, flag);
         state.setData(block);
 
@@ -991,11 +944,11 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static boolean handleBlockGrowEvent(World world, BlockPosition pos, IBlockData block) {
+    public static boolean handleBlockGrowEvent(World world, BlockPos pos, net.minecraft.block.BlockState block) {
         return handleBlockGrowEvent(world, pos, block, 3);
     }
 
-    public static boolean handleBlockGrowEvent(World world, BlockPosition pos, IBlockData newData, int flag) {
+    public static boolean handleBlockGrowEvent(World world, BlockPos pos, net.minecraft.block.BlockState newData, int flag) {
         Block block = world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
         CraftBlockState state = (CraftBlockState) block.getState();
         state.setData(newData);
@@ -1016,11 +969,11 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static FoodLevelChangeEvent callFoodLevelChangeEvent(EntityHuman entity, int level) {
+    public static FoodLevelChangeEvent callFoodLevelChangeEvent(PlayerEntity entity, int level) {
         return callFoodLevelChangeEvent(entity, level, null);
     }
 
-    public static FoodLevelChangeEvent callFoodLevelChangeEvent(EntityHuman entity, int level, ItemStack item) {
+    public static FoodLevelChangeEvent callFoodLevelChangeEvent(PlayerEntity entity, int level, ItemStack item) {
         FoodLevelChangeEvent event = new FoodLevelChangeEvent(entity.getBukkitEntity(), level, (item == null) ? null : CraftItemStack.asBukkitCopy(item));
         entity.getBukkitEntity().getServer().getPluginManager().callEvent(event);
         return event;
@@ -1038,11 +991,11 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static EntityChangeBlockEvent callEntityChangeBlockEvent(Entity entity, BlockPosition position, IBlockData newBlock) {
+    public static EntityChangeBlockEvent callEntityChangeBlockEvent(Entity entity, BlockPos position, net.minecraft.block.BlockState newBlock) {
         return callEntityChangeBlockEvent(entity, position, newBlock, false);
     }
 
-    public static EntityChangeBlockEvent callEntityChangeBlockEvent(Entity entity, BlockPosition position, IBlockData newBlock, boolean cancelled) {
+    public static EntityChangeBlockEvent callEntityChangeBlockEvent(Entity entity, BlockPos position, net.minecraft.block.BlockState newBlock, boolean cancelled) {
         Block block = entity.world.getWorld().getBlockAt(position.getX(), position.getY(), position.getZ());
 
         EntityChangeBlockEvent event = new EntityChangeBlockEvent(entity.getBukkitEntity(), block, CraftBlockData.fromData(newBlock));
@@ -1152,7 +1105,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static BlockRedstoneEvent callRedstoneChange(World world, BlockPosition pos, int oldCurrent, int newCurrent) {
+    public static BlockRedstoneEvent callRedstoneChange(World world, BlockPos pos, int oldCurrent, int newCurrent) {
         BlockRedstoneEvent event = new BlockRedstoneEvent(world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), oldCurrent, newCurrent);
         world.getServer().getPluginManager().callEvent(event);
         return event;
@@ -1170,8 +1123,8 @@ public class CraftEventFactory {
         Bukkit.getPluginManager().callEvent(event);
     }
 
-    public static BlockIgniteEvent callBlockIgniteEvent(World world, BlockPosition block, BlockPosition source) {
-        org.bukkit.World bukkitWorld = world.getWorld();
+    public static BlockIgniteEvent callBlockIgniteEvent(World world, BlockPos block, BlockPos source) {
+        org.bukkit.World bukkitWorld = world.getCraftWorld();
         Block igniter = bukkitWorld.getBlockAt(source.getX(), source.getY(), source.getZ());
         IgniteCause cause;
         switch (igniter.getType()) {
@@ -1191,8 +1144,8 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static BlockIgniteEvent callBlockIgniteEvent(World world, BlockPosition pos, Entity igniter) {
-        org.bukkit.World bukkitWorld = world.getWorld();
+    public static BlockIgniteEvent callBlockIgniteEvent(World world, BlockPos pos, Entity igniter) {
+        org.bukkit.World bukkitWorld = world.getCraftWorld();
         org.bukkit.entity.Entity bukkitIgniter = igniter.getBukkitEntity();
         IgniteCause cause;
         switch (bukkitIgniter.getType()) {
@@ -1402,7 +1355,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static EntityBreedEvent callEntityBreedEvent(EntityLiving child, EntityLiving mother, EntityLiving father, EntityLiving breeder, ItemStack bredWith, int experience) {
+    public static EntityBreedEvent callEntityBreedEvent(net.minecraft.entity.LivingEntity child, net.minecraft.entity.LivingEntity mother, net.minecraft.entity.LivingEntity father, net.minecraft.entity.LivingEntity breeder, ItemStack bredWith, int experience) {
         org.bukkit.entity.LivingEntity breederEntity = (LivingEntity) (breeder == null ? null : breeder.getBukkitEntity());
         CraftItemStack bredWithStack = bredWith == null ? null : CraftItemStack.asCraftMirror(bredWith).clone();
 
@@ -1421,7 +1374,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static boolean handleBlockFormEvent(World world, BlockPosition pos, IBlockData block) {
+    public static boolean handleBlockFormEvent(World world, BlockPos pos, net.minecraft.block.BlockState block) {
         return handleBlockFormEvent(world, pos, block, 3);
     }
 
@@ -1458,15 +1411,15 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static boolean handleBlockFormEvent(World world, BlockPosition pos, IBlockData block, @Nullable Entity entity) {
+    public static boolean handleBlockFormEvent(World world, BlockPos pos, net.minecraft.block.BlockState block, @Nullable Entity entity) {
         return handleBlockFormEvent(world, pos, block, 3, entity);
     }
 
-    public static boolean handleBlockFormEvent(World world, BlockPosition pos, IBlockData block, int flag) {
+    public static boolean handleBlockFormEvent(World world, BlockPos pos, net.minecraft.block.BlockState block, int flag) {
         return handleBlockFormEvent(world, pos, block, flag, null);
     }
 
-    public static boolean handleBlockFormEvent(World world, BlockPosition pos, IBlockData block, int flag, @Nullable Entity entity) {
+    public static boolean handleBlockFormEvent(World world, BlockPos pos, net.minecraft.block.BlockState block, int flag, @Nullable Entity entity) {
         CraftBlockState blockState = CraftBlockState.getBlockState(world, pos, flag);
         blockState.setData(block);
 

@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.world.WorldAccess;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -48,7 +49,7 @@ public class CraftBlockState implements org.bukkit.block.BlockState {
         position = BlockPos.ZERO;
     }
 
-    public static CraftBlockState getBlockState(ServerWorldAccess world, BlockPos pos) {
+    public static CraftBlockState getBlockState(WorldAccess world, BlockPos pos) {
         return new CraftBlockState(CraftBlock.at(world, pos));
     }
 

@@ -8,6 +8,8 @@ import net.minecraft.server.EntityVillager;
 import net.minecraft.server.IBlockData;
 import net.minecraft.server.IRegistry;
 import net.minecraft.server.VillagerProfession;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.village.VillagerProfession;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftServer;
@@ -106,7 +108,7 @@ public class CraftVillager extends CraftAbstractVillager implements Villager {
     }
 
     public static Profession nmsToBukkitProfession(VillagerProfession nms) {
-        return Profession.valueOf(IRegistry.VILLAGER_PROFESSION.getKey(nms).getKey().toUpperCase(Locale.ROOT));
+        return Profession.valueOf(Registry.VILLAGER_PROFESSION.getKey(nms).getKey().toUpperCase(Locale.ROOT));
     }
 
     public static VillagerProfession bukkitToNmsProfession(Profession bukkit) {

@@ -53,7 +53,7 @@ public final class CraftItemStack extends ItemStack {
     /**
      * Copies the NMS stack to return as a strictly-Bukkit stack
      */
-    public static ItemStack asBukkitCopy(net.minecraft.server.ItemStack original) {
+    public static ItemStack asBukkitCopy(net.minecraft.item.ItemStack original) {
         if (original.isEmpty()) {
             return new ItemStack(Material.AIR);
         }
@@ -64,7 +64,7 @@ public final class CraftItemStack extends ItemStack {
         return stack;
     }
 
-    public static CraftItemStack asCraftMirror(net.minecraft.server.ItemStack original) {
+    public static CraftItemStack asCraftMirror(net.minecraft.item.ItemStack original) {
         return new CraftItemStack((original == null || original.isEmpty()) ? null : original);
     }
 
@@ -602,7 +602,7 @@ public final class CraftItemStack extends ItemStack {
         return hasItemMeta(handle) && !CraftItemFactory.instance().equals(getItemMeta(), null);
     }
 
-    static boolean hasItemMeta(net.minecraft.server.ItemStack item) {
+    static boolean hasItemMeta(net.minecraft.item.ItemStack item) {
         return !(item == null || item.getTag() == null || item.getTag().isEmpty());
     }
 }
