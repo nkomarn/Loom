@@ -18,13 +18,28 @@ else
   }
 fi
 
-# 1=${1%"/"} # remove trailing '/' if present
-
 src="src/main/java/net/minecraft/"
-minecraftSource="$1/net/minecraft/"
+minecraftSource="${1%/}/net/minecraft/"
+fullSource=false
+
+if [ $# -ge 2 ]
+then
+    fullSource=$2
+    if [ "$fullSource" = true ]
+    then
+        echo "Copying full minecraft source."
+    else
+        echo "Only copying patched files."
+    fi
+fi
 
 rm -rf "$src" # remove existing nms source from /src/main/java
 mkdir -p "$src" # make sure the nms folder exists
+
+if [ "$fullSource" = true ]
+then
+    cp -a "$minecraftSource." "$src"
+fi
 
 for patchFile in $(/bin/find "nms-patches" -name '*.patch')
 do
@@ -39,8 +54,7 @@ do
     cp "$minecraftSource$file" "$src$file"
     patch -d "src/main/java/" "net/minecraft/$file" < "$patchFile" > /dev/null
   else
-    echo "Unable to apply $patchFileClean."
-    echo "  $file not found."
+    echo "Unable to apply $patchFileClean: $file not found"
   fi
 
 done

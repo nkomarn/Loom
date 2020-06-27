@@ -19,7 +19,7 @@ else
 fi
 
 src="src/main/java/net/minecraft/"
-nms="$1/net/minecraft/"
+nms="${1%/}/net/minecraft/"
 show_diff_msg=true
 
 if [ $# -ge 2 ]
