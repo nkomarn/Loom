@@ -1,0 +1,72 @@
+--- a/net/minecraft/block/ConcretePowderBlock.java
++++ b/net/minecraft/block/ConcretePowderBlock.java
+@@ -8,6 +8,10 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.block.CraftBlockState;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockFormEvent;
+ 
+ public class ConcretePowderBlock extends FallingBlock {
+ 
+@@ -20,9 +24,8 @@
+ 
+     public void onLanding(World world, BlockPos blockpos, BlockState blockstate, BlockState blockstate1, FallingBlockEntity fallingblockentity) {
+         if (shouldHarden(world, blockpos, blockstate1)) {
+-            world.setBlockState(blockpos, this.hardenedState, 3);
++            CraftEventFactory.handleBlockFormEvent(world, blockpos, this.hardenedState, 3); // CraftBukkit
+         }
+-
+     }
+ 
+     public BlockState getPlacementState(ItemPlacementContext itemplacementcontext) {
+@@ -30,7 +33,24 @@
+         BlockPos blockpos = itemplacementcontext.getBlockPos();
+         BlockState blockstate = world.getBlockState(blockpos);
+ 
+-        return shouldHarden(world, blockpos, blockstate) ? this.hardenedState : super.getPlacementState(itemplacementcontext);
++        // CraftBukkit start
++        if (!shouldHarden(world, blockpos, blockstate)) {
++            return super.getPlacementState(itemplacementcontext);
++        }
++
++        // TODO: An event factory call for methods like this
++        CraftBlockState blockState = CraftBlockState.getBlockState(world, blockpos);
++        blockState.setData(this.hardenedState);
++
++        BlockFormEvent event = new BlockFormEvent(blockState.getBlock(), blockState);
++        world.getServer().getPluginManager().callEvent(event);
++
++        if (!event.isCancelled()) {
++            return blockState.getHandle();
++        }
++
++        return super.getPlacementState(itemplacementcontext);
++        // CraftBukkit end
+     }
+ 
+     private static boolean shouldHarden(BlockView blockview, BlockPos blockpos, BlockState blockstate) {
+@@ -65,6 +85,20 @@
+     }
+ 
+     public BlockState getStateForNeighborUpdate(BlockState blockstate, Direction direction, BlockState blockstate1, WorldAccess worldaccess, BlockPos blockpos, BlockPos blockpos1) {
+-        return hardensOnAnySide(worldaccess, blockpos) ? this.hardenedState : super.getStateForNeighborUpdate(blockstate, direction, blockstate1, worldaccess, blockpos, blockpos1);
++        // CraftBukkit start
++        if (hardensOnAnySide(worldaccess, blockpos)) {
++            CraftBlockState blockState = CraftBlockState.getBlockState(worldaccess, blockpos);
++            blockState.setData(this.hardenedState);
++
++            BlockFormEvent event = new BlockFormEvent(blockState.getBlock(), blockState);
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (!event.isCancelled()) {
++                return blockState.getHandle();
++            }
++        }
++
++        return super.getStateForNeighborUpdate(blockstate, direction, blockstate1, worldaccess, blockpos, blockpos1);
++        // CraftBukkit end
+     }
+ }

@@ -1,0 +1,22 @@
+--- a/net/minecraft/block/DispenserBlock.java
++++ b/net/minecraft/block/DispenserBlock.java
+@@ -42,9 +42,10 @@
+ 
+     public static final DirectionProperty FACING = FacingBlock.FACING;
+     public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
+-    private static final Map<Item, DispenserBehavior> BEHAVIORS = (Map) Util.make(new Object2ObjectOpenHashMap<>(), (object2objectopenhashmap) -> {
++    public static final Map<Item, DispenserBehavior> BEHAVIORS = Util.make((new Object2ObjectOpenHashMap()), (object2objectopenhashmap) -> { // CraftBukkit - decompile error
+         object2objectopenhashmap.defaultReturnValue(new ItemDispenserBehavior());
+     });
++    public static boolean eventFired = false; // CraftBukkit
+ 
+     public static void registerBehavior(ItemConvertible itemconvertible, DispenserBehavior dispenserbehavior) {
+         DispenserBlock.BEHAVIORS.put(itemconvertible.asItem(), dispenserbehavior);
+@@ -86,6 +87,7 @@
+             DispenserBehavior dispenserbehavior = this.getBehaviorForItem(itemstack);
+ 
+             if (dispenserbehavior != DispenserBehavior.NOOP) {
++                eventFired = false; // CraftBukkit - reset event status
+                 dispenserblockentity.setStack(i, dispenserbehavior.dispense(blockpointerimpl, itemstack));
+             }
+ 

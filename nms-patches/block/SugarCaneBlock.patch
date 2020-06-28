@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/SugarCaneBlock.java
++++ b/net/minecraft/block/SugarCaneBlock.java
+@@ -14,6 +14,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class SugarCaneBlock extends Block {
+ 
+@@ -48,7 +49,7 @@
+                 int j = (Integer) blockstate.get(SugarCaneBlock.AGE);
+ 
+                 if (j == 15) {
+-                    serverworld.setBlockState(blockpos.up(), this.getDefaultState());
++                    CraftEventFactory.handleBlockGrowEvent(serverworld, blockpos.up(), this.getDefaultState()); // CraftBukkit
+                     serverworld.setBlockState(blockpos, (BlockState) blockstate.with(SugarCaneBlock.AGE, 0), 4);
+                 } else {
+                     serverworld.setBlockState(blockpos, (BlockState) blockstate.with(SugarCaneBlock.AGE, j + 1), 4);

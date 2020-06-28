@@ -1,0 +1,32 @@
+--- a/net/minecraft/block/LeverBlock.java
++++ b/net/minecraft/block/LeverBlock.java
+@@ -17,6 +17,8 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class LeverBlock extends WallMountedBlock {
+ 
+@@ -80,6 +82,20 @@
+ 
+             return ActionResult.SUCCESS;
+         } else {
++            // CraftBukkit start - Interact Lever
++            boolean powered = blockstate.get(POWERED); // Old powered state
++            org.bukkit.block.Block block = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++            int old = (powered) ? 15 : 0;
++            int current = (!powered) ? 15 : 0;
++
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, old, current);
++            Bukkit.getPluginManager().callEvent(eventRedstone);
++
++            if ((eventRedstone.getNewCurrent() > 0) == (powered)) {
++                return ActionResult.SUCCESS;
++            }
++            // CraftBukkit end
++
+             blockstate1 = this.method_21846(blockstate, world, blockpos);
+             float f = (Boolean) blockstate1.get(LeverBlock.POWERED) ? 0.6F : 0.5F;
+ 

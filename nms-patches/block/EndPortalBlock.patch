@@ -1,0 +1,39 @@
+--- a/net/minecraft/block/EndPortalBlock.java
++++ b/net/minecraft/block/EndPortalBlock.java
+@@ -3,7 +3,9 @@
+ import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.block.entity.EndPortalBlockEntity;
+ import net.minecraft.entity.Entity;
++import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.fluid.Fluid;
++import net.minecraft.server.network.ServerPlayerEntity;
+ import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.util.function.BooleanBiFunction;
+ import net.minecraft.util.math.BlockPos;
+@@ -12,6 +14,10 @@
+ import net.minecraft.util.shape.VoxelShapes;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.Location;
++import org.bukkit.event.entity.EntityPortalEnterEvent;
++import org.bukkit.event.player.PlayerTeleportEvent;
+ 
+ public class EndPortalBlock extends BlockWithEntity {
+ 
+@@ -38,6 +44,15 @@
+                 return;
+             }
+ 
++            // CraftBukkit start - Entity in portal
++            EntityPortalEnterEvent event = new EntityPortalEnterEvent(entity.getBukkitEntity(), new Location(world.getCraftWorld(), blockpos.getX(), blockpos.getY(), blockpos.getZ()));
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (entity instanceof ServerPlayerEntity) {
++                ((ServerPlayerEntity) entity).changeDimension(serverworld, PlayerTeleportEvent.TeleportCause.END_PORTAL);
++                return;
++            }
++            // CraftBukkit end
+             entity.changeDimension(serverworld);
+         }
+ 

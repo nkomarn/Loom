@@ -1,0 +1,50 @@
+--- a/net/minecraft/block/RedstoneTorchBlock.java
++++ b/net/minecraft/block/RedstoneTorchBlock.java
+@@ -14,6 +14,8 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class RedstoneTorchBlock extends TorchBlock {
+ 
+@@ -67,8 +69,22 @@
+             list.remove(0);
+         }
+ 
++        // CraftBukkit start
++        org.bukkit.block.Block block = serverworld.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++        int oldCurrent = blockstate.get(LIT) ? 15 : 0;
++        BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, oldCurrent);
++        // CraftBukkit end
+         if ((Boolean) blockstate.get(RedstoneTorchBlock.LIT)) {
+             if (flag) {
++                // CraftBukkit start
++                if (oldCurrent != 0) {
++                    event.setNewCurrent(0);
++                    Bukkit.getPluginManager().callEvent(event);
++                    if (event.getNewCurrent() != 0) {
++                        return;
++                    }
++                }
++                // CraftBukkit end
+                 serverworld.setBlockState(blockpos, (BlockState) blockstate.with(RedstoneTorchBlock.LIT, false), 3);
+                 if (isBurnedOut(serverworld, blockpos, true)) {
+                     serverworld.syncWorldEvent(1502, blockpos, 0);
+@@ -76,6 +92,15 @@
+                 }
+             }
+         } else if (!flag && !isBurnedOut(serverworld, blockpos, false)) {
++            // CraftBukkit start
++            if (oldCurrent != 15) {
++                event.setNewCurrent(15);
++                Bukkit.getPluginManager().callEvent(event);
++                if (event.getNewCurrent() != 15) {
++                    return;
++                }
++            }
++            // CraftBukkit end
+             serverworld.setBlockState(blockpos, (BlockState) blockstate.with(RedstoneTorchBlock.LIT, true), 3);
+         }
+ 

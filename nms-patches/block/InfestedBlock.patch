@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/InfestedBlock.java
++++ b/net/minecraft/block/InfestedBlock.java
+@@ -11,6 +11,7 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
++import org.bukkit.event.entity.CreatureSpawnEvent;
+ 
+ public class InfestedBlock extends Block {
+ 
+@@ -35,7 +36,7 @@
+         SilverfishEntity silverfishentity = (SilverfishEntity) EntityType.SILVERFISH.create(world);
+ 
+         silverfishentity.refreshPositionAndAngles((double) blockpos.getX() + 0.5D, (double) blockpos.getY(), (double) blockpos.getZ() + 0.5D, 0.0F, 0.0F);
+-        world.spawnEntity(silverfishentity);
++        world.spawnEntity(silverfishentity, CreatureSpawnEvent.SpawnReason.SILVERFISH_BLOCK); // CraftBukkit - add SpawnReason
+         silverfishentity.playSpawnEffects();
+     }
+ 

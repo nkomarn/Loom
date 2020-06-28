@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/AbstractPlantStemBlock.java
++++ b/net/minecraft/block/AbstractPlantStemBlock.java
+@@ -12,6 +12,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public abstract class AbstractPlantStemBlock extends AbstractPlantPartBlock implements Fertilizable {
+ 
+@@ -44,7 +45,7 @@
+             BlockPos blockpos1 = blockpos.offset(this.growthDirection);
+ 
+             if (this.chooseStemState(serverworld.getBlockState(blockpos1))) {
+-                serverworld.setBlockState(blockpos1, (BlockState) blockstate.cycle(AbstractPlantStemBlock.AGE));
++                CraftEventFactory.handleBlockSpreadEvent(serverworld, blockpos, blockpos1, blockstate.cycle(AGE)); // CraftBukkit
+             }
+         }
+ 

@@ -1,0 +1,30 @@
+--- a/net/minecraft/block/OreBlock.java
++++ b/net/minecraft/block/OreBlock.java
+@@ -20,6 +20,7 @@
+ 
+     public void onStacksDropped(BlockState blockstate, World world, BlockPos blockpos, ItemStack itemstack) {
+         super.onStacksDropped(blockstate, world, blockpos, itemstack);
++        /* CraftBukkit start - Delegated to getExpDrop
+         if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemstack) == 0) {
+             int i = this.getExperienceWhenMined(world.random);
+ 
+@@ -27,6 +28,19 @@
+                 this.dropExperience(world, blockpos, i);
+             }
+         }
++        */
++    }
++
++    @Override
++    public int getExpDrop(BlockState blockstate, World world, BlockPos blockpos, ItemStack itemstack) {
++        if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemstack) == 0) {
++            int i = this.getExperienceWhenMined(world.random);
+ 
++            if (i > 0) {
++                return i;
++            }
++        }
++        return 0;
++        // CraftBukkit end
+     }
+ }

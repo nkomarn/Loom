@@ -1,0 +1,106 @@
+--- a/net/minecraft/block/RedstoneOreBlock.java
++++ b/net/minecraft/block/RedstoneOreBlock.java
+@@ -18,6 +18,11 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.entity.EntityInteractEvent;
++import org.bukkit.event.player.PlayerInteractEvent;
+ 
+ public class RedstoneOreBlock extends Block {
+ 
+@@ -29,20 +34,36 @@
+     }
+ 
+     public void onBlockBreakStart(BlockState blockstate, World world, BlockPos blockpos, PlayerEntity playerentity) {
+-        light(blockstate, world, blockpos);
++        light(blockstate, world, blockpos, playerentity); // CraftBukkit - add entityhuman
+         super.onBlockBreakStart(blockstate, world, blockpos, playerentity);
+     }
+ 
+     public void onSteppedOn(World world, BlockPos blockpos, Entity entity) {
+-        light(world.getBlockState(blockpos), world, blockpos);
+-        super.onSteppedOn(world, blockpos, entity);
++        // CraftBukkit start
++        //light(world.getBlockState(blockpos), world, blockpos);
++        //super.onSteppedOn(world, blockpos, entity);
++        if (entity instanceof PlayerEntity) {
++            PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent((PlayerEntity) entity, Action.PHYSICAL, blockpos, null, null, null);
++            if (!event.isCancelled()) {
++                light(world.getBlockState(blockpos), world, blockpos, entity); // add entity
++                super.onSteppedOn(world, blockpos, entity);
++            }
++        } else {
++            EntityInteractEvent event = new EntityInteractEvent(entity.getBukkitEntity(), world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()));
++            Bukkit.getPluginManager().callEvent(event);
++            if (!event.isCancelled()) {
++                light(world.getBlockState(blockpos), world, blockpos, entity); // add entity
++                super.onSteppedOn(world, blockpos, entity);
++            }
++        }
++        // CraftBukkit end
+     }
+ 
+     public ActionResult onUse(BlockState blockstate, World world, BlockPos blockpos, PlayerEntity playerentity, Hand hand, BlockHitResult blockhitresult) {
+         if (world.isClient) {
+             spawnParticles(world, blockpos);
+         } else {
+-            light(blockstate, world, blockpos);
++            light(blockstate, world, blockpos, playerentity); // CraftBukkit - add entityhuman
+         }
+ 
+         ItemStack itemstack = playerentity.getStackInHand(hand);
+@@ -50,9 +71,14 @@
+         return itemstack.getItem() instanceof BlockItem && (new ItemPlacementContext(playerentity, hand, itemstack, blockhitresult)).canPlace() ? ActionResult.PASS : ActionResult.SUCCESS;
+     }
+ 
+-    private static void light(BlockState blockstate, World world, BlockPos blockpos) {
++    private static void light(BlockState blockstate, World world, BlockPos blockpos, Entity entity) { // CraftBukkit - add Entity
+         spawnParticles(world, blockpos);
+         if (!(Boolean) blockstate.get(RedstoneOreBlock.LIT)) {
++            // CraftBukkit start
++            if (CraftEventFactory.callEntityChangeBlockEvent(entity, blockpos, blockstate.with(LIT, true)).isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
+             world.setBlockState(blockpos, (BlockState) blockstate.with(RedstoneOreBlock.LIT, true), 3);
+         }
+ 
+@@ -64,6 +90,11 @@
+ 
+     public void randomTick(BlockState blockstate, ServerWorld serverworld, BlockPos blockpos, Random random) {
+         if ((Boolean) blockstate.get(RedstoneOreBlock.LIT)) {
++            // CraftBukkit start
++            if (CraftEventFactory.callBlockFadeEvent(serverworld, blockpos, blockstate.with(LIT, false)).isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
+             serverworld.setBlockState(blockpos, (BlockState) blockstate.with(RedstoneOreBlock.LIT, false), 3);
+         }
+ 
+@@ -71,12 +102,22 @@
+ 
+     public void onStacksDropped(BlockState blockstate, World world, BlockPos blockpos, ItemStack itemstack) {
+         super.onStacksDropped(blockstate, world, blockpos, itemstack);
++        /* CraftBukkit start - Delegated to getExpDrop
+         if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemstack) == 0) {
+             int i = 1 + world.random.nextInt(5);
+ 
+             this.dropExperience(world, blockpos, i);
+         }
++        */
++    }
+ 
++    @Override
++    public int getExpDrop(BlockState blockstate, World world, BlockPos blockpos, ItemStack itemstack) {
++        if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemstack) == 0) {
++            return 1 + world.random.nextInt(5);
++        }
++        return 0;
++        // CraftBukkit end
+     }
+ 
+     private static void spawnParticles(World world, BlockPos blockpos) {

@@ -1,0 +1,23 @@
+--- a/net/minecraft/block/TntBlock.java
++++ b/net/minecraft/block/TntBlock.java
+@@ -20,6 +20,7 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class TntBlock extends Block {
+ 
+@@ -107,7 +108,11 @@
+ 
+             if (projectileentity.isOnFire()) {
+                 BlockPos blockpos = blockhitresult.getBlockPos();
+-
++                // CraftBukkit start
++                if (CraftEventFactory.callEntityChangeBlockEvent(projectileentity, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) {
++                    return;
++                }
++                // CraftBukkit end
+                 primeTnt(world, blockpos, entity instanceof LivingEntity ? (LivingEntity) entity : null);
+                 world.removeBlock(blockpos, false);
+             }

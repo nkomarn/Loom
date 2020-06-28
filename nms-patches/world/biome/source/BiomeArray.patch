@@ -1,0 +1,25 @@
+--- a/net/minecraft/world/biome/source/BiomeArray.java
++++ b/net/minecraft/world/biome/source/BiomeArray.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.world.biome.source;
+ 
+ import javax.annotation.Nullable;
++
+ import net.minecraft.network.PacketByteBuf;
+ import net.minecraft.util.math.ChunkPos;
+ import net.minecraft.util.math.MathHelper;
+@@ -123,4 +124,14 @@
+ 
+         return this.data[i1 << BiomeArray.HORIZONTAL_SECTION_COUNT + BiomeArray.HORIZONTAL_SECTION_COUNT | j1 << BiomeArray.HORIZONTAL_SECTION_COUNT | l];
+     }
++
++    // CraftBukkit start
++    public void setBiome(int i, int j, int k, Biome biome) {
++        int l = i & HORIZONTAL_BIT_MASK;
++        int i1 = MathHelper.clamp(j, 0, VERTICAL_BIT_MASK);
++        int j1 = k & HORIZONTAL_BIT_MASK;
++
++        this.data[i1 << HORIZONTAL_SECTION_COUNT + HORIZONTAL_SECTION_COUNT | j1 << HORIZONTAL_SECTION_COUNT | l] = biome;
++    }
++    // CraftBukkit end
+ }

@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/GrassBlock.java
++++ b/net/minecraft/block/GrassBlock.java
+@@ -9,6 +9,7 @@
+ import net.minecraft.world.gen.feature.ConfiguredFeature;
+ import net.minecraft.world.gen.feature.DecoratedFeatureConfig;
+ import net.minecraft.world.gen.feature.FlowerFeature;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class GrassBlock extends SpreadableBlock implements Fertilizable {
+ 
+@@ -67,7 +68,7 @@
+                             }
+ 
+                             if (blockstate3.canPlaceAt(serverworld, blockpos2)) {
+-                                serverworld.setBlockState(blockpos2, blockstate3, 3);
++                                CraftEventFactory.handleBlockGrowEvent(serverworld, blockpos2, blockstate3, 3); // CraftBukkit
+                             }
+                         }
+                     }

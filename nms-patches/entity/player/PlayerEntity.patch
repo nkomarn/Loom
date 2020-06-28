@@ -1,10 +1,142 @@
 --- a/net/minecraft/entity/player/PlayerEntity.java
 +++ b/net/minecraft/entity/player/PlayerEntity.java
-@@ -77,6 +77,7 @@
- import net.minecraft.screen.PlayerScreenHandler;
- import net.minecraft.screen.ScreenHandler;
- import net.minecraft.server.network.ServerPlayerEntity;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.sound.SoundCategory;
- import net.minecraft.sound.SoundEvent;
- import net.minecraft.sound.SoundEvents;
+@@ -5,6 +5,7 @@
+ import com.google.common.collect.Lists;
+ import com.mojang.authlib.GameProfile;
+ import com.mojang.datafixers.util.Either;
++
+ import java.nio.charset.StandardCharsets;
+ import java.util.Collection;
+ import java.util.Iterator;
+@@ -15,6 +16,7 @@
+ import java.util.UUID;
+ import java.util.function.Predicate;
+ import javax.annotation.Nullable;
++
+ import net.minecraft.SharedConstants;
+ import net.minecraft.advancement.criterion.Criteria;
+ import net.minecraft.block.BedBlock;
+@@ -106,6 +108,12 @@
+ import net.minecraft.world.GameMode;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.Item;
++import org.bukkit.entity.Player;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
++import org.bukkit.event.entity.EntityRegainHealthEvent;
++import org.bukkit.event.player.PlayerDropItemEvent;
+ 
+ public abstract class PlayerEntity extends LivingEntity {
+ 
+@@ -148,6 +156,16 @@
+     @Nullable
+     public FishingBobberEntity fishHook;
+ 
++    // CraftBukkit start
++    public boolean fauxSleeping;
++    public int oldLevel = -1;
++
++    @Override
++    public CraftHumanEntity getBukkitEntity() {
++        return (CraftHumanEntity) super.getBukkitEntity();
++    }
++    // CraftBukkit end
++
+     public PlayerEntity(World world, BlockPos blockpos, GameProfile gameprofile) {
+         super(EntityType.PLAYER, world);
+         this.selectedItem = ItemStack.EMPTY;
+@@ -283,7 +301,7 @@
+         ItemStack itemstack = this.getEquippedStack(EquipmentSlot.HEAD);
+ 
+         if (itemstack.getItem() == Items.TURTLE_HELMET && !this.isSubmergedIn(FluidTags.WATER)) {
+-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 200, 0, false, false, true));
++            this.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 200, 0, false, false, true), EntityPotionEffectEvent.Cause.TURTLE_HELMET); // CraftBukkit
+         }
+ 
+     }
+@@ -437,7 +455,8 @@
+ 
+         if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {
+             if (this.getHealth() < this.getMaxHealth() && this.age % 20 == 0) {
+-                this.heal(1.0F);
++                // CraftBukkit - added regain reason of "REGEN" for filtering purposes.
++                this.heal(1.0F, EntityRegainHealthEvent.RegainReason.REGEN);
+             }
+ 
+             if (this.hungerManager.isNotFull() && this.age % 10 == 0) {
+@@ -618,6 +637,30 @@
+                 itementity.setVelocity((double) (-f3 * f2 * 0.3F) + Math.cos((double) f5) * (double) f6, (double) (-f1 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double) (f4 * f2 * 0.3F) + Math.sin((double) f5) * (double) f6);
+             }
+ 
++            // CraftBukkit start - fire PlayerDropItemEvent
++            Player player = (Player) this.getBukkitEntity();
++            Item drop = (Item) itementity.getBukkitEntity();
++
++            PlayerDropItemEvent event = new PlayerDropItemEvent(player, drop);
++            this.world.getServer().getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                org.bukkit.inventory.ItemStack cur = player.getInventory().getItemInHand();
++                if (flag1 && (cur == null || cur.getAmount() == 0)) {
++                    // The complete stack was dropped
++                    player.getInventory().setItemInHand(drop.getItemStack());
++                } else if (flag1 && cur.isSimilar(drop.getItemStack()) && cur.getAmount() < cur.getMaxStackSize() && drop.getItemStack().getAmount() == 1) {
++                    // Only one item is dropped
++                    cur.setAmount(cur.getAmount() + 1);
++                    player.getInventory().setItemInHand(cur);
++                } else {
++                    // Fallback
++                    player.getInventory().addItem(drop.getItemStack());
++                }
++                return null;
++            }
++            // CraftBukkit end
++
+             return itementity;
+         }
+     }
+@@ -740,16 +783,17 @@
+         if (this.isInvulnerableTo(damagesource)) {
+             return false;
+         } else if (this.abilities.invulnerable && !damagesource.isOutOfWorld()) {
++            this.forceExplosionKnockback = true; // SPIGOT-5258 - Make invulnerable players get knockback from explosions
+             return false;
+         } else {
+             this.despawnCounter = 0;
+             if (this.isDead()) {
+                 return false;
+             } else {
+-                this.dropShoulderEntities();
++                // this.dropShoulderEntities(); // CraftBukkit - moved down
+                 if (damagesource.isScaledWithDifficulty()) {
+                     if (this.world.getDifficulty() == Difficulty.PEACEFUL) {
+-                        f = 0.0F;
++                        return false; // CraftBukkit - f = 0.0f -> return false
+                     }
+ 
+                     if (this.world.getDifficulty() == Difficulty.EASY) {
+@@ -761,7 +805,13 @@
+                     }
+                 }
+ 
+-                return f == 0.0F ? false : super.damage(damagesource, f);
++                // CraftBukkit start - Don't filter out 0 damage
++                boolean damaged = super.damage(damagesource, f);
++                if (damaged) {
++                    this.dropShoulderEntities();
++                }
++                return damaged;
++                // CraftBukkit end
+             }
+         }
+     }
+@@ -1612,7 +1662,7 @@
+     }
+ 
+     public Iterable<ItemStack> getItemsHand() {
+-        return Lists.newArrayList((Object[])(this.getMainHandStack(), this.getOffHandStack()));
++        return Lists.newArrayList((Object[]) (this.getMainHandStack(), this.getOffHandStack()));
+     }
+ 
+     public Iterable<ItemStack> getArmorItems() {

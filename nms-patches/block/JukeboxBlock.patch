@@ -1,0 +1,17 @@
+--- a/net/minecraft/block/JukeboxBlock.java
++++ b/net/minecraft/block/JukeboxBlock.java
+@@ -59,7 +59,13 @@
+         BlockEntity blockentity = worldaccess.getBlockEntity(blockpos);
+ 
+         if (blockentity instanceof JukeboxBlockEntity) {
+-            ((JukeboxBlockEntity) blockentity).setRecord(itemstack.copy());
++            // CraftBukkit start - There can only be one
++            itemstack = itemstack.copy();
++            if (!itemstack.isEmpty()) {
++                itemstack.setCount(1);
++            }
++            ((JukeboxBlockEntity) blockentity).setRecord(itemstack);
++            // CraftBukkit end
+             worldaccess.setBlockState(blockpos, (BlockState) blockstate.with(JukeboxBlock.HAS_RECORD, true), 2);
+         }
+     }

@@ -1,0 +1,48 @@
+--- a/net/minecraft/block/Block.java
++++ b/net/minecraft/block/Block.java
+@@ -4,10 +4,12 @@
+ import com.google.common.cache.CacheLoader;
+ import com.google.common.cache.LoadingCache;
+ import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
++
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
++
+ import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.ExperienceOrbEntity;
+@@ -257,11 +259,17 @@
+             ItemEntity itementity = new ItemEntity(world, (double) blockpos.getX() + d0, (double) blockpos.getY() + d1, (double) blockpos.getZ() + d2, itemstack);
+ 
+             itementity.setToDefaultPickupDelay();
+-            world.spawnEntity(itementity);
++            // CraftBukkit start
++            if (world.captureDrops != null) {
++                world.captureDrops.add(itementity);
++            } else {
++                world.spawnEntity(itementity);
++            }
++            // CraftBukkit end
+         }
+     }
+ 
+-    protected void dropExperience(World world, BlockPos blockpos, int i) {
++    public void dropExperience(World world, BlockPos blockpos, int i) { // Loom - public access
+         if (!world.isClient && world.getGameRules().getBoolean(GameRules.DO_TILE_DROPS)) {
+             while (i > 0) {
+                 int j = ExperienceOrbEntity.roundToOrbSize(i);
+@@ -382,6 +390,12 @@
+         return this;
+     }
+ 
++    // CraftBukkit start
++    public int getExpDrop(BlockState iblockdata, World world, BlockPos blockposition, ItemStack itemstack) {
++        return 0;
++    }
++    // CraftBukkit end
++
+     public static final class NeighborGroup {
+ 
+         private final BlockState self;

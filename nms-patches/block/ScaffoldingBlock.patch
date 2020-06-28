@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/ScaffoldingBlock.java
++++ b/net/minecraft/block/ScaffoldingBlock.java
+@@ -19,6 +19,7 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class ScaffoldingBlock extends Block implements Waterloggable {
+ 
+@@ -82,7 +83,7 @@
+         int i = calculateDistance(serverworld, blockpos);
+         BlockState blockstate1 = (BlockState) ((BlockState) blockstate.with(ScaffoldingBlock.DISTANCE, i)).with(ScaffoldingBlock.BOTTOM, this.shouldBeBottom(serverworld, blockpos, i));
+ 
+-        if ((Integer) blockstate1.get(ScaffoldingBlock.DISTANCE) == 7) {
++        if (blockstate1.get(DISTANCE) == 7 && !CraftEventFactory.callBlockFadeEvent(serverworld, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) { // CraftBukkit - BlockFadeEvent
+             if ((Integer) blockstate.get(ScaffoldingBlock.DISTANCE) == 7) {
+                 serverworld.spawnEntity(new FallingBlockEntity(serverworld, (double) blockpos.getX() + 0.5D, (double) blockpos.getY(), (double) blockpos.getZ() + 0.5D, (BlockState) blockstate1.with(ScaffoldingBlock.WATERLOGGED, false)));
+             } else {

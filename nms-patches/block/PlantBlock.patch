@@ -1,0 +1,26 @@
+--- a/net/minecraft/block/PlantBlock.java
++++ b/net/minecraft/block/PlantBlock.java
+@@ -6,6 +6,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class PlantBlock extends Block {
+ 
+@@ -18,7 +19,14 @@
+     }
+ 
+     public BlockState getStateForNeighborUpdate(BlockState blockstate, Direction direction, BlockState blockstate1, WorldAccess worldaccess, BlockPos blockpos, BlockPos blockpos1) {
+-        return !blockstate.canPlaceAt(worldaccess, blockpos) ? Blocks.AIR.getDefaultState() : super.getStateForNeighborUpdate(blockstate, direction, blockstate1, worldaccess, blockpos, blockpos1);
++        // CraftBukkit start
++        if (!blockstate.canPlaceAt(worldaccess, blockpos)) {
++            if (!CraftEventFactory.callBlockPhysicsEvent(worldaccess, blockpos).isCancelled()) {
++                return Blocks.AIR.getDefaultState();
++            }
++        }
++        return super.getStateForNeighborUpdate(blockstate, direction, blockstate1, worldaccess, blockpos, blockpos1);
++        // CraftBukkit end
+     }
+ 
+     public boolean canPlaceAt(BlockState blockstate, WorldView worldview, BlockPos blockpos) {

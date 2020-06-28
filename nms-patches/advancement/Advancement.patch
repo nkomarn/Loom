@@ -1,0 +1,26 @@
+--- a/net/minecraft/advancement/Advancement.java
++++ b/net/minecraft/advancement/Advancement.java
+@@ -15,6 +15,7 @@
+ import java.util.function.Consumer;
+ import java.util.function.Function;
+ import javax.annotation.Nullable;
++
+ import net.minecraft.advancement.criterion.CriterionConditions;
+ import net.minecraft.item.ItemConvertible;
+ import net.minecraft.item.ItemStack;
+@@ -30,6 +31,7 @@
+ import net.minecraft.util.Identifier;
+ import net.minecraft.util.JsonHelper;
+ import org.apache.commons.lang3.ArrayUtils;
++import org.bukkit.craftbukkit.advancement.CraftAdvancement;
+ 
+ public class Advancement {
+ 
+@@ -41,6 +43,7 @@
+     private final String[][] requirements;
+     private final Set<Advancement> children = Sets.newLinkedHashSet();
+     private final Text text;
++    public final org.bukkit.advancement.Advancement bukkit = new CraftAdvancement(this); // CraftBukkit
+ 
+     public Advancement(Identifier identifier, @Nullable Advancement advancement, @Nullable AdvancementDisplay advancementdisplay, AdvancementRewards advancementrewards, Map<String, AdvancementCriterion> map, String[][] astring) {
+         this.id = identifier;

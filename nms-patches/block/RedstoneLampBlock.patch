@@ -1,0 +1,34 @@
+--- a/net/minecraft/block/RedstoneLampBlock.java
++++ b/net/minecraft/block/RedstoneLampBlock.java
+@@ -8,6 +8,7 @@
+ import net.minecraft.state.property.BooleanProperty;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class RedstoneLampBlock extends Block {
+ 
+@@ -31,6 +32,11 @@
+                 if (flag1) {
+                     world.getBlockTickScheduler().schedule(blockpos, this, 4);
+                 } else {
++                    // CraftBukkit start
++                    if (CraftEventFactory.callRedstoneChange(world, blockpos, 0, 15).getNewCurrent() != 15) {
++                        return;
++                    }
++                    // CraftBukkit end
+                     world.setBlockState(blockpos, (BlockState) blockstate.cycle(RedstoneLampBlock.LIT), 2);
+                 }
+             }
+@@ -40,6 +46,11 @@
+ 
+     public void scheduledTick(BlockState blockstate, ServerWorld serverworld, BlockPos blockpos, Random random) {
+         if ((Boolean) blockstate.get(RedstoneLampBlock.LIT) && !serverworld.isReceivingRedstonePower(blockpos)) {
++            // CraftBukkit start
++            if (CraftEventFactory.callRedstoneChange(serverworld, blockpos, 15, 0).getNewCurrent() != 0) {
++                return;
++            }
++            // CraftBukkit end
+             serverworld.setBlockState(blockpos, (BlockState) blockstate.cycle(RedstoneLampBlock.LIT), 2);
+         }
+ 

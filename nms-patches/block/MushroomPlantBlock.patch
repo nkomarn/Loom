@@ -1,0 +1,37 @@
+--- a/net/minecraft/block/MushroomPlantBlock.java
++++ b/net/minecraft/block/MushroomPlantBlock.java
+@@ -12,6 +12,8 @@
+ import net.minecraft.world.gen.feature.DefaultBiomeFeatures;
+ import net.minecraft.world.gen.feature.Feature;
+ import net.minecraft.world.gen.feature.HugeMushroomFeatureConfig;
++import org.bukkit.TreeType;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class MushroomPlantBlock extends PlantBlock implements Fertilizable {
+ 
+@@ -53,7 +55,7 @@
+             }
+ 
+             if (serverworld.isAir(blockpos2) && blockstate.canPlaceAt(serverworld, blockpos2)) {
+-                serverworld.setBlockState(blockpos2, blockstate, 2);
++                CraftEventFactory.handleBlockSpreadEvent(serverworld, blockpos, blockpos2, blockstate, 2); // CraftBukkit
+             }
+         }
+ 
+@@ -75,13 +77,15 @@
+         ConfiguredFeature configuredfeature;
+ 
+         if (this == Blocks.BROWN_MUSHROOM) {
+-            configuredfeature = Feature.HUGE_BROWN_MUSHROOM.configure(DefaultBiomeFeatures.HUGE_BROWN_MUSHROOM_CONFIG);
++            SaplingBlock.treeType = TreeType.BROWN_MUSHROOM; // CraftBukkit
++            configuredfeature = Feature.HUGE_BROWN_MUSHROOM.configure(DefaultBiomeFeatures.HUGE_BROWN_MUSHROOM_CONFIG); // TODO skipped some stuff here, see if it matters
+         } else {
+             if (this != Blocks.RED_MUSHROOM) {
+                 serverworld.setBlockState(blockpos, blockstate, 3);
+                 return false;
+             }
+ 
++            SaplingBlock.treeType = TreeType.RED_MUSHROOM; // CraftBukkit
+             configuredfeature = Feature.HUGE_RED_MUSHROOM.configure(DefaultBiomeFeatures.HUGE_RED_MUSHROOM_CONFIG);
+         }
+ 

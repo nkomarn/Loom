@@ -1,0 +1,47 @@
+--- a/net/minecraft/block/ComparatorBlock.java
++++ b/net/minecraft/block/ComparatorBlock.java
+@@ -2,6 +2,7 @@
+ 
+ import java.util.List;
+ import java.util.Random;
++import java.util.function.Predicate;
+ import javax.annotation.Nullable;
+ import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.block.entity.ComparatorBlockEntity;
+@@ -23,6 +24,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.TickPriority;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class ComparatorBlock extends AbstractRedstoneGateBlock implements BlockEntityProvider {
+ 
+@@ -83,7 +85,8 @@
+ 
+     @Nullable
+     private ItemFrameEntity getAttachedItemFrame(World world, Direction direction, BlockPos blockpos) {
+-        List<ItemFrameEntity> list = world.getEntities(ItemFrameEntity.class, new Box((double) blockpos.getX(), (double) blockpos.getY(), (double) blockpos.getZ(), (double) (blockpos.getX() + 1), (double) (blockpos.getY() + 1), (double) (blockpos.getZ() + 1)), (itemframeentity) -> {
++        // CraftBukkit - decompile error
++        List<ItemFrameEntity> list = world.getEntities(ItemFrameEntity.class, new Box(blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockpos.getX() + 1, blockpos.getY() + 1, blockpos.getZ() + 1), (Predicate<ItemFrameEntity>) (itemframeentity) -> {
+             return itemframeentity != null && itemframeentity.getHorizontalFacing() == direction;
+         });
+ 
+@@ -136,8 +139,18 @@
+             boolean flag1 = (Boolean) blockstate.get(ComparatorBlock.POWERED);
+ 
+             if (flag1 && !flag) {
++                // CraftBukkit start
++                if (CraftEventFactory.callRedstoneChange(world, blockpos, 15, 0).getNewCurrent() != 0) {
++                    return;
++                }
++                // CraftBukkit end
+                 world.setBlockState(blockpos, (BlockState) blockstate.with(ComparatorBlock.POWERED, false), 2);
+             } else if (!flag1 && flag) {
++                // CraftBukkit start
++                if (CraftEventFactory.callRedstoneChange(world, blockpos, 0, 15).getNewCurrent() != 15) {
++                    return;
++                }
++                // CraftBukkit end
+                 world.setBlockState(blockpos, (BlockState) blockstate.with(ComparatorBlock.POWERED, true), 2);
+             }
+ 

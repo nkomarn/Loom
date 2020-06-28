@@ -1,0 +1,10 @@
+--- a/net/minecraft/entity/attribute/ClampedEntityAttribute.java
++++ b/net/minecraft/entity/attribute/ClampedEntityAttribute.java
+@@ -21,6 +21,7 @@
+     }
+ 
+     public double clamp(double d0) {
++        if (d0 != d0) return getDefaultValue(); // CraftBukkit
+         d0 = MathHelper.clamp(d0, this.minValue, this.maxValue);
+         return d0;
+     }

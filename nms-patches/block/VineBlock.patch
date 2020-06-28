@@ -1,0 +1,26 @@
+--- a/net/minecraft/block/VineBlock.java
++++ b/net/minecraft/block/VineBlock.java
+@@ -19,6 +19,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class VineBlock extends Block {
+ 
+@@ -177,10 +178,13 @@
+                         BlockPos blockpos3 = blockpos2.offset(direction1);
+                         BlockPos blockpos4 = blockpos2.offset(direction2);
+ 
++                        // CraftBukkit start - Call BlockSpreadEvent
++                        BlockPos source = blockpos;
++
+                         if (flag && shouldConnectTo(serverworld, blockpos3, direction1)) {
+-                            serverworld.setBlockState(blockpos2, (BlockState) this.getDefaultState().with(getFacingProperty(direction1), true), 2);
++                            CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos2, this.getDefaultState().with(getFacingProperty(direction1), true), 2);
+                         } else if (flag1 && shouldConnectTo(serverworld, blockpos4, direction2)) {
+-                            serverworld.setBlockState(blockpos2, (BlockState) this.getDefaultState().with(getFacingProperty(direction2), true), 2);
++                            CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos2, this.getDefaultState().set(getFacingProperty(direction2), true), 2);
+                         } else {
+                             Direction direction3 = direction.getOpposite();
+ 

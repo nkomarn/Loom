@@ -1,0 +1,22 @@
+--- a/net/minecraft/block/IceBlock.java
++++ b/net/minecraft/block/IceBlock.java
+@@ -12,6 +12,7 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.LightType;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class IceBlock extends TransparentBlock {
+ 
+@@ -44,6 +45,11 @@
+     }
+ 
+     protected void melt(BlockState blockstate, World world, BlockPos blockpos) {
++        // CraftBukkit start
++        if (CraftEventFactory.callBlockFadeEvent(world, blockpos, world.getDimension().isUltrawarm() ? Blocks.AIR.getDefaultState() : Blocks.WATER.getDefaultState()).isCancelled()) {
++            return;
++        }
++        // CraftBukkit end
+         if (world.getDimension().isUltrawarm()) {
+             world.removeBlock(blockpos, false);
+         } else {

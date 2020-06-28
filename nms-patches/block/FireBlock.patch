@@ -1,0 +1,142 @@
+--- a/net/minecraft/block/FireBlock.java
++++ b/net/minecraft/block/FireBlock.java
+@@ -4,7 +4,7 @@
+ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+ import java.util.Map;
+ import java.util.Random;
+-import java.util.Map.Entry;
++
+ import net.minecraft.item.ItemPlacementContext;
+ import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.state.StateManager;
+@@ -22,6 +22,11 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.block.CraftBlockState;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockBurnEvent;
++import org.bukkit.event.block.BlockFadeEvent;
+ 
+ public class FireBlock extends AbstractFireBlock {
+ 
+@@ -43,7 +48,18 @@
+     }
+ 
+     public BlockState getStateForNeighborUpdate(BlockState blockstate, Direction direction, BlockState blockstate1, WorldAccess worldaccess, BlockPos blockpos, BlockPos blockpos1) {
+-        return this.canPlaceAt(blockstate, worldaccess, blockpos) ? this.method_24855(worldaccess, blockpos, (Integer) blockstate.get(FireBlock.AGE)) : Blocks.AIR.getDefaultState();
++        // CraftBukkit start
++        if (!this.canPlaceAt(blockstate, worldaccess, blockpos)) {
++            CraftBlockState blockState = CraftBlockState.getBlockState(worldaccess, blockpos);
++            blockState.setData(Blocks.AIR.getDefaultState());
++
++            BlockFadeEvent event = new BlockFadeEvent(blockState.getBlock(), blockState);
++            if (!event.isCancelled()) {
++                return blockState.getHandle();
++            }
++        }
++        return this.method_24855(worldaccess, blockpos, blockstate.get(AGE));
++        // CraftBukkit end
+     }
+ 
+     public VoxelShape getOutlineShape(BlockState blockstate, BlockView blockview, BlockPos blockpos, ShapeContext shapecontext) {
+@@ -110,7 +126,7 @@
+         serverworld.getBlockTickScheduler().schedule(blockpos, this, method_26155(serverworld.random));
+         if (serverworld.getGameRules().getBoolean(GameRules.DO_FIRE_TICK)) {
+             if (!blockstate.canPlaceAt(serverworld, blockpos)) {
+-                serverworld.removeBlock(blockpos, false);
++                extinguishFire(serverworld, blockpos); // CraftBukkit - invalid place location
+             }
+ 
+             BlockState blockstate1 = serverworld.getBlockState(blockpos.down());
+@@ -118,7 +134,7 @@
+             int i = (Integer) blockstate.get(FireBlock.AGE);
+ 
+             if (!flag && serverworld.isRaining() && this.isRainingAround(serverworld, blockpos) && random.nextFloat() < 0.2F + (float) i * 0.03F) {
+-                serverworld.removeBlock(blockpos, false);
++                extinguishFire(serverworld, blockpos); // CraftBukkit - extinguished by rain
+             } else {
+                 int j = Math.min(15, i + random.nextInt(3) / 2);
+ 
+@@ -132,14 +148,14 @@
+                         BlockPos blockpos1 = blockpos.down();
+ 
+                         if (!serverworld.getBlockState(blockpos1).isSideSolidFullSquare(serverworld, blockpos1, Direction.UP) || i > 3) {
+-                            serverworld.removeBlock(blockpos, false);
++                            extinguishFire(serverworld, blockpos); // CraftBukkit
+                         }
+ 
+                         return;
+                     }
+ 
+                     if (i == 15 && random.nextInt(4) == 0 && !this.isFlammable(serverworld.getBlockState(blockpos.down()))) {
+-                        serverworld.removeBlock(blockpos, false);
++                        extinguishFire(serverworld, blockpos); // CraftBukkit
+                         return;
+                     }
+                 }
+@@ -147,12 +163,14 @@
+                 boolean flag1 = serverworld.hasHighHumidity(blockpos);
+                 int k = flag1 ? -50 : 0;
+ 
+-                this.trySpreadingFire(serverworld, blockpos.east(), 300 + k, random, i);
+-                this.trySpreadingFire(serverworld, blockpos.west(), 300 + k, random, i);
+-                this.trySpreadingFire(serverworld, blockpos.down(), 250 + k, random, i);
+-                this.trySpreadingFire(serverworld, blockpos.up(), 250 + k, random, i);
+-                this.trySpreadingFire(serverworld, blockpos.north(), 300 + k, random, i);
+-                this.trySpreadingFire(serverworld, blockpos.south(), 300 + k, random, i);
++                // CraftBukkit start - add source blockposition to burn calls
++                this.trySpreadingFire(serverworld, blockpos.east(), 300 + k, random, i, blockpos);
++                this.trySpreadingFire(serverworld, blockpos.west(), 300 + k, random, i, blockpos);
++                this.trySpreadingFire(serverworld, blockpos.down(), 250 + k, random, i, blockpos);
++                this.trySpreadingFire(serverworld, blockpos.up(), 250 + k, random, i, blockpos);
++                this.trySpreadingFire(serverworld, blockpos.north(), 300 + k, random, i, blockpos);
++                this.trySpreadingFire(serverworld, blockpos.south(), 300 + k, random, i, blockpos);
++                // CraftBukkit end
+                 BlockPos.Mutable blockpos_mutable = new BlockPos.Mutable();
+ 
+                 for (int l = -1; l <= 1; ++l) {
+@@ -178,7 +196,15 @@
+                                     if (i2 > 0 && random.nextInt(k1) <= i2 && (!serverworld.isRaining() || !this.isRainingAround(serverworld, blockpos_mutable))) {
+                                         int j2 = Math.min(15, i + random.nextInt(5) / 4);
+ 
+-                                        serverworld.setBlockState(blockpos_mutable, this.method_24855(serverworld, blockpos_mutable, j2), 3);
++                                        // CraftBukkit start - Call to stop spread of fire
++                                        if (serverworld.getBlockState(blockpos_mutable).getBlock() != Blocks.FIRE) {
++                                            if (CraftEventFactory.callBlockIgniteEvent(serverworld, blockpos_mutable, blockpos).isCancelled()) {
++                                                continue;
++                                            }
++
++                                            CraftEventFactory.handleBlockSpreadEvent(serverworld, blockpos, blockpos_mutable, this.method_24855(serverworld, blockpos_mutable, j2), 3); // CraftBukkit
++                                        }
++                                        // CraftBukkit end
+                                     }
+                                 }
+                             }
+@@ -202,12 +228,24 @@
+         return blockstate.contains(Properties.WATERLOGGED) && (Boolean) blockstate.get(Properties.WATERLOGGED) ? 0 : this.burnChances.getInt(blockstate.getBlock());
+     }
+ 
+-    private void trySpreadingFire(World world, BlockPos blockpos, int i, Random random, int j) {
++    private void trySpreadingFire(World world, BlockPos blockpos, int i, Random random, int j, BlockPos sourcepos) {
+         int k = this.getSpreadChance(world.getBlockState(blockpos));
+ 
+         if (random.nextInt(i) < k) {
+             BlockState blockstate = world.getBlockState(blockpos);
+ 
++            // CraftBukkit start
++            org.bukkit.block.Block theBlock = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++            org.bukkit.block.Block sourceBlock = world.getCraftWorld().getBlockAt(sourcepos.getX(), sourcepos.getY(), sourcepos.getZ());
++
++            BlockBurnEvent event = new BlockBurnEvent(theBlock, sourceBlock);
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
++
+             if (random.nextInt(j + 10) < 5 && !world.hasRain(blockpos)) {
+                 int l = Math.min(j + random.nextInt(5) / 4, 15);
+ 

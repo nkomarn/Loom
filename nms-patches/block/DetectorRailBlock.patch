@@ -1,0 +1,29 @@
+--- a/net/minecraft/block/DetectorRailBlock.java
++++ b/net/minecraft/block/DetectorRailBlock.java
+@@ -25,6 +25,8 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class DetectorRailBlock extends AbstractRailBlock {
+ 
+@@ -73,6 +75,17 @@
+ 
+         BlockState blockstate1;
+ 
++        // CraftBukkit start
++        if (flag != flag1) {
++            org.bukkit.block.Block block = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, flag ? 15 : 0, flag1 ? 15 : 0);
++            Bukkit.getPluginManager().callEvent(eventRedstone);
++
++            flag1 = eventRedstone.getNewCurrent() > 0;
++        }
++        // CraftBukkit end
++
+         if (flag1 && !flag) {
+             blockstate1 = (BlockState) blockstate.with(DetectorRailBlock.POWERED, true);
+             world.setBlockState(blockpos, blockstate1, 3);

@@ -1,0 +1,24 @@
+--- a/net/minecraft/block/PoweredRailBlock.java
++++ b/net/minecraft/block/PoweredRailBlock.java
+@@ -10,6 +10,7 @@
+ import net.minecraft.util.BlockRotation;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class PoweredRailBlock extends AbstractRailBlock {
+ 
+@@ -112,6 +113,13 @@
+         boolean flag1 = world.isReceivingRedstonePower(blockpos) || this.isPoweredByOtherRails(world, blockpos, blockstate, true, 0) || this.isPoweredByOtherRails(world, blockpos, blockstate, false, 0);
+ 
+         if (flag1 != flag) {
++            // CraftBukkit start
++            int power = flag ? 15 : 0;
++            int newPower = CraftEventFactory.callRedstoneChange(world, blockpos, power, 15 - power).getNewCurrent();
++            if (newPower == power) {
++                return;
++            }
++            // CraftBukkit end
+             world.setBlockState(blockpos, (BlockState) blockstate.with(PoweredRailBlock.POWERED, flag1), 3);
+             world.updateNeighborsAlways(blockpos.down(), this);
+             if (((RailShape) blockstate.get(PoweredRailBlock.SHAPE)).isAscending()) {

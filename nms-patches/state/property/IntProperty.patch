@@ -1,0 +1,18 @@
+--- a/net/minecraft/state/property/IntProperty.java
++++ b/net/minecraft/state/property/IntProperty.java
+@@ -9,9 +9,15 @@
+ public class IntProperty extends Property<Integer> {
+ 
+     private final ImmutableSet<Integer> values;
++    // CraftBukkit start
++    public final int min;
++    public final int max;
+ 
+     protected IntProperty(String s, int i, int j) {
+         super(s, Integer.class);
++        this.min = i;
++        this.max = j;
++        // CraftBukkit end
+         if (i < 0) {
+             throw new IllegalArgumentException("Min value of " + s + " must be 0 or greater");
+         } else if (j <= i) {

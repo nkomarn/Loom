@@ -1,0 +1,11 @@
+--- a/net/minecraft/advancement/AdvancementManager.java
++++ b/net/minecraft/advancement/AdvancementManager.java
+@@ -73,7 +73,7 @@
+             }
+         }
+ 
+-        AdvancementManager.LOGGER.info("Loaded {} advancements", (Object) this.advancements.size());
++        // Advancements.LOGGER.info("Loaded {} advancements", this.advancements.size()); // CraftBukkit - moved to AdvancementDataWorld#reload
+     }
+ 
+     public Iterable<Advancement> getRoots() {

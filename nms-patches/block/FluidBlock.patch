@@ -1,0 +1,35 @@
+--- a/net/minecraft/block/FluidBlock.java
++++ b/net/minecraft/block/FluidBlock.java
+@@ -25,6 +25,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class FluidBlock extends Block implements FluidDrainable {
+ 
+@@ -122,14 +123,20 @@
+                     if (world.getFluidState(blockpos1).isIn(FluidTags.WATER)) {
+                         Block block = world.getFluidState(blockpos).isStill() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
+ 
+-                        world.setBlockState(blockpos, block.getDefaultState());
+-                        this.playExtinguishSound(world, blockpos);
++                        // CraftBukkit start
++                        if (CraftEventFactory.handleBlockFormEvent(world, blockpos, block.getDefaultState())) {
++                            this.playExtinguishSound(world, blockpos);
++                        }
++                        // CraftBukkit end
+                         return false;
+                     }
+ 
+                     if (flag && world.getBlockState(blockpos1).isOf(Blocks.BLUE_ICE)) {
+-                        world.setBlockState(blockpos, Blocks.BASALT.getDefaultState());
+-                        this.playExtinguishSound(world, blockpos);
++                        // CraftBukkit start
++                        if (CraftEventFactory.handleBlockFormEvent(world, blockpos, Blocks.BASALT.getDefaultState())) {
++                            this.playExtinguishSound(world, blockpos);
++                        }
++                        // CraftBukkit end
+                         return false;
+                     }
+                 }

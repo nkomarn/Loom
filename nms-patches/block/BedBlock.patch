@@ -1,0 +1,50 @@
+--- a/net/minecraft/block/BedBlock.java
++++ b/net/minecraft/block/BedBlock.java
+@@ -72,7 +72,8 @@
+                 }
+             }
+ 
+-            if (!isOverworld(world)) {
++            // CraftBukkit - moved world and biome check into EntityHuman
++            if (false && !isOverworld(world)) {
+                 world.removeBlock(blockpos, false);
+                 BlockPos blockpos1 = blockpos.offset(((Direction) blockstate.get(BedBlock.FACING)).getOpposite());
+ 
+@@ -89,7 +90,16 @@
+ 
+                 return ActionResult.SUCCESS;
+             } else {
++                // CraftBukkit start
++                BlockState finalBlockState = blockstate;
++                BlockPos finalBlockPos = blockpos;
++                // CraftBukkit end
+                 playerentity.trySleep(blockpos).ifLeft((playerentity_sleepfailurereason) -> {
++                    // CraftBukkit start - handling bed explosion from below here
++                    if (playerentity_sleepfailurereason == PlayerEntity.SleepFailureReason.NOT_POSSIBLE_HERE) {
++                        this.explodeBed(finalBlockState, world, finalBlockPos);
++                    } else
++                    // CraftBukkit end
+                     if (playerentity_sleepfailurereason != null) {
+                         playerentity.sendMessage(playerentity_sleepfailurereason.toText(), true);
+                     }
+@@ -100,6 +110,20 @@
+         }
+     }
+ 
++    // CraftBukkit start
++    private ActionResult explodeBed(BlockState iblockdata, World world, BlockPos blockposition) {
++        world.removeBlock(blockposition, false);
++        BlockPos blockposition1 = blockposition.offset((iblockdata.get(FACING)).getOpposite());
++
++        if (world.getBlockState(blockposition1).getBlock() == this) {
++            world.removeBlock(blockposition1, false);
++        }
++
++        world.createExplosion(null, DamageSource.badRespawnPoint(), null, (double) blockposition.getX() + 0.5D, (double) blockposition.getY() + 0.5D, (double) blockposition.getZ() + 0.5D, 5.0F, true, Explosion.DestructionType.DESTROY);
++        return ActionResult.SUCCESS;
++    }
++    // CraftBukkit end
++
+     public static boolean isOverworld(World world) {
+         return world.getDimension().isBedWorking();
+     }

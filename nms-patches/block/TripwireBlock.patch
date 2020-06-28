@@ -1,0 +1,53 @@
+--- a/net/minecraft/block/TripwireBlock.java
++++ b/net/minecraft/block/TripwireBlock.java
+@@ -21,6 +21,11 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.entity.EntityInteractEvent;
+ 
+ public class TripwireBlock extends Block {
+ 
+@@ -141,6 +146,38 @@
+             }
+         }
+ 
++        // CraftBukkit start - Call interact even when triggering connected tripwire
++        if (flag != flag1 && flag1 && blockstate.get(ATTACHED)) {
++            org.bukkit.World bworld = world.getCraftWorld();
++            org.bukkit.block.Block block = bworld.getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++            boolean allowed = false;
++
++            for (Object object : list) {
++                if (object != null) {
++                    Cancellable event;
++
++                    if (object instanceof PlayerEntity) {
++                        event = CraftEventFactory.callPlayerInteractEvent((PlayerEntity) object, Action.PHYSICAL, blockpos, null, null, null);
++                    } else if (object instanceof Entity) {
++                        event = new EntityInteractEvent(((Entity) object).getBukkitEntity(), block);
++                        Bukkit.getPluginManager().callEvent((EntityInteractEvent) event);
++                    } else {
++                        continue;
++                    }
++
++                    if (!event.isCancelled()) {
++                        allowed = true;
++                        break;
++                    }
++                }
++            }
++
++            if (!allowed) {
++                return;
++            }
++        }
++        // CraftBukkit end
++
+         if (flag1 != flag) {
+             blockstate = (BlockState) blockstate.with(TripwireBlock.POWERED, flag1);
+             world.setBlockState(blockpos, blockstate, 3);

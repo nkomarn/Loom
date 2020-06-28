@@ -1,0 +1,40 @@
+--- a/net/minecraft/block/StemBlock.java
++++ b/net/minecraft/block/StemBlock.java
+@@ -11,6 +11,7 @@
+ import net.minecraft.util.shape.VoxelShape;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class StemBlock extends PlantBlock implements Fertilizable {
+ 
+@@ -41,14 +42,18 @@
+ 
+                 if (i < 7) {
+                     blockstate = (BlockState) blockstate.with(StemBlock.AGE, i + 1);
+-                    serverworld.setBlockState(blockpos, blockstate, 2);
++                    CraftEventFactory.handleBlockGrowEvent(serverworld, blockpos, blockstate, 2); // CraftBukkit
+                 } else {
+                     Direction direction = Direction.Type.HORIZONTAL.random(random);
+                     BlockPos blockpos1 = blockpos.offset(direction);
+                     BlockState blockstate1 = serverworld.getBlockState(blockpos1.down());
+ 
+                     if (serverworld.getBlockState(blockpos1).isAir() && (blockstate1.isOf(Blocks.FARMLAND) || blockstate1.isOf(Blocks.DIRT) || blockstate1.isOf(Blocks.COARSE_DIRT) || blockstate1.isOf(Blocks.PODZOL) || blockstate1.isOf(Blocks.GRASS_BLOCK))) {
+-                        serverworld.setBlockState(blockpos1, this.gourdBlock.getDefaultState());
++                        // CraftBukkit start
++                        if (!CraftEventFactory.handleBlockGrowEvent(serverworld, blockpos1, this.gourdBlock.getDefaultState())) {
++                            return;
++                        }
++                        // CraftBukkit end
+                         serverworld.setBlockState(blockpos, (BlockState) this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction));
+                     }
+                 }
+@@ -69,7 +74,7 @@
+         int i = Math.min(7, (Integer) blockstate.get(StemBlock.AGE) + MathHelper.nextInt(serverworld.random, 2, 5));
+         BlockState blockstate1 = (BlockState) blockstate.with(StemBlock.AGE, i);
+ 
+-        serverworld.setBlockState(blockpos, blockstate1, 2);
++        CraftEventFactory.handleBlockGrowEvent(serverworld, blockpos, blockstate1, 2); // CraftBukkit
+         if (i == 7) {
+             blockstate1.randomTick(serverworld, blockpos, serverworld.random);
+         }

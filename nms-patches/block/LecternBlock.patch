@@ -1,0 +1,17 @@
+--- a/net/minecraft/block/LecternBlock.java
++++ b/net/minecraft/block/LecternBlock.java
+@@ -183,12 +183,13 @@
+     }
+ 
+     private void dropBook(BlockState blockstate, World world, BlockPos blockpos) {
+-        BlockEntity blockentity = world.getBlockEntity(blockpos);
++        BlockEntity blockentity = world.getBlockEntity(blockpos, false); // CraftBukkit - don't validate, type may be changed already
+ 
+         if (blockentity instanceof LecternBlockEntity) {
+             LecternBlockEntity lecternblockentity = (LecternBlockEntity) blockentity;
+             Direction direction = (Direction) blockstate.get(LecternBlock.FACING);
+             ItemStack itemstack = lecternblockentity.getBook().copy();
++            if (itemstack.isEmpty()) return; // CraftBukkit - SPIGOT-5500
+             float f = 0.25F * (float) direction.getOffsetX();
+             float f1 = 0.25F * (float) direction.getOffsetZ();
+             ItemEntity itementity = new ItemEntity(world, (double) blockpos.getX() + 0.5D + (double) f, (double) (blockpos.getY() + 1), (double) blockpos.getZ() + 0.5D + (double) f1, itemstack);

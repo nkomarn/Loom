@@ -1,0 +1,27 @@
+--- a/net/minecraft/block/RedstoneWireBlock.java
++++ b/net/minecraft/block/RedstoneWireBlock.java
+@@ -31,6 +31,8 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class RedstoneWireBlock extends Block {
+ 
+@@ -231,7 +233,14 @@
+     private void update(World world, BlockPos blockpos, BlockState blockstate) {
+         int i = this.method_27842(world, blockpos);
+ 
+-        if ((Integer) blockstate.get(RedstoneWireBlock.POWER) != i) {
++        // CraftBukkit start
++        int oldPower = blockstate.get(POWER);
++        if (oldPower != i) {
++            BlockRedstoneEvent event = new BlockRedstoneEvent(world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()), oldPower, i);
++            Bukkit.getPluginManager().callEvent(event);
++
++            i = event.getNewCurrent();
++            // CraftBukkit end
+             if (world.getBlockState(blockpos) == blockstate) {
+                 world.setBlockState(blockpos, (BlockState) blockstate.with(RedstoneWireBlock.POWER, i), 2);
+             }

@@ -1,0 +1,73 @@
+--- a/net/minecraft/block/CarvedPumpkinBlock.java
++++ b/net/minecraft/block/CarvedPumpkinBlock.java
+@@ -21,6 +21,8 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.util.BlockStateListPopulator;
++import org.bukkit.event.entity.CreatureSpawnEvent;
+ 
+ public class CarvedPumpkinBlock extends HorizontalFacingBlock implements Wearable {
+ 
+@@ -59,12 +61,13 @@
+         ServerPlayerEntity serverplayerentity;
+         int j;
+ 
++        BlockStateListPopulator blockList = new BlockStateListPopulator(world); // CraftBukkit - Use BlockStateListPopulator
+         if (blockpattern_result != null) {
+             for (i = 0; i < this.getSnowGolemPattern().getHeight(); ++i) {
+                 CachedBlockPosition cachedblockposition = blockpattern_result.translate(0, i, 0);
+ 
+-                world.setBlockState(cachedblockposition.getBlockPos(), Blocks.AIR.getDefaultState(), 2);
+-                world.syncWorldEvent(2001, cachedblockposition.getBlockPos(), Block.getRawIdFromState(cachedblockposition.getBlockState()));
++                blockList.setBlockState(cachedblockposition.getBlockPos(), Blocks.AIR.getDefaultState(), 2); // CraftBukkit
++                // world.syncWorldEvent(2001, cachedblockposition.getBlockPos(), Block.getRawIdFromState(cachedblockposition.getBlockState())); // CraftBukkit
+             }
+ 
+             SnowGolemEntity snowgolementity = (SnowGolemEntity) EntityType.SNOW_GOLEM.create(world);
+@@ -72,6 +75,16 @@
+ 
+             snowgolementity.refreshPositionAndAngles((double) blockpos1.getX() + 0.5D, (double) blockpos1.getY() + 0.05D, (double) blockpos1.getZ() + 0.5D, 0.0F, 0.0F);
+             world.spawnEntity(snowgolementity);
++            // CraftBukkit start
++            if (!world.spawnEntity(snowgolementity, CreatureSpawnEvent.SpawnReason.BUILD_SNOWMAN)) {
++                return;
++            }
++
++            for (BlockPos pos : blockList.getBlocks()) {
++                world.syncWorldEvent(2001, pos, Block.getRawIdFromState(world.getBlockState(pos)));
++            }
++            blockList.updateList();
++            // CraftBukkit end
+             iterator = world.getNonSpectatingEntities(ServerPlayerEntity.class, snowgolementity.getBoundingBox().expand(5.0D)).iterator();
+ 
+             while (iterator.hasNext()) {
+@@ -91,8 +104,8 @@
+                     for (int k = 0; k < this.getIronGolemPattern().getHeight(); ++k) {
+                         CachedBlockPosition cachedblockposition2 = blockpattern_result.translate(i, k, 0);
+ 
+-                        world.setBlockState(cachedblockposition2.getBlockPos(), Blocks.AIR.getDefaultState(), 2);
+-                        world.syncWorldEvent(2001, cachedblockposition2.getBlockPos(), Block.getRawIdFromState(cachedblockposition2.getBlockState()));
++                        blockList.setTypeAndData(cachedblockposition2.getBlockPos(), Blocks.AIR.getDefaultState(), 2); // CraftBukkit
++                        // world.syncWorldEvent(2001, cachedblockposition2.getBlockPos(), Block.getRawIdFromState(cachedblockposition2.getBlockState())); // CraftBukkit
+                     }
+                 }
+ 
+@@ -101,7 +114,16 @@
+ 
+                 irongolementity.setPlayerCreated(true);
+                 irongolementity.refreshPositionAndAngles((double) blockpos2.getX() + 0.5D, (double) blockpos2.getY() + 0.05D, (double) blockpos2.getZ() + 0.5D, 0.0F, 0.0F);
+-                world.spawnEntity(irongolementity);
++                // CraftBukkit start
++                if (!world.spawnEntity(irongolementity, CreatureSpawnEvent.SpawnReason.BUILD_IRONGOLEM)) {
++                    return;
++                }
++
++                for (BlockPos pos : blockList.getBlocks()) {
++                    world.syncWorldEvent(2001, pos, Block.getRawIdFromState(world.getBlockState(pos)));
++                }
++                blockList.updateList();
++                // CraftBukkit end
+                 iterator = world.getNonSpectatingEntities(ServerPlayerEntity.class, irongolementity.getBoundingBox().expand(5.0D)).iterator();
+ 
+                 while (iterator.hasNext()) {

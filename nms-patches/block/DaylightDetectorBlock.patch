@@ -1,0 +1,10 @@
+--- a/net/minecraft/block/DaylightDetectorBlock.java
++++ b/net/minecraft/block/DaylightDetectorBlock.java
+@@ -58,6 +58,7 @@
+ 
+             i = MathHelper.clamp(i, 0, 15);
+             if ((Integer) blockstate.get(DaylightDetectorBlock.POWER) != i) {
++                i = org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(world, blockpos, blockstate.get(POWER), i).getNewCurrent(); // CraftBukkit - Call BlockRedstoneEvent
+                 world.setBlockState(blockpos, (BlockState) blockstate.with(DaylightDetectorBlock.POWER, i), 3);
+             }
+ 

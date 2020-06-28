@@ -1,0 +1,22 @@
+--- a/net/minecraft/block/SnowBlock.java
++++ b/net/minecraft/block/SnowBlock.java
+@@ -16,6 +16,7 @@
+ import net.minecraft.world.LightType;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class SnowBlock extends Block {
+ 
+@@ -72,6 +73,11 @@
+ 
+     public void randomTick(BlockState blockstate, ServerWorld serverworld, BlockPos blockpos, Random random) {
+         if (serverworld.getLightLevel(LightType.BLOCK, blockpos) > 11) {
++            // CraftBukkit start
++            if (CraftEventFactory.callBlockFadeEvent(serverworld, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
+             dropStacks(blockstate, serverworld, blockpos);
+             serverworld.removeBlock(blockpos, false);
+         }

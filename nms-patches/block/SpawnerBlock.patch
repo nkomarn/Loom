@@ -1,0 +1,21 @@
+--- a/net/minecraft/block/SpawnerBlock.java
++++ b/net/minecraft/block/SpawnerBlock.java
+@@ -19,9 +19,18 @@
+ 
+     public void onStacksDropped(BlockState blockstate, World world, BlockPos blockpos, ItemStack itemstack) {
+         super.onStacksDropped(blockstate, world, blockpos, itemstack);
++        /* CraftBukkit start - Delegate to getExpDrop
+         int i = 15 + world.random.nextInt(15) + world.random.nextInt(15);
+ 
+         this.dropExperience(world, blockpos, i);
++        */
++    }
++
++    @Override
++    public int getExpDrop(BlockState blockstate, World world, BlockPos blockpos, ItemStack itemstack) {
++        int i = 15 + world.random.nextInt(15) + world.random.nextInt(15);
++        return i;
++        // CraftBukkit end
+     }
+ 
+     public BlockRenderType getRenderType(BlockState blockstate) {

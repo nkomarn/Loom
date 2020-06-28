@@ -1,0 +1,46 @@
+--- a/net/minecraft/entity/ai/brain/task/OpenDoorsTask.java
++++ b/net/minecraft/entity/ai/brain/task/OpenDoorsTask.java
+@@ -2,11 +2,13 @@
+ 
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.Sets;
++
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Set;
+ import java.util.stream.Collectors;
+ import java.util.stream.Stream;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockState;
+ import net.minecraft.block.DoorBlock;
+@@ -21,6 +23,8 @@
+ import net.minecraft.util.dynamic.GlobalPos;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.Position;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.event.entity.EntityInteractEvent;
+ 
+ public class OpenDoorsTask extends Task<LivingEntity> {
+ 
+@@ -59,11 +63,19 @@
+             if (BlockTags.WOODEN_DOORS.contains(block) && block instanceof DoorBlock) {
+                 boolean flag = j >= i;
+ 
++                // CraftBukkit start - entities opening doors
++                EntityInteractEvent event = new org.bukkit.event.entity.EntityInteractEvent(livingentity.getBukkitEntity(), CraftBlock.at(livingentity.world, blockpos));
++                livingentity.world.getServer().getPluginManager().callEvent(event);
++                if (event.isCancelled()) {
++                    return;
++                }
++                // CaftBukkit end
++
+                 ((DoorBlock) block).setOpen(serverworld, blockpos, flag);
+                 GlobalPos globalpos = GlobalPos.create(serverworld.getRegistryKey(), blockpos);
+ 
+                 if (!brain.getOptionalMemory(MemoryModuleType.OPENED_DOORS).isPresent() && flag) {
+-                    brain.remember(MemoryModuleType.OPENED_DOORS, (Object) Sets.newHashSet((Object[]) (globalpos)));
++                    brain.remember(MemoryModuleType.OPENED_DOORS, Sets.newHashSet(new GlobalPos[]{globalpos})); // CraftBukkit - decompile error
+                 } else {
+                     brain.getOptionalMemory(MemoryModuleType.OPENED_DOORS).ifPresent((set1) -> {
+                         if (flag) {

@@ -1,0 +1,29 @@
+--- a/net/minecraft/block/ObserverBlock.java
++++ b/net/minecraft/block/ObserverBlock.java
+@@ -13,6 +13,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class ObserverBlock extends FacingBlock {
+ 
+@@ -37,8 +38,18 @@
+ 
+     public void scheduledTick(BlockState blockstate, ServerWorld serverworld, BlockPos blockpos, Random random) {
+         if ((Boolean) blockstate.get(ObserverBlock.POWERED)) {
++            // CraftBukkit start
++            if (CraftEventFactory.callRedstoneChange(serverworld, blockpos, 15, 0).getNewCurrent() != 0) {
++                return;
++            }
++            // CraftBukkit end
+             serverworld.setBlockState(blockpos, (BlockState) blockstate.with(ObserverBlock.POWERED, false), 2);
+         } else {
++            // CraftBukkit start
++            if (CraftEventFactory.callRedstoneChange(serverworld, blockpos, 0, 15).getNewCurrent() != 15) {
++                return;
++            }
++            // CraftBukkit end
+             serverworld.setBlockState(blockpos, (BlockState) blockstate.with(ObserverBlock.POWERED, true), 2);
+             serverworld.getBlockTickScheduler().schedule(blockpos, this, 2);
+         }

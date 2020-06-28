@@ -1,0 +1,53 @@
+--- a/net/minecraft/command/EntitySelectorReader.java
++++ b/net/minecraft/command/EntitySelectorReader.java
+@@ -101,6 +101,7 @@
+     private boolean selectsScores;
+     private boolean selectsAdvancements;
+     private boolean usesAt;
++    private boolean checkPermissions;
+ 
+     public EntitySelectorReader(StringReader stringreader) {
+         this(stringreader, true);
+@@ -135,7 +136,7 @@
+             box = this.createBox(this.dx == null ? 0.0D : this.dx, this.dy == null ? 0.0D : this.dy, this.dz == null ? 0.0D : this.dz);
+         }
+ 
+-        Function function;
++        Function<Vec3d, Vec3d> function; // CraftBukkit - decompile error
+ 
+         if (this.x == null && this.y == null && this.z == null) {
+             function = (vec3d) -> {
+@@ -196,7 +197,10 @@
+         };
+     }
+ 
+-    protected void readAtVariable() throws CommandSyntaxException {
++    // CraftBukkit start
++    protected void readAtVariable(boolean overridePermissions) throws CommandSyntaxException {
++        this.checkPermissions = !overridePermissions;
++        // CraftBukkit end
+         this.usesAt = true;
+         this.suggestionProvider = this::suggestSelectorRest;
+         if (!this.reader.canRead()) {
+@@ -451,6 +455,12 @@
+     }
+ 
+     public EntitySelector read() throws CommandSyntaxException {
++        // CraftBukkit start
++        return read(false);
++    }
++
++    public EntitySelector read(boolean overridePermissions) throws CommandSyntaxException {
++        // CraftBukkit end
+         this.startCursor = this.reader.getCursor();
+         this.suggestionProvider = this::suggestSelector;
+         if (this.reader.canRead() && this.reader.peek() == '@') {
+@@ -459,7 +469,7 @@
+             }
+ 
+             this.reader.skip();
+-            this.readAtVariable();
++            this.readAtVariable(overridePermissions); // CraftBukkit
+         } else {
+             this.readRegular();
+         }

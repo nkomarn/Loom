@@ -1,0 +1,55 @@
+--- a/net/minecraft/block/AbstractFireBlock.java
++++ b/net/minecraft/block/AbstractFireBlock.java
+@@ -11,6 +11,11 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityCombustByBlockEvent;
++import org.bukkit.event.entity.EntityCombustEvent;
+ 
+ public abstract class AbstractFireBlock extends Block {
+ 
+@@ -48,7 +53,14 @@
+         if (!entity.isFireImmune()) {
+             entity.setFireTicks(entity.getFireTicks() + 1);
+             if (entity.getFireTicks() == 0) {
+-                entity.setOnFireFor(8);
++                // CraftBukkit start
++                EntityCombustEvent event = new EntityCombustByBlockEvent(CraftBlock.at(world, blockpos), entity.getBukkitEntity(), 8);
++                Bukkit.getPluginManager().callEvent(event);
++
++                if (!event.isCancelled()) {
++                    entity.setOnFireFor(event.getDuration(), false);
++                }
++                // CraftBukkit end
+             }
+ 
+             entity.damage(DamageSource.IN_FIRE, this.damage);
+@@ -59,9 +71,10 @@
+ 
+     public void onBlockAdded(BlockState blockstate, World world, BlockPos blockpos, BlockState blockstate1, boolean flag) {
+         if (!blockstate1.isOf(blockstate.getBlock())) {
++            // CraftBukkit - getTypeKey() TODO i didn't change the if statement- see if this changes anything.
+             if (world.getRegistryKey() != World.OVERWORLD && world.getRegistryKey() != World.NETHER || !NetherPortalBlock.createPortalAt(world, blockpos)) {
+                 if (!blockstate.canPlaceAt(world, blockpos)) {
+-                    world.removeBlock(blockpos, false);
++                    extinguishFire(world, blockpos); // CraftBukkit - fuel block broke
+                 }
+ 
+             }
+@@ -97,4 +110,12 @@
+ 
+         return true;
+     }
++
++    // CraftBukkit start
++    protected void extinguishFire(WorldAccess world, BlockPos position) {
++        if (!CraftEventFactory.callBlockFadeEvent(world, position, Blocks.AIR.getDefaultState()).isCancelled()) {
++            world.removeBlock(position, false);
++        }
++    }
++    // CraftBukkit end
+ }

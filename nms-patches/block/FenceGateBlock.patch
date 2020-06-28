@@ -1,0 +1,30 @@
+--- a/net/minecraft/block/FenceGateBlock.java
++++ b/net/minecraft/block/FenceGateBlock.java
+@@ -17,6 +17,8 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class FenceGateBlock extends HorizontalFacingBlock {
+ 
+@@ -113,6 +115,18 @@
+     public void neighborUpdate(BlockState blockstate, World world, BlockPos blockpos, Block block, BlockPos blockpos1, boolean flag) {
+         if (!world.isClient) {
+             boolean flag1 = world.isReceivingRedstonePower(blockpos);
++            // CraftBukkit start
++            boolean oldPowered = blockstate.get(POWERED);
++            if (oldPowered != flag1) {
++                int newPower = flag1 ? 15 : 0;
++                int oldPower = oldPowered ? 15 : 0;
++                org.bukkit.block.Block bukkitBlock = org.bukkit.craftbukkit.block.CraftBlock.at(world, blockpos);
++
++                BlockRedstoneEvent eventRedstone = new org.bukkit.event.block.BlockRedstoneEvent(bukkitBlock, oldPower, newPower);
++                Bukkit.getPluginManager().callEvent(eventRedstone);
++                flag1 = eventRedstone.getNewCurrent() > 0;
++            }
++            // CraftBukkit end
+ 
+             if ((Boolean) blockstate.get(FenceGateBlock.POWERED) != flag1) {
+                 world.setBlockState(blockpos, (BlockState) ((BlockState) blockstate.with(FenceGateBlock.POWERED, flag1)).with(FenceGateBlock.OPEN, flag1), 2);

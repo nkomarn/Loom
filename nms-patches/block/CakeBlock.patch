@@ -1,0 +1,38 @@
+--- a/net/minecraft/block/CakeBlock.java
++++ b/net/minecraft/block/CakeBlock.java
+@@ -3,6 +3,7 @@
+ import net.minecraft.entity.ai.pathing.NavigationType;
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.item.ItemStack;
++import net.minecraft.server.network.ServerPlayerEntity;
+ import net.minecraft.stat.Stats;
+ import net.minecraft.state.StateManager;
+ import net.minecraft.state.property.IntProperty;
+@@ -17,6 +18,8 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.FoodLevelChangeEvent;
+ 
+ public class CakeBlock extends Block {
+ 
+@@ -53,7 +56,17 @@
+             return ActionResult.PASS;
+         } else {
+             playerentity.incrementStat(Stats.EAT_CAKE_SLICE);
+-            playerentity.getHungerManager().add(2, 0.1F);
++            // CraftBukkit start
++            //playerentity.getHungerManager().add(2, 0.1F);
++            int oldFoodLevel = playerentity.getHungerManager().getFoodLevel();
++            FoodLevelChangeEvent event = CraftEventFactory.callFoodLevelChangeEvent(playerentity, 2 + oldFoodLevel);
++
++            if (!event.isCancelled()) {
++                playerentity.getHungerManager().add(event.getFoodLevel() - oldFoodLevel, 0.1f);
++            }
++
++            playerentity.getBukkitEntity().sendHealthUpdate();
++            // CraftBukkit end
+             int i = (Integer) blockstate.get(CakeBlock.BITES);
+ 
+             if (i < 6) {

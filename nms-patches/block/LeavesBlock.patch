@@ -1,0 +1,27 @@
+--- a/net/minecraft/block/LeavesBlock.java
++++ b/net/minecraft/block/LeavesBlock.java
+@@ -14,6 +14,8 @@
+ import net.minecraft.util.shape.VoxelShapes;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.Bukkit;
++import org.bukkit.event.block.LeavesDecayEvent;
+ 
+ public class LeavesBlock extends Block {
+ 
+@@ -35,6 +37,15 @@
+ 
+     public void randomTick(BlockState blockstate, ServerWorld serverworld, BlockPos blockpos, Random random) {
+         if (!(Boolean) blockstate.get(LeavesBlock.PERSISTENT) && (Integer) blockstate.get(LeavesBlock.DISTANCE) == 7) {
++            // CraftBukkit start
++            LeavesDecayEvent event = new LeavesDecayEvent(serverworld.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()));
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (event.isCancelled() || serverworld.getBlockState(blockpos).getBlock() != this) {
++                return;
++            }
++            // CraftBukkit end
++
+             dropStacks(blockstate, serverworld, blockpos);
+             serverworld.removeBlock(blockpos, false);
+         }

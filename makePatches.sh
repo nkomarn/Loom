@@ -35,7 +35,7 @@ newPatches=0
 updatedPatches=0
 unchangedPatches=0
 
-for file in $(/bin/find $src -name '*.java')
+for file in $(find $src -name '*.java')
 do
     pathRelativeToSrc=${file#$src}
 
