@@ -13,11 +13,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
+import net.minecraft.block.enums.Instrument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.bukkit.Bukkit;
@@ -355,18 +358,18 @@ public class CraftEventFactory {
     /**
      * Player Interact event
      */
-    public static PlayerInteractEvent callPlayerInteractEvent(EntityHuman who, Action action, ItemStack itemstack, EnumHand hand) {
+    public static PlayerInteractEvent callPlayerInteractEvent(PlayerEntity who, Action action, ItemStack itemstack, Hand hand) {
         if (action != Action.LEFT_CLICK_AIR && action != Action.RIGHT_CLICK_AIR) {
             throw new AssertionError(String.format("%s performing %s with %s", who, action, itemstack));
         }
-        return callPlayerInteractEvent(who, action, null, EnumDirection.SOUTH, itemstack, hand);
+        return callPlayerInteractEvent(who, action, null, Direction.SOUTH, itemstack, hand);
     }
 
-    public static PlayerInteractEvent callPlayerInteractEvent(EntityHuman who, Action action, BlockPosition position, EnumDirection direction, ItemStack itemstack, EnumHand hand) {
+    public static PlayerInteractEvent callPlayerInteractEvent(PlayerEntity who, Action action, BlockPos position, Direction direction, ItemStack itemstack, Hand hand) {
         return callPlayerInteractEvent(who, action, position, direction, itemstack, false, hand);
     }
 
-    public static PlayerInteractEvent callPlayerInteractEvent(EntityHuman who, Action action, BlockPosition position, EnumDirection direction, ItemStack itemstack, boolean cancelledBlock, EnumHand hand) {
+    public static PlayerInteractEvent callPlayerInteractEvent(PlayerEntity who, Action action, BlockPos position, Direction direction, ItemStack itemstack, boolean cancelledBlock, Hand hand) {
         Player player = (who == null) ? null : (Player) who.getBukkitEntity();
         CraftItemStack itemInHand = CraftItemStack.asCraftMirror(itemstack);
 
@@ -620,7 +623,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static boolean handleMoistureChangeEvent(World world, BlockPosition pos, IBlockData newBlock, int flag) {
+    public static boolean handleMoistureChangeEvent(World world, BlockPos pos, net.minecraft.block.BlockState newBlock, int flag) {
         CraftBlockState state = CraftBlockState.getBlockState(world, pos, flag);
         state.setData(newBlock);
 
@@ -641,7 +644,7 @@ public class CraftEventFactory {
         CraftBlockState state = CraftBlockState.getBlockState(world, target, flag);
         state.setData(block);
 
-        BlockSpreadEvent event = new BlockSpreadEvent(world.getWorld().getBlockAt(target.getX(), target.getY(), target.getZ()), world.getWorld().getBlockAt(source.getX(), source.getY(), source.getZ()), state);
+        BlockSpreadEvent event = new BlockSpreadEvent(world.getCraftWorld().getBlockAt(target.getX(), target.getY(), target.getZ()), world.getWorld().getBlockAt(source.getX(), source.getY(), source.getZ()), state);
         Bukkit.getPluginManager().callEvent(event);
 
         if (!event.isCancelled()) {
@@ -949,7 +952,7 @@ public class CraftEventFactory {
     }
 
     public static boolean handleBlockGrowEvent(World world, BlockPos pos, net.minecraft.block.BlockState newData, int flag) {
-        Block block = world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
+        Block block = world.getCraftWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
         CraftBlockState state = (CraftBlockState) block.getState();
         state.setData(newData);
 
@@ -1111,7 +1114,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static NotePlayEvent callNotePlayEvent(World world, BlockPosition pos, BlockPropertyInstrument instrument, int note) {
+    public static NotePlayEvent callNotePlayEvent(World world, BlockPos pos, Instrument instrument, int note) {
         NotePlayEvent event = new NotePlayEvent(world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), org.bukkit.Instrument.getByType((byte) instrument.ordinal()), new org.bukkit.Note(note));
         world.getServer().getPluginManager().callEvent(event);
         return event;
@@ -1360,16 +1363,16 @@ public class CraftEventFactory {
         CraftItemStack bredWithStack = bredWith == null ? null : CraftItemStack.asCraftMirror(bredWith).clone();
 
         EntityBreedEvent event = new EntityBreedEvent((LivingEntity) child.getBukkitEntity(), (LivingEntity) mother.getBukkitEntity(), (LivingEntity) father.getBukkitEntity(), breederEntity, bredWithStack, experience);
-        child.world.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         return event;
     }
 
-    public static BlockPhysicsEvent callBlockPhysicsEvent(GeneratorAccess world, BlockPosition blockposition) {
+    public static BlockPhysicsEvent callBlockPhysicsEvent(WorldAccess world, BlockPos blockposition) {
         org.bukkit.block.Block block = CraftBlock.at(world, blockposition);
         BlockPhysicsEvent event = new BlockPhysicsEvent(block, block.getBlockData());
         // Suppress during worldgen
         if (world instanceof World) {
-            world.getMinecraftWorld().getMinecraftServer().server.getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         }
         return event;
     }

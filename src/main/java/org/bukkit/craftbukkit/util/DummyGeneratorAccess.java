@@ -3,6 +3,8 @@ package org.bukkit.craftbukkit.util;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
+
+import net.minecraft.block.Block;
 import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.BiomeBase;
 import net.minecraft.server.BiomeManager;
@@ -29,16 +31,18 @@ import net.minecraft.server.TileEntity;
 import net.minecraft.server.World;
 import net.minecraft.server.WorldBorder;
 import net.minecraft.server.WorldData;
+import net.minecraft.world.TickScheduler;
+import net.minecraft.world.WorldAccess;
 
-public class DummyGeneratorAccess implements GeneratorAccess {
+public class DummyGeneratorAccess implements WorldAccess {
 
-    public static final GeneratorAccess INSTANCE = new DummyGeneratorAccess();
+    public static final WorldAccess INSTANCE = new DummyGeneratorAccess();
 
     protected DummyGeneratorAccess() {
     }
 
     @Override
-    public TickList<Block> getBlockTickList() {
+    public TickScheduler<Block> getBlockTickList() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

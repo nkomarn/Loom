@@ -4,30 +4,29 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.Fluid;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.World;
+
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 
 public class BlockStateListPopulator extends DummyGeneratorAccess {
     private final World world;
-    private final LinkedHashMap<BlockPosition, CraftBlockState> list;
+    private final LinkedHashMap<BlockPos, CraftBlockState> list;
 
     public BlockStateListPopulator(World world) {
         this(world, new LinkedHashMap<>());
     }
 
-    public BlockStateListPopulator(World world, LinkedHashMap<BlockPosition, CraftBlockState> list) {
+    public BlockStateListPopulator(World world, LinkedHashMap<BlockPos, CraftBlockState> list) {
         this.world = world;
         this.list = list;
     }
 
     @Override
-    public IBlockData getType(BlockPosition bp) {
+    public BlockState getType(BlockPos bp) {
         CraftBlockState state = list.get(bp);
-        return (state != null) ? state.getHandle() : world.getType(bp);
+        return (state != null) ? state.getHandle() : world.getBlockState(bp);
     }
 
     @Override
@@ -37,7 +36,7 @@ public class BlockStateListPopulator extends DummyGeneratorAccess {
     }
 
     @Override
-    public boolean setTypeAndData(BlockPosition position, IBlockData data, int flag) {
+    public boolean setTypeAndData(BlockPos position, net.minecraft.block.BlockState data, int flag) {
         CraftBlockState state = CraftBlockState.getBlockState(world, position, flag);
         state.setData(data);
         list.put(position, state);
@@ -50,7 +49,7 @@ public class BlockStateListPopulator extends DummyGeneratorAccess {
         }
     }
 
-    public Set<BlockPosition> getBlocks() {
+    public Set<BlockPos> getBlocks() {
         return list.keySet();
     }
 
