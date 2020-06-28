@@ -1,14 +1,6 @@
 --- a/net/minecraft/world/SpawnHelper.java
 +++ b/net/minecraft/world/SpawnHelper.java
-@@ -23,6 +23,7 @@
- import net.minecraft.entity.player.PlayerEntity;
- import net.minecraft.fluid.FluidState;
- import net.minecraft.nbt.CompoundTag;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.tag.BlockTags;
- import net.minecraft.tag.FluidTags;
- import net.minecraft.util.collection.WeightedPicker;
-@@ -65,7 +66,8 @@
+@@ -66,7 +66,8 @@
              if (entity instanceof MobEntity) {
                  MobEntity mobentity = (MobEntity) entity;
  
@@ -18,7 +10,7 @@
                      continue;
                  }
              }
-@@ -101,10 +103,44 @@
+@@ -102,10 +103,44 @@
          SpawnGroup[] aspawngroup = SpawnHelper.SPAWNABLE_GROUPS;
          int i = aspawngroup.length;
  
@@ -64,7 +56,7 @@
                  spawnEntitiesInChunk(spawngroup, serverworld, worldchunk, (entitytype, blockpos, chunk) -> {
                      return spawnhelper_info.test(entitytype, blockpos, chunk);
                  }, (mobentity, chunk) -> {
-@@ -179,9 +215,13 @@
+@@ -180,9 +215,13 @@
                                          mobentity.refreshPositionAndAngles(d0, (double) i, d1, serverworld.random.nextFloat() * 360.0F, 0.0F);
                                          if (isValidSpawn(serverworld, mobentity, d2)) {
                                              entitydata = mobentity.initialize(serverworld, serverworld.getLocalDifficulty(mobentity.getBlockPos()), SpawnReason.NATURAL, entitydata, (CompoundTag) null);
@@ -81,7 +73,7 @@
                                              spawnhelper_runner.run(mobentity, chunk);
                                              if (j >= mobentity.getLimitPerChunk()) {
                                                  return;
-@@ -489,8 +529,10 @@
+@@ -490,8 +529,10 @@
              return this.groupToCountView;
          }
  

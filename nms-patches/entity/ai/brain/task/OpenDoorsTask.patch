@@ -14,7 +14,7 @@
  import net.minecraft.block.Block;
  import net.minecraft.block.BlockState;
  import net.minecraft.block.DoorBlock;
-@@ -21,6 +23,8 @@
+@@ -20,6 +22,8 @@
  import net.minecraft.util.dynamic.GlobalPos;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.Position;
@@ -23,7 +23,7 @@
  
  public class OpenDoorsTask extends Task<LivingEntity> {
  
-@@ -59,11 +63,19 @@
+@@ -58,11 +62,19 @@
              if (BlockTags.WOODEN_DOORS.contains(block) && block instanceof DoorBlock) {
                  boolean flag = j >= i;
  

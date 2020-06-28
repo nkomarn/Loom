@@ -52,9 +52,9 @@ do
     strip_cr "$minecraftSource$file"
     mkdir -p "$(dirname "$src$file")"
     cp "$minecraftSource$file" "$src$file"
-    patch -d "src/main/java/" "net/minecraft/$file" < "$patchFile" > /dev/null
-  else
-    echo "Unable to apply $patchFileClean: $file not found"
+    patch -d "src/main/java/" "net/minecraft/$file" < "$patchFile"
+  #else
+    # TEMP --- echo "Unable to apply $patchFileClean: $file not found"
   fi
 
 done

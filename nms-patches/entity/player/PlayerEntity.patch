@@ -16,7 +16,7 @@
  import net.minecraft.SharedConstants;
  import net.minecraft.advancement.criterion.Criteria;
  import net.minecraft.block.BedBlock;
-@@ -106,6 +108,12 @@
+@@ -105,6 +107,12 @@
  import net.minecraft.world.GameMode;
  import net.minecraft.world.GameRules;
  import net.minecraft.world.World;
@@ -29,7 +29,7 @@
  
  public abstract class PlayerEntity extends LivingEntity {
  
-@@ -148,6 +156,16 @@
+@@ -147,6 +155,16 @@
      @Nullable
      public FishingBobberEntity fishHook;
  
@@ -46,7 +46,7 @@
      public PlayerEntity(World world, BlockPos blockpos, GameProfile gameprofile) {
          super(EntityType.PLAYER, world);
          this.selectedItem = ItemStack.EMPTY;
-@@ -283,7 +301,7 @@
+@@ -282,7 +300,7 @@
          ItemStack itemstack = this.getEquippedStack(EquipmentSlot.HEAD);
  
          if (itemstack.getItem() == Items.TURTLE_HELMET && !this.isSubmergedIn(FluidTags.WATER)) {
@@ -55,7 +55,7 @@
          }
  
      }
-@@ -437,7 +455,8 @@
+@@ -436,7 +454,8 @@
  
          if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {
              if (this.getHealth() < this.getMaxHealth() && this.age % 20 == 0) {
@@ -65,7 +65,7 @@
              }
  
              if (this.hungerManager.isNotFull() && this.age % 10 == 0) {
-@@ -618,6 +637,30 @@
+@@ -617,6 +636,30 @@
                  itementity.setVelocity((double) (-f3 * f2 * 0.3F) + Math.cos((double) f5) * (double) f6, (double) (-f1 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double) (f4 * f2 * 0.3F) + Math.sin((double) f5) * (double) f6);
              }
  
@@ -96,7 +96,7 @@
              return itementity;
          }
      }
-@@ -740,16 +783,17 @@
+@@ -739,16 +782,17 @@
          if (this.isInvulnerableTo(damagesource)) {
              return false;
          } else if (this.abilities.invulnerable && !damagesource.isOutOfWorld()) {
@@ -116,7 +116,7 @@
                      }
  
                      if (this.world.getDifficulty() == Difficulty.EASY) {
-@@ -761,7 +805,13 @@
+@@ -760,7 +804,13 @@
                      }
                  }
  
@@ -131,7 +131,7 @@
              }
          }
      }
-@@ -1612,7 +1662,7 @@
+@@ -1611,7 +1661,7 @@
      }
  
      public Iterable<ItemStack> getItemsHand() {

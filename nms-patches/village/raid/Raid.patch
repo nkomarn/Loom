@@ -1,14 +1,6 @@
 --- a/net/minecraft/village/raid/Raid.java
 +++ b/net/minecraft/village/raid/Raid.java
-@@ -39,6 +39,7 @@
- import net.minecraft.nbt.NbtHelper;
- import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
- import net.minecraft.server.network.ServerPlayerEntity;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.sound.SoundCategory;
- import net.minecraft.sound.SoundEvents;
- import net.minecraft.stat.Stats;
-@@ -226,6 +227,7 @@
+@@ -227,6 +227,7 @@
  
                  this.active = this.world.isChunkLoaded(this.center);
                  if (this.world.getDifficulty() == Difficulty.PEACEFUL) {
@@ -16,7 +8,7 @@
                      this.invalidate();
                      return;
                  }
-@@ -245,13 +247,16 @@
+@@ -246,13 +247,16 @@
                  if (!this.world.isNearOccupiedPointOfInterest(this.center)) {
                      if (this.wavesSpawned > 0) {
                          this.status = Raid.Status.LOSS;
@@ -33,7 +25,7 @@
                      this.invalidate();
                      return;
                  }
-@@ -325,6 +330,7 @@
+@@ -326,6 +330,7 @@
                      }
  
                      if (j > 3) {
@@ -41,7 +33,7 @@
                          this.invalidate();
                          break;
                      }
-@@ -337,6 +343,7 @@
+@@ -338,6 +343,7 @@
                          this.status = Raid.Status.VICTORY;
                          Iterator iterator = this.heroesOfTheVillage.iterator();
  
@@ -49,7 +41,7 @@
                          while (iterator.hasNext()) {
                              UUID uuid = (UUID) iterator.next();
                              Entity entity = this.world.getEntity(uuid);
-@@ -350,9 +357,11 @@
+@@ -351,9 +357,11 @@
  
                                      serverplayerentity.incrementStat(Stats.RAID_WIN);
                                      Criteria.HERO_OF_THE_VILLAGE.trigger(serverplayerentity);
@@ -61,7 +53,7 @@
                      }
                  }
  
-@@ -360,6 +369,7 @@
+@@ -361,6 +369,7 @@
              } else if (this.isFinished()) {
                  ++this.finishCooldown;
                  if (this.finishCooldown >= 600) {
@@ -69,7 +61,7 @@
                      this.invalidate();
                      return;
                  }
-@@ -494,6 +504,10 @@
+@@ -495,6 +504,10 @@
          Raid.Member[] araid_member = Raid.Member.VALUES;
          int j = araid_member.length;
  
@@ -80,7 +72,7 @@
          for (int k = 0; k < j; ++k) {
              Raid.Member raid_member = araid_member[k];
              int l = this.getCount(raid_member, i, flag1) + this.getBonusCount(raid_member, this.random, i, localdifficulty, flag1);
-@@ -506,9 +520,11 @@
+@@ -507,9 +520,11 @@
                      raiderentity.setPatrolLeader(true);
                      this.setWaveCaptain(i, raiderentity);
                      flag = true;
@@ -92,7 +84,7 @@
                  if (raid_member.type == EntityType.RAVAGER) {
                      RaiderEntity raiderentity1 = null;
  
-@@ -527,6 +543,7 @@
+@@ -528,6 +543,7 @@
                          this.addRaider(i, raiderentity1, blockpos, false);
                          raiderentity1.refreshPositionAndAngles(blockpos, 0.0F, 0.0F);
                          raiderentity1.startRiding(raiderentity);
@@ -100,7 +92,7 @@
                      }
                  }
              }
-@@ -536,6 +553,7 @@
+@@ -537,6 +553,7 @@
          ++this.wavesSpawned;
          this.updateBar();
          this.markDirty();
@@ -108,7 +100,7 @@
      }
  
      public void addRaider(int i, RaiderEntity raiderentity, @Nullable BlockPos blockpos, boolean flag) {
-@@ -551,7 +569,7 @@
+@@ -552,7 +569,7 @@
                  raiderentity.initialize(this.world, this.world.getLocalDifficulty(blockpos), SpawnReason.EVENT, (EntityData) null, (CompoundTag) null);
                  raiderentity.addBonusForWave(i, false);
                  raiderentity.setOnGround(true);
@@ -117,7 +109,7 @@
              }
          }
  
-@@ -810,6 +828,16 @@
+@@ -811,6 +828,16 @@
          }
      }
  

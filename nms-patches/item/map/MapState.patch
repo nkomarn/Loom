@@ -8,7 +8,7 @@
  import net.minecraft.network.Packet;
  import net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket;
  import net.minecraft.text.Text;
-@@ -56,8 +57,18 @@
+@@ -47,8 +48,18 @@
      public final Map<String, MapIcon> icons = Maps.newLinkedHashMap();
      private final Map<String, MapFrameMarker> frames = Maps.newHashMap();
  
@@ -27,7 +27,7 @@
      }
  
      public void init(int i, int j, int k, boolean flag, boolean flag1, RegistryKey<World> registrykey) {
-@@ -79,13 +90,31 @@
+@@ -70,13 +81,31 @@
      }
  
      public void fromTag(CompoundTag compoundtag) {
@@ -63,7 +63,7 @@
          this.xCenter = compoundtag.getInt("xCenter");
          this.zCenter = compoundtag.getInt("zCenter");
          this.scale = (byte) MathHelper.clamp(compoundtag.getByte("scale"), 0, 4);
-@@ -118,13 +147,32 @@
+@@ -109,13 +138,32 @@
      }
  
      public CompoundTag toTag(CompoundTag compoundtag) {
@@ -97,7 +97,7 @@
          compoundtag.putInt("xCenter", this.xCenter);
          compoundtag.putInt("zCenter", this.zCenter);
          compoundtag.putByte("scale", this.scale);
-@@ -415,12 +463,24 @@
+@@ -406,12 +454,24 @@
  
          @Nullable
          public Packet<?> getPacket(ItemStack itemstack) {

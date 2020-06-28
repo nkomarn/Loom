@@ -1,32 +1,6 @@
 --- a/net/minecraft/server/network/ServerPlayerInteractionManager.java
 +++ b/net/minecraft/server/network/ServerPlayerInteractionManager.java
-@@ -2,19 +2,20 @@
- 
- import java.util.Objects;
- import net.minecraft.advancement.criterion.Criteria;
--import net.minecraft.block.Block;
--import net.minecraft.block.BlockState;
--import net.minecraft.block.CommandBlock;
--import net.minecraft.block.JigsawBlock;
--import net.minecraft.block.StructureBlock;
-+import net.minecraft.block.*;
- import net.minecraft.block.entity.BlockEntity;
-+import net.minecraft.block.enums.DoubleBlockHalf;
-+import net.minecraft.entity.EquipmentSlot;
- import net.minecraft.item.ItemStack;
- import net.minecraft.item.ItemUsageContext;
- import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
- import net.minecraft.network.packet.s2c.play.PlayerActionResponseS2CPacket;
- import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
- import net.minecraft.screen.NamedScreenHandlerFactory;
- import net.minecraft.screen.ScreenHandler;
-+import net.minecraft.server.MinecraftServer;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.util.ActionResult;
- import net.minecraft.util.Hand;
- import net.minecraft.util.TypedActionResult;
-@@ -26,6 +27,19 @@
+@@ -27,6 +27,19 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -46,7 +20,7 @@
  public class ServerPlayerInteractionManager {
  
      private static final Logger LOGGER = LogManager.getLogger();
-@@ -60,7 +74,7 @@
+@@ -61,7 +74,7 @@
          this.gameMode = gamemode;
          gamemode.setAbilities(this.player.abilities);
          this.player.sendAbilitiesUpdate();
@@ -55,7 +29,7 @@
          this.world.updateSleepingPlayers();
      }
  
-@@ -89,7 +103,7 @@
+@@ -90,7 +103,7 @@
      }
  
      public void update() {
@@ -64,7 +38,7 @@
          BlockState blockstate;
  
          if (this.failedToMine) {
-@@ -145,9 +159,31 @@
+@@ -146,9 +159,31 @@
  
              if (playeractionc2spacket_action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
                  if (!this.world.canPlayerModifyAt(this.player, blockpos)) {
@@ -96,7 +70,7 @@
  
                  if (this.isCreative()) {
                      this.finishMining(blockpos, playeractionc2spacket_action, "creative destroy");
-@@ -163,11 +199,43 @@
+@@ -164,11 +199,43 @@
                  float f = 1.0F;
  
                  blockstate = this.world.getBlockState(blockpos);
@@ -141,7 +115,7 @@
                  if (!blockstate.isAir() && f >= 1.0F) {
                      this.finishMining(blockpos, playeractionc2spacket_action, "insta mine");
                  } else {
-@@ -211,7 +279,7 @@
+@@ -212,7 +279,7 @@
              } else if (playeractionc2spacket_action == PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK) {
                  this.mining = false;
                  if (!Objects.equals(this.miningPos, blockpos)) {
@@ -150,7 +124,7 @@
                      this.world.setBlockBreakingInfo(this.player.getEntityId(), this.miningPos, -1);
                      this.player.networkHandler.sendPacket(new PlayerActionResponseS2CPacket(this.miningPos, this.world.getBlockState(this.miningPos), playeractionc2spacket_action, true, "aborted mismatched destroying"));
                  }
-@@ -227,17 +295,73 @@
+@@ -228,17 +295,73 @@
          if (this.tryBreakBlock(blockpos)) {
              this.player.networkHandler.sendPacket(new PlayerActionResponseS2CPacket(blockpos, this.world.getBlockState(blockpos), playeractionc2spacket_action, true, s));
          } else {
@@ -226,7 +200,7 @@
              BlockEntity blockentity = this.world.getBlockEntity(blockpos);
              Block block = blockstate.getBlock();
  
-@@ -247,6 +371,10 @@
+@@ -248,6 +371,10 @@
              } else if (this.player.isBlockBreakingRestricted(this.world, blockpos, this.gameMode)) {
                  return false;
              } else {
@@ -237,7 +211,7 @@
                  block.onBreak(this.world, blockpos, blockstate, this.player);
                  boolean flag = this.world.removeBlock(blockpos, false);
  
-@@ -255,19 +383,32 @@
+@@ -256,19 +383,32 @@
                  }
  
                  if (this.isCreative()) {
@@ -273,7 +247,7 @@
              }
          }
      }
-@@ -309,12 +450,40 @@
+@@ -310,12 +450,40 @@
          }
      }
  
@@ -314,7 +288,7 @@
  
              if (namedscreenhandlerfactory != null) {
                  serverplayerentity.openHandledScreen(namedscreenhandlerfactory);
-@@ -328,25 +497,25 @@
+@@ -329,25 +497,25 @@
              ItemStack itemstack1 = itemstack.copy();
  
              if (!flag1) {
@@ -346,7 +320,7 @@
                  }
  
                  if (actionresult1.isAccepted()) {
-@@ -354,10 +523,10 @@
+@@ -355,10 +523,10 @@
                  }
  
                  return actionresult1;
