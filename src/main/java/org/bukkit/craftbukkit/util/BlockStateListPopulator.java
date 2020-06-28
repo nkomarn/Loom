@@ -5,16 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-<<<<<<< HEAD
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.bukkit.block.BlockState;
-=======
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
->>>>>>> ddc9995a5824cc8afba705fc4bfc580c628dca01
 import org.bukkit.craftbukkit.block.CraftBlockState;
 
 public class BlockStateListPopulator extends DummyGeneratorAccess {
@@ -31,22 +25,22 @@ public class BlockStateListPopulator extends DummyGeneratorAccess {
     }
 
     @Override
-    public BlockState getType(BlockPos bp) {
-        CraftBlockState state = list.get(bp);
-        return (state != null) ? state.getHandle() : world.getBlockState(bp);
+    public BlockState getBlockState(BlockPos blockPos) {
+        CraftBlockState state = list.get(blockPos);
+        return (state != null) ? state.getHandle() : world.getBlockState(blockPos);
     }
 
     @Override
-    public FluidState getFluid(BlockPos bp) {
-        CraftBlockState state = list.get(bp);
-        return (state != null) ? state.getHandle().getFluidState() : world.getFluidState(bp);
+    public FluidState getFluidState(BlockPos blockPos) {
+        CraftBlockState state = list.get(blockPos);
+        return (state != null) ? state.getHandle().getFluidState() : world.getFluidState(blockPos);
     }
 
     @Override
-    public boolean setTypeAndData(BlockPos position, net.minecraft.block.BlockState data, int flag) {
-        CraftBlockState state = CraftBlockState.getBlockState(world, position, flag);
-        state.setData(data);
-        list.put(position, state);
+    public boolean setBlockState(BlockPos blockpos, BlockState blockstate, int flag) {
+        CraftBlockState state = CraftBlockState.getBlockState(world, blockpos, flag);
+        state.setData(blockstate);
+        list.put(blockpos, state);
         return true;
     }
 
