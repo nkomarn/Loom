@@ -1,0 +1,129 @@
+--- a/net/minecraft/block/entity/SignBlockEntity.java
++++ b/net/minecraft/block/entity/SignBlockEntity.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.block.entity;
+ 
++import com.google.gson.JsonParseException;
+ import com.mojang.brigadier.exceptions.CommandSyntaxException;
+ import javax.annotation.Nullable;
+ import net.minecraft.block.BlockState;
+@@ -21,10 +22,12 @@
+ import net.minecraft.util.math.Vec2f;
+ import net.minecraft.util.math.Vec3d;
+ 
+-public class SignBlockEntity extends BlockEntity {
++import java.util.UUID;
+ 
+-    private final Text[] text;
+-    private boolean editable;
++public class SignBlockEntity extends BlockEntity implements CommandOutput { // CraftBukkit - implements
++
++    public final Text[] text;
++    public boolean editable;
+     private PlayerEntity editor;
+     private final StringRenderable[] textBeingEdited;
+     private DyeColor textColor;
+@@ -46,6 +49,12 @@
+             compoundtag.putString("Text" + (i + 1), s);
+         }
+ 
++        // CraftBukkit start
++        if (Boolean.getBoolean("convertLegacySigns")) {
++            compoundtag.putBoolean("Bukkit.isConverted", true);
++        }
++        // CraftBukkit end
++
+         compoundtag.putString("Color", this.textColor.getName());
+         return compoundtag;
+     }
+@@ -55,18 +64,37 @@
+         super.fromTag(blockstate, compoundtag);
+         this.textColor = DyeColor.byName(compoundtag.getString("Color"), DyeColor.BLACK);
+ 
++        // CraftBukkit start - Add an option to convert signs correctly
++        // This is done with a flag instead of all the time because
++        // we have no way to tell whether a sign is from 1.7.10 or 1.8
++
++        boolean oldSign = Boolean.getBoolean("convertLegacySigns") && !compoundtag.getBoolean("Bukkit.isConverted");
++
+         for (int i = 0; i < 4; ++i) {
+             String s = compoundtag.getString("Text" + (i + 1));
+-            MutableText mutabletext = Text.Serializer.fromJson(s.isEmpty() ? "\"\"" : s);
++            if (s != null && s.length() > 2048) {
++                s = "\"\"";
++            }
++
++            try {
++                MutableText mutabletext = Text.Serializer.fromJson(s.isEmpty() ? "\"\"" : s);
++                if (oldSign) {
++                    this.text[i] = org.bukkit.craftbukkit.util.CraftChatMessage.fromString(s)[0];
++                    continue;
++                }
++                // CraftBukkit end
+ 
+-            if (this.world instanceof ServerWorld) {
+-                try {
+-                    this.text[i] = Texts.parse(this.getCommandSource((ServerPlayerEntity) null), mutabletext, (Entity) null, 0);
+-                } catch (CommandSyntaxException commandsyntaxexception) {
++                if (this.world instanceof ServerWorld) {
++                    try {
++                        this.text[i] = Texts.parse(this.getCommandSource((ServerPlayerEntity) null), mutabletext, (Entity) null, 0);
++                    } catch (CommandSyntaxException commandsyntaxexception) {
++                        this.text[i] = mutabletext;
++                    }
++                } else {
+                     this.text[i] = mutabletext;
+                 }
+-            } else {
+-                this.text[i] = mutabletext;
++            } catch (JsonParseException jsonParseException) {
++                this.text[i] = new LiteralText(s);
+             }
+ 
+             this.textBeingEdited[i] = null;
+@@ -128,7 +156,8 @@
+         String s = serverplayerentity == null ? "Sign" : serverplayerentity.getName().getString();
+         Object object = serverplayerentity == null ? new LiteralText("Sign") : serverplayerentity.getDisplayName();
+ 
+-        return new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ofCenter(this.pos), Vec2f.ZERO, (ServerWorld) this.world, 2, s, (Text) object, this.world.getServer(), serverplayerentity);
++        // CraftBukkit - this
++        return new ServerCommandSource(this, Vec3d.ofCenter(this.pos), Vec2f.ZERO, (ServerWorld) this.world, 2, s, (Text) object, this.world.getServer(), serverplayerentity);
+     }
+ 
+     public DyeColor getTextColor() {
+@@ -139,10 +168,34 @@
+         if (dyecolor != this.getTextColor()) {
+             this.textColor = dyecolor;
+             this.markDirty();
+-            this.world.updateListeners(this.getPos(), this.getCachedState(), this.getCachedState(), 3);
++            if (this.world != null) this.world.updateListeners(this.getPos(), this.getCachedState(), this.getCachedState(), 3); // CraftBukkit - skip notify if world is null (SPIGOT-5122)
+             return true;
+         } else {
+             return false;
+         }
+     }
++
++    @Override
++    public void sendSystemMessage(Text arg, UUID uUID) {
++    }
++
++    @Override
++    public boolean shouldReceiveFeedback() {
++        return false;
++    }
++
++    @Override
++    public boolean shouldTrackOutput() {
++        return false;
++    }
++
++    @Override
++    public boolean shouldBroadcastConsoleToOps() {
++        return false;
++    }
++
++    @Override
++    public org.bukkit.command.CommandSender getBukkitSender(ServerCommandSource wrapper) {
++        return wrapper.getEntity() != null ? wrapper.getEntity().getBukkitSender(wrapper) : new org.bukkit.craftbukkit.command.CraftBlockCommandSender(wrapper, this);
++    }
+ }

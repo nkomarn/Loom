@@ -1,0 +1,10 @@
+--- a/net/minecraft/block/sapling/LargeTreeSaplingGenerator.java
++++ b/net/minecraft/block/sapling/LargeTreeSaplingGenerator.java
+@@ -37,6 +37,7 @@
+             return false;
+         } else {
+             ((TreeFeatureConfig) configuredfeature.config).ignoreFluidCheck();
++            this.setTreeType(configuredfeature); // CraftBukkit
+             BlockState blockstate1 = Blocks.AIR.getDefaultState();
+ 
+             serverworld.setBlockState(blockpos.add(i, 0, j), blockstate1, 4);

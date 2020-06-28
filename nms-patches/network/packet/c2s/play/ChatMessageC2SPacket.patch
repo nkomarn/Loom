@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/packet/c2s/play/ChatMessageC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/ChatMessageC2SPacket.java
+@@ -36,7 +36,5 @@
+         return this.chatMessage;
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ }

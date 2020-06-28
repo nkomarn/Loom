@@ -1,0 +1,17 @@
+--- a/net/minecraft/network/packet/c2s/play/ResourcePackStatusC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/ResourcePackStatusC2SPacket.java
+@@ -28,10 +28,12 @@
+         serverplaypacketlistener.onResourcePackStatus(this);
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
++    public Status getStatus() {
++        return status;
+     }
+ 
++    // Loom - decompile errors
++
+     public static enum Status {
+ 
+         SUCCESSFULLY_LOADED, DECLINED, FAILED_DOWNLOAD, ACCEPTED;

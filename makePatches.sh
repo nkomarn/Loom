@@ -2,7 +2,7 @@
 
 if [ -z "$1" ]
 then
-    echo "Please run this script again with the clean decompile sources as an argument. In most cases this will be ../work/decompile-XXXX"
+    echo "Please run this script again with the clean decompile sources as an argument. In most cases this will be ./decompiled"
     exit
 fi
 
@@ -18,8 +18,8 @@ else
   }
 fi
 
-cb=src/main/java/net/minecraft/server
-nms="$1/net/minecraft/server"
+src="src/main/java/net/minecraft/"
+nms="${1%/}/net/minecraft/"
 show_diff_msg=true
 
 if [ $# -ge 2 ]
@@ -31,16 +31,32 @@ then
     fi
 fi
 
-for file in $(/bin/ls $cb)
+newPatches=0
+updatedPatches=0
+unchangedPatches=0
+
+for file in $(/bin/find $src -name '*.java')
 do
+    pathRelativeToSrc=${file#$src}
+
     if [ "$show_diff_msg" = true ]
     then
-        echo "Diffing $file"
+        echo "Diffing $pathRelativeToSrc"
     fi
-    strip_cr "$nms/$file" > /dev/null
-	strip_cr "$cb/$file" > /dev/null
-    outName=$(echo nms-patches/"$(echo $file | cut -d. -f1)".patch)
-    patchNew=$(diff -u --label a/net/minecraft/server/$file "$nms/$file" --label b/net/minecraft/server/$file "$cb/$file")
+
+    strip_cr "$nms$pathRelativeToSrc" > /dev/null
+    strip_cr "$src$pathRelativeToSrc" > /dev/null
+    outName=$(echo nms-patches/"$(echo $pathRelativeToSrc | cut -d. -f1)".patch)
+
+    patchNew=$(diff -u --label a/net/minecraft/$pathRelativeToSrc "$nms$pathRelativeToSrc" --label b/net/minecraft/$pathRelativeToSrc "$src$pathRelativeToSrc")
+
+    # Check if the difference is empty
+    if [ -z "$patchNew" ]
+    then
+        continue
+    fi
+
+    # Check if the patch existed
     if [ -f "$outName" ]
     then
         patchCut=$(echo "$patchNew" | tail -n +3)
@@ -48,9 +64,19 @@ do
         if [ "$patchCut" != "$patchOld" ] ; then
             echo "$outName changed"
             echo "$patchNew" > "$outName"
+            ((updatedPatches=updatedPatches+1))
+        else
+            ((unchangedPatches=unchangedPatches+1))
         fi
     else
         echo "New patch $outName"
+        mkdir -p "$(dirname "$outName")"
         echo "$patchNew" > "$outName"
+        ((newPatches=newPatches+1))
     fi
 done
+
+echo ""
+echo "Unchanged patches: $unchangedPatches"
+echo "Updated patches: $updatedPatches"
+echo "New patches: $newPatches"

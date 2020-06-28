@@ -1,0 +1,11 @@
+--- a/net/minecraft/nbt/CompoundTag.java
++++ b/net/minecraft/nbt/CompoundTag.java
+@@ -530,7 +530,5 @@
+         return Collections.unmodifiableMap(this.tags);
+     }
+ 
+-    public Tag copy() {
+-        return this.copy();
+-    }
++    // Loom - decompile error
+ }

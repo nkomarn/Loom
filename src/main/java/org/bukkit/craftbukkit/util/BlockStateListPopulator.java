@@ -5,9 +5,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+<<<<<<< HEAD
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.bukkit.block.BlockState;
+=======
+import net.minecraft.block.BlockState;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+>>>>>>> ddc9995a5824cc8afba705fc4bfc580c628dca01
 import org.bukkit.craftbukkit.block.CraftBlockState;
 
 public class BlockStateListPopulator extends DummyGeneratorAccess {
@@ -30,9 +37,9 @@ public class BlockStateListPopulator extends DummyGeneratorAccess {
     }
 
     @Override
-    public Fluid getFluid(BlockPosition bp) {
+    public FluidState getFluid(BlockPos bp) {
         CraftBlockState state = list.get(bp);
-        return (state != null) ? state.getHandle().getFluid() : world.getFluid(bp);
+        return (state != null) ? state.getHandle().getFluidState() : world.getFluidState(bp);
     }
 
     @Override
@@ -44,7 +51,7 @@ public class BlockStateListPopulator extends DummyGeneratorAccess {
     }
 
     public void updateList() {
-        for (BlockState state : list.values()) {
+        for (CraftBlockState state : list.values()) {
             state.update(true);
         }
     }

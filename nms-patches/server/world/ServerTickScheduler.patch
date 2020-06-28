@@ -1,0 +1,31 @@
+--- a/net/minecraft/server/world/ServerTickScheduler.java
++++ b/net/minecraft/server/world/ServerTickScheduler.java
+@@ -49,11 +49,18 @@
+     public void tick() {
+         int i = this.scheduledTickActionsInOrder.size();
+ 
+-        if (i != this.scheduledTickActions.size()) {
++        if (false) { // CraftBukkit
+             throw new IllegalStateException("TickNextTick list out of synch");
+         } else {
+             if (i > 65536) {
+                 i = 65536;
++                // CraftBukkit start - If the server has too much to process over time, try to alleviate that
++                if (i > 20 * 65536) {
++                    i = i / 20;
++                } else {
++                    i = 65536;
++                }
++                // CraftBukkit end
+             }
+ 
+             ServerChunkManager serverchunkmanager = this.world.getChunkManager();
+@@ -92,7 +99,7 @@
+                         throw new CrashException(crashreport);
+                     }
+                 } else {
+-                    this.schedule(scheduledtick.pos, scheduledtick.getObject(), 0);
++                    this.schedule(scheduledtick.pos, (T) scheduledtick.getObject(), 0); // CraftBukkit - decompile error
+                 }
+             }
+ 

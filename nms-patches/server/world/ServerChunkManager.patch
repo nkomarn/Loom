@@ -1,0 +1,17 @@
+--- a/net/minecraft/server/world/ServerChunkManager.java
++++ b/net/minecraft/server/world/ServerChunkManager.java
+@@ -487,13 +487,7 @@
+         return this.spawnEntry;
+     }
+ 
+-    public LightingProvider getLightingProvider() {
+-        return this.getLightingProvider();
+-    }
+-
+-    public BlockView getWorld() {
+-        return this.getWorld();
+-    }
++    // Loom - decompile error
+ 
+     final class MainThreadExecutor extends ThreadExecutor<Runnable> {
+ 

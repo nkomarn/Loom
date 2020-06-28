@@ -1,0 +1,129 @@
+--- a/net/minecraft/scoreboard/ServerScoreboard.java
++++ b/net/minecraft/scoreboard/ServerScoreboard.java
+@@ -28,7 +28,7 @@
+     public void updateScore(ScoreboardPlayerScore scoreboardplayerscore) {
+         super.updateScore(scoreboardplayerscore);
+         if (this.objectives.contains(scoreboardplayerscore.getObjective())) {
+-            this.server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.CHANGE, scoreboardplayerscore.getObjective().getName(), scoreboardplayerscore.getPlayerName(), scoreboardplayerscore.getScore()));
++            sendAll(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.CHANGE, scoreboardplayerscore.getObjective().getName(), scoreboardplayerscore.getPlayerName(), scoreboardplayerscore.getScore()));
+         }
+ 
+         this.runUpdateListeners();
+@@ -36,14 +36,14 @@
+ 
+     public void updatePlayerScore(String s) {
+         super.updatePlayerScore(s);
+-        this.server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.REMOVE, (String) null, s, 0));
++        sendAll(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.REMOVE, (String) null, s, 0));
+         this.runUpdateListeners();
+     }
+ 
+     public void updatePlayerScore(String s, ScoreboardObjective scoreboardobjective) {
+         super.updatePlayerScore(s, scoreboardobjective);
+         if (this.objectives.contains(scoreboardobjective)) {
+-            this.server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.REMOVE, scoreboardobjective.getName(), s, 0));
++            sendAll(new ScoreboardPlayerUpdateS2CPacket(ServerScoreboard.UpdateMode.REMOVE, scoreboardobjective.getName(), s, 0));
+         }
+ 
+         this.runUpdateListeners();
+@@ -55,7 +55,7 @@
+         super.setObjectiveSlot(i, scoreboardobjective);
+         if (scoreboardobjective1 != scoreboardobjective && scoreboardobjective1 != null) {
+             if (this.getSlot(scoreboardobjective1) > 0) {
+-                this.server.getPlayerManager().sendToAll(new ScoreboardDisplayS2CPacket(i, scoreboardobjective));
++                sendAll(new ScoreboardDisplayS2CPacket(i, scoreboardobjective));
+             } else {
+                 this.removeScoreboardObjective(scoreboardobjective1);
+             }
+@@ -63,7 +63,7 @@
+ 
+         if (scoreboardobjective != null) {
+             if (this.objectives.contains(scoreboardobjective)) {
+-                this.server.getPlayerManager().sendToAll(new ScoreboardDisplayS2CPacket(i, scoreboardobjective));
++                sendAll(new ScoreboardDisplayS2CPacket(i, scoreboardobjective));
+             } else {
+                 this.addScoreboardObjective(scoreboardobjective);
+             }
+@@ -74,7 +74,7 @@
+ 
+     public boolean addPlayerToTeam(String s, Team team) {
+         if (super.addPlayerToTeam(s, team)) {
+-            this.server.getPlayerManager().sendToAll(new TeamS2CPacket(team, Arrays.asList(s), 3));
++            sendAll(new TeamS2CPacket(team, Arrays.asList(s), 3)); // Craftbukkit
+             this.runUpdateListeners();
+             return true;
+         } else {
+@@ -84,7 +84,7 @@
+ 
+     public void removePlayerFromTeam(String s, Team team) {
+         super.removePlayerFromTeam(s, team);
+-        this.server.getPlayerManager().sendToAll(new TeamS2CPacket(team, Arrays.asList(s), 4));
++        sendAll(new TeamS2CPacket(team, Arrays.asList(s), 4)); // Craftbukkit
+         this.runUpdateListeners();
+     }
+ 
+@@ -96,7 +96,7 @@
+     public void updateExistingObjective(ScoreboardObjective scoreboardobjective) {
+         super.updateExistingObjective(scoreboardobjective);
+         if (this.objectives.contains(scoreboardobjective)) {
+-            this.server.getPlayerManager().sendToAll(new ScoreboardObjectiveUpdateS2CPacket(scoreboardobjective, 2));
++            sendAll(new ScoreboardObjectiveUpdateS2CPacket(scoreboardobjective, 2)); // Craftbukkit
+         }
+ 
+         this.runUpdateListeners();
+@@ -113,19 +113,19 @@
+ 
+     public void updateScoreboardTeamAndPlayers(Team team) {
+         super.updateScoreboardTeamAndPlayers(team);
+-        this.server.getPlayerManager().sendToAll(new TeamS2CPacket(team, 0));
++        sendAll(new TeamS2CPacket(team, 0)); // Craftbukkit
+         this.runUpdateListeners();
+     }
+ 
+     public void updateScoreboardTeam(Team team) {
+         super.updateScoreboardTeam(team);
+-        this.server.getPlayerManager().sendToAll(new TeamS2CPacket(team, 2));
++        sendAll(new TeamS2CPacket(team, 2)); // Craftbukkit
+         this.runUpdateListeners();
+     }
+ 
+     public void updateRemovedTeam(Team team) {
+         super.updateRemovedTeam(team);
+-        this.server.getPlayerManager().sendToAll(new TeamS2CPacket(team, 1));
++        sendAll(new TeamS2CPacket(team, 1)); // Craftbukkit
+         this.runUpdateListeners();
+     }
+ 
+@@ -174,6 +174,7 @@
+ 
+         while (iterator.hasNext()) {
+             ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) iterator.next();
++            if (serverplayerentity.getBukkitEntity().getScoreboard().getHandle() != this) continue; // CraftBukkit - Only players on this board
+             Iterator iterator1 = list.iterator();
+ 
+             while (iterator1.hasNext()) {
+@@ -206,6 +207,7 @@
+ 
+         while (iterator.hasNext()) {
+             ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) iterator.next();
++            if (serverplayerentity.getBukkitEntity().getScoreboard().getHandle() != this) continue; // CraftBukkit - Only players on this board
+             Iterator iterator1 = list.iterator();
+ 
+             while (iterator1.hasNext()) {
+@@ -230,6 +232,16 @@
+         return i;
+     }
+ 
++    // CraftBukkit start - Send to players
++    private void sendAll(Packet packet) {
++        for (ServerPlayerEntity entityplayer : this.server.getPlayerManager().getPlayerList()) {
++            if (entityplayer.getBukkitEntity().getScoreboard().getHandle() == this) {
++                entityplayer.networkHandler.sendPacket(packet);
++            }
++        }
++    }
++    // CraftBukkit end
++
+     public static enum UpdateMode {
+ 
+         CHANGE, REMOVE;

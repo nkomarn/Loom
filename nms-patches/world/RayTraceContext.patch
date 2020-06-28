@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/RayTraceContext.java
++++ b/net/minecraft/world/RayTraceContext.java
+@@ -24,7 +24,7 @@
+         this.end = vec3d1;
+         this.shapeType = raytracecontext_shapetype;
+         this.fluid = raytracecontext_fluidhandling;
+-        this.entityPosition = ShapeContext.of(entity);
++        this.entityPosition = (entity == null) ? ShapeContext.absent() : ShapeContext.of(entity);
+     }
+ 
+     public Vec3d getEnd() {

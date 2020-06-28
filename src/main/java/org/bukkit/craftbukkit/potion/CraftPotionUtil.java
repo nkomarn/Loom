@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.potion;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.MobEffectList;
 import org.bukkit.potion.PotionData;
@@ -104,7 +105,7 @@ public class CraftPotionUtil {
         return new MobEffect(type, effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
     }
 
-    public static PotionEffect toBukkit(MobEffect effect) {
+    public static PotionEffect toBukkit(StatusEffectInstance effect) {
         PotionEffectType type = PotionEffectType.getById(MobEffectList.getId(effect.getMobEffect()));
         int amp = effect.getAmplifier();
         int duration = effect.getDuration();

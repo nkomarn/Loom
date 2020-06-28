@@ -1,0 +1,10 @@
+--- a/net/minecraft/server/MinecraftServer.java
++++ b/net/minecraft/server/MinecraftServer.java
+@@ -78,6 +78,7 @@
+ import net.minecraft.server.network.SpawnLocating;
+ import net.minecraft.server.world.ChunkTicketType;
+ import net.minecraft.server.world.ServerChunkManager;
++import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.structure.StructureManager;
+ import net.minecraft.tag.BlockTags;
+ import net.minecraft.tag.RegistryTagManager;

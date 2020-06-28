@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/packet/c2s/play/HandSwingC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/HandSwingC2SPacket.java
+@@ -33,7 +33,5 @@
+         return this.hand;
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ }

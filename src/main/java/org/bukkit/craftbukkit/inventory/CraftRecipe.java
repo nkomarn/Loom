@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.RecipeItemStack;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +36,7 @@ public interface CraftRecipe extends Recipe {
         return stack;
     }
 
-    public static RecipeChoice toBukkit(RecipeItemStack list) {
+    public static RecipeChoice toBukkit(Ingredient list) {
         list.buildChoices();
 
         if (list.choices.length == 0) {

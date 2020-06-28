@@ -1,0 +1,113 @@
+--- a/net/minecraft/block/entity/BeaconBlockEntity.java
++++ b/net/minecraft/block/entity/BeaconBlockEntity.java
+@@ -37,6 +37,11 @@
+ import net.minecraft.util.math.Box;
+ import net.minecraft.world.Heightmap;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.potion.CraftPotionUtil;
++import org.bukkit.potion.PotionEffect;
++// CraftBukkit end
++
+ public class BeaconBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, Tickable {
+ 
+     public static final StatusEffect[][] EFFECTS_BY_LEVEL = new StatusEffect[][]{{StatusEffects.SPEED, StatusEffects.HASTE}, {StatusEffects.RESISTANCE, StatusEffects.JUMP_BOOST}, {StatusEffects.STRENGTH}, {StatusEffects.REGENERATION}};
+@@ -54,6 +59,16 @@
+     private ContainerLock lock;
+     private final PropertyDelegate propertyDelegate;
+ 
++    // CraftBukkit start - add fields and methods
++    public PotionEffect getPrimaryEffect() {
++        return (this.primary != null) ? CraftPotionUtil.toBukkit(new StatusEffectInstance(this.primary, getLevel(), getAmplification(), true, true)) : null;
++    }
++
++    public PotionEffect getSecondaryEffect() {
++        return (hasSecondaryEffect()) ? CraftPotionUtil.toBukkit(new StatusEffectInstance(this.secondary, getLevel(), getAmplification(), true, true)) : null;
++    }
++    // CraftBukkit end
++
+     public BeaconBlockEntity() {
+         super(BlockEntityType.BEACON);
+         this.lock = ContainerLock.EMPTY;
+@@ -216,39 +231,44 @@
+         super.markRemoved();
+     }
+ 
++    // CraftBukkit start - split into components
+     private void applyPlayerEffects() {
+         if (!this.world.isClient && this.primary != null) {
+-            double d0 = (double) (this.level * 10 + 10);
+-            byte b0 = 0;
+-
+-            if (this.level >= 4 && this.primary == this.secondary) {
+-                b0 = 1;
++            byte amplification = getAmplification();
++            int effectLevel = getEffectLevel();
++            List<PlayerEntity> list = getHumansInRange();
++            this.applyEffect(list, this.primary, effectLevel, amplification);
++            if (this.hasSecondaryEffect()) {
++                this.applyEffect(list, this.secondary, effectLevel, 0);
+             }
++        }
++    }
+ 
+-            int i = (9 + this.level * 2) * 20;
+-            Box box = (new Box(this.pos)).expand(d0).stretch(0.0D, (double) this.world.getHeight(), 0.0D);
+-            List<PlayerEntity> list = this.world.getNonSpectatingEntities(PlayerEntity.class, box);
+-            Iterator iterator = list.iterator();
+-
+-            PlayerEntity playerentity;
+-
+-            while (iterator.hasNext()) {
+-                playerentity = (PlayerEntity) iterator.next();
+-                playerentity.addStatusEffect(new StatusEffectInstance(this.primary, i, b0, true, true));
+-            }
++    private byte getAmplification() {
++        return (this.level >= 4 && this.primary == this.secondary) ? (byte)1 : 0;
++    }
+ 
+-            if (this.level >= 4 && this.primary != this.secondary && this.secondary != null) {
+-                iterator = list.iterator();
++    private int getEffectLevel() {
++        return (9 + this.level * 2) * 20;
++    }
+ 
+-                while (iterator.hasNext()) {
+-                    playerentity = (PlayerEntity) iterator.next();
+-                    playerentity.addStatusEffect(new StatusEffectInstance(this.secondary, i, 0, true, true));
+-                }
+-            }
++    private List<PlayerEntity> getHumansInRange() {
++        double d0 = (double) (this.level * 10 + 10);
++        Box box = (new Box(this.pos)).expand(d0).stretch(0.0D, (double) this.world.getHeight(), 0.0D);
++        return this.world.getNonSpectatingEntities(PlayerEntity.class, box);
++    }
+ 
++    private void applyEffect(List<PlayerEntity> list, final StatusEffect effects, final int level, final int amplification) {
++        for (PlayerEntity playerEntity : list) {
++            playerEntity.addStatusEffect(new StatusEffectInstance(effects, level, amplification, true, true));
+         }
+     }
+ 
++    private boolean hasSecondaryEffect() {
++        return this.level >= 4 && this.primary != this.secondary && this.secondary != null;
++    }
++    // CraftBukkit end - split into components
++
+     public void playSound(SoundEvent soundevent) {
+         this.world.playSound((PlayerEntity) null, this.pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+     }
+@@ -275,8 +295,11 @@
+ 
+     public void fromTag(BlockState blockstate, CompoundTag compoundtag) {
+         super.fromTag(blockstate, compoundtag);
+-        this.primary = getPotionEffectById(compoundtag.getInt("Primary"));
+-        this.secondary = getPotionEffectById(compoundtag.getInt("Secondary"));
++        // CraftBukkit start - persist manually set non-default beacon effects (SPIGOT-3598)
++        this.primary = StatusEffect.byRawId(compoundtag.getInt("Primary"));
++        this.secondary = StatusEffect.byRawId(compoundtag.getInt("Secondary"));
++        this.level = compoundtag.getInt("Levels"); // SPIGOT-5053, use where available
++        // CraftBukkit end
+         if (compoundtag.contains("CustomName", 8)) {
+             this.customName = Text.Serializer.fromJson(compoundtag.getString("CustomName"));
+         }

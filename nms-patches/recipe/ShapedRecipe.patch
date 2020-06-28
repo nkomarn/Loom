@@ -1,0 +1,109 @@
+--- a/net/minecraft/recipe/ShapedRecipe.java
++++ b/net/minecraft/recipe/ShapedRecipe.java
+@@ -22,6 +22,15 @@
+ import net.minecraft.util.collection.DefaultedList;
+ import net.minecraft.util.registry.Registry;
+ import net.minecraft.world.World;
++// CraftBukkit start
++import java.util.ArrayList;
++import java.util.List;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.inventory.CraftRecipe;
++import org.bukkit.craftbukkit.inventory.CraftShapedRecipe;
++import org.bukkit.craftbukkit.util.CraftMagicNumbers;
++import org.bukkit.inventory.RecipeChoice;
++// CraftBukkit end
+ 
+ public class ShapedRecipe implements CraftingRecipe {
+ 
+@@ -257,13 +266,67 @@
+         }
+     }
+ 
+-    public ItemStack craft(Inventory inventory) {
+-        return this.craft((CraftingInventory) inventory);
+-    }
++    // Loom -- decompile error
++
++    // CraftBukkit start
++    public org.bukkit.inventory.ShapedRecipe toBukkitRecipe() {
++        CraftItemStack result = CraftItemStack.asCraftMirror(this.output);
++        CraftShapedRecipe recipe = new CraftShapedRecipe(result, this);
++        recipe.setGroup(this.group);
++
++        switch (this.height) {
++        case 1:
++            switch (this.width) {
++            case 1:
++                recipe.shape("a");
++                break;
++            case 2:
++                recipe.shape("ab");
++                break;
++            case 3:
++                recipe.shape("abc");
++                break;
++            }
++            break;
++        case 2:
++            switch (this.width) {
++            case 1:
++                recipe.shape("a","b");
++                break;
++            case 2:
++                recipe.shape("ab","cd");
++                break;
++            case 3:
++                recipe.shape("abc","def");
++                break;
++            }
++            break;
++        case 3:
++            switch (this.width) {
++            case 1:
++                recipe.shape("a","b","c");
++                break;
++            case 2:
++                recipe.shape("ab","cd","ef");
++                break;
++            case 3:
++                recipe.shape("abc","def","ghi");
++                break;
++            }
++            break;
++        }
++        char c = 'a';
++        for (Ingredient list : this.inputs) {
++            RecipeChoice choice = CraftRecipe.toBukkit(list);
++            if (choice != null) {
++                recipe.setIngredient(c, choice);
++            }
+ 
+-    public boolean matches(Inventory inventory, World world) {
+-        return this.matches((CraftingInventory) inventory, world);
++            c++;
++        }
++        return recipe;
+     }
++    // CraftBukkit end
+ 
+     public static class Serializer implements RecipeSerializer<ShapedRecipe> {
+ 
+@@ -311,16 +374,6 @@
+             packetbytebuf.writeItemStack(shapedrecipe.output);
+         }
+ 
+-        public void write(PacketByteBuf packetbytebuf, Recipe recipe) {
+-            this.write(packetbytebuf, (ShapedRecipe) recipe);
+-        }
+-
+-        public Recipe read(Identifier identifier, PacketByteBuf packetbytebuf) {
+-            return this.read(identifier, packetbytebuf);
+-        }
+-
+-        public Recipe read(Identifier identifier, JsonObject jsonobject) {
+-            return this.read(identifier, jsonobject);
+-        }
++        // Loom -- decompile error
+     }
+ }

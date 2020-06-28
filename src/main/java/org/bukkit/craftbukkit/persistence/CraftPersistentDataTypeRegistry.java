@@ -162,7 +162,7 @@ public final class CraftPersistentDataTypeRegistry {
             });
         }
 
-        throw new IllegalArgumentException("Could not find a valid TagAdapter implementation for the requested type " + type.getSimpleName());
+        throw new IllegalArgumentException("Could not find a valid NBTBaseTagAdapter implementation for the requested type " + type.getSimpleName());
     }
 
     private <T, Z extends NBTBase> TagAdapter<T, Z> createAdapter(Class<T> primitiveType, Class<Z> nbtBaseType, Function<T, Z> builder, Function<Z, T> extractor) {

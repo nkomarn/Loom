@@ -1,0 +1,19 @@
+--- a/net/minecraft/nbt/AbstractListTag.java
++++ b/net/minecraft/nbt/AbstractListTag.java
+@@ -18,15 +18,5 @@
+ 
+     public abstract byte getElementType();
+ 
+-    public Object remove(int i) {
+-        return this.remove(i);
+-    }
+-
+-    public void add(int i, Object object) {
+-        this.add(i, (Tag) object);
+-    }
+-
+-    public Object set(int i, Object object) {
+-        return this.set(i, (Tag) object);
+-    }
++    // Loom - decompile error
+ }

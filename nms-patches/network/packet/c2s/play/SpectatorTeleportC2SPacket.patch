@@ -1,0 +1,19 @@
+--- a/net/minecraft/network/packet/c2s/play/SpectatorTeleportC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/SpectatorTeleportC2SPacket.java
+@@ -8,6 +8,7 @@
+ import net.minecraft.network.PacketByteBuf;
+ import net.minecraft.network.listener.PacketListener;
+ import net.minecraft.network.listener.ServerPlayPacketListener;
++import net.minecraft.server.world.ServerWorld;
+ 
+ public class SpectatorTeleportC2SPacket implements Packet<ServerPlayPacketListener> {
+ 
+@@ -36,7 +37,5 @@
+         return serverworld.getEntity(this.targetUuid);
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile error
+ }

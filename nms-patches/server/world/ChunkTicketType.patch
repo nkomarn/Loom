@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/world/ChunkTicketType.java
++++ b/net/minecraft/server/world/ChunkTicketType.java
+@@ -23,6 +23,8 @@
+     public static final ChunkTicketType<BlockPos> PORTAL = create("portal", Vec3i::compareTo, 300);
+     public static final ChunkTicketType<Integer> POST_TELEPORT = create("post_teleport", Integer::compareTo, 5);
+     public static final ChunkTicketType<ChunkPos> UNKNOWN = create("unknown", Comparator.comparingLong(ChunkPos::toLong), 1);
++    public static final ChunkTicketType<Unit> PLUGIN = create("plugin", (unit, unit1) -> 0); // CraftBukkit
++    public static final ChunkTicketType<org.bukkit.plugin.Plugin> PLUGIN_TICKET = create("plugin_ticket", Comparator.comparing(plugin -> plugin.getClass().getName())); // CraftBukkit
+ 
+     public static <T> ChunkTicketType<T> create(String s, Comparator<T> comparator) {
+         return new ChunkTicketType<>(s, comparator, 0L);

@@ -1,0 +1,64 @@
+--- a/net/minecraft/block/entity/BlockEntity.java
++++ b/net/minecraft/block/entity/BlockEntity.java
+@@ -14,8 +14,20 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
++import org.bukkit.craftbukkit.persistence.CraftPersistentDataTypeRegistry;
++import org.bukkit.inventory.InventoryHolder;
++// CraftBukkit end
++
+ public abstract class BlockEntity {
+ 
++    // CraftBukkit start - data containers
++    private static final CraftPersistentDataTypeRegistry DATA_TYPE_REGISTRY = new CraftPersistentDataTypeRegistry();
++    public CraftPersistentDataContainer persistentDataContainer;
++    // CraftBukkit end
++
+     private static final Logger LOGGER = LogManager.getLogger();
+     private final BlockEntityType<?> type;
+     @Nullable
+@@ -47,6 +59,14 @@
+ 
+     public void fromTag(BlockState blockstate, CompoundTag compoundtag) {
+         this.pos = new BlockPos(compoundtag.getInt("x"), compoundtag.getInt("y"), compoundtag.getInt("z"));
++        // CraftBukkit start - read container
++        this.persistentDataContainer = new CraftPersistentDataContainer(DATA_TYPE_REGISTRY);
++
++        CompoundTag persistentDataTag = compoundtag.getCompound("PublicBukkitValues");
++        if (persistentDataTag != null) {
++            this.persistentDataContainer.putAll(persistentDataTag);
++        }
++        // CraftBukkit end
+     }
+ 
+     public CompoundTag toTag(CompoundTag compoundtag) {
+@@ -63,6 +83,11 @@
+             compoundtag.putInt("x", this.pos.getX());
+             compoundtag.putInt("y", this.pos.getY());
+             compoundtag.putInt("z", this.pos.getZ());
++            // CraftBukkit start - store container
++            if (this.persistentDataContainer != null && !this.persistentDataContainer.isEmpty()) {
++                compoundtag.put("PublicBukkitValues", this.persistentDataContainer.toTagCompound());
++            }
++            // CraftBukkit end
+             return compoundtag;
+         }
+     }
+@@ -178,4 +203,13 @@
+             }, this::getPos);
+         }
+     }
++
++    // CraftBukkit start - add method
++    public InventoryHolder getOwner() {
++        if (world == null) return null;
++        org.bukkit.block.BlockState state = world.getCraftWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()).getState();
++        if (state instanceof InventoryHolder) return (InventoryHolder) state;
++        return null;
++    }
++    // CraftBukkit end
+ }

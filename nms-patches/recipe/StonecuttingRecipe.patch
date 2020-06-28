@@ -1,0 +1,34 @@
+--- a/net/minecraft/recipe/StonecuttingRecipe.java
++++ b/net/minecraft/recipe/StonecuttingRecipe.java
+@@ -5,6 +5,14 @@
+ import net.minecraft.util.Identifier;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.inventory.CraftRecipe;
++import org.bukkit.craftbukkit.inventory.CraftStonecuttingRecipe;
++import org.bukkit.craftbukkit.util.CraftNamespacedKey;
++import org.bukkit.inventory.Recipe;
++// CraftBukkit end
++
+ public class StonecuttingRecipe extends CuttingRecipe {
+ 
+     public StonecuttingRecipe(Identifier identifier, String s, Ingredient ingredient, ItemStack itemstack) {
+@@ -14,4 +22,16 @@
+     public boolean matches(Inventory inventory, World world) {
+         return this.input.test(inventory.getStack(0));
+     }
++
++    // CraftBukkit start
++    @Override
++    public Recipe toBukkitRecipe() {
++        CraftItemStack result = CraftItemStack.asCraftMirror(this.output);
++
++        CraftStonecuttingRecipe recipe = new CraftStonecuttingRecipe(CraftNamespacedKey.fromMinecraft(this.id), result, CraftRecipe.toBukkit(this.input));
++        recipe.setGroup(this.group);
++
++        return recipe;
++    }
++    // CraftBukkit end
+ }

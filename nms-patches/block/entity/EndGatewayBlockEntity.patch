@@ -1,0 +1,42 @@
+--- a/net/minecraft/block/entity/EndGatewayBlockEntity.java
++++ b/net/minecraft/block/entity/EndGatewayBlockEntity.java
+@@ -27,6 +27,12 @@
+ import net.minecraft.world.gen.feature.FeatureConfig;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++import org.bukkit.event.player.PlayerTeleportEvent;
++// CraftBukkit end
+ 
+ public class EndGatewayBlockEntity extends EndPortalBlockEntity implements Tickable {
+ 
+@@ -153,6 +159,26 @@
+                     entity1 = entity.getRootVehicle();
+                 }
+ 
++                // CraftBukkit start - Fire PlayerTeleportEvent
++                if (entity1 instanceof ServerPlayerEntity) {
++                    org.bukkit.craftbukkit.entity.CraftPlayer player = (CraftPlayer) entity1.getBukkitEntity();
++                    org.bukkit.Location location = new Location(world.getCraftWorld(), (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D);
++                    location.setPitch(player.getLocation().getPitch());
++                    location.setYaw(player.getLocation().getYaw());
++
++                    PlayerTeleportEvent teleEvent = new PlayerTeleportEvent(player, player.getLocation(), location, PlayerTeleportEvent.TeleportCause.END_GATEWAY);
++                    Bukkit.getPluginManager().callEvent(teleEvent);
++                    if (teleEvent.isCancelled()) {
++                        return;
++                    }
++
++                    ((ServerPlayerEntity) entity1).networkHandler.teleport(teleEvent.getTo()); // TODO patch
++                    this.startTeleportCooldown(); // CraftBukkit - call at end of method
++                    return;
++
++                }
++                // CraftBukkit end
++
+                 entity1.teleport((double) blockpos.getX() + 0.5D, (double) blockpos.getY(), (double) blockpos.getZ() + 0.5D);
+             }
+ 

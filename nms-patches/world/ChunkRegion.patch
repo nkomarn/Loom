@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/ChunkRegion.java
++++ b/net/minecraft/world/ChunkRegion.java
+@@ -17,6 +17,7 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.particle.ParticleEffect;
++import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.sound.SoundCategory;
+ import net.minecraft.sound.SoundEvent;
+ import net.minecraft.util.Util;
+@@ -246,6 +247,12 @@
+     }
+ 
+     public boolean spawnEntity(Entity entity) {
++        // CraftBukkit start
++        return spawnEntity(entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.DEFAULT);
++    }
++
++    public boolean spawnEntity(Entity entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason reason) {
++        // CraftBukkit end
+         int i = MathHelper.floor(entity.getX() / 16.0D);
+         int j = MathHelper.floor(entity.getZ() / 16.0D);
+ 

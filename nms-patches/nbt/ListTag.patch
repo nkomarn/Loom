@@ -1,0 +1,45 @@
+--- a/net/minecraft/nbt/ListTag.java
++++ b/net/minecraft/nbt/ListTag.java
+@@ -50,11 +50,9 @@
+             return "TAG_List";
+         }
+ 
+-        public Tag read(DataInput datainput, int i, PositionTracker positiontracker) throws IOException {
+-            return this.read(datainput, i, positiontracker);
+-        }
++        // Loom - decompile error
+     };
+-    private static final ByteSet NBT_NUMBER_TYPES = new ByteOpenHashSet(Arrays.asList(1, 2, 3, 4, 5, 6));
++    private static final ByteSet NBT_NUMBER_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte) 4, (byte) 5, (byte) 6)); // Loom - decompile error
+     private final List<Tag> value;
+     private byte type;
+ 
+@@ -347,27 +345,5 @@
+         this.type = 0;
+     }
+ 
+-    public Tag copy() {
+-        return this.copy();
+-    }
+-
+-    public Object remove(int i) {
+-        return this.remove(i);
+-    }
+-
+-    public void add(int i, Object object) {
+-        this.add(i, (Tag) object);
+-    }
+-
+-    public Object set(int i, Object object) {
+-        return this.set(i, (Tag) object);
+-    }
+-
+-    public Object get(int i) {
+-        return this.get(i);
+-    }
+-
+-    ListTag(List list, byte b0, Object object) {
+-        this(list, b0);
+-    }
++    // Loom - decompile error
+ }

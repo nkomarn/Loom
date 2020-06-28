@@ -1,0 +1,67 @@
+--- a/net/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket.java
+@@ -8,14 +8,14 @@
+ 
+ public class PlayerMoveC2SPacket implements Packet<ServerPlayPacketListener> {
+ 
+-    protected double x;
+-    protected double y;
+-    protected double z;
+-    protected float yaw;
+-    protected float pitch;
++    public double x;
++    public double y;
++    public double z;
++    public float yaw;
++    public float pitch;
+     protected boolean onGround;
+-    protected boolean changePosition;
+-    protected boolean changeLook;
++    public boolean changePosition;
++    public boolean changeLook;
+ 
+     public PlayerMoveC2SPacket() {}
+ 
+@@ -55,9 +55,7 @@
+         return this.onGround;
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ 
+     public static class LookOnly extends PlayerMoveC2SPacket {
+ 
+@@ -77,9 +75,7 @@
+             super.write(packetbytebuf);
+         }
+ 
+-        public void apply(PacketListener packetlistener) {
+-            super.apply((ServerPlayPacketListener) packetlistener);
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public static class PositionOnly extends PlayerMoveC2SPacket {
+@@ -102,9 +98,7 @@
+             super.write(packetbytebuf);
+         }
+ 
+-        public void apply(PacketListener packetlistener) {
+-            super.apply((ServerPlayPacketListener) packetlistener);
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public static class Both extends PlayerMoveC2SPacket {
+@@ -132,8 +126,6 @@
+             super.write(packetbytebuf);
+         }
+ 
+-        public void apply(PacketListener packetlistener) {
+-            super.apply((ServerPlayPacketListener) packetlistener);
+-        }
++        // Loom - decompile errors
+     }
+ }
