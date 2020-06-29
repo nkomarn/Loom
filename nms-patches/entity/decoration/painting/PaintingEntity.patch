@@ -1,0 +1,12 @@
+--- a/net/minecraft/entity/decoration/painting/PaintingEntity.java
++++ b/net/minecraft/entity/decoration/painting/PaintingEntity.java
+@@ -26,6 +26,9 @@
+ 
+     public PaintingEntity(EntityType<? extends PaintingEntity> entitytype, World world) {
+         super(entitytype, world);
++        // CraftBukkit start - generate a non-null painting +
++        this.motive = PaintingMotive.KEBAB;
++        // CraftBukkit end
+     }
+ 
+     public PaintingEntity(World world, BlockPos blockpos, Direction direction) {

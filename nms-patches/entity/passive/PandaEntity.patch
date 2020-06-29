@@ -1,0 +1,31 @@
+--- a/net/minecraft/entity/passive/PandaEntity.java
++++ b/net/minecraft/entity/passive/PandaEntity.java
+@@ -485,7 +485,7 @@
+     }
+ 
+     protected void loot(ItemEntity itementity) {
+-        if (this.getEquippedStack(EquipmentSlot.MAINHAND).isEmpty() && PandaEntity.IS_FOOD.test(itementity)) {
++        if (!org.bukkit.craftbukkit.event.CraftEventFactory.callEntityPickupItemEvent(this, itementity, 0, !(this.getEquippedStack(EquipmentSlot.MAINHAND).isEmpty() && PandaEntity.IS_FOOD.test(itementity))).isCancelled()) { // CraftBukkit
+             this.method_29499(itementity);
+             ItemStack itemstack = itementity.getStack();
+ 
+@@ -695,7 +695,7 @@
+ 
+         protected void setMobEntityTarget(MobEntity mobentity, LivingEntity livingentity) {
+             if (mobentity instanceof PandaEntity && ((PandaEntity) mobentity).isAttacking()) {
+-                mobentity.setTarget(livingentity);
++                mobentity.setTarget(livingentity, org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY, true); // CraftBukkit
+             }
+ 
+         }
+@@ -790,9 +790,7 @@
+         private final PandaEntity panda;
+ 
+         public PandaFleeGoal(PandaEntity pandaentity, Class<T> oclass, float f, double d0, double d1) {
+-            Predicate predicate = EntityPredicates.EXCEPT_SPECTATOR;
+-
+-            super(pandaentity, oclass, f, d0, d1, predicate::test);
++            super(pandaentity, oclass, f, d0, d1, EntityPredicates.EXCEPT_SPECTATOR::test); // CraftBukkit - decompile error
+             this.panda = pandaentity;
+         }
+ 

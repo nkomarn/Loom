@@ -1,0 +1,36 @@
+--- a/net/minecraft/entity/passive/PigEntity.java
++++ b/net/minecraft/entity/passive/PigEntity.java
+@@ -46,6 +46,10 @@
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++// CraftBukkit end
++
+ public class PigEntity extends AnimalEntity implements ItemSteerable, Saddleable {
+ 
+     private static final TrackedData<Boolean> SADDLED = DataTracker.registerData(PigEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+@@ -230,6 +234,13 @@
+ 
+             zombifiedpiglinentity.setPersistent();
+             this.world.spawnEntity(zombifiedpiglinentity);
++            // CraftBukkit start
++            if (CraftEventFactory.callPigZapEvent(this, lightningentity, zombifiedpiglinentity).isCancelled()) {
++                return;
++            }
++            // CraftBukkit - added a reason for spawning this creature
++            this.world.spawnEntity(zombifiedpiglinentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.LIGHTNING);
++            // CraftBukkit end
+             this.remove();
+         } else {
+             super.onStruckByLightning(lightningentity);
+@@ -261,7 +272,5 @@
+         return PigEntity.BREEDING_INGREDIENT.test(itemstack);
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile errors
+ }

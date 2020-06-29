@@ -1,0 +1,68 @@
+--- a/net/minecraft/entity/decoration/LeashKnotEntity.java
++++ b/net/minecraft/entity/decoration/LeashKnotEntity.java
+@@ -22,6 +22,13 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import net.minecraft.server.network.ServerPlayerEntity;
++import net.minecraft.server.world.ServerWorld;
++import net.minecraft.network.packet.s2c.play.EntityAttachS2CPacket;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++// CraftBukkit end
++
+ public class LeashKnotEntity extends AbstractDecorationEntity {
+ 
+     public LeashKnotEntity(EntityType<? extends LeashKnotEntity> entitytype, World world) {
+@@ -45,6 +52,7 @@
+ 
+     protected void updateAttachmentPosition() {
+         this.setPos((double) this.attachmentPos.getX() + 0.5D, (double) this.attachmentPos.getY() + 0.5D, (double) this.attachmentPos.getZ() + 0.5D);
++        if (valid) ((ServerWorld)world).checkChunk(this); // CraftBukkit
+     }
+ 
+     public void setFacing(Direction direction) {}
+@@ -83,22 +91,41 @@
+             while (iterator.hasNext()) {
+                 mobentity = (MobEntity) iterator.next();
+                 if (mobentity.getHoldingEntity() == playerentity) {
++                    // CraftBukkit start
++                    if (CraftEventFactory.callPlayerLeashEntityEvent(mobentity, this, playerentity).isCancelled()) {
++                        ((ServerPlayerEntity) playerentity).networkHandler.sendPacket(new EntityAttachS2CPacket(mobentity, mobentity.getHoldingEntity()));
++                        continue;
++                    }
++                    // CraftBukkit end
+                     mobentity.attachLeash(this, true);
+                     flag = true;
+                 }
+             }
+ 
+             if (!flag) {
+-                this.remove();
+-                if (playerentity.abilities.creativeMode) {
++                // CraftBukkit start - Move below
++                // this.remove();
++                if (true || playerentity.abilities.creativeMode) { // CraftBukkit - Process for non-creative as well
+                     iterator = list.iterator();
+ 
+                     while (iterator.hasNext()) {
+                         mobentity = (MobEntity) iterator.next();
+                         if (mobentity.isLeashed() && mobentity.getHoldingEntity() == this) {
+                             mobentity.detachLeash(true, false);
++                            // CraftBukkit start
++                            if (CraftEventFactory.callPlayerUnleashEntityEvent(mobentity, playerentity).isCancelled()) {
++                                removed = false;
++                                continue;
++                            }
++                            mobentity.detachLeash(true, !playerentity.abilities.canInstantlyBuild); // false -> survival mode boolean
++                            // CraftBukkit end
+                         }
+                     }
++                    // CraftBukkit start
++                    if (removed) {
++                        this.remove();
++                    }
++                    // CraftBukkit end
+                 }
+             }
+ 

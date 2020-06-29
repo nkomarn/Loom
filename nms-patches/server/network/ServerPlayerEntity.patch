@@ -505,7 +505,7 @@
 +            serverworld = ((CraftWorld) exit.getWorld()).getHandle();
 +            this.inTeleportationState = true; // CraftBukkit - Set teleport invulnerability only if player changing worlds
 +
-+            this.networkHandler.sendPacket(new PlayerRespawnS2CPacket(serverworld.getDimensionRegistryKey(), serverworld.getRegistryKey(), BiomeAccess.hashSeed(serverworld.getSeed()), this.interactionManager.getGameMode(), this.interactionManager.c(), serverworld.isDebugWorld(), serverworld.isFlat(), true));
++            this.networkHandler.sendPacket(new PlayerRespawnS2CPacket(serverworld.getDimensionRegistryKey(), serverworld.getRegistryKey(), BiomeAccess.hashSeed(serverworld.getSeed()), this.interactionManager.getGameMode(), this.interactionManager.method_30119(), serverworld.isDebugWorld(), serverworld.isFlat(), true));
 +            this.networkHandler.sendPacket(new DifficultyS2CPacket(this.world.getDifficulty(), this.world.getLevelProperties().isDifficultyLocked()));
 +            PlayerManager playerlist = this.server.getPlayerManager();
 +
@@ -564,11 +564,11 @@
 +            return Either.left(PlayerEntity.SleepFailureReason.OTHER_PROBLEM);
 +        }
 +    }
-+
+ 
 +    public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos) {
 +        Direction direction = (Direction) this.world.getBlockState(blockpos).get(HorizontalFacingBlock.FACING);
 +        Either<PlayerEntity.SleepFailureReason, Unit> bedResult = this.getBedResult(blockpos, direction);
- 
++
 +        {
 +            {
 +                {

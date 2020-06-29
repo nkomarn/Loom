@@ -1,0 +1,66 @@
+--- a/net/minecraft/entity/passive/MooshroomEntity.java
++++ b/net/minecraft/entity/passive/MooshroomEntity.java
+@@ -40,6 +40,11 @@
+ import net.minecraft.world.WorldView;
+ import org.apache.commons.lang3.tuple.Pair;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTransformEvent;
++// CraftBukkit end
++
+ public class MooshroomEntity extends CowEntity implements Shearable {
+ 
+     private static final TrackedData<String> TYPE = DataTracker.registerData(MooshroomEntity.class, TrackedDataHandlerRegistry.STRING);
+@@ -106,6 +111,11 @@
+             this.playSound(soundevent, 1.0F, 1.0F);
+             return ActionResult.success(this.world.isClient);
+         } else if (itemstack.getItem() == Items.SHEARS && this.isShearable()) {
++            // CraftBukkit start
++            if (!CraftEventFactory.handlePlayerShearEntityEvent(playerentity, this, itemstack, hand)) {
++                return ActionResult.PASS;
++            }
++            // CraftBukkit end
+             this.sheared(SoundCategory.PLAYERS);
+             if (!this.world.isClient) {
+                 itemstack.damage(1, (LivingEntity) playerentity, (playerentity1) -> {
+@@ -151,7 +161,7 @@
+         this.world.playSoundFromEntity((PlayerEntity) null, this, SoundEvents.ENTITY_MOOSHROOM_SHEAR, soundcategory, 1.0F, 1.0F);
+         if (!this.world.isClient()) {
+             ((ServerWorld) this.world).spawnParticles(ParticleTypes.EXPLOSION, this.getX(), this.getBodyY(0.5D), this.getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
+-            this.remove();
++            // this.remove(); // CraftBikkit - moved down
+             CowEntity cowentity = (CowEntity) EntityType.COW.create(this.world);
+ 
+             cowentity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.yaw, this.pitch);
+@@ -167,7 +177,14 @@
+             }
+ 
+             cowentity.setInvulnerable(this.isInvulnerable());
+-            this.world.spawnEntity(cowentity);
++            // CraftBukkit start
++            if (CraftEventFactory.callEntityTransformEvent(this, cowentity, EntityTransformEvent.TransformReason.SHEARED).isCancelled()) {
++                return;
++            }
++            this.world.spawnEntity(cowentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SHEARED);
++
++            this.remove(); // CraftBukkit - from above
++            // CraftBukkit end
+ 
+             for (int i = 0; i < 5; ++i) {
+                 this.world.spawnEntity(new ItemEntity(this.world, this.getX(), this.getBodyY(1.0D), this.getZ(), new ItemStack(this.getMooshroomType().mushroom.getBlock())));
+@@ -248,13 +265,7 @@
+         return mooshroomentity_type2;
+     }
+ 
+-    public CowEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
+-
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile errors
+ 
+     public static enum Type {
+ 

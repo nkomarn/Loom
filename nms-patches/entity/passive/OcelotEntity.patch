@@ -1,0 +1,43 @@
+--- a/net/minecraft/entity/passive/OcelotEntity.java
++++ b/net/minecraft/entity/passive/OcelotEntity.java
+@@ -117,7 +117,7 @@
+     }
+ 
+     public boolean canImmediatelyDespawn(double d0) {
+-        return !this.isTrusting() && this.age > 2400;
++        return !this.isTrusting() /*&& this.age > 2400*/; // CraftBukkit
+     }
+ 
+     public static DefaultAttributeContainer.Builder createOcelotAttributes() {
+@@ -163,7 +163,8 @@
+         if ((this.temptGoal == null || this.temptGoal.isActive()) && !this.isTrusting() && this.isBreedingItem(itemstack) && playerentity.squaredDistanceTo((Entity) this) < 9.0D) {
+             this.eat(playerentity, itemstack);
+             if (!this.world.isClient) {
+-                if (this.random.nextInt(3) == 0) {
++                // CraftBukkit - added event call and isCancelled check
++                if (this.random.nextInt(3) == 0 && !org.bukkit.craftbukkit.event.CraftEventFactory.callEntityTameEvent(this, playerentity).isCancelled()) {
+                     this.setTrusting(true);
+                     this.showEmoteParticle(true);
+                     this.world.sendEntityStatus(this, (byte) 41);
+@@ -248,9 +249,7 @@
+         return super.initialize(worldaccess, localdifficulty, spawnreason, (EntityData) entitydata, compoundtag);
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile errors
+ 
+     static class OcelotTemptGoal extends TemptGoal {
+ 
+@@ -271,9 +270,7 @@
+         private final OcelotEntity ocelot;
+ 
+         public FleeGoal(OcelotEntity ocelotentity, Class<T> oclass, float f, double d0, double d1) {
+-            Predicate predicate = EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR;
+-
+-            super(ocelotentity, oclass, f, d0, d1, predicate::test);
++            super(ocelotentity, oclass, f, d0, d1, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR::test);
+             this.ocelot = ocelotentity;
+         }
+ 

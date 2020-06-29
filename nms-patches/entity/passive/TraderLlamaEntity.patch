@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/passive/TraderLlamaEntity.java
++++ b/net/minecraft/entity/passive/TraderLlamaEntity.java
+@@ -133,7 +133,7 @@
+         }
+ 
+         public void start() {
+-            this.mob.setTarget(this.offender);
++            this.mob.setTarget(this.offender, org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_OWNER, true); // CraftBukkit
+             Entity entity = this.llama.getHoldingEntity();
+ 
+             if (entity instanceof WanderingTraderEntity) {

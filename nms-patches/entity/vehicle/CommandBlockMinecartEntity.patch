@@ -1,0 +1,15 @@
+--- a/net/minecraft/entity/vehicle/CommandBlockMinecartEntity.java
++++ b/net/minecraft/entity/vehicle/CommandBlockMinecartEntity.java
+@@ -108,5 +108,12 @@
+         public ServerCommandSource getSource() {
+             return new ServerCommandSource(this, CommandBlockMinecartEntity.this.getPos(), CommandBlockMinecartEntity.this.getRotationClient(), this.getWorld(), 2, this.getCustomName().getString(), CommandBlockMinecartEntity.this.getDisplayName(), this.getWorld().getServer(), CommandBlockMinecartEntity.this);
+         }
++
++        // CraftBukkit start
++        @Override
++        public org.bukkit.command.CommandSender getBukkitSender(ServerCommandSource wrapper) {
++            return (org.bukkit.craftbukkit.entity.CraftMinecartCommand) CommandBlockMinecartEntity.this.getBukkitEntity();
++        }
++        // CraftBukkit end
+     }
+ }

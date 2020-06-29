@@ -1,0 +1,76 @@
+--- a/net/minecraft/entity/vehicle/StorageMinecartEntity.java
++++ b/net/minecraft/entity/vehicle/StorageMinecartEntity.java
+@@ -28,6 +28,14 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import java.util.List;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.inventory.InventoryHolder;
++// CraftBukkit end
++
+ public abstract class StorageMinecartEntity extends AbstractMinecartEntity implements Inventory, NamedScreenHandlerFactory {
+ 
+     private DefaultedList<ItemStack> inventory;
+@@ -36,15 +44,56 @@
+     private Identifier lootTableId;
+     private long lootSeed;
+ 
++    // CraftBukkit start
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++
++    public List<ItemStack> getContents() {
++        return this.inventory;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    public InventoryHolder getOwner() {
++        org.bukkit.entity.Entity cart = getBukkitEntity();
++        if(cart instanceof InventoryHolder) return (InventoryHolder) cart;
++        return null;
++    }
++
++    @Override
++    public int getMaxCountPerStack() {
++        return maxStack;
++    }
++
++    public void setMaxCountPerStack(int size) {
++        maxStack = size;
++    }
++
++    @Override
++    public Location getLocation() {
++        return getBukkitEntity().getLocation();
++    }
++    // CraftBukkit end
++
+     protected StorageMinecartEntity(EntityType<?> entitytype, World world) {
+         super(entitytype, world);
+-        this.inventory = DefaultedList.ofSize(36, ItemStack.EMPTY);
++        this.inventory = DefaultedList.ofSize(size(), ItemStack.EMPTY);
+         this.field_7733 = true;
+     }
+ 
+     protected StorageMinecartEntity(EntityType<?> entitytype, double d0, double d1, double d2, World world) {
+         super(entitytype, world, d0, d1, d2);
+-        this.inventory = DefaultedList.ofSize(36, ItemStack.EMPTY);
++        this.inventory = DefaultedList.ofSize(size(), ItemStack.EMPTY);
+         this.field_7733 = true;
+     }
+ 

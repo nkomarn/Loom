@@ -1,0 +1,52 @@
+--- a/net/minecraft/entity/passive/ParrotEntity.java
++++ b/net/minecraft/entity/passive/ParrotEntity.java
+@@ -63,11 +63,10 @@
+ public class ParrotEntity extends TameableShoulderEntity implements Flutterer {
+ 
+     private static final TrackedData<Integer> ATTR_VARIANT = DataTracker.registerData(ParrotEntity.class, TrackedDataHandlerRegistry.INTEGER);
+-    private static final Predicate<MobEntity> CAN_IMITATE=new Predicate<MobEntity>(){public boolean test(@Nullable MobEntity mobentity){return mobentity!=null&&ParrotEntity.MOB_SOUNDS.containsKey(mobentity.getType());}
++    private static final Predicate<MobEntity> CAN_IMITATE = (mobentity) -> mobentity != null && ParrotEntity.MOB_SOUNDS.containsKey(mobentity.getType());
+ 
+-    public boolean test(@Nullable Object object){return this.test((MobEntity)object);}};
+     private static final Item COOKIE = Items.COOKIE;
+-    private static final Set<Item> TAMING_INGREDIENTS = Sets.newHashSet((Object[])(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS));
++    private static final Set<Item> TAMING_INGREDIENTS = Sets.newHashSet(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS); // CraftBukkit - decompile error
+     private static final Map<EntityType<?>, SoundEvent> MOB_SOUNDS = (Map) Util.make(Maps.newHashMap(), (hashmap) -> {
+         hashmap.put(EntityType.BLAZE, SoundEvents.ENTITY_PARROT_IMITATE_BLAZE);
+         hashmap.put(EntityType.CAVE_SPIDER, SoundEvents.ENTITY_PARROT_IMITATE_SPIDER);
+@@ -228,7 +227,7 @@
+             }
+ 
+             if (!this.world.isClient) {
+-                if (this.random.nextInt(10) == 0) {
++                if (this.random.nextInt(10) == 0 && !org.bukkit.craftbukkit.event.CraftEventFactory.callEntityTameEvent(this, playerentity).isCancelled()) { // CraftBukkit
+                     this.setOwner(playerentity);
+                     this.world.sendEntityStatus(this, (byte) 7);
+                 } else {
+@@ -242,7 +241,7 @@
+                 itemstack.decrement(1);
+             }
+ 
+-            this.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 900));
++            this.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 900), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.FOOD); // CraftBukkit
+             if (playerentity.isCreative() || !this.isInvulnerable()) {
+                 this.damage(DamageSource.player(playerentity), Float.MAX_VALUE);
+             }
+@@ -341,7 +340,7 @@
+     }
+ 
+     public boolean isPushable() {
+-        return true;
++        return super.isPushable();
+     }
+ 
+     protected void pushAway(Entity entity) {
+@@ -354,7 +353,7 @@
+         if (this.isInvulnerableTo(damagesource)) {
+             return false;
+         } else {
+-            this.setSitting(false);
++            // this.setSitting(false); // CraftBukkit - moved into EntityLiving.damageEntity(DamageSource, float)
+             return super.damage(damagesource, f);
+         }
+     }
