@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/mob/WitchEntity.java
++++ b/net/minecraft/entity/mob/WitchEntity.java
+@@ -126,7 +126,7 @@
+                             while (iterator.hasNext()) {
+                                 StatusEffectInstance statuseffectinstance = (StatusEffectInstance) iterator.next();
+ 
+-                                this.addStatusEffect(new StatusEffectInstance(statuseffectinstance));
++                                this.addStatusEffect(new StatusEffectInstance(statuseffectinstance), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+                             }
+                         }
+                     }

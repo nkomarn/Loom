@@ -1,0 +1,49 @@
+--- a/net/minecraft/entity/mob/ShulkerEntity.java
++++ b/net/minecraft/entity/mob/ShulkerEntity.java
+@@ -45,6 +45,12 @@
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import net.minecraft.server.world.ServerWorld;
++import org.bukkit.Location;
++import org.bukkit.event.entity.EntityTeleportEvent;
++// CraftBukkit end
++
+ public class ShulkerEntity extends GolemEntity implements Monster {
+ 
+     private static final UUID COVERED_ARMOR_BONUS_ID = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF27F");
+@@ -68,7 +74,7 @@
+         this.goalSelector.add(4, new ShulkerEntity.ShootBulletGoal());
+         this.goalSelector.add(7, new ShulkerEntity.PeekGoal());
+         this.goalSelector.add(8, new LookAroundGoal(this));
+-        this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge());
++        this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0])); // CraftBukkit - decompile error
+         this.targetSelector.add(2, new ShulkerEntity.SearchForPlayerGoal(this));
+         this.targetSelector.add(3, new ShulkerEntity.SearchForTargetGoal(this));
+     }
+@@ -303,6 +309,16 @@
+                     Direction direction = this.findAttachSide(blockpos1);
+ 
+                     if (direction != null) {
++                        // CraftBukkit start
++                        EntityTeleportEvent teleport = new EntityTeleportEvent(this.getBukkitEntity(), this.getBukkitEntity().getLocation(), new Location(this.world.getWorld(), blockposition1.getX(), blockposition1.getY(), blockposition1.getZ()));
++                        this.world.getServer().getPluginManager().callEvent(teleport);
++                        if (!teleport.isCancelled()) {
++                            Location to = teleport.getTo();
++                            blockpos1 = new BlockPos(to.getX(), to.getY(), to.getZ());
++                        } else {
++                            return false;
++                        }
++                        // CraftBukkit end
+                         this.dataTracker.set(ShulkerEntity.ATTACHED_FACE, direction);
+                         this.playSound(SoundEvents.ENTITY_SHULKER_TELEPORT, 1.0F, 1.0F);
+                         this.dataTracker.set(ShulkerEntity.ATTACHED_BLOCK, Optional.of(blockpos1));
+@@ -341,6 +357,7 @@
+                 }
+ 
+                 this.resetPosition((double) blockpos.getX() + 0.5D, (double) blockpos.getY(), (double) blockpos.getZ() + 0.5D);
++                if (valid) ((ServerWorld) world).checkChunk(this); // CraftBukkit
+             }
+         }
+ 

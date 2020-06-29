@@ -49,9 +49,9 @@
 +        return null; // This method won't be called since CraftInventoryDoubleChest doesn't defer to here
 +    }
 +
-+    public void setMaxStackSize(int size) {
-+        this.first.setMaxStackSize(size);
-+        this.second.setMaxStackSize(size);
++    public void setMaxCountPerStack(int size) {
++        this.first.setMaxCountPerStack(size);
++        this.second.setMaxCountPerStack(size);
 +    }
 +
 +    @Override

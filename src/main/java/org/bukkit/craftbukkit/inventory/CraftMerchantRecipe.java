@@ -83,7 +83,7 @@ public class CraftMerchantRecipe extends MerchantRecipe {
         handle.priceMultiplier = priceMultiplier;
     }
 
-    public net.minecraft.server.MerchantRecipe toMinecraft() {
+    public TradeOffer toMinecraft() {
         List<ItemStack> ingredients = getIngredients();
         Preconditions.checkState(!ingredients.isEmpty(), "No offered ingredients");
         handle.buyingItem1 = CraftItemStack.asNMSCopy(ingredients.get(0));

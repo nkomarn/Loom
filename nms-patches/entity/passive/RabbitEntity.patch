@@ -1,0 +1,37 @@
+--- a/net/minecraft/entity/passive/RabbitEntity.java
++++ b/net/minecraft/entity/passive/RabbitEntity.java
+@@ -68,8 +68,14 @@
+         super(entitytype, world);
+         this.jumpControl = new RabbitEntity.RabbitJumpControl(this);
+         this.moveControl = new RabbitEntity.RabbitMoveControl(this);
++        this.initializePathFinderGoals();
++    }
++
++    // CraftBukkit start - code from constructor
++    public void initializePathFinderGoals(){
+         this.setSpeed(0.0D);
+     }
++    // CraftBukkit end
+ 
+     protected void initGoals() {
+         this.goalSelector.add(1, new SwimGoal(this));
+@@ -432,9 +438,19 @@
+                     Integer integer = (Integer) blockstate.get(CarrotsBlock.AGE);
+ 
+                     if (integer == 0) {
++                        // CraftBukkit start
++                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(this.rabbit, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) {
++                            return;
++                        }
++                        // CraftBukkit end
+                         world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 2);
+                         world.breakBlock(blockpos, true, this.rabbit);
+                     } else {
++                        // CraftBukkit start
++                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(this.rabbit, blockpos, blockstate.with(CarrotsBlock.AGE, integer - 1)).isCancelled()) {
++                            return;
++                        }
++                        // CraftBukkit end
+                         world.setBlockState(blockpos, (BlockState) blockstate.with(CarrotsBlock.AGE, integer - 1), 2);
+                         world.syncWorldEvent(2001, blockpos, Block.getRawIdFromState(blockstate));
+                     }

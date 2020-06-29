@@ -24,6 +24,8 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.AdvancementDataPlayer;
 import net.minecraft.server.AdvancementProgress;
 import net.minecraft.server.AttributeMapBase;
@@ -68,6 +70,8 @@ import net.minecraft.server.Vec3D;
 import net.minecraft.server.WhiteListEntry;
 import net.minecraft.server.WorldServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanList;
@@ -1038,7 +1042,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     private void hidePlayer0(@Nullable Plugin plugin, Player player) {
         Validate.notNull(player, "hidden player cannot be null");
-        if (getHandle().playerConnection == null) return;
+        if (getHandle().networkHandler == null) return;
         if (equals(player)) return;
 
         Set<WeakReference<Plugin>> hidingPlugins = hiddenPlayers.get(player.getUniqueId());
@@ -1053,9 +1057,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         hiddenPlayers.put(player.getUniqueId(), hidingPlugins);
 
         // Remove this player from the hidden player's EntityTrackerEntry
-        PlayerChunkMap tracker = ((WorldServer) entity.world).getChunkProvider().playerChunkMap;
-        EntityPlayer other = ((CraftPlayer) player).getHandle();
-        PlayerChunkMap.EntityTracker entry = tracker.trackedEntities.get(other.getId());
+        ThreadedAnvilChunkStorage tracker = ((ServerWorld) entity.world).getChunkManager().threadedAnvilChunkStorage;
+        ServerPlayerEntity other = ((CraftPlayer) player).getHandle();
+        ThreadedAnvilChunkStorage.EntityTracker entry = tracker.trackedEntities.get(other.getId());
         if (entry != null) {
             entry.clear(getHandle());
         }
@@ -1082,7 +1086,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     private void showPlayer0(@Nullable Plugin plugin, Player player) {
         Validate.notNull(player, "shown player cannot be null");
-        if (getHandle().playerConnection == null) return;
+        if (getHandle().networkHandler == null) return;
         if (equals(player)) return;
 
         Set<WeakReference<Plugin>> hidingPlugins = hiddenPlayers.get(player.getUniqueId());
@@ -1134,7 +1138,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return (ServerPlayerEntity) entity;
     }
 
-    public void setHandle(final EntityPlayer entity) {
+    public void setHandle(final ServerPlayerEntity entity) {
         super.setHandle(entity);
     }
 
@@ -1170,7 +1174,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         this.firstPlayed = firstPlayed;
     }
 
-    public void readExtraData(NBTTagCompound nbttagcompound) {
+    public void readExtraData(CompoundTag nbttagcompound) {
         hasPlayedBefore = true;
         if (nbttagcompound.hasKey("bukkit")) {
             NBTTagCompound data = nbttagcompound.getCompound("bukkit");
@@ -1191,7 +1195,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         }
     }
 
-    public void setExtraData(NBTTagCompound nbttagcompound) {
+    public void setExtraData(CompoundTag nbttagcompound) {
         if (!nbttagcompound.hasKey("bukkit")) {
             nbttagcompound.set("bukkit", new NBTTagCompound());
         }

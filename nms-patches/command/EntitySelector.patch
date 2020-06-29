@@ -1,0 +1,58 @@
+--- a/net/minecraft/command/EntitySelector.java
++++ b/net/minecraft/command/EntitySelector.java
+@@ -75,7 +75,7 @@
+     }
+ 
+     private void checkSourcePermission(ServerCommandSource servercommandsource) throws CommandSyntaxException {
+-        if (this.usesAt && !servercommandsource.hasPermissionLevel(2)) {
++        if (this.usesAt && !servercommandsource.hasPermissionLevel(2, "minecraft.command.selector")) { // CraftBukkit
+             throw EntityArgumentType.NOT_ALLOWED_EXCEPTION.create();
+         }
+     }
+@@ -100,7 +100,7 @@
+         } else if (this.playerName != null) {
+             ServerPlayerEntity serverplayerentity = servercommandsource.getMinecraftServer().getPlayerManager().getPlayer(this.playerName);
+ 
+-            return (List) (serverplayerentity == null ? Collections.emptyList() : Lists.newArrayList((Object[]) (serverplayerentity)));
++            return (List) (serverplayerentity == null ? Collections.emptyList() : Lists.newArrayList(serverplayerentity)); // Loom - decompile errors
+         } else if (this.uuid != null) {
+             Iterator iterator = servercommandsource.getMinecraftServer().getWorlds().iterator();
+ 
+@@ -116,13 +116,13 @@
+                 entity = serverworld.getEntity(this.uuid);
+             } while (entity == null);
+ 
+-            return Lists.newArrayList((Object[]) (entity));
++            return Lists.newArrayList((entity));  // Loom - decompile errors
+         } else {
+             Vec3d vec3d = (Vec3d) this.positionOffset.apply(servercommandsource.getPosition());
+             Predicate<Entity> predicate = this.getPositionPredicate(vec3d);
+ 
+             if (this.senderOnly) {
+-                return (List) (servercommandsource.getEntity() != null && predicate.test(servercommandsource.getEntity()) ? Lists.newArrayList((Object[]) (servercommandsource.getEntity())) : Collections.emptyList());
++                return (List) (servercommandsource.getEntity() != null && predicate.test(servercommandsource.getEntity()) ? Lists.newArrayList((servercommandsource.getEntity())) : Collections.emptyList());  // Loom - decompile errors
+             } else {
+                 List<Entity> list = Lists.newArrayList();
+ 
+@@ -169,10 +169,10 @@
+ 
+         if (this.playerName != null) {
+             serverplayerentity = servercommandsource.getMinecraftServer().getPlayerManager().getPlayer(this.playerName);
+-            return (List) (serverplayerentity == null ? Collections.emptyList() : Lists.newArrayList((Object[]) (serverplayerentity)));
++            return (List) (serverplayerentity == null ? Collections.emptyList() : Lists.newArrayList((serverplayerentity)));  // Loom - decompile errors
+         } else if (this.uuid != null) {
+             serverplayerentity = servercommandsource.getMinecraftServer().getPlayerManager().getPlayer(this.uuid);
+-            return (List) (serverplayerentity == null ? Collections.emptyList() : Lists.newArrayList((Object[]) (serverplayerentity)));
++            return (List) (serverplayerentity == null ? Collections.emptyList() : Lists.newArrayList((serverplayerentity)));  // Loom - decompile errors
+         } else {
+             Vec3d vec3d = (Vec3d) this.positionOffset.apply(servercommandsource.getPosition());
+             Predicate<Entity> predicate = this.getPositionPredicate(vec3d);
+@@ -182,7 +182,7 @@
+                     ServerPlayerEntity serverplayerentity1 = (ServerPlayerEntity) servercommandsource.getEntity();
+ 
+                     if (predicate.test(serverplayerentity1)) {
+-                        return Lists.newArrayList((Object[]) (serverplayerentity1));
++                        return Lists.newArrayList((serverplayerentity1));  // Loom - decompile errors
+                     }
+                 }
+ 

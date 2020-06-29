@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/projectile/ProjectileEntity.java
 +++ b/net/minecraft/entity/projectile/ProjectileEntity.java
-@@ -15,6 +15,8 @@
+@@ -15,13 +15,15 @@
  import net.minecraft.util.math.Vec3d;
  import net.minecraft.world.World;
  
@@ -9,6 +9,14 @@
  public abstract class ProjectileEntity extends Entity {
  
      private UUID ownerUuid;
+     private int field_23739;
+     private boolean field_23740;
+ 
+-    ProjectileEntity(EntityType<? extends ProjectileEntity> entitytype, World world) {
++    public ProjectileEntity(EntityType<? extends ProjectileEntity> entitytype, World world) { // Loom
+         super(entitytype, world);
+     }
+ 
 @@ -30,7 +32,7 @@
              this.ownerUuid = entity.getUuid();
              this.field_23739 = entity.getEntityId();

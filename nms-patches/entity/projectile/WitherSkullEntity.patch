@@ -1,0 +1,47 @@
+--- a/net/minecraft/entity/projectile/WitherSkullEntity.java
++++ b/net/minecraft/entity/projectile/WitherSkullEntity.java
+@@ -21,6 +21,9 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
+ 
++import org.bukkit.Bukkit;
++import org.bukkit.event.entity.ExplosionPrimeEvent; // CraftBukkit
++
+ public class WitherSkullEntity extends ExplosiveProjectileEntity {
+ 
+     private static final TrackedData<Boolean> CHARGED = DataTracker.registerData(WitherSkullEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+@@ -60,7 +63,7 @@
+                     if (entity.isAlive()) {
+                         this.dealDamage(livingentity, entity);
+                     } else {
+-                        livingentity.heal(5.0F);
++                        livingentity.heal(5.0F, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.WITHER); // CraftBukkit
+                     }
+                 }
+             } else {
+@@ -77,7 +80,7 @@
+                 }
+ 
+                 if (b0 > 0) {
+-                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 20 * b0, 1));
++                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 20 * b0, 1), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+                 }
+             }
+ 
+@@ -89,7 +92,15 @@
+         if (!this.world.isClient) {
+             Explosion.DestructionType explosion_destructiontype = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE;
+ 
+-            this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, explosion_destructiontype);
++            // CraftBukkit start
++            // this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, explosion_destructiontype);
++            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), 1.0F, false);
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (!event.isCancelled()) {
++                this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), event.getRadius(), event.getFire(), explosion_destructiontype);
++            }
++            // CraftBukkit end
+             this.remove();
+         }
+ 

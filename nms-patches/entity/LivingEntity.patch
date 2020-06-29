@@ -1,12 +1,14 @@
 --- a/net/minecraft/entity/LivingEntity.java
 +++ b/net/minecraft/entity/LivingEntity.java
-@@ -106,6 +106,25 @@
+@@ -106,6 +106,27 @@
  import net.minecraft.world.World;
  import org.apache.logging.log4j.Logger;
  
 +// CraftBukkit start
 +import net.minecraft.entity.passive.AnimalEntity;
 +import net.minecraft.entity.passive.TameableEntity;
++import net.minecraft.nbt.FloatTag;
++import net.minecraft.nbt.IntTag;
 +
 +import java.util.ArrayList;
 +import java.util.HashSet;
@@ -26,19 +28,37 @@
  public abstract class LivingEntity extends Entity {
  
      private static final UUID SPRINTING_SPEED_BOOST_ID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
-@@ -191,6 +210,21 @@
+@@ -120,7 +141,7 @@
+     private static final TrackedData<Optional<BlockPos>> SLEEPING_POSITION = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
+     protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F);
+     private final AttributeContainer attributes;
+-    private final DamageTracker damageTracker = new DamageTracker(this);
++    public DamageTracker damageTracker = new DamageTracker(this);
+     private final Map<StatusEffect, StatusEffectInstance> activeStatusEffects = Maps.newHashMap();
+     private final DefaultedList<ItemStack> equippedHand;
+     private final DefaultedList<ItemStack> equippedArmor;
+@@ -171,7 +192,7 @@
+     protected double serverPitch;
+     protected double serverHeadYaw;
+     protected int headTrackingIncrements;
+-    private boolean effectsChanged;
++    public boolean effectsChanged;
+     @Nullable
+     private LivingEntity attacker;
+     private int lastAttackedTime;
+@@ -191,6 +212,21 @@
      private float leaningPitch;
      private float lastLeaningPitch;
      protected Brain<?> brain;
 +    // CraftBukkit start
 +    public int expToDrop;
 +    public int maxAirTicks = 300;
-+    boolean forceDrops;
-+    ArrayList<org.bukkit.inventory.ItemStack> drops = new ArrayList<org.bukkit.inventory.ItemStack>();
++    public boolean forceDrops;
++    public ArrayList<org.bukkit.inventory.ItemStack> drops = new ArrayList<org.bukkit.inventory.ItemStack>();
 +    public final org.bukkit.craftbukkit.attribute.CraftAttributeMap craftAttributes;
 +    public boolean collides = true;
 +    public Set<UUID> collidableExemptions = new HashSet<>();
-+    public boolean canPickUpLoot;
++    public boolean pickUpLoot;
 +
 +    @Override
 +    public float getBukkitYaw() {
@@ -48,7 +68,7 @@
  
      protected LivingEntity(EntityType<? extends LivingEntity> entitytype, World world) {
          super(entitytype, world);
-@@ -202,7 +236,9 @@
+@@ -202,7 +238,9 @@
          this.activeItemStack = ItemStack.EMPTY;
          this.climbingPos = Optional.empty();
          this.attributes = new AttributeContainer(DefaultAttributeRegistry.get(entitytype));
@@ -59,7 +79,7 @@
          this.inanimate = true;
          this.randomSmallSeed = (float) ((Math.random() + 1.0D) * 0.009999999776482582D);
          this.refreshPosition();
-@@ -266,7 +302,13 @@
+@@ -266,7 +304,13 @@
                  double d1 = Math.min((double) (0.2F + f / 15.0F), 2.5D);
                  int i = (int) (150.0D * d1);
  
@@ -74,7 +94,7 @@
              }
          }
  
-@@ -485,7 +527,7 @@
+@@ -485,7 +529,7 @@
  
      protected void updatePostDeath() {
          ++this.deathTime;
@@ -83,7 +103,7 @@
              this.remove();
  
              for (int i = 0; i < 20; ++i) {
-@@ -644,6 +686,17 @@
+@@ -644,6 +688,17 @@
              }
          }
  
@@ -101,7 +121,7 @@
          if (compoundtag.contains("Health", 99)) {
              this.setHealth(compoundtag.getFloat("Health"));
          }
-@@ -681,9 +734,32 @@
+@@ -681,9 +736,32 @@
  
      }
  
@@ -134,7 +154,7 @@
          try {
              while (iterator.hasNext()) {
                  StatusEffect statuseffect = (StatusEffect) iterator.next();
-@@ -693,6 +769,12 @@
+@@ -693,6 +771,12 @@
                      this.onStatusEffectUpgraded(statuseffectinstance, true);
                  })) {
                      if (!this.world.isClient) {
@@ -147,7 +167,7 @@
                          iterator.remove();
                          this.onStatusEffectRemoved(statuseffectinstance);
                      }
-@@ -704,6 +786,18 @@
+@@ -704,6 +788,18 @@
              ;
          }
  
@@ -166,7 +186,7 @@
          if (this.effectsChanged) {
              if (!this.world.isClient) {
                  this.updatePotionVisibility();
-@@ -813,6 +907,12 @@
+@@ -813,6 +909,12 @@
      }
  
      public boolean clearStatusEffects() {
@@ -179,7 +199,7 @@
          if (this.world.isClient) {
              return false;
          } else {
-@@ -821,7 +921,14 @@
+@@ -821,7 +923,14 @@
              boolean flag;
  
              for (flag = false; iterator.hasNext(); flag = true) {
@@ -195,7 +215,7 @@
                  iterator.remove();
              }
  
-@@ -847,17 +954,43 @@
+@@ -847,17 +956,43 @@
      }
  
      public boolean addStatusEffect(StatusEffectInstance statuseffectinstance) {
@@ -240,7 +260,7 @@
                  return true;
              } else {
                  return false;
-@@ -883,11 +1016,39 @@
+@@ -883,11 +1018,39 @@
  
      @Nullable
      public StatusEffectInstance removeStatusEffectInternal(@Nullable StatusEffect statuseffect) {
@@ -281,7 +301,7 @@
  
          if (statuseffectinstance != null) {
              this.onStatusEffectRemoved(statuseffectinstance);
-@@ -925,19 +1086,54 @@
+@@ -925,19 +1088,54 @@
      }
  
      public void heal(float f) {
@@ -337,7 +357,7 @@
          this.dataTracker.set(LivingEntity.HEALTH, MathHelper.clamp(f, 0.0F, this.getMaxHealth()));
      }
  
-@@ -950,7 +1146,7 @@
+@@ -950,7 +1148,7 @@
              return false;
          } else if (this.world.isClient) {
              return false;
@@ -346,7 +366,7 @@
              return false;
          } else if (damagesource.isFire() && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
              return false;
-@@ -962,17 +1158,19 @@
+@@ -962,17 +1160,19 @@
              this.despawnCounter = 0;
              float f1 = f;
  
@@ -369,7 +389,7 @@
                  this.damageShield(f);
                  f2 = f;
                  f = 0.0F;
-@@ -992,20 +1190,39 @@
+@@ -992,20 +1192,39 @@
  
              if ((float) this.timeUntilRegen > 10.0F) {
                  if (f <= this.lastDamageTaken) {
@@ -411,7 +431,7 @@
              this.knockbackVelocity = 0.0F;
              Entity entity1 = damagesource.getAttacker();
  
-@@ -1126,19 +1343,29 @@
+@@ -1126,19 +1345,29 @@
              Hand[] ahand = Hand.values();
              int i = ahand.length;
  
@@ -445,7 +465,7 @@
                      ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this;
  
                      serverplayerentity.incrementStat(Stats.USED.getOrCreateStat(Items.TOTEM_OF_UNDYING));
-@@ -1146,13 +1373,15 @@
+@@ -1146,13 +1375,15 @@
                  }
  
                  this.setHealth(1.0F);
@@ -465,7 +485,7 @@
          }
      }
  
-@@ -1269,20 +1498,38 @@
+@@ -1269,20 +1500,38 @@
  
          boolean flag = this.playerHitTimer > 0;
  
@@ -506,7 +526,7 @@
  
              while (i > 0) {
                  int j = ExperienceOrbEntity.roundToOrbSize(i);
-@@ -1290,7 +1537,9 @@
+@@ -1290,7 +1539,9 @@
                  i -= j;
                  this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.getX(), this.getY(), this.getZ(), j));
              }
@@ -516,7 +536,7 @@
  
      }
  
-@@ -1408,9 +1657,14 @@
+@@ -1408,9 +1659,14 @@
          int i = this.computeFallDamage(f, f1);
  
          if (i > 0) {
@@ -532,7 +552,7 @@
              return true;
          } else {
              return flag;
-@@ -1450,7 +1704,7 @@
+@@ -1450,7 +1706,7 @@
  
      protected float applyArmorToDamage(DamageSource damagesource, float f) {
          if (!damagesource.bypassesArmor()) {
@@ -541,7 +561,7 @@
              f = DamageUtil.getDamageLeft(f, (float) this.getArmor(), (float) this.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
          }
  
-@@ -1463,7 +1717,8 @@
+@@ -1463,7 +1719,8 @@
          } else {
              int i;
  
@@ -551,7 +571,7 @@
                  i = (this.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1) * 5;
                  int j = 25 - i;
                  float f1 = f * (float) j;
-@@ -1494,28 +1749,174 @@
+@@ -1494,28 +1751,174 @@
          }
      }
  
@@ -626,7 +646,10 @@
 +            if (event.isCancelled()) {
 +                return false;
 +            }
-+
+ 
+-            f = Math.max(f - this.getAbsorptionAmount(), 0.0F);
+-            this.setAbsorptionAmount(this.getAbsorptionAmount() - (f1 - f));
+-            float f2 = f1 - f;
 +
 +//            f = this.applyArmorToDamage(damagesource, f);
 +//            f = this.applyEnchantmentsToDamage(damagesource, f);
@@ -648,10 +671,7 @@
 +                    }
 +                }
 +            }
- 
--            f = Math.max(f - this.getAbsorptionAmount(), 0.0F);
--            this.setAbsorptionAmount(this.getAbsorptionAmount() - (f1 - f));
--            float f2 = f1 - f;
++
 +            // Apply damage to helmet
 +            if ((damagesource == DamageSource.ANVIL || damagesource == DamageSource.FALLING_BLOCK) && this.getEquippedStack(EquipmentSlot.HEAD) != null) {
 +                this.getEquippedStack(EquipmentSlot.HEAD).damage((int) (event.getDamage() * 4.0F + this.random.nextFloat() * event.getDamage() * 2.0F), this, (entityliving) -> {
@@ -735,3 +755,12 @@
      }
  
      public DamageTracker getDamageTracker() {
+@@ -2886,7 +3289,7 @@
+     }
+ 
+     public void wakeUp() {
+-        Optional optional = this.getSleepingPosition();
++        Optional<BlockPos> optional = this.getSleepingPosition(); // Loom - decompile error
+         World world = this.world;
+ 
+         this.world.getClass();

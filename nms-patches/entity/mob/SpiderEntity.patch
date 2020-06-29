@@ -1,0 +1,20 @@
+--- a/net/minecraft/entity/mob/SpiderEntity.java
++++ b/net/minecraft/entity/mob/SpiderEntity.java
+@@ -147,7 +147,7 @@
+             skeletonentity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.yaw, 0.0F);
+             skeletonentity.initialize(worldaccess, localdifficulty, spawnreason, (EntityData) null, (CompoundTag) null);
+             skeletonentity.startRiding(this);
+-            worldaccess.spawnEntity(skeletonentity);
++            worldaccess.spawnEntity(skeletonentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.JOCKEY); // CraftBukkit - add SpawnReason
+         }
+ 
+         if (object == null) {
+@@ -161,7 +161,7 @@
+             StatusEffect statuseffect = ((SpiderEntity.SpiderData) object).effect;
+ 
+             if (statuseffect != null) {
+-                this.addStatusEffect(new StatusEffectInstance(statuseffect, Integer.MAX_VALUE));
++                this.addStatusEffect(new StatusEffectInstance(statuseffect, Integer.MAX_VALUE), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.SPIDER_SPAWN); // CraftBukkit
+             }
+         }
+ 

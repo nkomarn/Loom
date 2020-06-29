@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/projectile/TridentEntity.java
++++ b/net/minecraft/entity/projectile/TridentEntity.java
+@@ -148,7 +148,7 @@
+ 
+                 lightningentity.method_29495(Vec3d.ofBottomCenter(blockpos));
+                 lightningentity.setChanneler(entity1 instanceof ServerPlayerEntity ? (ServerPlayerEntity) entity1 : null);
+-                this.world.spawnEntity(lightningentity);
++                ((ServerWorld) this.world).strikeLightning(lightningentity, org.bukkit.event.weather.LightningStrikeEvent.Cause.TRIDENT); // CraftBukkit
+                 soundevent = SoundEvents.ITEM_TRIDENT_THUNDER;
+                 f1 = 5.0F;
+             }

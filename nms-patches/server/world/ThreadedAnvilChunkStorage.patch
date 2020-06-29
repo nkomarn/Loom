@@ -83,7 +83,7 @@
 +                            // CraftBukkit start - these are spawned serialized (DefinedStructure) and we don't call an add event below at the moment due to ordering complexities
 +                            boolean needsRemoval = false;
 +                            if (chunk.needsDecoration && !this.world.getServer().getSpawnNPCs() && entity instanceof Npc) {
-+                                entity.die();
++                                entity.remove();
 +                                needsRemoval = true;
 +                            }
 +
@@ -152,7 +152,7 @@
 +                        }
 +                    }
 +
-+                    serverplayerentity.removeQueue.remove(Integer.valueOf(this.entity.getEntityId()));
++                    serverplayerentity.removedEntities.remove(Integer.valueOf(this.entity.getEntityId()));
 +                    // CraftBukkit end
 +
                      if (flag1 && this.playersTracking.add(serverplayerentity)) {

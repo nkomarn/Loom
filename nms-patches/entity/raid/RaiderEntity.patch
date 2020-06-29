@@ -1,0 +1,29 @@
+--- a/net/minecraft/entity/raid/RaiderEntity.java
++++ b/net/minecraft/entity/raid/RaiderEntity.java
+@@ -163,7 +163,7 @@
+                     StatusEffectInstance statuseffectinstance1 = new StatusEffectInstance(StatusEffects.BAD_OMEN, 120000, i, false, false, true);
+ 
+                     if (!this.world.getGameRules().getBoolean(GameRules.DISABLE_RAIDS)) {
+-                        playerentity.addStatusEffect(statuseffectinstance1);
++                        playerentity.addStatusEffect(statuseffectinstance1, org.bukkit.event.entity.EntityPotionEffectEvent.Cause.PATROL_CAPTAIN); // CraftBukkit
+                     }
+                 }
+             }
+@@ -415,7 +415,7 @@
+             while (iterator.hasNext()) {
+                 RaiderEntity raiderentity = (RaiderEntity) iterator.next();
+ 
+-                raiderentity.setTarget(this.raider.getTarget());
++                raiderentity.setTarget(this.raider.getTarget(), org.bukkit.event.entity.EntityTargetEvent.TargetReason.FOLLOW_LEADER, true); // CraftBukkit
+             }
+ 
+         }
+@@ -431,7 +431,7 @@
+                 while (iterator.hasNext()) {
+                     RaiderEntity raiderentity = (RaiderEntity) iterator.next();
+ 
+-                    raiderentity.setTarget(livingentity);
++                    raiderentity.setTarget(livingentity, org.bukkit.event.entity.EntityTargetEvent.TargetReason.FOLLOW_LEADER, true); // CraftBukkit
+                     raiderentity.setAttacking(true);
+                 }
+ 

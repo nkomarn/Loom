@@ -525,9 +525,9 @@
 +        WorldProperties worldproperties = serverworld1.getLevelProperties();
          serverplayerentity1.networkHandler.sendPacket(new PlayerRespawnS2CPacket(serverplayerentity1.world.getDimensionRegistryKey(), serverplayerentity1.world.getRegistryKey(), BiomeAccess.hashSeed(serverplayerentity1.getServerWorld().getSeed()), serverplayerentity1.interactionManager.getGameMode(), serverplayerentity1.interactionManager.method_30119(), serverplayerentity1.getServerWorld().isDebugWorld(), serverplayerentity1.getServerWorld().isFlat(), flag));
 -        serverplayerentity1.networkHandler.requestTeleport(serverplayerentity1.getX(), serverplayerentity1.getY(), serverplayerentity1.getZ(), serverplayerentity1.yaw, serverplayerentity1.pitch);
-+        serverplayerentity1.spawnIn(serverworld1);
-+        serverplayerentity1.dead = false;
-+        serverplayerentity1.networkHandler.teleport(new Location(worldserver1.getWorld(), entityplayer1.locX(), entityplayer1.locY(), entityplayer1.locZ(), entityplayer1.yaw, entityplayer1.pitch));
++        serverplayerentity1.setWorld(serverworld1);
++        serverplayerentity1.removed = false;
++        serverplayerentity1.networkHandler.teleport(new Location(serverworld1.getCraftWorld(), serverplayerentity1.getX(), serverplayerentity1.getY(), serverplayerentity1.getZ(), serverplayerentity1.yaw, serverplayerentity1.pitch));
 +        serverplayerentity1.setSneaking(false);
 +
 +        //serverplayerentity1.networkHandler.requestTeleport(serverplayerentity1.getX(), serverplayerentity1.getY(), serverplayerentity1.getZ(), serverplayerentity1.yaw, serverplayerentity1.pitch);
@@ -630,6 +630,15 @@
      public void sendToDimension(Packet<?> packet, RegistryKey<World> registrykey) {
          for (int i = 0; i < this.players.size(); ++i) {
              ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this.players.get(i);
+@@ -637,7 +900,7 @@
+     }
+ 
+     public void removeFromOperators(GameProfile gameprofile) {
+-        this.ops.remove((Object) gameprofile);
++        this.ops.remove(gameprofile); // Loom - decompile errors
+         ServerPlayerEntity serverplayerentity = this.getPlayer(gameprofile.getId());
+ 
+         if (serverplayerentity != null) {
 @@ -660,7 +923,7 @@
  
              serverplayerentity.networkHandler.sendPacket(new EntityStatusS2CPacket(serverplayerentity, b0));
@@ -731,12 +740,12 @@
 -        UUID uuid = playerentity.getUuid();
 -        ServerStatHandler serverstathandler = uuid == null ? null : (ServerStatHandler) this.statisticsMap.get(uuid);
 +    // CraftBukkit start
-+    public ServerStatHandler getStatisticManager(ServerPlayerEntity playerentity) {
++    public ServerStatHandler createStatHandler(ServerPlayerEntity playerentity) {
 +        ServerStatHandler serverstatisticmanager = playerentity.getStatHandler();
-+        return serverstatisticmanager == null ? getStatisticManager(playerentity.getUuid(), playerentity.getDisplayName().getString()) : serverstatisticmanager;
++        return serverstatisticmanager == null ? createStatHandler(playerentity.getUuid(), playerentity.getDisplayName().getString()) : serverstatisticmanager;
 +    }
 +
-+    public ServerStatHandler getStatisticManager(UUID uuid, String displayName) {
++    public ServerStatHandler createStatHandler(UUID uuid, String displayName) {
 +        ServerPlayerEntity playerentity = this.getPlayer(uuid);
 +        ServerStatHandler serverstathandler = playerentity == null ? null : (ServerStatHandler) playerentity.getStatHandler();
 +        // CraftBukkit end

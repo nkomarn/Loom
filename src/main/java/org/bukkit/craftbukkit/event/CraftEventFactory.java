@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import net.minecraft.block.enums.Instrument;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.Npc;
@@ -26,6 +27,7 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -33,9 +35,11 @@ import net.minecraft.item.Items;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.screen.MerchantScreenHandler;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.stat.Stat;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Unit;
 import net.minecraft.util.hit.HitResult;
@@ -409,16 +413,16 @@ public class CraftEventFactory {
     /**
      * EntityTransformEvent
      */
-    public static EntityTransformEvent callEntityTransformEvent(LivingEntity original, LivingEntity coverted, EntityTransformEvent.TransformReason transformReason) {
+    public static EntityTransformEvent callEntityTransformEvent(net.minecraft.entity.LivingEntity original, net.minecraft.entity.LivingEntity coverted, EntityTransformEvent.TransformReason transformReason) {
         return callEntityTransformEvent(original, Collections.singletonList(coverted), transformReason);
     }
 
     /**
      * EntityTransformEvent
      */
-    public static EntityTransformEvent callEntityTransformEvent(LivingEntity original, List<LivingEntity> convertedList, EntityTransformEvent.TransformReason convertType) {
+    public static EntityTransformEvent callEntityTransformEvent(net.minecraft.entity.LivingEntity original, List<net.minecraft.entity.LivingEntity> convertedList, EntityTransformEvent.TransformReason convertType) {
         List<org.bukkit.entity.Entity> list = new ArrayList<>();
-        for (LivingEntity entityLiving : convertedList) {
+        for (net.minecraft.entity.LivingEntity entityLiving : convertedList) {
             list.add(entityLiving.getBukkitEntity());
         }
 
@@ -583,7 +587,7 @@ public class CraftEventFactory {
     /**
      * ItemMergeEvent
      */
-    public static ItemMergeEvent callItemMergeEvent(EntityItem merging, EntityItem mergingWith) {
+    public static ItemMergeEvent callItemMergeEvent(ItemEntity merging, ItemEntity mergingWith) {
         org.bukkit.entity.Item entityMerging = (org.bukkit.entity.Item) merging.getBukkitEntity();
         org.bukkit.entity.Item entityMergingWith = (org.bukkit.entity.Item) mergingWith.getBukkitEntity();
 
@@ -596,7 +600,7 @@ public class CraftEventFactory {
     /**
      * PotionSplashEvent
      */
-    public static PotionSplashEvent callPotionSplashEvent(EntityPotion potion, Map<LivingEntity, Double> affectedEntities) {
+    public static PotionSplashEvent callPotionSplashEvent(PotionEntity potion, Map<LivingEntity, Double> affectedEntities) {
         ThrownPotion thrownPotion = (ThrownPotion) potion.getBukkitEntity();
 
         PotionSplashEvent event = new PotionSplashEvent(thrownPotion, affectedEntities);
@@ -604,7 +608,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static LingeringPotionSplashEvent callLingeringPotionSplashEvent(EntityPotion potion, EntityAreaEffectCloud cloud) {
+    public static LingeringPotionSplashEvent callLingeringPotionSplashEvent(PotionEntity potion, AreaEffectCloudEntity cloud) {
         ThrownPotion thrownPotion = (ThrownPotion) potion.getBukkitEntity();
         AreaEffectCloud effectCloud = (AreaEffectCloud) cloud.getBukkitEntity();
 
@@ -676,7 +680,7 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static PlayerDeathEvent callPlayerDeathEvent(EntityPlayer victim, List<org.bukkit.inventory.ItemStack> drops, String deathMessage, boolean keepInventory) {
+    public static PlayerDeathEvent callPlayerDeathEvent(ServerPlayerEntity victim, List<org.bukkit.inventory.ItemStack> drops, String deathMessage, boolean keepInventory) {
         CraftPlayer entity = victim.getBukkitEntity();
         PlayerDeathEvent event = new PlayerDeathEvent(entity, drops, victim.getExpReward(), 0, deathMessage);
         event.setKeepInventory(keepInventory);
@@ -1037,11 +1041,11 @@ public class CraftEventFactory {
         return event;
     }
 
-    public static Container callInventoryOpenEvent(EntityPlayer player, Container container) {
+    public static ScreenHandler callInventoryOpenEvent(ServerPlayerEntity player, ScreenHandler container) {
         return callInventoryOpenEvent(player, container, false);
     }
 
-    public static Container callInventoryOpenEvent(EntityPlayer player, Container container, boolean cancelled) {
+    public static ScreenHandler callInventoryOpenEvent(ServerPlayerEntity player, ScreenHandler container, boolean cancelled) {
         if (player.activeContainer != player.defaultContainer) { // fire INVENTORY_CLOSE if one already open
             player.playerConnection.a(new PacketPlayInCloseWindow(player.activeContainer.windowId));
         }
@@ -1250,15 +1254,15 @@ public class CraftEventFactory {
         return c.mutableCopy().setChatModifier(modi);
     }
 
-    public static PlayerUnleashEntityEvent callPlayerUnleashEntityEvent(EntityInsentient entity, EntityHuman player) {
+    public static PlayerUnleashEntityEvent callPlayerUnleashEntityEvent(MobEntity entity, PlayerEntity player) {
         PlayerUnleashEntityEvent event = new PlayerUnleashEntityEvent(entity.getBukkitEntity(), (Player) player.getBukkitEntity());
-        entity.world.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         return event;
     }
 
     public static PlayerLeashEntityEvent callPlayerLeashEntityEvent(MobEntity entity, Entity leashHolder, PlayerEntity player) {
         PlayerLeashEntityEvent event = new PlayerLeashEntityEvent(entity.getBukkitEntity(), leashHolder.getBukkitEntity(), (Player) player.getBukkitEntity());
-        entity.world.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         return event;
     }
 
@@ -1268,8 +1272,8 @@ public class CraftEventFactory {
         return bse;
     }
 
-    public static boolean handlePlayerShearEntityEvent(EntityHuman player, Entity sheared, ItemStack shears, EnumHand hand) {
-        if (!(player instanceof EntityPlayer)) {
+    public static boolean handlePlayerShearEntityEvent(PlayerEntity player, Entity sheared, ItemStack shears, Hand hand) {
+        if (!(player instanceof ServerPlayerEntity)) {
             return true;
         }
 
@@ -1278,8 +1282,8 @@ public class CraftEventFactory {
         return !event.isCancelled();
     }
 
-    public static Cancellable handleStatisticsIncrease(EntityHuman entityHuman, net.minecraft.server.Statistic<?> statistic, int current, int newValue) {
-        Player player = ((EntityPlayer) entityHuman).getBukkitEntity();
+    public static Cancellable handleStatisticsIncrease(PlayerEntity entityHuman, Stat<?> statistic, int current, int newValue) {
+        Player player = ((ServerPlayerEntity) entityHuman).getBukkitEntity();
         Event event;
         if (true) {
             org.bukkit.Statistic stat = CraftStatistic.getBukkitStatistic(statistic);
@@ -1450,7 +1454,7 @@ public class CraftEventFactory {
         return !event.isCancelled();
     }
 
-    public static EntityPickupItemEvent callEntityPickupItemEvent(Entity who, EntityItem item, int remaining, boolean cancelled) {
+    public static EntityPickupItemEvent callEntityPickupItemEvent(Entity who, ItemEntity item, int remaining, boolean cancelled) {
         EntityPickupItemEvent event = new EntityPickupItemEvent((LivingEntity) who.getBukkitEntity(), (Item) item.getBukkitEntity(), remaining);
         event.setCancelled(cancelled);
         Bukkit.getPluginManager().callEvent(event);

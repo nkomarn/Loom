@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/packet/s2c/play/EntityAttachS2CPacket.java
++++ b/net/minecraft/network/packet/s2c/play/EntityAttachS2CPacket.java
+@@ -34,7 +34,5 @@
+         clientplaypacketlistener.onEntityAttach(this);
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ClientPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ }

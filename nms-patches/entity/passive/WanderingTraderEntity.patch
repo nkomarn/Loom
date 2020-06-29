@@ -1,0 +1,34 @@
+--- a/net/minecraft/entity/passive/WanderingTraderEntity.java
++++ b/net/minecraft/entity/passive/WanderingTraderEntity.java
+@@ -45,6 +45,13 @@
+ import net.minecraft.village.TraderOfferList;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.inventory.CraftMerchantRecipe;
++import org.bukkit.entity.AbstractVillager;
++import org.bukkit.event.entity.VillagerAcquireTradeEvent;
++// CraftBukkit end
++
+ public class WanderingTraderEntity extends AbstractTraderEntity {
+ 
+     @Nullable
+@@ -126,7 +133,16 @@
+             TradeOffer tradeoffer = tradeoffers_factory.create(this, this.random);
+ 
+             if (tradeoffer != null) {
+-                traderofferlist.add(tradeoffer);
++                // CraftBukkit start
++                VillagerAcquireTradeEvent event = new VillagerAcquireTradeEvent((AbstractVillager) getBukkitEntity(), tradeoffer.asBukkit());
++                // Suppress during worldgen
++                if (this.valid) {
++                    Bukkit.getPluginManager().callEvent(event);
++                }
++                if (!event.isCancelled()) {
++                    traderofferlist.add(CraftMerchantRecipe.fromBukkit(event.getRecipe()).toMinecraft());
++                }
++                // CraftBukkit end
+             }
+ 
+         }

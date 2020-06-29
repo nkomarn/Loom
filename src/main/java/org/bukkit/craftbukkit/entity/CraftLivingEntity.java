@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.server.DamageSource;
 import net.minecraft.server.EntityArmorStand;
 import net.minecraft.server.EntityArrow;
@@ -38,6 +40,7 @@ import net.minecraft.server.EnumHand;
 import net.minecraft.server.GenericAttributes;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.MobEffectList;
+import net.minecraft.world.World;
 import org.apache.commons.lang.Validate;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -371,8 +374,8 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity) {
-        net.minecraft.server.World world = ((CraftWorld) getWorld()).getHandle();
-        net.minecraft.server.Entity launch = null;
+        World world = ((CraftWorld) getWorld()).getHandle();
+        net.minecraft.entity.Entity launch = null;
 
         if (Snowball.class.isAssignableFrom(projectile)) {
             launch = new EntitySnowball(world, getHandle());
@@ -452,7 +455,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
             ((T) launch.getBukkitEntity()).setVelocity(velocity);
         }
 
-        world.addEntity(launch);
+        world.spawnEntity(launch);
         return (T) launch.getBukkitEntity();
     }
 
@@ -468,13 +471,13 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public boolean getRemoveWhenFarAway() {
-        return getHandle() instanceof EntityInsentient && !((EntityInsentient) getHandle()).persistent;
+        return getHandle() instanceof MobEntity && !((MobEntity) getHandle()).persistent;
     }
 
     @Override
     public void setRemoveWhenFarAway(boolean remove) {
-        if (getHandle() instanceof EntityInsentient) {
-            ((EntityInsentient) getHandle()).persistent = !remove;
+        if (getHandle() instanceof MobEntity) {
+            ((MobEntity) getHandle()).persistent = !remove;
         }
     }
 
@@ -485,12 +488,12 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public void setCanPickupItems(boolean pickup) {
-        getHandle().canPickUpLoot = pickup;
+        getHandle().pickUpLoot = pickup;
     }
 
     @Override
     public boolean getCanPickupItems() {
-        return getHandle().canPickUpLoot;
+        return getHandle().pickUpLoot;
     }
 
     @Override
@@ -504,10 +507,10 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public boolean isLeashed() {
-        if (!(getHandle() instanceof EntityInsentient)) {
+        if (!(getHandle() instanceof MobEntity)) {
             return false;
         }
-        return ((EntityInsentient) getHandle()).getLeashHolder() != null;
+        return ((MobEntity) getHandle()).getLeashHolder() != null;
     }
 
     @Override
@@ -515,14 +518,14 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         if (!isLeashed()) {
             throw new IllegalStateException("Entity not leashed");
         }
-        return ((EntityInsentient) getHandle()).getLeashHolder().getBukkitEntity();
+        return ((MobEntity) getHandle()).getLeashHolder().getBukkitEntity();
     }
 
     private boolean unleash() {
         if (!isLeashed()) {
             return false;
         }
-        ((EntityInsentient) getHandle()).unleash(true, false);
+        ((MobEntity) getHandle()).unleash(true, false);
         return true;
     }
 
