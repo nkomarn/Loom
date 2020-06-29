@@ -1,0 +1,97 @@
+--- a/net/minecraft/entity/passive/WolfEntity.java
++++ b/net/minecraft/entity/passive/WolfEntity.java
+@@ -58,6 +58,11 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
++// CraftBukkit end
++
+ public class WolfEntity extends TameableEntity implements Angerable {
+ 
+     private static final TrackedData<Boolean> BEGGING = DataTracker.registerData(WolfEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+@@ -108,6 +113,24 @@
+         return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.30000001192092896D).add(EntityAttributes.GENERIC_MAX_HEALTH, 8.0D).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0D);
+     }
+ 
++    // CraftBukkit - add overriden version
++    @Override
++    public boolean setTarget(LivingEntity entityliving, org.bukkit.event.entity.EntityTargetEvent.TargetReason reason, boolean fire) {
++        if (!super.setTarget(entityliving, reason, fire)) { // TODO honestly i don't rally know
++            return false;
++        }
++        entityliving = getTarget();
++        /* // PAIL
++        if (entityliving == null) {
++            this.setAngry(false);
++        } else if (!this.isTamed()) {
++            this.setAngry(true);
++        }
++        */
++        return true;
++    }
++    // CraftBukkit end
++
+     protected void initDataTracker() {
+         super.initDataTracker();
+         this.dataTracker.startTracking(WolfEntity.BEGGING, false);
+@@ -233,7 +256,7 @@
+         } else {
+             Entity entity = damagesource.getAttacker();
+ 
+-            this.setSitting(false);
++            // this.setSitting(false); // CraftBukkit - moved into EntityLiving.damageEntity(DamageSource, float)
+             if (entity != null && !(entity instanceof PlayerEntity) && !(entity instanceof PersistentProjectileEntity)) {
+                 f = (f + 1.0F) / 2.0F;
+             }
+@@ -256,7 +279,7 @@
+         super.setTamed(flag);
+         if (flag) {
+             this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(20.0D);
+-            this.setHealth(20.0F);
++            this.setHealth(this.getMaxHealth()); // CraftBukkit - 20.0 -> getMaxHealth()
+         } else {
+             this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(8.0D);
+         }
+@@ -279,7 +302,7 @@
+                         itemstack.decrement(1);
+                     }
+ 
+-                    this.heal((float) item.getFoodComponent().getHunger());
++                    this.heal((float) item.getFoodComponent().getHunger(), org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.EATING); // CraftBukkit
+                     return ActionResult.SUCCESS;
+                 }
+ 
+@@ -290,7 +313,7 @@
+                         this.setSitting(!this.isSitting());
+                         this.jumping = false;
+                         this.navigation.stop();
+-                        this.setTarget((LivingEntity) null);
++                        this.setTarget((LivingEntity) null, TargetReason.FORGOT_TARGET, true); // CraftBukkit - reason
+                         return ActionResult.SUCCESS;
+                     }
+ 
+@@ -311,8 +334,8 @@
+                 if (!playerentity.abilities.creativeMode) {
+                     itemstack.decrement(1);
+                 }
+-
+-                if (this.random.nextInt(3) == 0) {
++                // CraftBukkit - added event call and isCancelled check.
++                if (this.random.nextInt(3) == 0 && !CraftEventFactory.callEntityTameEvent(this, playerentity).isCancelled()) {
+                     this.setOwner(playerentity);
+                     this.navigation.stop();
+                     this.setTarget((LivingEntity) null);
+@@ -420,9 +443,7 @@
+         return !this.hasAngerTime() && super.canBeLeashedBy(playerentity);
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile errors
+ 
+     class AvoidLlamaGoal<T extends LivingEntity> extends FleeEntityGoal<T> {
+ 

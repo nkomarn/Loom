@@ -1,0 +1,51 @@
+--- a/net/minecraft/server/ServerConfigList.java
++++ b/net/minecraft/server/ServerConfigList.java
+@@ -53,7 +53,7 @@
+     @Nullable
+     public V get(K k0) {
+         this.removeInvalidEntries();
+-        return (ServerConfigEntry) this.map.get(this.toString(k0));
++        return (V) this.map.get(this.toString(k0)); // CraftBukkit - decompile error
+     }
+ 
+     public void remove(K k0) {
+@@ -75,6 +75,12 @@
+         return (String[]) this.map.keySet().toArray(new String[this.map.size()]);
+     }
+ 
++    // CraftBukkit start
++    public Collection<V> getValues() {
++        return this.map.values();
++    }
++    // CraftBukkit end
++
+     public boolean isEmpty() {
+         return this.map.size() < 1;
+     }
+@@ -92,7 +98,7 @@
+         Iterator iterator = this.map.values().iterator();
+ 
+         while (iterator.hasNext()) {
+-            V v0 = (ServerConfigEntry) iterator.next();
++            V v0 = (V) iterator.next(); // CraftBukkit - decompile error
+ 
+             if (v0.isInvalid()) {
+                 list.add(v0.getKey());
+@@ -102,7 +108,7 @@
+         iterator = list.iterator();
+ 
+         while (iterator.hasNext()) {
+-            K k0 = iterator.next();
++            K k0 = (K) iterator.next(); // CraftBukkit - decompile error
+ 
+             this.map.remove(this.toString(k0));
+         }
+@@ -166,7 +172,7 @@
+                     ServerConfigEntry<K> serverconfigentry = this.fromJson(jsonobject);
+ 
+                     if (serverconfigentry.getKey() != null) {
+-                        this.map.put(this.toString(serverconfigentry.getKey()), serverconfigentry);
++                        this.map.put(this.toString(serverconfigentry.getKey()), (V) serverconfigentry); // CraftBukkit - decompile error
+                     }
+                 }
+             } catch (Throwable throwable1) {

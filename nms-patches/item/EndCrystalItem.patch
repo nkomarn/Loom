@@ -1,0 +1,14 @@
+--- a/net/minecraft/item/EndCrystalItem.java
++++ b/net/minecraft/item/EndCrystalItem.java
+@@ -43,6 +43,11 @@
+                         EndCrystalEntity endcrystalentity = new EndCrystalEntity(world, d0 + 0.5D, d1, d2 + 0.5D);
+ 
+                         endcrystalentity.setShowBottom(false);
++                        // CraftBukkit start
++                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityPlaceEvent(itemusagecontext, endcrystalentity).isCancelled()) {
++                            return ActionResult.FAIL;
++                        }
++                        // CraftBukkit end
+                         world.spawnEntity(endcrystalentity);
+                         EnderDragonFight enderdragonfight = ((ServerWorld) world).getEnderDragonFight();
+ 

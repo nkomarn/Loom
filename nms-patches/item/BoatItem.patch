@@ -1,0 +1,25 @@
+--- a/net/minecraft/item/BoatItem.java
++++ b/net/minecraft/item/BoatItem.java
+@@ -17,6 +17,8 @@
+ import net.minecraft.world.RayTraceContext;
+ import net.minecraft.world.World;
+ 
++import net.minecraft.util.ActionResult; // CraftBukkit
++
+ public class BoatItem extends Item {
+ 
+     private static final Predicate<Entity> RIDERS = EntityPredicates.EXCEPT_SPECTATOR.and(Entity::collides);
+@@ -53,6 +55,13 @@
+             }
+ 
+             if (blockhitresult.getType() == HitResult.Type.BLOCK) {
++                // CraftBukkit start - Boat placement
++                org.bukkit.event.player.PlayerInteractEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerInteractEvent(playerentity, org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK, blockhitresult.getBlockPos(), blockhitresult.getSide(), itemstack, hand);
++
++                if (event.isCancelled()) {
++                    return new TypedActionResult(ActionResult.PASS, itemstack);
++                }
++                // CraftBukkit end
+                 BoatEntity boatentity = new BoatEntity(world, blockhitresult.getPos().x, blockhitresult.getPos().y, blockhitresult.getPos().z);
+ 
+                 boatentity.setBoatType(this.type);

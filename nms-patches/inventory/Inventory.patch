@@ -1,0 +1,56 @@
+--- a/net/minecraft/inventory/Inventory.java
++++ b/net/minecraft/inventory/Inventory.java
+@@ -6,6 +6,11 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.Clearable;
+ 
++// CraftBukkit start
++import net.minecraft.recipe.Recipe;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++// CraftBukkit end
++
+ public interface Inventory extends Clearable {
+ 
+     int size();
+@@ -20,9 +25,7 @@
+ 
+     void setStack(int i, ItemStack arg);
+ 
+-    default int getMaxCountPerStack() {
+-        return 64;
+-    }
++    int getMaxCountPerStack(); // CraftBukkit
+ 
+     void markDirty();
+ 
+@@ -61,4 +64,30 @@
+ 
+         return false;
+     }
++
++
++    // CraftBukkit start
++    java.util.List<ItemStack> getContents();
++
++    void onOpen(CraftHumanEntity who);
++
++    void onClose(CraftHumanEntity who);
++
++    java.util.List<org.bukkit.entity.HumanEntity> getViewers();
++
++    org.bukkit.inventory.InventoryHolder getOwner();
++
++    void setMaxCountPerStack(int size);
++
++    org.bukkit.Location getLocation();
++
++    default Recipe getCurrentRecipe() {
++        return null;
++    }
++
++    default void setCurrentRecipe(Recipe recipe) {
++    }
++
++    int MAX_STACK = 64;
++    // CraftBukkit end
+ }

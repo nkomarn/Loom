@@ -1,0 +1,155 @@
+--- a/net/minecraft/world/explosion/Explosion.java
++++ b/net/minecraft/world/explosion/Explosion.java
+@@ -43,6 +43,14 @@
+ import net.minecraft.world.RayTraceContext;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityExplodeEvent;
++import org.bukkit.Location;
++import org.bukkit.event.block.BlockExplodeEvent;
++// CraftBukkit end
++
+ public class Explosion {
+ 
+     private final boolean createFire;
+@@ -59,11 +67,12 @@
+     private final ExplosionBehavior behavior;
+     private final List<BlockPos> affectedBlocks = Lists.newArrayList();
+     private final Map<PlayerEntity, Vec3d> affectedPlayers = Maps.newHashMap();
++    public boolean wasCanceled = false; // CraftBukkit - add field
+ 
+     public Explosion(World world, @Nullable Entity entity, @Nullable DamageSource damagesource, @Nullable ExplosionBehavior explosionbehavior, double d0, double d1, double d2, float f, boolean flag, Explosion.DestructionType explosion_destructiontype) {
+         this.world = world;
+         this.entity = entity;
+-        this.power = f;
++        this.power = (float) Math.max(f, 0.0); // CraftBukkit - clamp bad values // CraftBukkit - clamp bad values
+         this.x = d0;
+         this.y = d1;
+         this.z = d2;
+@@ -113,6 +122,11 @@
+     }
+ 
+     public void collectBlocksAndDamageEntities() {
++        // CraftBukkit start
++        if (this.power < 0.1F) {
++            return;
++        }
++        // CraftBukkit end
+         Set<BlockPos> set = Sets.newHashSet();
+         boolean flag = true;
+ 
+@@ -146,7 +160,7 @@
+                                 f -= ((Float) optional.get() + 0.3F) * 0.3F;
+                             }
+ 
+-                            if (f > 0.0F && this.behavior.canDestroyBlock(this, this.world, blockpos, blockstate, f)) {
++                            if (f > 0.0F && this.behavior.canDestroyBlock(this, this.world, blockpos, blockstate, f)&& blockpos.getY() < 256 && blockpos.getY() >= 0) { // CraftBukkit - don't wrap explosions
+                                 set.add(blockpos);
+                             }
+ 
+@@ -190,7 +204,16 @@
+                         double d12 = (double) getExposure(vec3d, entity);
+                         double d13 = (1.0D - d7) * d12;
+ 
+-                        entity.damage(this.getDamageSource(), (float) ((int) ((d13 * d13 + d13) / 2.0D * 7.0D * (double) f2 + 1.0D)));
++                        // CraftBukkit start
++                        // entity.damage(this.getDamageSource(), (float) ((int) ((d13 * d13 + d13) / 2.0D * 7.0D * (double) f2 + 1.0D)));
++                        CraftEventFactory.entityDamage = this.entity;
++                        entity.forceExplosionKnockback = false;
++                        boolean wasDamaged = entity.damage(this.getDamageSource(), (float) ((int) ((d13 * d13 + d13) / 2.0D * 7.0D * (double) f2 + 1.0D)));
++                        CraftEventFactory.entityDamage = null;
++                        if (!wasDamaged && !(entity instanceof TntEntity || entity instanceof FallingBlockEntity) && !entity.forceExplosionKnockback) {
++                            continue;
++                        }
++                        // CraftBukkit end
+                         double d14 = d13;
+ 
+                         if (entity instanceof LivingEntity) {
+@@ -233,6 +256,52 @@
+             Collections.shuffle(this.affectedBlocks, this.world.random);
+             Iterator iterator = this.affectedBlocks.iterator();
+ 
++            // CraftBukkit start
++            org.bukkit.World bworld = this.world.getCraftWorld();
++            org.bukkit.entity.Entity explode = this.entity == null ? null : this.entity.getBukkitEntity();
++            Location location = new Location(bworld, this.x, this.y, this.z);
++
++            List<org.bukkit.block.Block> blockList = Lists.newArrayList();
++            for (int i1 = this.affectedBlocks.size() - 1; i1 >= 0; i1--) {
++                BlockPos cpos = (BlockPos) this.affectedBlocks.get(i1);
++                org.bukkit.block.Block bblock = bworld.getBlockAt(cpos.getX(), cpos.getY(), cpos.getZ());
++                if (!bblock.getType().isAir()) {
++                    blockList.add(bblock);
++                }
++            }
++
++            boolean cancelled;
++            List<org.bukkit.block.Block> bukkitBlocks;
++            float yieldd;
++
++            if (explode != null) {
++                EntityExplodeEvent event = new EntityExplodeEvent(explode, location, blockList, this.destructionType == DestructionType.DESTROY ? 1.0F / this.power : 1.0F);
++                Bukkit.getPluginManager().callEvent(event);
++                cancelled = event.isCancelled();
++                bukkitBlocks = event.blockList();
++                yieldd = event.getYield();
++            } else {
++                BlockExplodeEvent event = new BlockExplodeEvent(location.getBlock(), blockList, this.destructionType == DestructionType.DESTROY ? 1.0F / this.power : 1.0F);
++                Bukkit.getPluginManager().callEvent(event);
++                cancelled = event.isCancelled();
++                bukkitBlocks = event.blockList();
++                yieldd = event.getYield();
++            }
++
++            this.affectedBlocks.clear();
++
++            for (org.bukkit.block.Block bblock : bukkitBlocks) {
++                BlockPos coords = new BlockPos(bblock.getX(), bblock.getY(), bblock.getZ());
++                affectedBlocks.add(coords);
++            }
++
++            if (cancelled) {
++                this.wasCanceled = true;
++                return;
++            }
++            // CraftBukkit end
++            iterator = this.affectedBlocks.iterator();
++
+             while (iterator.hasNext()) {
+                 BlockPos blockpos = (BlockPos) iterator.next();
+                 BlockState blockstate = this.world.getBlockState(blockpos);
+@@ -246,8 +315,8 @@
+                         BlockEntity blockentity = block.hasBlockEntity() ? this.world.getBlockEntity(blockpos) : null;
+                         LootContext.Builder lootcontext_builder = (new LootContext.Builder((ServerWorld) this.world)).random(this.world.random).parameter(LootContextParameters.POSITION, blockpos).parameter(LootContextParameters.TOOL, ItemStack.EMPTY).optionalParameter(LootContextParameters.BLOCK_ENTITY, blockentity).optionalParameter(LootContextParameters.THIS_ENTITY, this.entity);
+ 
+-                        if (this.destructionType == Explosion.DestructionType.DESTROY) {
+-                            lootcontext_builder.parameter(LootContextParameters.EXPLOSION_RADIUS, this.power);
++                        if (this.destructionType == Explosion.DestructionType.DESTROY || yieldd < 1.0F) { // CraftBukkit - add yield
++                            lootcontext_builder.parameter(LootContextParameters.EXPLOSION_RADIUS, 1.0F / yieldd); // CraftBukkit - add yield
+                         }
+ 
+                         blockstate.getDroppedStacks(lootcontext_builder).forEach((itemstack) -> {
+@@ -277,7 +346,11 @@
+                 BlockPos blockpos2 = (BlockPos) iterator1.next();
+ 
+                 if (this.random.nextInt(3) == 0 && this.world.getBlockState(blockpos2).isAir() && this.world.getBlockState(blockpos2.down()).isOpaqueFullCube(this.world, blockpos2.down())) {
+-                    this.world.setBlockState(blockpos2, AbstractFireBlock.getState(this.world, blockpos2));
++                    // CraftBukkit start - Ignition by explosion
++                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(this.world, blockpos2.getX(), blockpos2.getY(), blockpos2.getZ(), this).isCancelled()) {
++                        this.world.setBlockState(blockpos2, AbstractFireBlock.getState(this.world, blockpos2));
++                    }
++                    // CraftBukkit end
+                 }
+             }
+         }
+@@ -285,6 +358,7 @@
+     }
+ 
+     private static void method_24023(ObjectArrayList<Pair<ItemStack, BlockPos>> objectarraylist, ItemStack itemstack, BlockPos blockpos) {
++        if (itemstack.isEmpty()) return; // CraftBukkit - SPIGOT-5425
+         int i = objectarraylist.size();
+ 
+         for (int j = 0; j < i; ++j) {

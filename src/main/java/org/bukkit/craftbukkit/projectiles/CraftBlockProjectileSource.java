@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.projectiles;
 
 import java.util.Random;
+
+import net.minecraft.block.entity.DispenserBlockEntity;
 import net.minecraft.server.BlockDispenser;
 import net.minecraft.server.EntityArrow;
 import net.minecraft.server.EntityEgg;
@@ -45,15 +47,15 @@ import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.util.Vector;
 
 public class CraftBlockProjectileSource implements BlockProjectileSource {
-    private final TileEntityDispenser dispenserBlock;
+    private final DispenserBlockEntity dispenserBlock;
 
-    public CraftBlockProjectileSource(TileEntityDispenser dispenserBlock) {
+    public CraftBlockProjectileSource(DispenserBlockEntity dispenserBlock) {
         this.dispenserBlock = dispenserBlock;
     }
 
     @Override
     public Block getBlock() {
-        return dispenserBlock.getWorld().getWorld().getBlockAt(dispenserBlock.getPosition().getX(), dispenserBlock.getPosition().getY(), dispenserBlock.getPosition().getZ());
+        return dispenserBlock.getWorld().getCraftWorld().getBlockAt(dispenserBlock.getPos().getX(), dispenserBlock.getPos().getY(), dispenserBlock.getPos().getZ());
     }
 
     @Override
@@ -65,7 +67,7 @@ public class CraftBlockProjectileSource implements BlockProjectileSource {
     public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity) {
         Validate.isTrue(getBlock().getType() == Material.DISPENSER, "Block is no longer dispenser");
         // Copied from BlockDispenser.dispense()
-        SourceBlock isourceblock = new SourceBlock(dispenserBlock.getWorld(), dispenserBlock.getPosition());
+        SourceBlock isourceblock = new SourceBlock(dispenserBlock.getWorld(), dispenserBlock.getPos());
         // Copied from DispenseBehaviorProjectile
         IPosition iposition = BlockDispenser.a(isourceblock);
         EnumDirection enumdirection = (EnumDirection) isourceblock.getBlockData().get(BlockDispenser.FACING);

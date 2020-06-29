@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/MobSpawnerLogic.java
++++ b/net/minecraft/world/MobSpawnerLogic.java
+@@ -59,6 +59,7 @@
+ 
+     public void setEntityId(EntityType<?> entitytype) {
+         this.spawnEntry.getEntityTag().putString("id", Registry.ENTITY_TYPE.getId(entitytype).toString());
++        this.spawnPotentials.clear(); // CraftBukkit - SPIGOT-3496, MC-92282
+     }
+ 
+     private boolean isPlayerInRange() {
+@@ -164,7 +165,7 @@
+     }
+ 
+     private void spawnEntity(Entity entity) {
+-        if (this.getWorld().spawnEntity(entity)) {
++        if (this.getWorld().spawnEntity(entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER)) { // CraftBukkit
+             Iterator iterator = entity.getPassengerList().iterator();
+ 
+             while (iterator.hasNext()) {

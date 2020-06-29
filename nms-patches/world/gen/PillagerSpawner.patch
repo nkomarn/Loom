@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/gen/PillagerSpawner.java
++++ b/net/minecraft/world/gen/PillagerSpawner.java
+@@ -115,7 +115,7 @@
+ 
+                 patrolentity.updatePosition((double) blockpos.getX(), (double) blockpos.getY(), (double) blockpos.getZ());
+                 patrolentity.initialize(world, world.getLocalDifficulty(blockpos), SpawnReason.PATROL, (EntityData) null, (CompoundTag) null);
+-                world.spawnEntity(patrolentity);
++                world.spawnEntity(patrolentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.PATROL); // CraftBukkit
+                 return true;
+             } else {
+                 return false;

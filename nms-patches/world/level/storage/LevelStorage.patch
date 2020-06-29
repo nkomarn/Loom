@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/level/storage/LevelStorage.java
++++ b/net/minecraft/world/level/storage/LevelStorage.java
+@@ -216,6 +216,12 @@
+             return this.directoryName;
+         }
+ 
++        // Loom start
++        public Path getDirectoryPath() {
++            return directory;
++        }
++        // Loom end
++
+         public Path getDirectory(WorldSavePath worldsavepath) {
+             return (Path) this.field_24190.computeIfAbsent(worldsavepath, (worldsavepath1) -> {
+                 return this.directory.resolve(worldsavepath1.getRelativePath());

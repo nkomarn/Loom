@@ -28,6 +28,7 @@ import net.minecraft.server.WorldChunkManager;
 import net.minecraft.server.WorldDimension;
 import net.minecraft.server.WorldGenStage;
 import net.minecraft.server.WorldServer;
+import net.minecraft.server.world.ServerWorld;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;
@@ -72,7 +73,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
         }
     }
 
-    public CustomChunkGenerator(WorldServer world, net.minecraft.server.ChunkGenerator delegate, ChunkGenerator generator) {
+    public CustomChunkGenerator(ServerWorld world, net.minecraft.world.gen.chunk.ChunkGenerator delegate, ChunkGenerator generator) {
         super(delegate.getWorldChunkManager(), delegate.getSettings());
 
         this.world = world;

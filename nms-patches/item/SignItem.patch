@@ -1,0 +1,22 @@
+--- a/net/minecraft/item/SignItem.java
++++ b/net/minecraft/item/SignItem.java
+@@ -10,6 +10,8 @@
+ 
+ public class SignItem extends WallStandingBlockItem {
+ 
++    public static BlockPos openSign; // CraftBukkit
++
+     public SignItem(Item.Settings item_settings, Block block, Block block1) {
+         super(block, block1, item_settings);
+     }
+@@ -19,6 +21,10 @@
+ 
+         if (!world.isClient && !flag && playerentity != null) {
+             playerentity.openEditSignScreen((SignBlockEntity) world.getBlockEntity(blockpos));
++            // CraftBukkit start - SPIGOT-4678
++            // entityhuman.openSign((TileEntitySign) world.getTileEntity(blockposition));
++            SignItem.openSign = blockpos;
++            // CraftBukkit end
+         }
+ 
+         return flag;

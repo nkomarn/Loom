@@ -6,6 +6,9 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.BlockPosition;
 import net.minecraft.server.DamageSource;
@@ -947,14 +950,14 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return Pose.values()[getHandle().getPose().ordinal()];
     }
 
-    public void storeBukkitValues(NBTTagCompound c) {
+    public void storeBukkitValues(CompoundTag c) {
         if (!this.persistentDataContainer.isEmpty()) {
-            c.set("BukkitValues", this.persistentDataContainer.toTagCompound());
+            c.put("BukkitValues", this.persistentDataContainer.toTagCompound());
         }
     }
 
-    public void readBukkitValues(NBTTagCompound c) {
-        NBTTagCompound base = c.getCompound("BukkitValues");
+    public void readBukkitValues(CompoundTag c) {
+        CompoundTag base = c.getCompound("BukkitValues");
         if (base != null) {
             this.persistentDataContainer.putAll(base);
         }

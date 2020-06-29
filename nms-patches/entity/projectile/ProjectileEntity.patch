@@ -1,0 +1,28 @@
+--- a/net/minecraft/entity/projectile/ProjectileEntity.java
++++ b/net/minecraft/entity/projectile/ProjectileEntity.java
+@@ -15,6 +15,8 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
+ 
++import org.bukkit.entity.LivingEntity; // CraftBukkit
++
+ public abstract class ProjectileEntity extends Entity {
+ 
+     private UUID ownerUuid;
+@@ -30,7 +32,7 @@
+             this.ownerUuid = entity.getUuid();
+             this.field_23739 = entity.getEntityId();
+         }
+-
++        this.projectileSource = entity == null ? null : (LivingEntity) entity.getBukkitEntity(); // CraftBukkit
+     }
+ 
+     @Nullable
+@@ -109,6 +111,7 @@
+     }
+ 
+     protected void onCollision(HitResult hitresult) {
++        org.bukkit.craftbukkit.event.CraftEventFactory.callProjectileHitEvent(this, hitresult); // CraftBukkit - Call event
+         HitResult.Type hitresult_type = hitresult.getType();
+ 
+         if (hitresult_type == HitResult.Type.ENTITY) {

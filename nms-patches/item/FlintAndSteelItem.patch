@@ -1,0 +1,17 @@
+--- a/net/minecraft/item/FlintAndSteelItem.java
++++ b/net/minecraft/item/FlintAndSteelItem.java
+@@ -40,6 +40,14 @@
+             BlockPos blockpos1 = blockpos.offset(itemusagecontext.getSide());
+ 
+             if (AbstractFireBlock.method_30032(world, blockpos1)) {
++                // CraftBukkit start - Store the clicked block
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, blockpos1, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, playerentity).isCancelled()) {
++                    itemusagecontext.getStack().damage(1, playerentity, (entityhuman1) -> {
++                        entityhuman1.sendToolBreakStatus(itemusagecontext.getHand());
++                    });
++                    return ActionResult.PASS;
++                }
++                // CraftBukkit end
+                 world.playSound(playerentity, blockpos1, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, FlintAndSteelItem.RANDOM.nextFloat() * 0.4F + 0.8F);
+                 BlockState blockstate1 = AbstractFireBlock.getState(world, blockpos1);
+ 

@@ -1,0 +1,32 @@
+--- a/net/minecraft/recipe/SmeltingRecipe.java
++++ b/net/minecraft/recipe/SmeltingRecipe.java
+@@ -3,6 +3,14 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.Identifier;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.inventory.CraftFurnaceRecipe;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.inventory.CraftRecipe;
++import org.bukkit.craftbukkit.util.CraftNamespacedKey;
++import org.bukkit.inventory.Recipe;
++// CraftBukkit end
++
+ public class SmeltingRecipe extends AbstractCookingRecipe {
+ 
+     public SmeltingRecipe(Identifier identifier, String s, Ingredient ingredient, ItemStack itemstack, float f, int i) {
+@@ -12,4 +20,14 @@
+     public RecipeSerializer<?> getSerializer() {
+         return RecipeSerializer.SMELTING;
+     }
++
++    @Override
++    public Recipe toBukkitRecipe() {
++        CraftItemStack result = CraftItemStack.asCraftMirror(this.output);
++
++        CraftFurnaceRecipe recipe = new CraftFurnaceRecipe(CraftNamespacedKey.fromMinecraft(this.id), result, CraftRecipe.toBukkit(this.input), this.experience, this.cookTime);
++        recipe.setGroup(this.group);
++
++        return recipe;
++    }
+ }

@@ -1,0 +1,97 @@
+--- a/net/minecraft/world/GameRules.java
++++ b/net/minecraft/world/GameRules.java
+@@ -113,7 +113,7 @@
+     }
+ 
+     public <T extends GameRules.Rule<T>> T get(GameRules.Key<T> gamerules_key) {
+-        return (GameRules.Rule) this.rules.get(gamerules_key);
++        return (T) this.rules.get(gamerules_key); // CraftBukkit - decompile error
+     }
+ 
+     public CompoundTag toNbt() {
+@@ -144,8 +144,8 @@
+     }
+ 
+     private static <T extends GameRules.Rule<T>> void accept(GameRules.TypeConsumer gamerules_typeconsumer, GameRules.Key<?> gamerules_key, GameRules.Type<?> gamerules_type) {
+-        gamerules_typeconsumer.accept(gamerules_key, gamerules_type);
+-        gamerules_type.accept(gamerules_typeconsumer, gamerules_key);
++        gamerules_typeconsumer.accept((GameRules.Key<T>)gamerules_key, (GameRules.Type<T>)gamerules_type); // CraftBukkit - decompile error
++        gamerules_type.accept(gamerules_typeconsumer, (GameRules.Key) gamerules_key); // CraftBukkit - decompile error
+     }
+ 
+     public boolean getBoolean(GameRules.Key<GameRules.BooleanRule> gamerules_key) {
+@@ -176,7 +176,7 @@
+             this.value = flag;
+         }
+ 
+-        protected void setFromArgument(CommandContext<ServerCommandSource> commandcontext, String s) {
++        public void setFromArgument(CommandContext<ServerCommandSource> commandcontext, String s) { // PAIL - private->public
+             this.value = BoolArgumentType.getBool(commandcontext, s);
+         }
+ 
+@@ -193,7 +193,7 @@
+             return Boolean.toString(this.value);
+         }
+ 
+-        protected void deserialize(String s) {
++        public void deserialize(String s) { // PAIL - private->public
+             this.value = Boolean.parseBoolean(s);
+         }
+ 
+@@ -209,13 +209,7 @@
+             return new GameRules.BooleanRule(this.type, this.value);
+         }
+ 
+-        protected GameRules.Rule copy() {
+-            return this.copy();
+-        }
+-
+-        protected GameRules.Rule getThis() {
+-            return this.getThis();
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public static class IntRule extends GameRules.Rule<GameRules.IntRule> {
+@@ -250,7 +244,7 @@
+             return Integer.toString(this.value);
+         }
+ 
+-        protected void deserialize(String s) {
++        public void deserialize(String s) {
+             this.value = parseInt(s);
+         }
+ 
+@@ -278,13 +272,7 @@
+             return new GameRules.IntRule(this.type, this.value);
+         }
+ 
+-        protected GameRules.Rule copy() {
+-            return this.copy();
+-        }
+-
+-        protected GameRules.Rule getThis() {
+-            return this.getThis();
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public abstract static class Rule<T extends GameRules.Rule<T>> {
+@@ -309,7 +297,7 @@
+ 
+         }
+ 
+-        protected abstract void deserialize(String string);
++        public abstract void deserialize(String string); // PAIL - private->public
+ 
+         public abstract String serialize();
+ 
+@@ -343,7 +331,7 @@
+         }
+ 
+         public T createRule() {
+-            return (GameRules.Rule) this.ruleFactory.apply(this);
++            return (T) this.ruleFactory.apply(this); // CraftBukkit - decompile error
+         }
+ 
+         public void accept(GameRules.TypeConsumer gamerules_typeconsumer, GameRules.Key<T> gamerules_key) {

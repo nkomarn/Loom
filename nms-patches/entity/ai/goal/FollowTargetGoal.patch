@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/ai/goal/FollowTargetGoal.java
++++ b/net/minecraft/entity/ai/goal/FollowTargetGoal.java
+@@ -56,7 +56,7 @@
+     }
+ 
+     public void start() {
+-        this.mob.setTarget(this.targetEntity);
++        this.mob.setTarget(this.targetEntity, org.bukkit.event.entity.EntityTargetEvent.TargetReason.OWNER_ATTACKED_TARGET, true); // CraftBukkit - reason
+         super.start();
+     }
+ 

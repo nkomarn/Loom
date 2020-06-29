@@ -1,0 +1,36 @@
+--- a/net/minecraft/loot/condition/SurvivesExplosionLootCondition.java
++++ b/net/minecraft/loot/condition/SurvivesExplosionLootCondition.java
+@@ -32,7 +32,7 @@
+             Random random = lootcontext.getRandom();
+             float f = 1.0F / ofloat;
+ 
+-            return random.nextFloat() <= f;
++            return random.nextFloat() < f; // CraftBukkit - <= to < to allow for plugins to completely disable block drops from explosions
+         } else {
+             return true;
+         }
+@@ -44,9 +44,7 @@
+         };
+     }
+ 
+-    public boolean test(Object object) {
+-        return this.test((LootContext) object);
+-    }
++    // Loom - decompile errors
+ 
+     public static class Serializer implements JsonSerializer<SurvivesExplosionLootCondition> {
+ 
+@@ -58,12 +56,6 @@
+             return SurvivesExplosionLootCondition.INSTANCE;
+         }
+ 
+-        public Object fromJson(JsonObject jsonobject, JsonDeserializationContext jsondeserializationcontext) {
+-            return this.fromJson(jsonobject, jsondeserializationcontext);
+-        }
+-
+-        public void toJson(JsonObject jsonobject, Object object, JsonSerializationContext jsonserializationcontext) {
+-            this.toJson(jsonobject, (SurvivesExplosionLootCondition) object, jsonserializationcontext);
+-        }
++        // Loom - decompile errors
+     }
+ }

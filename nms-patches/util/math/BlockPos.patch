@@ -1,0 +1,77 @@
+--- a/net/minecraft/util/math/BlockPos.java
++++ b/net/minecraft/util/math/BlockPos.java
+@@ -215,9 +215,7 @@
+                     }
+                 }
+ 
+-                protected Object computeNext() {
+-                    return this.computeNext();
+-                }
++                // Loom - decompile errors
+             };
+         };
+     }
+@@ -277,9 +275,7 @@
+                     }
+                 }
+ 
+-                protected Object computeNext() {
+-                    return this.computeNext();
+-                }
++                // Loom - decompile errors
+             };
+         };
+     }
+@@ -337,28 +333,12 @@
+                     }
+                 }
+ 
+-                protected Object computeNext() {
+-                    return this.computeNext();
+-                }
++                // Loom - decompile errors
+             };
+         };
+     }
+ 
+-    public Vec3i crossProduct(Vec3i vec3i) {
+-        return this.crossProduct(vec3i);
+-    }
+-
+-    public Vec3i offset(Direction direction, int i) {
+-        return this.offset(direction, i);
+-    }
+-
+-    public Vec3i down(int i) {
+-        return this.down(i);
+-    }
+-
+-    public Vec3i down() {
+-        return this.down();
+-    }
++    // Loom - decompile errors
+ 
+     public static class Mutable extends BlockPos {
+ 
+@@ -462,20 +442,7 @@
+             return new BlockPos(this);
+         }
+ 
+-        public Vec3i crossProduct(Vec3i vec3i) {
+-            return super.crossProduct(vec3i);
+-        }
+-
+-        public Vec3i offset(Direction direction, int i) {
+-            return this.offset(direction, i);
+-        }
+-
+-        public Vec3i down(int i) {
+-            return super.down(i);
+-        }
++        // Loom - decompile errors
+ 
+-        public Vec3i down() {
+-            return super.down();
+-        }
+     }
+ }

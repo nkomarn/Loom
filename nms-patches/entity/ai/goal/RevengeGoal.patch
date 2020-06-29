@@ -1,0 +1,19 @@
+--- a/net/minecraft/entity/ai/goal/RevengeGoal.java
++++ b/net/minecraft/entity/ai/goal/RevengeGoal.java
+@@ -59,7 +59,7 @@
+     }
+ 
+     public void start() {
+-        this.mob.setTarget(this.mob.getAttacker());
++        this.mob.setTarget(this.mob.getAttacker(), org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY, true); // CraftBukkit - reason
+         this.target = this.mob.getTarget();
+         this.lastAttackedTime = this.mob.getLastAttackedTime();
+         this.maxTimeWithoutVisibility = 300;
+@@ -106,6 +106,6 @@
+     }
+ 
+     protected void setMobEntityTarget(MobEntity mobentity, LivingEntity livingentity) {
+-        mobentity.setTarget(livingentity);
++        mobentity.setTarget(livingentity, org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_NEARBY_ENTITY, true); // CraftBukkit - reason
+     }
+ }

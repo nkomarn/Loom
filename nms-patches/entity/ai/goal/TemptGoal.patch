@@ -1,0 +1,46 @@
+--- a/net/minecraft/entity/ai/goal/TemptGoal.java
++++ b/net/minecraft/entity/ai/goal/TemptGoal.java
+@@ -10,6 +10,15 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.recipe.Ingredient;
+ 
++// CraftBukkit start
++import net.minecraft.entity.LivingEntity;
++
++import org.bukkit.craftbukkit.entity.CraftLivingEntity;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTargetEvent;
++import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
++// CraftBukkit end
++
+ public class TemptGoal extends Goal {
+ 
+     private static final TargetPredicate TEMPTING_ENTITY_PREDICATE = (new TargetPredicate()).setBaseMaxDistance(10.0D).includeInvulnerable().includeTeammates().ignoreEntityTargetRules().includeHidden();
+@@ -20,7 +29,7 @@
+     private double lastPlayerZ;
+     private double lastPlayerPitch;
+     private double lastPlayerYaw;
+-    protected PlayerEntity closestPlayer;
++    protected LivingEntity closestPlayer; // CraftBukkit
+     private int cooldown;
+     private boolean active;
+     private final Ingredient food;
+@@ -47,7 +56,17 @@
+             return false;
+         } else {
+             this.closestPlayer = this.mob.world.getClosestPlayer(TemptGoal.TEMPTING_ENTITY_PREDICATE, this.mob);
+-            return this.closestPlayer == null ? false : this.isTemptedBy(this.closestPlayer.getMainHandStack()) || this.isTemptedBy(this.closestPlayer.getOffHandStack());
++            // CraftBukkit start
++            boolean tempt = this.closestPlayer == null ? false : this.isTemptedBy(this.closestPlayer.getMainHandStack()) || this.isTemptedBy(this.closestPlayer.getOffHandStack());
++            if (tempt) {
++                EntityTargetLivingEntityEvent event = CraftEventFactory.callEntityTargetLivingEvent(this.mob, this.closestPlayer, EntityTargetEvent.TargetReason.TEMPT);
++                if (event.isCancelled()) {
++                    return false;
++                }
++                this.closestPlayer = (event.getTarget() == null) ? null : ((CraftLivingEntity) event.getTarget()).getHandle();
++            }
++            return tempt;
++            // CraftBukkit end
+         }
+     }
+ 

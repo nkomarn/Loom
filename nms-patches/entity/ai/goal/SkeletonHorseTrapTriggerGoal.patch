@@ -1,0 +1,47 @@
+--- a/net/minecraft/entity/ai/goal/SkeletonHorseTrapTriggerGoal.java
++++ b/net/minecraft/entity/ai/goal/SkeletonHorseTrapTriggerGoal.java
+@@ -14,6 +14,8 @@
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.world.LocalDifficulty;
+ 
++import net.minecraft.server.world.ServerWorld; // CraftBukkit
++
+ public class SkeletonHorseTrapTriggerGoal extends Goal {
+ 
+     private final SkeletonHorseEntity skeletonHorse;
+@@ -36,7 +38,7 @@
+ 
+         lightningentity.refreshPositionAfterTeleport(this.skeletonHorse.getX(), this.skeletonHorse.getY(), this.skeletonHorse.getZ());
+         lightningentity.method_29498(true);
+-        this.skeletonHorse.world.spawnEntity(lightningentity);
++        ((ServerWorld) this.skeletonHorse.world).strikeLightning(lightningentity, org.bukkit.event.weather.LightningStrikeEvent.Cause.TRAP); // CraftBukkit
+         SkeletonEntity skeletonentity = this.getSkeleton(localdifficulty, this.skeletonHorse);
+ 
+         skeletonentity.startRiding(this.skeletonHorse);
+@@ -45,7 +47,7 @@
+             HorseBaseEntity horsebaseentity = this.getHorse(localdifficulty);
+             SkeletonEntity skeletonentity1 = this.getSkeleton(localdifficulty, horsebaseentity);
+ 
+-            skeletonentity1.startRiding(horsebaseentity);
++            if (skeletonentity1 != null) skeletonentity1.startRiding(horsebaseentity); // CraftBukkit
+             horsebaseentity.addVelocity(this.skeletonHorse.getRandom().nextGaussian() * 0.5D, 0.0D, this.skeletonHorse.getRandom().nextGaussian() * 0.5D);
+         }
+ 
+@@ -60,7 +62,7 @@
+         skeletonhorseentity.setPersistent();
+         skeletonhorseentity.setTame(true);
+         skeletonhorseentity.setBreedingAge(0);
+-        skeletonhorseentity.world.spawnEntity(skeletonhorseentity);
++        if (!skeletonhorseentity.world.spawnEntity(skeletonhorseentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.TRAP)) return null; // CraftBukkit
+         return skeletonhorseentity;
+     }
+ 
+@@ -77,7 +79,7 @@
+ 
+         skeletonentity.equipStack(EquipmentSlot.MAINHAND, EnchantmentHelper.enchant(skeletonentity.getRandom(), skeletonentity.getMainHandStack(), (int) (5.0F + localdifficulty.getClampedLocalDifficulty() * (float) skeletonentity.getRandom().nextInt(18)), false));
+         skeletonentity.equipStack(EquipmentSlot.HEAD, EnchantmentHelper.enchant(skeletonentity.getRandom(), skeletonentity.getEquippedStack(EquipmentSlot.HEAD), (int) (5.0F + localdifficulty.getClampedLocalDifficulty() * (float) skeletonentity.getRandom().nextInt(18)), false));
+-        skeletonentity.world.spawnEntity(skeletonentity);
++        if (!skeletonentity.world.spawnEntity(skeletonentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.JOCKEY)) return null; // CraftBukkit
+         return skeletonentity;
+     }
+ }

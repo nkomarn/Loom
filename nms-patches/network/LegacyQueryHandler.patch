@@ -1,0 +1,34 @@
+--- a/net/minecraft/network/LegacyQueryHandler.java
++++ b/net/minecraft/network/LegacyQueryHandler.java
+@@ -36,11 +36,12 @@
+             MinecraftServer minecraftserver = this.networkIo.getServer();
+             int i = bytebuf.readableBytes();
+             String s;
++            org.bukkit.event.server.ServerListPingEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callServerListPingEvent(minecraftserver.server, inetsocketaddress.getAddress(), minecraftserver.getServerMotd(), minecraftserver.getCurrentPlayerCount(), minecraftserver.getMaxPlayerCount()); // CraftBukkit
+ 
+             switch (i) {
+                 case 0:
+                     LegacyQueryHandler.LOGGER.debug("Ping: (<1.3.x) from {}:{}", (Object) inetsocketaddress.getAddress(), (Object) inetsocketaddress.getPort());
+-                    s = String.format("%s\u00a7%d\u00a7%d", minecraftserver.getServerMotd(), minecraftserver.getCurrentPlayerCount(), minecraftserver.getMaxPlayerCount());
++                    s = String.format("%s\u00a7%d\u00a7%d", event.getMotd(), event.getNumPlayers(), event.getMaxPlayers()); // CraftBukkit
+                     this.reply(channelhandlercontext, this.toBuffer(s));
+                     break;
+                 case 1:
+@@ -49,7 +50,7 @@
+                     }
+ 
+                     LegacyQueryHandler.LOGGER.debug("Ping: (1.4-1.5.x) from {}:{}", (Object) inetsocketaddress.getAddress(), (Object) inetsocketaddress.getPort());
+-                    s = String.format("\u00a71\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d", 127, minecraftserver.getVersion(), minecraftserver.getServerMotd(), minecraftserver.getCurrentPlayerCount(), minecraftserver.getMaxPlayerCount());
++                    s = String.format("\u00a71\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d", 127, minecraftserver.getVersion(), event.getMotd(), event.getNumPlayers(), event.getMaxPlayers()); // CraftBukkit
+                     this.reply(channelhandlercontext, this.toBuffer(s));
+                     break;
+                 default:
+@@ -68,7 +69,7 @@
+                     }
+ 
+                     LegacyQueryHandler.LOGGER.debug("Ping: (1.6) from {}:{}", (Object) inetsocketaddress.getAddress(), (Object) inetsocketaddress.getPort());
+-                    String s1 = String.format("\u00a71\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d", 127, minecraftserver.getVersion(), minecraftserver.getServerMotd(), minecraftserver.getCurrentPlayerCount(), minecraftserver.getMaxPlayerCount());
++                    String s1 = String.format("\u00a71\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d", 127, minecraftserver.getVersion(), event.getMotd(), event.getNumPlayers(), event.getMaxPlayers()); // CraftBukkit
+                     ByteBuf bytebuf1 = this.toBuffer(s1);
+ 
+                     try {

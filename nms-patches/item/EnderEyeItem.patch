@@ -1,0 +1,15 @@
+--- a/net/minecraft/item/EnderEyeItem.java
++++ b/net/minecraft/item/EnderEyeItem.java
+@@ -82,7 +82,11 @@
+ 
+                     eyeofenderentity.setItem(itemstack);
+                     eyeofenderentity.moveTowards(blockpos);
+-                    world.spawnEntity(eyeofenderentity);
++                    // CraftBukkit start
++                    if (!world.spawnEntity(eyeofenderentity)) {
++                        return new TypedActionResult(ActionResult.FAIL, itemstack);
++                    }
++                    // CraftBukkit end
+                     if (playerentity instanceof ServerPlayerEntity) {
+                         Criteria.USED_ENDER_EYE.trigger((ServerPlayerEntity) playerentity, blockpos);
+                     }

@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/packet/c2s/handshake/HandshakeC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/handshake/HandshakeC2SPacket.java
+@@ -42,7 +42,15 @@
+         return this.protocolVersion;
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerHandshakePacketListener) packetlistener);
++    // Loom - decompile errors
++
++    // Loom start
++    public String getAddress() {
++        return address;
++    }
++
++    public int getPort() {
++        return port;
+     }
++    // Loom end
+ }

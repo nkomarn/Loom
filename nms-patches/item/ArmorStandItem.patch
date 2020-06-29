@@ -1,0 +1,16 @@
+--- a/net/minecraft/item/ArmorStandItem.java
++++ b/net/minecraft/item/ArmorStandItem.java
+@@ -40,6 +40,13 @@
+ 
+                     armorstandentity.refreshPositionAndAngles(armorstandentity.getX(), armorstandentity.getY(), armorstandentity.getZ(), f, 0.0F);
+                     this.setRotations(armorstandentity, world.random);
++
++                    // CraftBukkit start
++                    if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityPlaceEvent(itemusagecontext, armorstandentity).isCancelled()) {
++                        return ActionResult.FAIL;
++                    }
++                    // CraftBukkit end
++
+                     world.spawnEntity(armorstandentity);
+                     world.playSound((PlayerEntity) null, armorstandentity.getX(), armorstandentity.getY(), armorstandentity.getZ(), SoundEvents.ENTITY_ARMOR_STAND_PLACE, SoundCategory.BLOCKS, 0.75F, 0.8F);
+                 }

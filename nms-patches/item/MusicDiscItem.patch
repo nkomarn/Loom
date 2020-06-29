@@ -1,0 +1,10 @@
+--- a/net/minecraft/item/MusicDiscItem.java
++++ b/net/minecraft/item/MusicDiscItem.java
+@@ -34,6 +34,7 @@
+             ItemStack itemstack = itemusagecontext.getStack();
+ 
+             if (!world.isClient) {
++                if (true) return ActionResult.SUCCESS; // CraftBukkit - handled in ItemStack
+                 ((JukeboxBlock) Blocks.JUKEBOX).setRecord(world, blockpos, blockstate, itemstack);
+                 world.syncWorldEvent((PlayerEntity) null, 1010, blockpos, Item.getRawId(this));
+                 itemstack.decrement(1);

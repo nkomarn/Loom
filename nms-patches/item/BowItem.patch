@@ -1,0 +1,44 @@
+--- a/net/minecraft/item/BowItem.java
++++ b/net/minecraft/item/BowItem.java
+@@ -14,6 +14,8 @@
+ import net.minecraft.util.UseAction;
+ import net.minecraft.world.World;
+ 
++import net.minecraft.server.network.ServerPlayerEntity; // CraftBukkit
++
+ public class BowItem extends RangedWeaponItem implements Vanishable {
+ 
+     public BowItem(Item.Settings item_settings) {
+@@ -62,6 +64,14 @@
+                             persistentprojectileentity.setOnFireFor(100);
+                         }
+ 
++                        // CraftBukkit start
++                        org.bukkit.event.entity.EntityShootBowEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityShootBowEvent(playerentity, itemstack, persistentprojectileentity, f);
++                        if (event.isCancelled()) {
++                            event.getProjectile().remove();
++                            return;
++                        }
++                        // CraftBukkit end
++
+                         itemstack.damage(1, (LivingEntity) playerentity, (playerentity1) -> {
+                             playerentity1.sendToolBreakStatus(playerentity.getActiveHand());
+                         });
+@@ -69,7 +79,16 @@
+                             persistentprojectileentity.pickupType = PersistentProjectileEntity.PickupPermission.CREATIVE_ONLY;
+                         }
+ 
+-                        world.spawnEntity(persistentprojectileentity);
++                        // CraftBukkit start
++                        if (event.getProjectile() == persistentprojectileentity.getBukkitEntity()) {
++                            if (!world.spawnEntity(persistentprojectileentity)) {
++                                if (playerentity instanceof ServerPlayerEntity) {
++                                    ((ServerPlayerEntity) playerentity).getBukkitEntity().updateInventory();
++                                }
++                                return;
++                            }
++                        }
++                        // CraftBukkit end
+                     }
+ 
+                     world.playSound((PlayerEntity) null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (BowItem.RANDOM.nextFloat() * 0.4F + 1.2F) + f * 0.5F);

@@ -1,0 +1,69 @@
+--- a/net/minecraft/entity/effect/StatusEffect.java
++++ b/net/minecraft/entity/effect/StatusEffect.java
+@@ -19,6 +19,14 @@
+ import net.minecraft.util.Util;
+ import net.minecraft.util.registry.Registry;
+ 
++// CraftBukkit start
++import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
++import net.minecraft.server.network.ServerPlayerEntity;
++
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
++// CraftBukkit end
++
+ public class StatusEffect {
+ 
+     private final Map<EntityAttribute, EntityAttributeModifier> attributeModifiers = Maps.newHashMap();
+@@ -44,11 +52,11 @@
+     public void applyUpdateEffect(LivingEntity livingentity, int i) {
+         if (this == StatusEffects.REGENERATION) {
+             if (livingentity.getHealth() < livingentity.getMaxHealth()) {
+-                livingentity.heal(1.0F);
++                livingentity.heal(1.0F, RegainReason.MAGIC_REGEN); // CraftBukkit
+             }
+         } else if (this == StatusEffects.POISON) {
+             if (livingentity.getHealth() > 1.0F) {
+-                livingentity.damage(DamageSource.MAGIC, 1.0F);
++                livingentity.damage(CraftEventFactory.POISON, 1.0F); // CraftBukkit - DamageSource.MAGIC -> CraftEventFactory.POISON
+             }
+         } else if (this == StatusEffects.WITHER) {
+             livingentity.damage(DamageSource.WITHER, 1.0F);
+@@ -56,14 +64,26 @@
+             ((PlayerEntity) livingentity).addExhaustion(0.005F * (float) (i + 1));
+         } else if (this == StatusEffects.SATURATION && livingentity instanceof PlayerEntity) {
+             if (!livingentity.world.isClient) {
+-                ((PlayerEntity) livingentity).getHungerManager().add(i + 1, 1.0F);
++                // ((PlayerEntity) livingentity).getHungerManager().add(i + 1, 1.0F);
++                // CraftBukkit start
++                PlayerEntity entityhuman = (PlayerEntity) livingentity;
++                int oldFoodLevel = entityhuman.getHungerManager().getFoodLevel();
++
++                org.bukkit.event.entity.FoodLevelChangeEvent event = CraftEventFactory.callFoodLevelChangeEvent(entityhuman, i + 1 + oldFoodLevel);
++
++                if (!event.isCancelled()) {
++                    entityhuman.getHungerManager().add(event.getFoodLevel() - oldFoodLevel, 1.0F);
++                }
++
++                ((ServerPlayerEntity) entityhuman).networkHandler.sendPacket(new HealthUpdateS2CPacket(((ServerPlayerEntity) entityhuman).getBukkitEntity().getScaledHealth(), entityhuman.getHungerManager().getFoodLevel(), entityhuman.getHungerManager().getSaturationLevel()));
++                // CraftBukkit end
+             }
+         } else if ((this != StatusEffects.INSTANT_HEALTH || livingentity.isUndead()) && (this != StatusEffects.INSTANT_DAMAGE || !livingentity.isUndead())) {
+             if (this == StatusEffects.INSTANT_DAMAGE && !livingentity.isUndead() || this == StatusEffects.INSTANT_HEALTH && livingentity.isUndead()) {
+                 livingentity.damage(DamageSource.MAGIC, (float) (6 << i));
+             }
+         } else {
+-            livingentity.heal((float) Math.max(4 << i, 0));
++            livingentity.heal((float) Math.max(4 << i, 0), RegainReason.MAGIC); // CraftBukkit
+         }
+ 
+     }
+@@ -84,7 +104,7 @@
+             }
+         } else {
+             j = (int) (d0 * (double) (4 << i) + 0.5D);
+-            livingentity.heal((float) j);
++            livingentity.heal((float) j, RegainReason.MAGIC); // CraftBukkit
+         }
+ 
+     }

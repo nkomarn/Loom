@@ -1,14 +1,22 @@
 --- a/net/minecraft/item/map/MapState.java
 +++ b/net/minecraft/item/map/MapState.java
-@@ -15,6 +15,7 @@
- import net.minecraft.item.ItemStack;
- import net.minecraft.nbt.CompoundTag;
- import net.minecraft.nbt.ListTag;
+@@ -30,6 +30,15 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit begin
++import java.util.UUID;
 +import net.minecraft.nbt.Tag;
- import net.minecraft.network.Packet;
- import net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket;
- import net.minecraft.text.Text;
-@@ -47,8 +48,18 @@
++import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.map.CraftMapView;
++import org.bukkit.craftbukkit.util.CraftChatMessage;
++// CraftBukkit end
++
+ public class MapState extends PersistentState {
+ 
+     private static final Logger field_25019 = LogManager.getLogger();
+@@ -47,8 +56,18 @@
      public final Map<String, MapIcon> icons = Maps.newLinkedHashMap();
      private final Map<String, MapFrameMarker> frames = Maps.newHashMap();
  
@@ -27,7 +35,7 @@
      }
  
      public void init(int i, int j, int k, boolean flag, boolean flag1, RegistryKey<World> registrykey) {
-@@ -70,13 +81,31 @@
+@@ -70,13 +89,31 @@
      }
  
      public void fromTag(CompoundTag compoundtag) {
@@ -63,7 +71,7 @@
          this.xCenter = compoundtag.getInt("xCenter");
          this.zCenter = compoundtag.getInt("zCenter");
          this.scale = (byte) MathHelper.clamp(compoundtag.getByte("scale"), 0, 4);
-@@ -109,13 +138,32 @@
+@@ -109,13 +146,32 @@
      }
  
      public CompoundTag toTag(CompoundTag compoundtag) {
@@ -97,7 +105,7 @@
          compoundtag.putInt("xCenter", this.xCenter);
          compoundtag.putInt("zCenter", this.zCenter);
          compoundtag.putByte("scale", this.scale);
-@@ -406,12 +454,24 @@
+@@ -406,12 +462,24 @@
  
          @Nullable
          public Packet<?> getPacket(ItemStack itemstack) {
@@ -109,7 +117,7 @@
 +            for ( org.bukkit.map.MapCursor cursor : render.cursors) {
 +
 +                if (cursor.isVisible()) {
-+                    icons.add(new MapIcon(MapIcon.Type.a(cursor.getRawType()), cursor.getX(), cursor.getY(), cursor.getDirection(), CraftChatMessage.fromStringOrNull(cursor.getCaption())));
++                    icons.add(new MapIcon(MapIcon.Type.byId(cursor.getRawType()), cursor.getX(), cursor.getY(), cursor.getDirection(), CraftChatMessage.fromStringOrNull(cursor.getCaption())));
 +                }
 +            }
              if (this.dirty) {

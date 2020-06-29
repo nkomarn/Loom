@@ -1,20 +1,15 @@
 --- a/net/minecraft/world/World.java
 +++ b/net/minecraft/world/World.java
-@@ -31,6 +31,7 @@
- import net.minecraft.scoreboard.Scoreboard;
- import net.minecraft.server.MinecraftServer;
- import net.minecraft.server.world.ChunkHolder;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.sound.SoundCategory;
- import net.minecraft.sound.SoundEvent;
- import net.minecraft.tag.RegistryTagManager;
-@@ -62,6 +63,20 @@
+@@ -62,6 +62,21 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
 +// CraftBukkit start
 +import java.util.HashMap;
 +import java.util.Map;
++import net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket;
++import net.minecraft.server.world.ServerWorld;
++import net.minecraft.world.border.WorldBorderListener;
 +import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.CraftWorld;
@@ -22,13 +17,20 @@
 +import org.bukkit.craftbukkit.block.data.CraftBlockData;
 +import org.bukkit.event.block.BlockPhysicsEvent;
 +import net.minecraft.entity.ItemEntity;
-+import net.minecraft.world.border.WorldBorderListener;
-+import net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket;
 +// CraftBukkit end
 +
  public abstract class World implements WorldAccess, AutoCloseable {
  
      protected static final Logger LOGGER = LogManager.getLogger();
+@@ -74,7 +89,7 @@
+     public final List<BlockEntity> tickingBlockEntities = Lists.newArrayList();
+     protected final List<BlockEntity> pendingBlockEntities = Lists.newArrayList();
+     protected final List<BlockEntity> unloadedBlockEntities = Lists.newArrayList();
+-    private final Thread thread;
++    public final Thread thread;
+     private final boolean debugWorld;
+     private int ambientDarkness;
+     protected int lcgBlockSeed = (new Random()).nextInt();
 @@ -94,7 +109,39 @@
      private final RegistryKey<World> registryKey;
      private final RegistryKey<DimensionType> dimensionRegistryKey;

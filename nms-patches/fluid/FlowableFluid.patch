@@ -1,0 +1,79 @@
+--- a/net/minecraft/fluid/FlowableFluid.java
++++ b/net/minecraft/fluid/FlowableFluid.java
+@@ -31,6 +31,16 @@
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.block.BlockFace;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.craftbukkit.block.data.CraftBlockData;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockFromToEvent;
++import org.bukkit.event.block.FluidLevelChangeEvent;
++// CraftBukkit end
++
+ public abstract class FlowableFluid extends Fluid {
+ 
+     public static final BooleanProperty FALLING = Properties.FALLING;
+@@ -128,6 +138,15 @@
+             FluidState fluidstate1 = this.getUpdatedState(worldaccess, blockpos1, blockstate1);
+ 
+             if (this.canFlow(worldaccess, blockpos, blockstate, Direction.DOWN, blockpos1, blockstate1, worldaccess.getFluidState(blockpos1), fluidstate1.getFluid())) {
++                // CraftBukkit start
++                org.bukkit.block.Block source = CraftBlock.at(worldaccess, blockpos);
++                BlockFromToEvent event = new BlockFromToEvent(source, BlockFace.DOWN);
++                Bukkit.getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return;
++                }
++                // CraftBukkit end
+                 this.flow(worldaccess, blockpos1, blockstate1, Direction.DOWN, fluidstate1);
+                 if (this.method_15740(worldaccess, blockpos) >= 3) {
+                     this.method_15744(worldaccess, blockpos, fluidstate, blockstate);
+@@ -158,6 +177,15 @@
+                 BlockState blockstate1 = worldaccess.getBlockState(blockpos1);
+ 
+                 if (this.canFlow(worldaccess, blockpos, blockstate, direction, blockpos1, blockstate1, worldaccess.getFluidState(blockpos1), fluidstate1.getFluid())) {
++                    // CraftBukkit start
++                    org.bukkit.block.Block source = CraftBlock.at(worldaccess, blockpos);
++                    BlockFromToEvent event = new BlockFromToEvent(source, org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(direction));
++                    Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        continue;
++                    }
++                    // CraftBukkit end
+                     this.flow(worldaccess, blockpos1, blockstate1, direction, fluidstate1);
+                 }
+             }
+@@ -435,12 +463,25 @@
+ 
+             if (fluidstate1.isEmpty()) {
+                 fluidstate = fluidstate1;
+-                world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 3);
++
++                // CraftBukkit start
++                FluidLevelChangeEvent event = CraftEventFactory.callFluidLevelChangeEvent(world, blockpos, Blocks.AIR.getDefaultState());
++                if (event.isCancelled()) {
++                    return;
++                }
++                world.setBlockState(blockpos, ((CraftBlockData) event.getNewData()).getState(), 3);
++                // CraftBukkit end
+             } else if (!fluidstate1.equals(fluidstate)) {
+                 fluidstate = fluidstate1;
+                 BlockState blockstate = fluidstate1.getBlockState();
+ 
+-                world.setBlockState(blockpos, blockstate, 2);
++                // CraftBukkit start
++                FluidLevelChangeEvent event = CraftEventFactory.callFluidLevelChangeEvent(world, blockpos, blockstate);
++                if (event.isCancelled()) {
++                    return;
++                }
++                world.setBlockState(blockpos, ((CraftBlockData) event.getNewData()).getState(), 2);
++                // CraftBukkit end
+                 world.getFluidTickScheduler().schedule(blockpos, fluidstate1.getFluid(), i);
+                 world.updateNeighborsAlways(blockpos, blockstate.getBlock());
+             }

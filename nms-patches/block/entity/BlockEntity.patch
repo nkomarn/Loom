@@ -21,7 +21,20 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private final BlockEntityType<?> type;
      @Nullable
-@@ -47,6 +59,14 @@
+@@ -36,6 +48,12 @@
+         return this.world;
+     }
+ 
++    // Loom start
++    public void setWorld(World world) {
++        this.world = world;
++    }
++    // Loom end
++
+     public void setLocation(World world, BlockPos blockpos) {
+         this.world = world;
+         this.pos = blockpos.toImmutable();
+@@ -47,6 +65,14 @@
  
      public void fromTag(BlockState blockstate, CompoundTag compoundtag) {
          this.pos = new BlockPos(compoundtag.getInt("x"), compoundtag.getInt("y"), compoundtag.getInt("z"));
@@ -36,7 +49,7 @@
      }
  
      public CompoundTag toTag(CompoundTag compoundtag) {
-@@ -63,6 +83,11 @@
+@@ -63,6 +89,11 @@
              compoundtag.putInt("x", this.pos.getX());
              compoundtag.putInt("y", this.pos.getY());
              compoundtag.putInt("z", this.pos.getZ());
@@ -48,7 +61,7 @@
              return compoundtag;
          }
      }
-@@ -178,4 +203,13 @@
+@@ -178,4 +209,13 @@
              }, this::getPos);
          }
      }

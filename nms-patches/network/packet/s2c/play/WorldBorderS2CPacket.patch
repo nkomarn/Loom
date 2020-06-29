@@ -1,0 +1,26 @@
+--- a/net/minecraft/network/packet/s2c/play/WorldBorderS2CPacket.java
++++ b/net/minecraft/network/packet/s2c/play/WorldBorderS2CPacket.java
+@@ -23,8 +23,10 @@
+ 
+     public WorldBorderS2CPacket(WorldBorder worldborder, WorldBorderS2CPacket.Type worldborders2cpacket_type) {
+         this.type = worldborders2cpacket_type;
+-        this.centerX = worldborder.getCenterX();
+-        this.centerZ = worldborder.getCenterZ();
++        // CraftBukkit start - multiply out nether border
++        this.centerX = worldborder.getCenterX() * (worldborder.world.getDimension().isUltrawarm() ? 8 : 1);
++        this.centerZ = worldborder.getCenterZ() * (worldborder.world.getDimension().isUltrawarm() ? 8 : 1);
++        // CraftBukkit end
+         this.oldSize = worldborder.getSize();
+         this.size = worldborder.getTargetSize();
+         this.interpolationDuration = worldborder.getTargetRemainingTime();
+@@ -105,9 +107,7 @@
+         clientplaypacketlistener.onWorldBorder(this);
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ClientPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ 
+     public static enum Type {
+ 

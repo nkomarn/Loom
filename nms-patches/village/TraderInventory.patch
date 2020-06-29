@@ -1,0 +1,67 @@
+--- a/net/minecraft/village/TraderInventory.java
++++ b/net/minecraft/village/TraderInventory.java
+@@ -8,6 +8,16 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.collection.DefaultedList;
+ 
++// CraftBukkit start
++import java.util.List;
++import net.minecraft.entity.passive.AbstractTraderEntity;
++import net.minecraft.entity.passive.VillagerEntity;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.entity.CraftAbstractVillager;
++import org.bukkit.entity.HumanEntity;
++// CraftBukkit end
++
+ public class TraderInventory implements Inventory {
+ 
+     private final Trader trader;
+@@ -17,6 +27,47 @@
+     private int recipeIndex;
+     private int traderRewardedExperience;
+ 
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++
++    public List<ItemStack> getContents() {
++        return this.inventory;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++        trader.setCurrentCustomer((PlayerEntity) null); // SPIGOT-4860
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    @Override
++    public int getMaxCountPerStack() {
++        return maxStack;
++    }
++
++    public void setMaxCountPerStack(int i) {
++        maxStack = i;
++    }
++
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++        return (trader instanceof AbstractTraderEntity) ? (CraftAbstractVillager) ((AbstractTraderEntity) this.trader).getBukkitEntity() : null;
++    }
++
++    @Override
++    public Location getLocation() {
++        return (trader instanceof VillagerEntity) ? ((VillagerEntity) this.trader).getBukkitEntity().getLocation() : null;
++    }
++    // CraftBukkit end
++
++
+     public TraderInventory(Trader trader) {
+         this.inventory = DefaultedList.ofSize(3, ItemStack.EMPTY);
+         this.trader = trader;

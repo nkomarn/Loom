@@ -1,0 +1,29 @@
+--- a/net/minecraft/entity/ai/goal/TrackTargetGoal.java
++++ b/net/minecraft/entity/ai/goal/TrackTargetGoal.java
+@@ -12,6 +12,8 @@
+ import net.minecraft.scoreboard.AbstractTeam;
+ import net.minecraft.util.math.MathHelper;
+ 
++import org.bukkit.event.entity.EntityTargetEvent; // CraftBukkit
++
+ public abstract class TrackTargetGoal extends Goal {
+ 
+     protected final MobEntity mob;
+@@ -68,7 +70,7 @@
+                     if (livingentity instanceof PlayerEntity && ((PlayerEntity) livingentity).abilities.invulnerable) {
+                         return false;
+                     } else {
+-                        this.mob.setTarget(livingentity);
++                        this.mob.setTarget(livingentity, EntityTargetEvent.TargetReason.CLOSEST_ENTITY, true); // CraftBukkit
+                         return true;
+                     }
+                 }
+@@ -87,7 +89,7 @@
+     }
+ 
+     public void stop() {
+-        this.mob.setTarget((LivingEntity) null);
++        this.mob.setTarget((LivingEntity) null, EntityTargetEvent.TargetReason.FORGOT_TARGET, true); // CraftBukkit
+         this.target = null;
+     }
+ 

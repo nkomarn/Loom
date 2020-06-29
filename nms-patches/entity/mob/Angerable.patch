@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/mob/Angerable.java
++++ b/net/minecraft/entity/mob/Angerable.java
+@@ -117,6 +117,8 @@
+ 
+     void setTarget(@Nullable LivingEntity arg);
+ 
++    boolean setTarget(LivingEntity entityliving, org.bukkit.event.entity.EntityTargetEvent.TargetReason reason, boolean fireEvent); // CraftBukkit
++
+     @Nullable
+     LivingEntity getTarget();
+ }

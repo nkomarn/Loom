@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.generator;
 
-import net.minecraft.server.StructureSettings;
-import net.minecraft.server.WorldChunkManager;
+import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.chunk.StructuresConfig;
 
 // Do not implement functions to this class, add to NormalChunkGenerator
-public abstract class InternalChunkGenerator extends net.minecraft.server.ChunkGenerator {
+public abstract class InternalChunkGenerator extends ChunkGenerator {
 
-    public InternalChunkGenerator(WorldChunkManager worldchunkmanager, StructureSettings structuresettings) {
+    public InternalChunkGenerator(BiomeSource worldchunkmanager, StructuresConfig structuresettings) {
         super(worldchunkmanager, structuresettings);
     }
 }

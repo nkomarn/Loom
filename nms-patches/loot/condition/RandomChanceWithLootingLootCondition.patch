@@ -1,0 +1,40 @@
+--- a/net/minecraft/loot/condition/RandomChanceWithLootingLootCondition.java
++++ b/net/minecraft/loot/condition/RandomChanceWithLootingLootCondition.java
+@@ -40,6 +40,12 @@
+             i = EnchantmentHelper.getLooting((LivingEntity) entity);
+         }
+ 
++        // CraftBukkit start - only use lootingModifier if set by Bukkit
++        if (lootcontext.hasParameter(LootContextParameters.LOOTING_MOD)) {
++            i = lootcontext.hasParameter(LootContextParameters.LOOTING_MOD);
++        }
++        // CraftBukkit end
++
+         return lootcontext.getRandom().nextFloat() < this.chance + (float) i * this.lootingMultiplier;
+     }
+ 
+@@ -49,9 +55,7 @@
+         };
+     }
+ 
+-    public boolean test(Object object) {
+-        return this.test((LootContext) object);
+-    }
++    // Loom - decompile errors
+ 
+     RandomChanceWithLootingLootCondition(float f, float f1, Object object) {
+         this(f, f1);
+@@ -70,12 +74,6 @@
+             return new RandomChanceWithLootingLootCondition(JsonHelper.getFloat(jsonobject, "chance"), JsonHelper.getFloat(jsonobject, "looting_multiplier"));
+         }
+ 
+-        public Object fromJson(JsonObject jsonobject, JsonDeserializationContext jsondeserializationcontext) {
+-            return this.fromJson(jsonobject, jsondeserializationcontext);
+-        }
+-
+-        public void toJson(JsonObject jsonobject, Object object, JsonSerializationContext jsonserializationcontext) {
+-            this.toJson(jsonobject, (RandomChanceWithLootingLootCondition) object, jsonserializationcontext);
+-        }
++        // Loom - decompile errors
+     }
+ }

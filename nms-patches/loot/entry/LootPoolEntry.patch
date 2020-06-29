@@ -1,0 +1,40 @@
+--- a/net/minecraft/loot/entry/LootPoolEntry.java
++++ b/net/minecraft/loot/entry/LootPoolEntry.java
+@@ -43,7 +43,7 @@
+         public Serializer() {}
+ 
+         public final void toJson(JsonObject jsonobject, T t0, JsonSerializationContext jsonserializationcontext) {
+-            if (!ArrayUtils.isEmpty((Object[]) t0.conditions)) {
++            if (!ArrayUtils.isEmpty(t0.conditions)) { // Loom - decompile errors
+                 jsonobject.add("conditions", jsonserializationcontext.serialize(t0.conditions));
+             }
+ 
+@@ -60,13 +60,7 @@
+ 
+         public abstract T fromJson(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootCondition[] args);
+ 
+-        public Object fromJson(JsonObject jsonobject, JsonDeserializationContext jsondeserializationcontext) {
+-            return this.fromJson(jsonobject, jsondeserializationcontext);
+-        }
+-
+-        public void toJson(JsonObject jsonobject, Object object, JsonSerializationContext jsonserializationcontext) {
+-            this.toJson(jsonobject, (LootPoolEntry) object, jsonserializationcontext);
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public abstract static class Builder<T extends LootPoolEntry.Builder<T>> implements LootConditionConsumingBuilder<T> {
+@@ -96,12 +90,6 @@
+ 
+         public abstract LootPoolEntry build();
+ 
+-        public Object getThis() {
+-            return this.getThis();
+-        }
+-
+-        public Object conditionally(LootCondition.Builder lootcondition_builder) {
+-            return this.conditionally(lootcondition_builder);
+-        }
++        // Loom - decompile errors
+     }
+ }

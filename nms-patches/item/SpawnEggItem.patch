@@ -1,0 +1,20 @@
+--- a/net/minecraft/item/SpawnEggItem.java
++++ b/net/minecraft/item/SpawnEggItem.java
+@@ -163,7 +163,7 @@
+                     return Optional.empty();
+                 } else {
+                     ((MobEntity) object).refreshPositionAndAngles(vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0.0F, 0.0F);
+-                    world.spawnEntity((Entity) object);
++                    world.spawnEntity((Entity) object, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG); // CraftBukkit
+                     if (itemstack.hasCustomName()) {
+                         ((MobEntity) object).setCustomName(itemstack.getName());
+                     }
+@@ -172,7 +172,7 @@
+                         itemstack.decrement(1);
+                     }
+ 
+-                    return Optional.of(object);
++                    return Optional.of((MobEntity) object); // CraftBukkit - decompile error
+                 }
+             }
+         }

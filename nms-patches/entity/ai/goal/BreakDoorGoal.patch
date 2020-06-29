@@ -1,0 +1,15 @@
+--- a/net/minecraft/entity/ai/goal/BreakDoorGoal.java
++++ b/net/minecraft/entity/ai/goal/BreakDoorGoal.java
+@@ -66,6 +66,12 @@
+         }
+ 
+         if (this.breakProgress == this.getMaxProgress() && this.isDifficultySufficient(this.mob.world.getDifficulty())) {
++            // CraftBukkit start
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityBreakDoorEvent(this.mob, this.doorPos).isCancelled()) {
++                this.start();
++                return;
++            }
++            // CraftBukkit end
+             this.mob.world.removeBlock(this.doorPos, false);
+             this.mob.world.syncWorldEvent(1021, this.doorPos, 0);
+             this.mob.world.syncWorldEvent(2001, this.doorPos, Block.getRawIdFromState(this.mob.world.getBlockState(this.doorPos)));

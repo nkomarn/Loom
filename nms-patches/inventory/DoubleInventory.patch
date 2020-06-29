@@ -1,0 +1,65 @@
+--- a/net/minecraft/inventory/DoubleInventory.java
++++ b/net/minecraft/inventory/DoubleInventory.java
+@@ -3,11 +3,62 @@
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.item.ItemStack;
+ 
++// CraftBukkit start
++import java.util.ArrayList;
++import java.util.List;
++import org.bukkit.Location;
++
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++// CraftBukkit end
++
+ public class DoubleInventory implements Inventory {
+ 
+     private final Inventory first;
+     private final Inventory second;
+ 
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++
++    public List<ItemStack> getContents() {
++        List<ItemStack> result = new ArrayList<ItemStack>(this.size());
++        for (int i = 0; i < this.size(); i++) {
++            result.add(this.getStack(i));
++        }
++        return result;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++        this.first.onOpen(who);
++        this.second.onOpen(who);
++        transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        this.first.onClose(who);
++        this.second.onClose(who);
++        transaction.remove(who);
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++        return null; // This method won't be called since CraftInventoryDoubleChest doesn't defer to here
++    }
++
++    public void setMaxStackSize(int size) {
++        this.first.setMaxStackSize(size);
++        this.second.setMaxStackSize(size);
++    }
++
++    @Override
++    public Location getLocation() {
++        return first.getLocation(); // TODO: right?
++    }
++    // CraftBukkit end
++
+     public DoubleInventory(Inventory inventory, Inventory inventory1) {
+         if (inventory == null) {
+             inventory = inventory1;

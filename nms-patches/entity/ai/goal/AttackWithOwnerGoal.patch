@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/ai/goal/AttackWithOwnerGoal.java
++++ b/net/minecraft/entity/ai/goal/AttackWithOwnerGoal.java
+@@ -35,7 +35,7 @@
+     }
+ 
+     public void start() {
+-        this.mob.setTarget(this.attacking);
++        this.mob.setTarget(this.attacking, org.bukkit.event.entity.EntityTargetEvent.TargetReason.OWNER_ATTACKED_TARGET, true); // CraftBukkit - reason
+         LivingEntity livingentity = this.tameable.getOwner();
+ 
+         if (livingentity != null) {

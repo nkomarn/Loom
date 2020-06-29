@@ -1,0 +1,75 @@
+--- a/net/minecraft/network/PacketByteBuf.java
++++ b/net/minecraft/network/PacketByteBuf.java
+@@ -37,6 +37,8 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.util.math.Vec3d;
+ 
++import org.bukkit.craftbukkit.inventory.CraftItemStack; // CraftBukkit
++
+ public class PacketByteBuf extends ByteBuf {
+ 
+     private final ByteBuf parent;
+@@ -165,7 +167,7 @@
+     }
+ 
+     public <T extends Enum<T>> T readEnumConstant(Class<T> oclass) {
+-        return ((Enum[]) oclass.getEnumConstants())[this.readVarInt()];
++        return ((T[]) oclass.getEnumConstants())[this.readVarInt()]; // CraftBukkit - fix decompile error
+     }
+ 
+     public PacketByteBuf writeEnumConstant(Enum<?> oenum) {
+@@ -242,7 +244,7 @@
+         } else {
+             try {
+                 NbtIo.write(compoundtag, new ByteBufOutputStream(this));
+-            } catch (IOException ioexception) {
++            } catch (Exception ioexception) { // CraftBukkit - IOException -> Exception
+                 throw new EncoderException(ioexception);
+             }
+         }
+@@ -269,7 +271,7 @@
+     }
+ 
+     public PacketByteBuf writeItemStack(ItemStack itemstack) {
+-        if (itemstack.isEmpty()) {
++        if (itemstack.isEmpty() || itemstack.getItem() == null) { // CraftBukkit - NPE fix itemstack.getItem()
+             this.writeBoolean(false);
+         } else {
+             this.writeBoolean(true);
+@@ -298,6 +300,11 @@
+             ItemStack itemstack = new ItemStack(Item.byRawId(i), b0);
+ 
+             itemstack.setTag(this.readCompoundTag());
++            // CraftBukkit start
++            if (itemstack.getTag() != null) {
++                CraftItemStack.setItemMeta(itemstack, CraftItemStack.getItemMeta(itemstack));
++            }
++            // CraftBukkit end
+             return itemstack;
+         }
+     }
+@@ -1111,23 +1118,5 @@
+         return this.parent.release(i);
+     }
+ 
+-    public ReferenceCounted touch(Object object) {
+-        return this.touch(object);
+-    }
+-
+-    public ReferenceCounted touch() {
+-        return this.touch();
+-    }
+-
+-    public ReferenceCounted retain(int i) {
+-        return this.retain(i);
+-    }
+-
+-    public ReferenceCounted retain() {
+-        return this.retain();
+-    }
+-
+-    public int compareTo(Object object) {
+-        return this.compareTo((ByteBuf) object);
+-    }
++    // Loom - decompile errors
+ }
