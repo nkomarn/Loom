@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.Container;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
 import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
@@ -8,14 +9,13 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
 
 public class CraftInventoryView extends InventoryView {
-    private final Container container;
+    private final ScreenHandler container;
     private final CraftHumanEntity player;
     private final CraftInventory viewing;
 
-    public CraftInventoryView(HumanEntity player, Inventory viewing, Container container) {
+    public CraftInventoryView(HumanEntity player, Inventory viewing, ScreenHandler container) {
         // TODO: Should we make sure it really IS a CraftHumanEntity first? And a CraftInventory?
         this.player = (CraftHumanEntity) player;
         this.viewing = (CraftInventory) viewing;
@@ -47,21 +47,21 @@ public class CraftInventoryView extends InventoryView {
     }
 
     @Override
-    public void setItem(int slot, ItemStack item) {
-        net.minecraft.server.ItemStack stack = CraftItemStack.asNMSCopy(item);
+    public void setItem(int slot, org.bukkit.inventory.ItemStack item) {
+        ItemStack stack = CraftItemStack.asNMSCopy(item);
         if (slot >= 0) {
-            container.getSlot(slot).set(stack);
+            container.getSlot(slot).setStack(stack);
         } else {
-            player.getHandle().drop(stack, false);
+            player.getHandle().dropItem(stack, false);
         }
     }
 
     @Override
-    public ItemStack getItem(int slot) {
+    public org.bukkit.inventory.ItemStack getItem(int slot) {
         if (slot < 0) {
             return null;
         }
-        return CraftItemStack.asCraftMirror(container.getSlot(slot).getItem());
+        return CraftItemStack.asCraftMirror(container.getSlot(slot).getStack());
     }
 
     @Override
@@ -73,7 +73,7 @@ public class CraftInventoryView extends InventoryView {
         return rawSlot < viewing.getSize();
     }
 
-    public Container getHandle() {
+    public ScreenHandler getHandle() {
         return container;
     }
 }

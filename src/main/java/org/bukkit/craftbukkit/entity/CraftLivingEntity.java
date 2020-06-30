@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.DamageSource;
 import net.minecraft.server.EntityArmorStand;
 import net.minecraft.server.EntityArrow;
@@ -300,8 +302,8 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     @Override
-    public EntityLiving getHandle() {
-        return (EntityLiving) entity;
+    public PlayerEntity getHandle() {
+        return (PlayerEntity) entity;
     }
 
     public void setHandle(final EntityLiving entity) {

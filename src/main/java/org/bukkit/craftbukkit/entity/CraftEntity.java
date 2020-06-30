@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import net.minecraft.entity.Entity;
 import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.BlockPosition;
 import net.minecraft.server.DamageSource;

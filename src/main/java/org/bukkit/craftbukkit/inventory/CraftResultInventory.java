@@ -1,22 +1,23 @@
 package org.bukkit.craftbukkit.inventory;
 
+import net.minecraft.inventory.Inventory;
 import net.minecraft.server.IInventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftResultInventory extends CraftInventory {
 
-    private final IInventory resultInventory;
+    private final Inventory resultInventory;
 
-    public CraftResultInventory(IInventory inventory, IInventory resultInventory) {
+    public CraftResultInventory(Inventory inventory, Inventory resultInventory) {
         super(inventory);
         this.resultInventory = resultInventory;
     }
 
-    public IInventory getResultInventory() {
+    public Inventory getResultInventory() {
         return resultInventory;
     }
 
-    public IInventory getIngredientsInventory() {
+    public Inventory getIngredientsInventory() {
         return inventory;
     }
 

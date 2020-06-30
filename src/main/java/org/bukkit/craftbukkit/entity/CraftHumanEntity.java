@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.BlockBed;
 import net.minecraft.server.BlockEnchantmentTable;
 import net.minecraft.server.BlockPosition;
@@ -249,11 +251,11 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     @Override
-    public EntityHuman getHandle() {
-        return (EntityHuman) entity;
+    public PlayerEntity getHandle() {
+        return (PlayerEntity) entity;
     }
 
-    public void setHandle(final EntityHuman entity) {
+    public void setHandle(final PlayerEntity entity) {
         super.setHandle(entity);
         this.inventory = new CraftInventoryPlayer(entity.inventory);
     }
