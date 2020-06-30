@@ -1,0 +1,51 @@
+--- a/net/minecraft/entity/projectile/FireballEntity.java
++++ b/net/minecraft/entity/projectile/FireballEntity.java
+@@ -11,16 +11,21 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
+ 
++import org.bukkit.Bukkit;
++import org.bukkit.event.entity.ExplosionPrimeEvent; // CraftBukkit
++
+ public class FireballEntity extends AbstractFireballEntity {
+ 
+     public int explosionPower = 1;
+ 
+     public FireballEntity(EntityType<? extends FireballEntity> entitytype, World world) {
+         super(entitytype, world);
++        isIncendiary = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING); // CraftBukkit
+     }
+ 
+     public FireballEntity(World world, LivingEntity livingentity, double d0, double d1, double d2) {
+         super(EntityType.FIREBALL, livingentity, d0, d1, d2, world);
++        isIncendiary = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING); // CraftBukkit
+     }
+ 
+     protected void onCollision(HitResult hitresult) {
+@@ -28,7 +33,15 @@
+         if (!this.world.isClient) {
+             boolean flag = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
+ 
+-            this.world.createExplosion((Entity) null, this.getX(), this.getY(), this.getZ(), (float) this.explosionPower, flag, flag ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
++            // CraftBukkit start - fire ExplosionPrimeEvent
++            ExplosionPrimeEvent event = new ExplosionPrimeEvent((org.bukkit.entity.Explosive) this.getBukkitEntity());
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (!event.isCancelled()) {
++                // give 'this' instead of (Entity) null so we know what causes the damage
++                this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), event.getRadius(), event.getFire(), flag ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
++            }
++            // CraftBukkit end
+             this.remove();
+         }
+ 
+@@ -56,7 +69,8 @@
+     public void readCustomDataFromTag(CompoundTag compoundtag) {
+         super.readCustomDataFromTag(compoundtag);
+         if (compoundtag.contains("ExplosionPower", 99)) {
+-            this.explosionPower = compoundtag.getInt("ExplosionPower");
++            // CraftBukkit - set bukkitYield when setting explosionpower
++            bukkitYield = this.explosionPower = compoundtag.getInt("ExplosionPower");
+         }
+ 
+     }

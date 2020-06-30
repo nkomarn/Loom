@@ -1,0 +1,42 @@
+--- a/net/minecraft/entity/mob/ZombifiedPiglinEntity.java
++++ b/net/minecraft/entity/mob/ZombifiedPiglinEntity.java
+@@ -36,6 +36,12 @@
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
+ 
++// CraftBukkit start
++import net.minecraft.entity.Entity;
++import net.minecraft.server.world.ServerWorld;
++import org.bukkit.Bukkit;
++// CraftBukkit end
++
+ public class ZombifiedPiglinEntity extends ZombieEntity implements Angerable {
+ 
+     private static final UUID ATTACKING_SPEED_BOOST_ID = UUID.fromString("49455A49-7EC5-45BA-B886-3B90B23A1718");
+@@ -135,7 +141,7 @@
+         }).filter((zombifiedpiglinentity) -> {
+             return !zombifiedpiglinentity.isTeammate(this.getTarget());
+         }).forEach((zombifiedpiglinentity) -> {
+-            zombifiedpiglinentity.setTarget(this.getTarget());
++            zombifiedpiglinentity.setTarget(this.getTarget(), org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_NEARBY_ENTITY, true); // CraftBukkit
+         });
+     }
+ 
+@@ -157,7 +163,16 @@
+     }
+ 
+     public void chooseRandomAngerTime() {
+-        this.setAngerTime(ZombifiedPiglinEntity.field_25379.choose(this.random));
++        // CraftBukkit start
++        Entity entity = ((ServerWorld) this.world).getEntity(getAngryAt());
++        org.bukkit.event.entity.PigZombieAngerEvent event = new org.bukkit.event.entity.PigZombieAngerEvent((org.bukkit.entity.PigZombie) this.getBukkitEntity(), (entity == null) ? null : entity.getBukkitEntity(), ZombifiedPiglinEntity.field_25379.choose(this.random));
++        Bukkit.getPluginManager().callEvent(event);
++        if (event.isCancelled()) {
++            this.setAngryAt(null);
++            return;
++        }
++        this.setAngerTime(event.getNewAnger());
++        // CraftBukkit end
+     }
+ 
+     public static boolean canSpawn(EntityType<ZombifiedPiglinEntity> entitytype, WorldAccess worldaccess, SpawnReason spawnreason, BlockPos blockpos, Random random) {

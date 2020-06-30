@@ -1,0 +1,53 @@
+--- a/net/minecraft/entity/TntEntity.java
++++ b/net/minecraft/entity/TntEntity.java
+@@ -11,12 +11,17 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
+ 
++import org.bukkit.Bukkit;
++import org.bukkit.event.entity.ExplosionPrimeEvent; // CraftBukkit
++
+ public class TntEntity extends Entity {
+ 
+     private static final TrackedData<Integer> FUSE = DataTracker.registerData(TntEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     @Nullable
+     private LivingEntity causingEntity;
+     private int fuseTimer;
++    public float yield = 4; // CraftBukkit - add field
++    public boolean isIncendiary = false; // CraftBukkit - add field
+ 
+     public TntEntity(EntityType<? extends TntEntity> entitytype, World world) {
+         super(entitytype, world);
+@@ -62,10 +67,13 @@
+ 
+         --this.fuseTimer;
+         if (this.fuseTimer <= 0) {
+-            this.remove();
++            // CraftBukkit start - Need to reverse the order of the explosion and the entity death so we have a location for the event
++            // this.remove();
+             if (!this.world.isClient) {
+                 this.explode();
+             }
++            this.remove();
++            // CraftBukkit end
+         } else {
+             this.updateWaterState();
+             if (this.world.isClient) {
+@@ -76,9 +84,15 @@
+     }
+ 
+     private void explode() {
+-        float f = 4.0F;
++        // CraftBukkit start
++        // float f = 4.0F;
++        ExplosionPrimeEvent event = new ExplosionPrimeEvent((org.bukkit.entity.Explosive) this.getBukkitEntity());
++        Bukkit.getPluginManager().callEvent(event);
+ 
+-        this.world.createExplosion(this, this.getX(), this.getBodyY(0.0625D), this.getZ(), 4.0F, Explosion.DestructionType.BREAK);
++        if (!event.isCancelled()) {
++            this.world.createExplosion(this, this.getX(), this.getBodyY(0.0625D), this.getZ(), 4.0F, Explosion.DestructionType.BREAK);
++        }
++        // CraftBukkit end
+     }
+ 
+     protected void writeCustomDataToTag(CompoundTag compoundtag) {

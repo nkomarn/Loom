@@ -1,0 +1,174 @@
+--- a/net/minecraft/server/network/EntityTrackerEntry.java
++++ b/net/minecraft/server/network/EntityTrackerEntry.java
+@@ -38,6 +38,12 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerVelocityEvent;
++// CraftBukkit end
++
+ public class EntityTrackerEntry {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+@@ -59,7 +65,12 @@
+     private boolean hadVehicle;
+     private boolean lastOnGround;
+ 
+-    public EntityTrackerEntry(ServerWorld serverworld, Entity entity, int i, boolean flag, Consumer<Packet<?>> consumer) {
++    // CraftBukkit start
++    private final Set<ServerPlayerEntity> trackedPlayers;
++
++    public EntityTrackerEntry(ServerWorld serverworld, Entity entity, int i, boolean flag, Consumer<Packet<?>> consumer, Set<ServerPlayerEntity> trackedPlayers) {
++        this.trackedPlayers = trackedPlayers;
++        // CraftBukkit end
+         this.velocity = Vec3d.ZERO;
+         this.lastPassengers = Collections.emptyList();
+         this.world = serverworld;
+@@ -79,16 +90,18 @@
+ 
+         if (!list.equals(this.lastPassengers)) {
+             this.lastPassengers = list;
+-            this.receiver.accept(new EntityPassengersSetS2CPacket(this.entity));
++            // this.receiver.accept();
++            this.sendSyncPacket(new EntityPassengersSetS2CPacket(this.entity)); // CraftBukkit
+         }
+ 
+-        if (this.entity instanceof ItemFrameEntity && this.trackingTick % 10 == 0) {
++        // PAIL : rename
++        if (this.entity instanceof ItemFrameEntity /* && this.trackingTick % 10 == 0 */ ) { // CraftBukkit - Moved below, should always enter this block
+             ItemFrameEntity itemframeentity = (ItemFrameEntity) this.entity;
+             ItemStack itemstack = itemframeentity.getHeldItemStack();
+ 
+-            if (itemstack.getItem() instanceof FilledMapItem) {
++            if (this.trackingTick % 10 == 0 && itemstack.getItem() instanceof FilledMapItem) { // CraftBukkit - Moved this.tickCounter % 10 logic here so item frames do not enter the other blocks
+                 MapState mapstate = FilledMapItem.getOrCreateMapState(itemstack, this.world);
+-                Iterator iterator = this.world.getPlayers().iterator();
++                Iterator iterator = this.trackedPlayers.iterator(); // CraftBukkit
+ 
+                 while (iterator.hasNext()) {
+                     ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) iterator.next();
+@@ -133,6 +146,17 @@
+                 boolean flag2 = flag1 || this.trackingTick % 60 == 0;
+                 boolean flag3 = Math.abs(i - this.lastYaw) >= 1 || Math.abs(j - this.lastPitch) >= 1;
+ 
++                // CraftBukkit start - Code moved from below
++                if (flag2) {
++                    this.storeEncodedCoordinates();
++                }
++
++                if (flag3) {
++                    this.lastYaw = i;
++                    this.lastPitch = j;
++                }
++                // CraftBukkit end
++
+                 if (this.trackingTick > 0 || this.entity instanceof PersistentProjectileEntity) {
+                     long k = EntityS2CPacket.encodePacketCoordinate(vec3d.x);
+                     long l = EntityS2CPacket.encodePacketCoordinate(vec3d.y);
+@@ -171,6 +195,7 @@
+                 }
+ 
+                 this.syncEntityData();
++                /* CraftBukkit start - Code moved up
+                 if (flag2) {
+                     this.storeEncodedCoordinates();
+                 }
+@@ -179,6 +204,7 @@
+                     this.lastYaw = i;
+                     this.lastPitch = j;
+                 }
++                // CraftBukkit end */
+ 
+                 this.hadVehicle = false;
+             }
+@@ -194,7 +220,28 @@
+ 
+         ++this.trackingTick;
+         if (this.entity.velocityModified) {
+-            this.sendSyncPacket(new EntityVelocityUpdateS2CPacket(this.entity));
++//            this.sendSyncPacket(new EntityVelocityUpdateS2CPacket(this.entity));
++            // CraftBukkit start - Create PlayerVelocity event
++            boolean cancelled = false;
++
++            if (this.entity instanceof ServerPlayerEntity) {
++                Player player = (Player) this.entity.getBukkitEntity();
++                org.bukkit.util.Vector velocity = player.getVelocity();
++
++                PlayerVelocityEvent event = new PlayerVelocityEvent(player, velocity.clone());
++                Bukkit.getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    cancelled = true;
++                } else if (!velocity.equals(event.getVelocity())) {
++                    player.setVelocity(event.getVelocity());
++                }
++            }
++
++            if (!cancelled) {
++                this.sendSyncPacket(new EntityVelocityUpdateS2CPacket(this.entity));
++            }
++            // CraftBukkit end
+             this.entity.velocityModified = false;
+         }
+ 
+@@ -209,14 +256,17 @@
+         ServerPlayNetworkHandler serverplaynetworkhandler = serverplayerentity.networkHandler;
+ 
+         serverplayerentity.networkHandler.getClass();
+-        this.sendPackets(serverplaynetworkhandler::sendPacket);
++        this.sendPackets(serverplaynetworkhandler::sendPacket, serverplayerentity); // CraftBukkit - add player
+         this.entity.onStartedTrackingBy(serverplayerentity);
+         serverplayerentity.onStartedTracking(this.entity);
+     }
+ 
+-    public void sendPackets(Consumer<Packet<?>> consumer) {
++    public void sendPackets(Consumer<Packet<?>> consumer, ServerPlayerEntity entityplayer) { // CraftBukkit - add player
+         if (this.entity.removed) {
+-            EntityTrackerEntry.LOGGER.warn("Fetching packet for removed entity " + this.entity);
++            // CraftBukkit start - Remove useless error spam, just return
++            // EntityTrackerEntry.LOGGER.warn("Fetching packet for removed entity " + this.entity);
++            return;
++            // CraftBukkit end
+         }
+ 
+         Packet<?> packet = this.entity.createSpawnPacket();
+@@ -232,6 +282,12 @@
+         if (this.entity instanceof LivingEntity) {
+             Collection<EntityAttributeInstance> collection = ((LivingEntity) this.entity).getAttributes().getAttributesToSend();
+ 
++            // CraftBukkit start - If sending own attributes send scaled health instead of current maximum health
++            if (this.entity.getEntityId() == entityplayer.getEntityId()) {
++                ((ServerPlayerEntity) this.entity).getBukkitEntity().injectScaledMaxHealth(collection, false);
++            }
++            // CraftBukkit end
++
+             if (!collection.isEmpty()) {
+                 consumer.accept(new EntityAttributesS2CPacket(this.entity.getEntityId(), collection));
+             }
+@@ -265,6 +321,11 @@
+             }
+         }
+ 
++        // CraftBukkit start - Fix for nonsensical head yaw
++        this.lastHeadPitch = MathHelper.floor(this.entity.getHeadYaw() * 256.0F / 360.0F);
++        consumer.accept(new EntitySetHeadYawS2CPacket(this.entity, (byte) lastHeadPitch));
++        // CraftBukkit end
++
+         if (this.entity instanceof LivingEntity) {
+             LivingEntity livingentity = (LivingEntity) this.entity;
+             Iterator iterator = livingentity.getStatusEffects().iterator();
+@@ -305,6 +366,11 @@
+             Set<EntityAttributeInstance> set = ((LivingEntity) this.entity).getAttributes().getTracked();
+ 
+             if (!set.isEmpty()) {
++                // CraftBukkit start - Send scaled max health
++                if (this.entity instanceof ServerPlayerEntity) {
++                    ((ServerPlayerEntity) this.entity).getBukkitEntity().injectScaledMaxHealth(set, false);
++                }
++                // CraftBukkit end
+                 this.sendSyncPacket(new EntityAttributesS2CPacket(this.entity.getEntityId(), set));
+             }
+ 

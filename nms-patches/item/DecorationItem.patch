@@ -1,0 +1,34 @@
+--- a/net/minecraft/item/DecorationItem.java
++++ b/net/minecraft/item/DecorationItem.java
+@@ -12,6 +12,12 @@
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.entity.Player;
++import org.bukkit.event.hanging.HangingPlaceEvent;
++// CraftBukkit end
++
+ public class DecorationItem extends Item {
+ 
+     private final EntityType<? extends AbstractDecorationEntity> entityType;
+@@ -52,6 +58,18 @@
+ 
+             if (((AbstractDecorationEntity) object).canStayAttached()) {
+                 if (!world.isClient) {
++                    // CraftBukkit start - fire HangingPlaceEvent
++                    Player who = (itemusagecontext.getPlayer() == null) ? null : (Player) itemusagecontext.getPlayer().getBukkitEntity();
++                    org.bukkit.block.Block blockClicked = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++                    org.bukkit.block.BlockFace blockFace = org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(direction);
++
++                    HangingPlaceEvent event = new HangingPlaceEvent((org.bukkit.entity.Hanging) ((AbstractDecorationEntity) object).getBukkitEntity(), who, blockClicked, blockFace);
++                    Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        return ActionResult.FAIL;
++                    }
++                    // CraftBukkit end
+                     ((AbstractDecorationEntity) object).onPlace();
+                     world.spawnEntity((Entity) object);
+                 }

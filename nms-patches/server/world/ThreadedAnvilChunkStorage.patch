@@ -1,0 +1,160 @@
+--- a/net/minecraft/server/world/ThreadedAnvilChunkStorage.java
++++ b/net/minecraft/server/world/ThreadedAnvilChunkStorage.java
+@@ -91,6 +91,11 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import net.minecraft.entity.Npc;
++import org.bukkit.entity.Player;
++// CraftBukkit end
++
+ public class ThreadedAnvilChunkStorage extends VersionedChunkStorage implements ChunkHolder.PlayersWatchingChunkProvider {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+@@ -121,6 +126,31 @@
+     private final Queue<Runnable> field_19343;
+     private int watchDistance;
+ 
++    // CraftBukkit start - recursion-safe executor for Chunk loadCallback() and unloadCallback()
++    public final CallbackExecutor callbackExecutor = new CallbackExecutor();
++    public static final class CallbackExecutor implements java.util.concurrent.Executor, Runnable {
++
++        private Runnable queued;
++
++        @Override
++        public void execute(Runnable runnable) {
++            if (queued != null) {
++                throw new IllegalStateException("Already queued");
++            }
++            queued = runnable;
++        }
++
++        @Override
++        public void run() {
++            Runnable task = queued;
++            queued = null;
++            if (task != null) {
++                task.run();
++            }
++        }
++    };
++    // CraftBukkit end
++
+     public ThreadedAnvilChunkStorage(ServerWorld serverworld, LevelStorage.Session levelstorage_session, DataFixer datafixer, StructureManager structuremanager, Executor executor, ThreadExecutor<Runnable> threadexecutor, ChunkProvider chunkprovider, ChunkGenerator chunkgenerator, WorldGenerationProgressListener worldgenerationprogresslistener, Supplier<PersistentStateManager> supplier, int i, boolean flag) {
+         super(new File(levelstorage_session.method_27424(serverworld.getRegistryKey()), "region"), datafixer, flag);
+         this.chunkHolders = this.currentChunkHolders.clone();
+@@ -241,9 +271,10 @@
+ 
+         return completablefuture1.thenApply((list1) -> {
+             List<Chunk> list2 = Lists.newArrayList();
+-            final int l1 = 0;
++            int cnt = 0; // CraftBukkit start - decompile error
+ 
+-            for (Iterator iterator = list1.iterator(); iterator.hasNext(); ++l1) {
++            for (Iterator iterator = list1.iterator(); iterator.hasNext(); ++cnt) {
++                final int l1 = cnt; // CraftBukkit end
+                 final Either<Chunk, ChunkHolder.Unloaded> either = (Either) iterator.next();
+                 Optional<Chunk> optional = either.left();
+ 
+@@ -345,7 +376,7 @@
+             ThreadedAnvilChunkStorage.LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", (Object) this.saveDir.getName());
+         } else {
+             this.chunkHolders.values().stream().filter(ChunkHolder::isTicking).forEach((chunkholder) -> {
+-                Chunk chunk = (Chunk) chunkholder.getFuture().getNow((Object) null);
++                Chunk chunk = (Chunk) chunkholder.getFuture().getNow(null); // CraftBukkit - decompile error
+ 
+                 if (chunk instanceof ReadOnlyChunk || chunk instanceof WorldChunk) {
+                     this.save(chunk);
+@@ -395,7 +426,7 @@
+ 
+     private void tryUnloadChunk(long i, ChunkHolder chunkholder) {
+         CompletableFuture<Chunk> completablefuture = chunkholder.getFuture();
+-        Consumer consumer = (chunk) -> {
++        Consumer<Chunk> consumer = (chunk) -> { // CraftBukkit - decompile error
+             CompletableFuture<Chunk> completablefuture1 = chunkholder.getFuture();
+ 
+             if (completablefuture1 != completablefuture) {
+@@ -618,9 +649,17 @@
+                         while (iterator.hasNext()) {
+                             Entity entity = (Entity) iterator.next();
+ 
+-                            if (!(entity instanceof PlayerEntity) && !this.world.loadEntity(entity)) {
++                            // CraftBukkit start - these are spawned serialized (DefinedStructure) and we don't call an add event below at the moment due to ordering complexities
++                            boolean needsRemoval = false;
++                            if (chunk.needsDecoration && !this.world.getServer().getSpawnNPCs() && entity instanceof Npc) {
++                                entity.remove();
++                                needsRemoval = true;
++                            }
++
++                            if (!(entity instanceof PlayerEntity) && (needsRemoval || !this.world.loadEntity(entity))) {
++                                // CraftBukkit end
+                                 if (list == null) {
+-                                    list = Lists.newArrayList((Object[]) (entity));
++                                    list = Lists.newArrayList(entity); // Loom - decompile errors
+                                 } else {
+                                     list.add(entity);
+                                 }
+@@ -829,7 +868,7 @@
+                 return chunk instanceof WorldChunk ? Optional.of((WorldChunk) chunk) : Optional.empty();
+             });
+ 
+-            csvwriter.printRow(chunkpos.x, chunkpos.z, chunkholder.getLevel(), optional.isPresent(), optional.map(Chunk::getStatus).orElse((Object) null), optional1.map(WorldChunk::getLevelType).orElse((Object) null), getFutureStatus(chunkholder.getBorderFuture()), getFutureStatus(chunkholder.getTickingFuture()), getFutureStatus(chunkholder.getEntityTickingFuture()), this.ticketManager.getTicket(long2objectmap_entry.getLongKey()), !this.isTooFarFromPlayersToSpawnMobs(chunkpos), optional1.map((worldchunk) -> {
++            csvwriter.printRow(chunkpos.x, chunkpos.z, chunkholder.getLevel(), optional.isPresent(), optional.map(Chunk::getStatus).orElse(null), optional1.map(WorldChunk::getLevelType).orElse(null), getFutureStatus(chunkholder.getBorderFuture()), getFutureStatus(chunkholder.getTickingFuture()), getFutureStatus(chunkholder.getEntityTickingFuture()), this.ticketManager.getTicket(long2objectmap_entry.getLongKey()), !this.isTooFarFromPlayersToSpawnMobs(chunkpos), optional1.map((worldchunk) -> { // CraftBukkit - decompile error
+                 return Stream.of(worldchunk.getEntitySectionArray()).mapToInt(TypeFilterableList::size).sum();
+             }).orElse(0), optional1.map((worldchunk) -> {
+                 return worldchunk.getBlockEntities().size();
+@@ -840,7 +879,7 @@
+ 
+     private static String getFutureStatus(CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>> completablefuture) {
+         try {
+-            Either<WorldChunk, ChunkHolder.Unloaded> either = (Either) completablefuture.getNow((Object) null);
++            Either<WorldChunk, ChunkHolder.Unloaded> either = (Either) completablefuture.getNow(null); // CraftBukkit - decompile error
+ 
+             return either != null ? (String) either.map((worldchunk) -> {
+                 return "done";
+@@ -858,7 +897,7 @@
+     private CompoundTag getUpdatedChunkTag(ChunkPos chunkpos) throws IOException {
+         CompoundTag compoundtag = this.getNbt(chunkpos);
+ 
+-        return compoundtag == null ? null : this.updateChunkTag(this.world.getRegistryKey(), this.persistentStateManagerFactory, compoundtag);
++        return compoundtag == null ? null : this.updateChunkTag(this.world.getRegistryKey(), this.persistentStateManagerFactory, compoundtag, chunkpos, world); // CraftBukkit
+     }
+ 
+     boolean isTooFarFromPlayersToSpawnMobs(ChunkPos chunkpos) {
+@@ -1189,7 +1228,7 @@
+         private final Set<ServerPlayerEntity> playersTracking = Sets.newHashSet();
+ 
+         public EntityTracker(Entity entity, int i, int j, boolean flag) {
+-            this.entry = new EntityTrackerEntry(ThreadedAnvilChunkStorage.this.world, entity, j, flag, this::sendToOtherNearbyPlayers);
++            this.entry = new EntityTrackerEntry(ThreadedAnvilChunkStorage.this.world, entity, j, flag, this::sendToOtherNearbyPlayers, playersTracking); // CraftBukkit
+             this.entity = entity;
+             this.maxDistance = i;
+             this.lastCameraPosition = ChunkSectionPos.from(entity);
+@@ -1242,7 +1281,7 @@
+ 
+         public void updateCameraPosition(ServerPlayerEntity serverplayerentity) {
+             if (serverplayerentity != this.entity) {
+-                Vec3d vec3d = serverplayerentity.getPos().subtract(this.entry.getLastPos());
++                Vec3d vec3d = serverplayerentity.getPos().subtract(this.entity.getPos()); // MC-155077, SPIGOT-5113
+                 int i = Math.min(this.getMaxTrackDistance(), (ThreadedAnvilChunkStorage.this.watchDistance - 1) * 16);
+                 boolean flag = vec3d.x >= (double) (-i) && vec3d.x <= (double) i && vec3d.z >= (double) (-i) && vec3d.z <= (double) i && this.entity.canBeSpectated(serverplayerentity);
+ 
+@@ -1258,6 +1297,17 @@
+                         }
+                     }
+ 
++                    // CraftBukkit start - respect vanish API
++                    if (this.entity instanceof ServerPlayerEntity) {
++                        Player player = ((ServerPlayerEntity) this.entity).getBukkitEntity();
++                        if (!serverplayerentity.getBukkitEntity().canSee(player)) {
++                            flag1 = false;
++                        }
++                    }
++
++                    serverplayerentity.removedEntities.remove(Integer.valueOf(this.entity.getEntityId()));
++                    // CraftBukkit end
++
+                     if (flag1 && this.playersTracking.add(serverplayerentity)) {
+                         this.entry.startTracking(serverplayerentity);
+                     }

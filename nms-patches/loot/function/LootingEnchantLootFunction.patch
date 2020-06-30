@@ -1,0 +1,55 @@
+--- a/net/minecraft/loot/function/LootingEnchantLootFunction.java
++++ b/net/minecraft/loot/function/LootingEnchantLootFunction.java
+@@ -44,8 +44,13 @@
+ 
+         if (entity instanceof LivingEntity) {
+             int i = EnchantmentHelper.getLooting((LivingEntity) entity);
++            // CraftBukkit start - use lootingModifier if set by plugin
++            if (lootcontext.hasParameter(LootContextParameters.LOOTING_MOD)) {
++                i = lootcontext.get(LootContextParameters.LOOTING_MOD);
++            }
++            // CraftBukkit end
+ 
+-            if (i == 0) {
++            if (i <= 0) { // CraftBukkit - account for possible negative looting values from Bukkit
+                 return itemstack;
+             }
+ 
+@@ -73,7 +78,7 @@
+         public Serializer() {}
+ 
+         public void toJson(JsonObject jsonobject, LootingEnchantLootFunction lootingenchantlootfunction, JsonSerializationContext jsonserializationcontext) {
+-            super.toJson(jsonobject, (ConditionalLootFunction) lootingenchantlootfunction, jsonserializationcontext);
++            super.toJson(jsonobject, lootingenchantlootfunction, jsonserializationcontext);
+             jsonobject.add("count", jsonserializationcontext.serialize(lootingenchantlootfunction.countRange));
+             if (lootingenchantlootfunction.hasLimit()) {
+                 jsonobject.add("limit", jsonserializationcontext.serialize(lootingenchantlootfunction.limit));
+@@ -87,17 +92,7 @@
+             return new LootingEnchantLootFunction(alootcondition, (UniformLootTableRange) JsonHelper.deserialize(jsonobject, "count", jsondeserializationcontext, UniformLootTableRange.class), i);
+         }
+ 
+-        public ConditionalLootFunction fromJson(JsonObject jsonobject, JsonDeserializationContext jsondeserializationcontext, LootCondition[] alootcondition) {
+-            return this.fromJson(jsonobject, jsondeserializationcontext, alootcondition);
+-        }
+-
+-        public void toJson(JsonObject jsonobject, ConditionalLootFunction conditionallootfunction, JsonSerializationContext jsonserializationcontext) {
+-            this.toJson(jsonobject, (LootingEnchantLootFunction) conditionallootfunction, jsonserializationcontext);
+-        }
+-
+-        public void toJson(JsonObject jsonobject, Object object, JsonSerializationContext jsonserializationcontext) {
+-            this.toJson(jsonobject, (LootingEnchantLootFunction) object, jsonserializationcontext);
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public static class Builder extends ConditionalLootFunction.Builder<LootingEnchantLootFunction.Builder> {
+@@ -122,8 +117,6 @@
+             return new LootingEnchantLootFunction(this.getConditions(), this.countRange, this.limit);
+         }
+ 
+-        protected ConditionalLootFunction.Builder getThisBuilder() {
+-            return this.getThisBuilder();
+-        }
++        // Loom - decompile errors
+     }
+ }

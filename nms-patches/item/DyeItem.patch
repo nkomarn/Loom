@@ -1,0 +1,30 @@
+--- a/net/minecraft/item/DyeItem.java
++++ b/net/minecraft/item/DyeItem.java
+@@ -8,6 +8,8 @@
+ import net.minecraft.util.ActionResult;
+ import net.minecraft.util.DyeColor;
+ import net.minecraft.util.Hand;
++import org.bukkit.Bukkit;
++import org.bukkit.event.entity.SheepDyeWoolEvent; // CraftBukkit
+ 
+ public class DyeItem extends Item {
+ 
+@@ -26,7 +28,17 @@
+ 
+             if (sheepentity.isAlive() && !sheepentity.isSheared() && sheepentity.getColor() != this.color) {
+                 if (!playerentity.world.isClient) {
+-                    sheepentity.setColor(this.color);
++                    // CraftBukkit start
++                    byte bColor = (byte) this.getColor().getId();
++                    SheepDyeWoolEvent event = new SheepDyeWoolEvent((org.bukkit.entity.Sheep) sheepentity.getBukkitEntity(), org.bukkit.DyeColor.getByWoolData(bColor));
++                    Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        return ActionResult.PASS;
++                    }
++
++                    sheepentity.setColor(DyeColor.byId((byte) event.getColor().getWoolData()));
++                    // CraftBukkit end
+                     itemstack.decrement(1);
+                 }
+ 

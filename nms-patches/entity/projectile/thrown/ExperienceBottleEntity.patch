@@ -1,0 +1,22 @@
+--- a/net/minecraft/entity/projectile/thrown/ExperienceBottleEntity.java
++++ b/net/minecraft/entity/projectile/thrown/ExperienceBottleEntity.java
+@@ -35,9 +35,18 @@
+     protected void onCollision(HitResult hitresult) {
+         super.onCollision(hitresult);
+         if (!this.world.isClient) {
+-            this.world.syncWorldEvent(2002, this.getBlockPos(), PotionUtil.getColor(Potions.WATER));
++            // CraftBukkit - moved to after event
++            // this.world.syncWorldEvent(2002, this.getBlockPos(), PotionUtil.getColor(Potions.WATER));
+             int i = 3 + this.world.random.nextInt(5) + this.world.random.nextInt(5);
+ 
++            // CraftBukkit start
++            org.bukkit.event.entity.ExpBottleEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callExpBottleEvent(this, i);
++            i = event.getExperience();
++            if (event.getShowEffect()) {
++                this.world.syncWorldEvent(2002, this.getBlockPos(), PotionUtil.getColor(Potions.WATER));
++            }
++            // CraftBukkit end
++
+             while (i > 0) {
+                 int j = ExperienceOrbEntity.roundToOrbSize(i);
+ 

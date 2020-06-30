@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/mob/WitherSkeletonEntity.java
++++ b/net/minecraft/entity/mob/WitherSkeletonEntity.java
+@@ -92,7 +92,7 @@
+             return false;
+         } else {
+             if (entity instanceof LivingEntity) {
+-                ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 200));
++                ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 200), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+             }
+ 
+             return true;

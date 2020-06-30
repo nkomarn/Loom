@@ -1,0 +1,141 @@
+--- a/net/minecraft/entity/ItemEntity.java
++++ b/net/minecraft/entity/ItemEntity.java
+@@ -27,6 +27,13 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import net.minecraft.server.MinecraftServer;
++import org.bukkit.Bukkit;
++import org.bukkit.event.entity.EntityPickupItemEvent;
++import org.bukkit.event.player.PlayerPickupItemEvent;
++// CraftBukkit end
++
+ public class ItemEntity extends Entity {
+ 
+     private static final TrackedData<ItemStack> STACK = DataTracker.registerData(ItemEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
+@@ -36,6 +43,7 @@
+     private UUID thrower;
+     private UUID owner;
+     public final float hoverHeight;
++    private int lastTick = MinecraftServer.currentTick - 1; // CraftBukkit
+ 
+     public ItemEntity(EntityType<? extends ItemEntity> entitytype, World world) {
+         super(entitytype, world);
+@@ -68,9 +76,12 @@
+             this.remove();
+         } else {
+             super.tick();
+-            if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
+-                --this.pickupDelay;
+-            }
++            // CraftBukkit start - Use wall time for pickup and despawn timers
++            int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
++            if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
++            if (this.age != -32768) this.age += elapsedTicks;
++            this.lastTick = MinecraftServer.currentTick;
++            // CraftBukkit end
+ 
+             this.prevX = this.getX();
+             this.prevY = this.getY();
+@@ -121,9 +132,11 @@
+                 }
+             }
+ 
++            /* CraftBukkit start - moved up
+             if (this.age != -32768) {
+                 ++this.age;
+             }
++            // CraftBukkit end */
+ 
+             this.velocityDirty |= this.updateWaterState();
+             if (!this.world.isClient) {
+@@ -135,6 +148,12 @@
+             }
+ 
+             if (!this.world.isClient && this.age >= 6000) {
++                // CraftBukkit start - fire ItemDespawnEvent
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemDespawnEvent(this).isCancelled()) {
++                    this.age = 0;
++                    return;
++                }
++                // CraftBukkit end
+                 this.remove();
+             }
+ 
+@@ -210,10 +229,11 @@
+     private static void merge(ItemEntity itementity, ItemStack itemstack, ItemStack itemstack1) {
+         ItemStack itemstack2 = merge(itemstack, itemstack1, 64);
+ 
+-        itementity.setStack(itemstack2);
++        if (!itemstack2.isEmpty()) itementity.setStack(itemstack2); // CraftBukkit - don't set empty stacks
+     }
+ 
+     private static void merge(ItemEntity itementity, ItemStack itemstack, ItemEntity itementity1, ItemStack itemstack1) {
++        if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemMergeEvent(itementity1, itementity).isCancelled()) return; // CraftBukkit
+         merge(itementity, itemstack, itemstack1);
+         itementity.pickupDelay = Math.max(itementity.pickupDelay, itementity1.pickupDelay);
+         itementity.age = Math.min(itementity.age, itementity1.age);
+@@ -235,6 +255,11 @@
+         } else if (!this.getStack().getItem().damage(damagesource)) {
+             return false;
+         } else {
++            // CraftBukkit start
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, f)) {
++                return false;
++            }
++            // CraftBukkit end
+             this.scheduleVelocityUpdate();
+             this.health = (int) ((float) this.health - f);
+             if (this.health <= 0) {
+@@ -293,6 +318,40 @@
+             Item item = itemstack.getItem();
+             int i = itemstack.getCount();
+ 
++            // CraftBukkit start - fire PlayerPickupItemEvent
++            int canHold = playerentity.inventory.canHold(itemstack);
++            int remaining = i - canHold;
++
++            if (this.pickupDelay <= 0 && canHold > 0) {
++                itemstack.setCount(canHold);
++                // Call legacy event
++                PlayerPickupItemEvent playerEvent = new PlayerPickupItemEvent((org.bukkit.entity.Player) playerentity.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
++                playerEvent.setCancelled(!playerentity.pickUpLoot);
++                Bukkit.getPluginManager().callEvent(playerEvent);
++                if (playerEvent.isCancelled()) {
++                    itemstack.setCount(i); // SPIGOT-5294 - restore count
++                    return;
++                }
++
++                // Call newer event afterwards
++                EntityPickupItemEvent entityEvent = new EntityPickupItemEvent((org.bukkit.entity.Player) playerentity.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
++                entityEvent.setCancelled(!playerentity.pickUpLoot);
++                Bukkit.getPluginManager().callEvent(entityEvent);
++                if (entityEvent.isCancelled()) {
++                    itemstack.setCount(i); // SPIGOT-5294 - restore count
++                    return;
++                }
++
++                itemstack.setCount(canHold + remaining); // = i
++
++                // Possibly < 0; fix here so we do not have to modify code below
++                this.pickupDelay = 0;
++            } else if (this.pickupDelay == 0) {
++                // ensure that the code below isn't triggered if canHold says we can't pick the items up
++                this.pickupDelay = -1;
++            }
++            // CraftBukkit end
++
+             if (this.pickupDelay == 0 && (this.owner == null || this.owner.equals(playerentity.getUuid())) && playerentity.inventory.insertStack(itemstack)) {
+                 playerentity.sendPickup(this, i);
+                 if (itemstack.isEmpty()) {
+@@ -333,7 +392,9 @@
+     }
+ 
+     public void setStack(ItemStack itemstack) {
++        com.google.common.base.Preconditions.checkArgument(!itemstack.isEmpty(), "Cannot drop air"); // CraftBukkit
+         this.getDataTracker().set(ItemEntity.STACK, itemstack);
++        this.getDataTracker().markDirty(ItemEntity.STACK);
+     }
+ 
+     public void onTrackedDataSet(TrackedData<?> trackeddata) {

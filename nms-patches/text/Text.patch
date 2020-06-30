@@ -1,0 +1,39 @@
+--- a/net/minecraft/text/Text.java
++++ b/net/minecraft/text/Text.java
+@@ -27,7 +27,21 @@
+ import net.minecraft.util.LowercaseEnumTypeAdapterFactory;
+ import net.minecraft.util.Util;
+ 
+-public interface Text extends Message, StringRenderable {
++// CraftBukkit start
++import com.google.common.collect.Streams;
++import java.util.stream.Stream;
++
++public interface Text extends Message, StringRenderable, Iterable<Text> {
++
++    default Stream<Text> stream() {
++        return Streams.concat(new Stream[]{Stream.of(this), this.getSiblings().stream().flatMap(Text::stream)});
++    }
++
++    @Override
++    default Iterator<Text> iterator() {
++        return this.stream().iterator();
++    }
++    // CraftBukkit end
+ 
+     Style getStyle();
+ 
+@@ -378,12 +392,6 @@
+             }
+         }
+ 
+-        public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
+-            return this.serialize((Text) object, type, jsonserializationcontext);
+-        }
+-
+-        public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
+-            return this.deserialize(jsonelement, type, jsondeserializationcontext);
+-        }
++        // Loom - decompile errors
+     }
+ }

@@ -1,0 +1,38 @@
+--- a/net/minecraft/loot/LootTable.java
++++ b/net/minecraft/loot/LootTable.java
+@@ -30,6 +30,13 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import java.util.stream.Collectors;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.world.LootGenerateEvent;
++// CraftBukkit end
++
+ public class LootTable {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+@@ -114,8 +121,21 @@
+     }
+ 
+     public void supplyInventory(Inventory inventory, LootContext lootcontext) {
++        // CraftBukkit start
++        this.supplyInventory(inventory, lootcontext, false);
++    }
++
++    public void supplyInventory(Inventory inventory, LootContext lootcontext, boolean plugin) {
++        // CraftBukkit end
+         List<ItemStack> list = this.generateLoot(lootcontext);
+         Random random = lootcontext.getRandom();
++        // CraftBukkit start
++        LootGenerateEvent event = CraftEventFactory.callLootGenerateEvent(inventory, this, lootcontext, list, plugin);
++        if (event.isCancelled()) {
++            return;
++        }
++        list = event.getLoot().stream().map(CraftItemStack::asNMSCopy).collect(Collectors.toList());
++        // CraftBukkit end
+         List<Integer> list1 = this.getFreeSlots(inventory, random);
+ 
+         this.shuffle(list, list1.size(), random);

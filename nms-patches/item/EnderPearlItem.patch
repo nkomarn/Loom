@@ -1,0 +1,42 @@
+--- a/net/minecraft/item/EnderPearlItem.java
++++ b/net/minecraft/item/EnderPearlItem.java
+@@ -9,6 +9,11 @@
+ import net.minecraft.util.TypedActionResult;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import net.minecraft.server.network.ServerPlayerEntity;
++import net.minecraft.util.ActionResult;
++// CraftBukkit end
++
+ public class EnderPearlItem extends Item {
+ 
+     public EnderPearlItem(Item.Settings item_settings) {
+@@ -18,16 +23,24 @@
+     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerentity, Hand hand) {
+         ItemStack itemstack = playerentity.getStackInHand(hand);
+ 
+-        world.playSound((PlayerEntity) null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.ENTITY_ENDER_PEARL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (EnderPearlItem.RANDOM.nextFloat() * 0.4F + 0.8F));
+-        playerentity.getItemCooldownManager().set(this, 20);
++        // CraftBukkit start - change order
+         if (!world.isClient) {
+             EnderPearlEntity enderpearlentity = new EnderPearlEntity(world, playerentity);
+ 
+             enderpearlentity.setItem(itemstack);
+             enderpearlentity.setProperties(playerentity, playerentity.pitch, playerentity.yaw, 0.0F, 1.5F, 1.0F);
+-            world.spawnEntity(enderpearlentity);
++            if (!world.spawnEntity(enderpearlentity)) {
++                if (playerentity instanceof ServerPlayerEntity) {
++                    ((ServerPlayerEntity) playerentity).getBukkitEntity().updateInventory();
++                }
++                return new TypedActionResult(ActionResult.FAIL, itemstack);
++            }
+         }
+ 
++        world.playSound((PlayerEntity) null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.ENTITY_ENDER_PEARL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (EnderPearlItem.RANDOM.nextFloat() * 0.4F + 0.8F));
++        playerentity.getItemCooldownManager().set(this, 20);
++        // CraftBukkit end
++
+         playerentity.incrementStat(Stats.USED.getOrCreateStat(this));
+         if (!playerentity.abilities.creativeMode) {
+             itemstack.decrement(1);

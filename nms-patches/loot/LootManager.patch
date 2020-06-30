@@ -1,0 +1,48 @@
+--- a/net/minecraft/loot/LootManager.java
++++ b/net/minecraft/loot/LootManager.java
+@@ -6,6 +6,7 @@
+ import java.util.Map;
+ import java.util.Set;
+ import java.util.function.Function;
++import net.minecraft.loot.condition.LootCondition;
+ import net.minecraft.loot.condition.LootConditionManager;
+ import net.minecraft.loot.context.LootContextType;
+ import net.minecraft.loot.context.LootContextTypes;
+@@ -21,6 +22,7 @@
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final Gson GSON = LootGsons.getTableGsonBuilder().create();
+     private Map<Identifier, LootTable> tables = ImmutableMap.of();
++    public Map<LootTable, Identifier> lootTableToKey = ImmutableMap.of(); // CraftBukkit
+     private final LootConditionManager conditionManager;
+ 
+     public LootManager(LootConditionManager lootconditionmanager) {
+@@ -56,7 +58,7 @@
+         LootConditionManager lootconditionmanager = this.conditionManager;
+ 
+         this.conditionManager.getClass();
+-        Function function = lootconditionmanager::get;
++        Function<Identifier, LootCondition> function = lootconditionmanager::get; // CraftBukkit - decompile error
+ 
+         immutablemap.getClass();
+         LootTableReporter loottablereporter = new LootTableReporter(lootcontexttype, function, immutablemap::get);
+@@ -68,6 +70,11 @@
+             LootManager.LOGGER.warn("Found validation problem in " + s + ": " + s1);
+         });
+         this.tables = immutablemap;
++        // CraftBukkit start - build a reversed registry map
++        ImmutableMap.Builder<LootTable, Identifier> lootTableToKeyBuilder = ImmutableMap.builder();
++        this.tables.forEach((lootTable, key) -> lootTableToKeyBuilder.put(key, lootTable)); // PAIL rename keyToLootTable
++        this.lootTableToKey = lootTableToKeyBuilder.build();
++        // CraftBukkit end
+     }
+ 
+     public static void validate(LootTableReporter loottablereporter, Identifier identifier, LootTable loottable) {
+@@ -82,7 +89,5 @@
+         return this.tables.keySet();
+     }
+ 
+-    protected void apply(Object object, ResourceManager resourcemanager, Profiler profiler) {
+-        this.apply((Map) object, resourcemanager, profiler);
+-    }
++    // Loom - decompile errors
+ }

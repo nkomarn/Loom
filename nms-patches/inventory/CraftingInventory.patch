@@ -1,0 +1,90 @@
+--- a/net/minecraft/inventory/CraftingInventory.java
++++ b/net/minecraft/inventory/CraftingInventory.java
+@@ -8,6 +8,16 @@
+ import net.minecraft.screen.ScreenHandler;
+ import net.minecraft.util.collection.DefaultedList;
+ 
++// CraftBukkit start
++import java.util.List;
++import net.minecraft.recipe.Recipe;
++import net.minecraft.screen.CraftingScreenHandler;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.event.inventory.InventoryType;
++// CraftBukkit end
++
+ public class CraftingInventory implements Inventory, RecipeInputProvider {
+ 
+     private final DefaultedList<ItemStack> stacks;
+@@ -15,6 +25,70 @@
+     private final int height;
+     private final ScreenHandler handler;
+ 
++    // CraftBukkit start - add fields
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private Recipe currentRecipe;
++    public Inventory resultInventory;
++    private PlayerEntity owner;
++    private int maxStack = MAX_STACK;
++
++    public List<ItemStack> getContents() {
++        return this.stacks;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++
++    public InventoryType getInvType() {
++        return stacks.size() == 4 ? InventoryType.CRAFTING : InventoryType.WORKBENCH;
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++        return (owner == null) ? null : owner.getBukkitEntity();
++    }
++
++    @Override
++    public int getMaxCountPerStack() {
++        return maxStack;
++    }
++
++
++    public void setMaxCountPerStack(int size) {
++        maxStack = size;
++        resultInventory.setMaxCountPerStack(size);
++    }
++
++    @Override
++    public Location getLocation() {
++        return handler instanceof CraftingScreenHandler ? ((CraftingScreenHandler) handler).context.getLocation() : owner.getBukkitEntity().getLocation();
++    }
++
++    @Override
++    public Recipe getCurrentRecipe() {
++        return currentRecipe;
++    }
++
++    @Override
++    public void setCurrentRecipe(Recipe currentRecipe) {
++        this.currentRecipe = currentRecipe;
++    }
++
++    public CraftingInventory(ScreenHandler screenhandler, int i, int j, PlayerEntity player) {
++        this(screenhandler, i, j);
++        this.owner = player;
++    }
++    // CraftBukkit end
++
++
+     public CraftingInventory(ScreenHandler screenhandler, int i, int j) {
+         this.stacks = DefaultedList.ofSize(i * j, ItemStack.EMPTY);
+         this.handler = screenhandler;

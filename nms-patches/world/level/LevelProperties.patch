@@ -1,34 +1,22 @@
 --- a/net/minecraft/world/level/LevelProperties.java
 +++ b/net/minecraft/world/level/LevelProperties.java
-@@ -22,6 +22,7 @@
- import net.minecraft.nbt.Tag;
- import net.minecraft.resource.DataPackSettings;
- import net.minecraft.server.MinecraftServer;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.util.Util;
- import net.minecraft.util.crash.CrashReportSection;
- import net.minecraft.util.dynamic.DynamicSerializableUuid;
-@@ -39,11 +40,18 @@
- import net.minecraft.world.timer.TimerCallbackSerializer;
+@@ -40,6 +40,15 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
+ 
 +// CraftBukkit start
++import net.minecraft.network.packet.s2c.play.DifficultyS2CPacket;
++import net.minecraft.server.network.ServerPlayerEntity;
++import net.minecraft.server.world.ServerWorld;
 +import org.bukkit.Bukkit;
 +import org.bukkit.event.weather.ThunderChangeEvent;
 +import org.bukkit.event.weather.WeatherChangeEvent;
-+import net.minecraft.server.network.ServerPlayerEntity;
-+import net.minecraft.network.packet.s2c.play.DifficultyS2CPacket;
 +// CraftBukkit end
- 
++
  public class LevelProperties implements ServerWorldProperties, SaveProperties {
  
      private static final Logger LOGGER = LogManager.getLogger();
--    public LevelInfo field_25030;
-+    private LevelInfo field_25030;
-     private final GeneratorOptions field_25425;
-     private final Lifecycle field_25426;
-     private int spawnX;
-@@ -76,6 +84,7 @@
+@@ -76,6 +85,7 @@
      private final Set<String> serverBrands;
      private boolean modded;
      private final Timer<MinecraftServer> scheduledEvents;
@@ -36,7 +24,7 @@
  
      private LevelProperties(@Nullable DataFixer datafixer, int i, @Nullable CompoundTag compoundtag, boolean flag, int j, int k, int l, long i1, long j1, int k1, int l1, int i2, boolean flag1, int j2, boolean flag2, boolean flag3, boolean flag4, WorldBorder.Properties worldborder_properties, int k2, int l2, @Nullable UUID uuid, LinkedHashSet<String> linkedhashset, Timer<MinecraftServer> timer, @Nullable CompoundTag compoundtag1, CompoundTag compoundtag2, LevelInfo levelinfo, GeneratorOptions generatoroptions, Lifecycle lifecycle) {
          this.dataFixer = datafixer;
-@@ -118,9 +127,36 @@
+@@ -118,9 +128,36 @@
              return (Tag) dynamic.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap().getValue();
          });
  
@@ -76,7 +64,7 @@
      }
  
      public CompoundTag cloneWorldTag(RegistryTracker registrytracker, @Nullable CompoundTag compoundtag) {
-@@ -149,7 +185,7 @@
+@@ -149,7 +186,7 @@
          compoundtag.put("Version", compoundtag2);
          compoundtag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
          RegistryReadingOps<Tag> registryreadingops = RegistryReadingOps.of(NbtOps.INSTANCE, registrytracker);
@@ -85,7 +73,7 @@
          Logger logger = LevelProperties.LOGGER;
  
          logger.getClass();
-@@ -196,6 +232,7 @@
+@@ -196,6 +233,7 @@
              compoundtag.putUuid("WanderingTraderId", this.wanderingTraderId);
          }
  
@@ -93,7 +81,7 @@
      }
  
      public int getSpawnX() {
-@@ -284,6 +321,20 @@
+@@ -284,6 +322,20 @@
      }
  
      public void setThundering(boolean flag) {
@@ -114,7 +102,7 @@
          this.thundering = flag;
      }
  
-@@ -300,6 +351,20 @@
+@@ -300,6 +352,20 @@
      }
  
      public void setRaining(boolean flag) {
@@ -135,7 +123,7 @@
          this.raining = flag;
      }
  
-@@ -352,6 +417,12 @@
+@@ -352,6 +418,12 @@
      }
  
      public void setDifficulty(Difficulty difficulty) {
@@ -148,7 +136,7 @@
          this.field_25030 = this.field_25030.method_28381(difficulty);
      }
  
-@@ -437,4 +508,13 @@
+@@ -437,4 +509,13 @@
      public ServerWorldProperties getMainWorldProperties() {
          return this;
      }

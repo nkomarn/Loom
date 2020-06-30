@@ -1,0 +1,44 @@
+--- a/net/minecraft/entity/mob/SilverfishEntity.java
++++ b/net/minecraft/entity/mob/SilverfishEntity.java
+@@ -30,6 +30,8 @@
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
+ 
++import net.minecraft.block.Blocks; // Craftbukkit
++
+ public class SilverfishEntity extends HostileEntity {
+ 
+     private SilverfishEntity.CallForHelpGoal callForHelpGoal;
+@@ -44,7 +46,7 @@
+         this.goalSelector.add(3, this.callForHelpGoal);
+         this.goalSelector.add(4, new MeleeAttackGoal(this, 1.0D, false));
+         this.goalSelector.add(5, new SilverfishEntity.WanderAndInfestGoal(this));
+-        this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge());
++        this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0])); // CraftBukkit - decompile error
+         this.targetSelector.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
+     }
+ 
+@@ -167,6 +169,11 @@
+                 BlockState blockstate = world.getBlockState(blockpos);
+ 
+                 if (InfestedBlock.isInfestable(blockstate)) {
++                    // CraftBukkit start
++                    if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(this.mob, blockpos, InfestedBlock.fromRegularBlock(blockstate.getBlock())).isCancelled()) {
++                        return;
++                    }
++                    // CraftBukkit end
+                     world.setBlockState(blockpos, InfestedBlock.fromRegularBlock(blockstate.getBlock()), 3);
+                     this.mob.playSpawnEffects();
+                     this.mob.remove();
+@@ -211,6 +218,11 @@
+                             Block block = blockstate.getBlock();
+ 
+                             if (block instanceof InfestedBlock) {
++                                // CraftBukkit start
++                                if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(this.silverfish, blockpos1, Blocks.AIR.getDefaultState()).isCancelled()) {
++                                    continue;
++                                }
++                                // CraftBukkit end
+                                 if (world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
+                                     world.breakBlock(blockpos1, true, this.silverfish);
+                                 } else {

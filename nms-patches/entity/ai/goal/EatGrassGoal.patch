@@ -1,0 +1,33 @@
+--- a/net/minecraft/entity/ai/goal/EatGrassGoal.java
++++ b/net/minecraft/entity/ai/goal/EatGrassGoal.java
+@@ -11,6 +11,10 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++// CraftBukkit end
++
+ public class EatGrassGoal extends Goal {
+ 
+     private static final Predicate<BlockState> GRASS_PREDICATE = BlockStatePredicate.forBlock(Blocks.GRASS);
+@@ -58,7 +62,8 @@
+             BlockPos blockpos = this.mob.getBlockPos();
+ 
+             if (EatGrassGoal.GRASS_PREDICATE.test(this.world.getBlockState(blockpos))) {
+-                if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
++                // CraftBukkit
++                if (!CraftEventFactory.callEntityChangeBlockEvent(this.mob, blockpos, Blocks.AIR.getDefaultState(), !this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)).isCancelled()) {
+                     this.world.breakBlock(blockpos, false);
+                 }
+ 
+@@ -67,7 +72,8 @@
+                 BlockPos blockpos1 = blockpos.down();
+ 
+                 if (this.world.getBlockState(blockpos1).isOf(Blocks.GRASS_BLOCK)) {
+-                    if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
++                    // CraftBukkit
++                    if (!CraftEventFactory.callEntityChangeBlockEvent(this.mob, blockpos, Blocks.AIR.getDefaultState(), !this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)).isCancelled()) {
+                         this.world.syncWorldEvent(2001, blockpos1, Block.getRawIdFromState(Blocks.GRASS_BLOCK.getDefaultState()));
+                         this.world.setBlockState(blockpos1, Blocks.DIRT.getDefaultState(), 2);
+                     }

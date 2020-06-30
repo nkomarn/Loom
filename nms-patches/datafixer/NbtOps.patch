@@ -1,0 +1,255 @@
+--- a/net/minecraft/datafixer/NbtOps.java
++++ b/net/minecraft/datafixer/NbtOps.java
+@@ -135,9 +135,9 @@
+         return (b0 == b2 || b0 == 0) && (b1 == b2 || b1 == 0);
+     }
+ 
+-    private static <T extends Tag> void method_29151(AbstractListTag<T> abstractlisttag, Tag tag, Tag tag1) {
++    private static <T extends Tag> void method_29151(AbstractListTag<T> abstractlisttag, Tag tag, T tag1) { // Loom - decompiler errors
+         if (tag instanceof AbstractListTag) {
+-            AbstractListTag<?> abstractlisttag1 = (AbstractListTag) tag;
++            AbstractListTag<T> abstractlisttag1 = (AbstractListTag<T>) tag; // Loom - decompiler errors
+ 
+             abstractlisttag1.forEach((tag2) -> {
+                 abstractlisttag.add(tag2);
+@@ -147,9 +147,9 @@
+         abstractlisttag.add(tag1);
+     }
+ 
+-    private static <T extends Tag> void method_29150(AbstractListTag<T> abstractlisttag, Tag tag, List<Tag> list) {
++    private static <T extends Tag> void method_29150(AbstractListTag<T> abstractlisttag, Tag tag, List<T> list) { // Loom - decompiler errors
+         if (tag instanceof AbstractListTag) {
+-            AbstractListTag<?> abstractlisttag1 = (AbstractListTag) tag;
++            AbstractListTag<T> abstractlisttag1 = (AbstractListTag) tag; // Loom - decompiler errors
+ 
+             abstractlisttag1.forEach((tag1) -> {
+                 abstractlisttag.add(tag1);
+@@ -163,9 +163,9 @@
+ 
+     public DataResult<Tag> mergeToList(Tag tag, Tag tag1) {
+         if (!(tag instanceof AbstractListTag) && !(tag instanceof EndTag)) {
+-            return DataResult.error("mergeToList called with not a list: " + tag, (Object) tag);
++            return DataResult.error("mergeToList called with not a list: " + tag, tag); // Loom - decompiler errors
+         } else {
+-            AbstractListTag<?> abstractlisttag = method_29144(tag instanceof AbstractListTag ? ((AbstractListTag) tag).getElementType() : 0, tag1.getType());
++            AbstractListTag abstractlisttag = method_29144(tag instanceof AbstractListTag ? ((AbstractListTag) tag).getElementType() : 0, tag1.getType()); // Loom - decompiler errors
+ 
+             method_29151(abstractlisttag, tag, tag1);
+             return DataResult.success(abstractlisttag);
+@@ -174,9 +174,9 @@
+ 
+     public DataResult<Tag> mergeToList(Tag tag, List<Tag> list) {
+         if (!(tag instanceof AbstractListTag) && !(tag instanceof EndTag)) {
+-            return DataResult.error("mergeToList called with not a list: " + tag, (Object) tag);
++            return DataResult.error("mergeToList called with not a list: " + tag, tag);// Loom - decompiler errors
+         } else {
+-            AbstractListTag<?> abstractlisttag = method_29144(tag instanceof AbstractListTag ? ((AbstractListTag) tag).getElementType() : 0, (Byte) list.stream().findFirst().map(Tag::getType).orElse((byte) 0));
++            AbstractListTag abstractlisttag = method_29144(tag instanceof AbstractListTag ? ((AbstractListTag) tag).getElementType() : 0, (Byte) list.stream().findFirst().map(Tag::getType).orElse((byte) 0)); // Loom - decompiler errors
+ 
+             method_29150(abstractlisttag, tag, list);
+             return DataResult.success(abstractlisttag);
+@@ -185,9 +185,9 @@
+ 
+     public DataResult<Tag> mergeToMap(Tag tag, Tag tag1, Tag tag2) {
+         if (!(tag instanceof CompoundTag) && !(tag instanceof EndTag)) {
+-            return DataResult.error("mergeToMap called with not a map: " + tag, (Object) tag);
++            return DataResult.error("mergeToMap called with not a map: " + tag, tag); // Loom - decompiler errors
+         } else if (!(tag1 instanceof StringTag)) {
+-            return DataResult.error("key is not a string: " + tag1, (Object) tag);
++            return DataResult.error("key is not a string: " + tag1, tag); // Loom - decompiler errors
+         } else {
+             CompoundTag compoundtag = new CompoundTag();
+ 
+@@ -206,7 +206,7 @@
+ 
+     public DataResult<Tag> mergeToMap(Tag tag, MapLike<Tag> maplike) {
+         if (!(tag instanceof CompoundTag) && !(tag instanceof EndTag)) {
+-            return DataResult.error("mergeToMap called with not a map: " + tag, (Object) tag);
++            return DataResult.error("mergeToMap called with not a map: " + tag, tag); // Loom - decompiler errors
+         } else {
+             CompoundTag compoundtag = new CompoundTag();
+ 
+@@ -229,7 +229,7 @@
+                     compoundtag.put(tag1.asString(), (Tag) pair.getSecond());
+                 }
+             });
+-            return !list.isEmpty() ? DataResult.error("some keys are not strings: " + list, (Object) compoundtag) : DataResult.success(compoundtag);
++            return !list.isEmpty() ? DataResult.error("some keys are not strings: " + list, compoundtag) : DataResult.success(compoundtag); // Loom - decompiler errors
+         }
+     }
+ 
+@@ -286,15 +286,7 @@
+                     return "MapLike[" + compoundtag + "]";
+                 }
+ 
+-                @Nullable
+-                public Object get(String s) {
+-                    return this.get(s);
+-                }
+-
+-                @Nullable
+-                public Object get(Object object) {
+-                    return this.get((Tag) object);
+-                }
++                // Loom - decompiler errors
+             });
+         }
+     }
+@@ -413,129 +405,7 @@
+         return new NbtOps.MapBuilder();
+     }
+ 
+-    public Object remove(Object object, String s) {
+-        return this.remove((Tag) object, s);
+-    }
+-
+-    public Object createLongList(LongStream longstream) {
+-        return this.createLongList(longstream);
+-    }
+-
+-    public DataResult getLongStream(Object object) {
+-        return this.getLongStream((Tag) object);
+-    }
+-
+-    public Object createIntList(IntStream intstream) {
+-        return this.createIntList(intstream);
+-    }
+-
+-    public DataResult getIntStream(Object object) {
+-        return this.getIntStream((Tag) object);
+-    }
+-
+-    public Object createByteList(ByteBuffer bytebuffer) {
+-        return this.createByteList(bytebuffer);
+-    }
+-
+-    public DataResult getByteBuffer(Object object) {
+-        return this.getByteBuffer((Tag) object);
+-    }
+-
+-    public Object createList(Stream stream) {
+-        return this.createList(stream);
+-    }
+-
+-    public DataResult getList(Object object) {
+-        return this.getList((Tag) object);
+-    }
+-
+-    public DataResult getStream(Object object) {
+-        return this.getStream((Tag) object);
+-    }
+-
+-    public DataResult getMap(Object object) {
+-        return this.getMap((Tag) object);
+-    }
+-
+-    public Object createMap(Stream stream) {
+-        return this.createMap(stream);
+-    }
+-
+-    public DataResult getMapEntries(Object object) {
+-        return this.getMapEntries((Tag) object);
+-    }
+-
+-    public DataResult getMapValues(Object object) {
+-        return this.getMapValues((Tag) object);
+-    }
+-
+-    public DataResult mergeToMap(Object object, MapLike maplike) {
+-        return this.mergeToMap((Tag) object, maplike);
+-    }
+-
+-    public DataResult mergeToMap(Object object, Object object1, Object object2) {
+-        return this.mergeToMap((Tag) object, (Tag) object1, (Tag) object2);
+-    }
+-
+-    public DataResult mergeToList(Object object, List list) {
+-        return this.mergeToList((Tag) object, list);
+-    }
+-
+-    public DataResult mergeToList(Object object, Object object1) {
+-        return this.mergeToList((Tag) object, (Tag) object1);
+-    }
+-
+-    public Object createString(String s) {
+-        return this.createString(s);
+-    }
+-
+-    public DataResult getStringValue(Object object) {
+-        return this.getStringValue((Tag) object);
+-    }
+-
+-    public Object createBoolean(boolean flag) {
+-        return this.createBoolean(flag);
+-    }
+-
+-    public Object createDouble(double d0) {
+-        return this.createDouble(d0);
+-    }
+-
+-    public Object createFloat(float f) {
+-        return this.createFloat(f);
+-    }
+-
+-    public Object createLong(long i) {
+-        return this.createLong(i);
+-    }
+-
+-    public Object createInt(int i) {
+-        return this.createInt(i);
+-    }
+-
+-    public Object createShort(short short0) {
+-        return this.createShort(short0);
+-    }
+-
+-    public Object createByte(byte b0) {
+-        return this.createByte(b0);
+-    }
+-
+-    public Object createNumeric(Number number) {
+-        return this.createNumeric(number);
+-    }
+-
+-    public DataResult getNumberValue(Object object) {
+-        return this.getNumberValue((Tag) object);
+-    }
+-
+-    public Object convertTo(DynamicOps dynamicops, Object object) {
+-        return this.convertTo(dynamicops, (Tag) object);
+-    }
+-
+-    public Object empty() {
+-        return this.empty();
+-    }
++    // Loom - decompiler errors
+ 
+     class MapBuilder extends RecordBuilder.AbstractStringBuilder<Tag, CompoundTag> {
+ 
+@@ -555,7 +425,7 @@
+         protected DataResult<Tag> build(CompoundTag compoundtag, Tag tag) {
+             if (tag != null && tag != EndTag.INSTANCE) {
+                 if (!(tag instanceof CompoundTag)) {
+-                    return DataResult.error("mergeToMap called with not a map: " + tag, (Object) tag);
++                    return DataResult.error("mergeToMap called with not a map: " + tag, tag); // Loom - decompiler errors
+                 } else {
+                     CompoundTag compoundtag1 = new CompoundTag(Maps.newHashMap(((CompoundTag) tag).method_29143()));
+                     Iterator iterator = compoundtag.method_29143().entrySet().iterator();
+@@ -573,16 +443,6 @@
+             }
+         }
+ 
+-        protected Object append(String s, Object object, Object object1) {
+-            return this.append(s, (Tag) object, (CompoundTag) object1);
+-        }
+-
+-        protected DataResult build(Object object, Object object1) {
+-            return this.build((CompoundTag) object, (Tag) object1);
+-        }
+-
+-        protected Object initBuilder() {
+-            return this.initBuilder();
+-        }
++        // Loom - decompiler errors
+     }
+ }

@@ -1,0 +1,29 @@
+--- a/net/minecraft/entity/mob/RavagerEntity.java
++++ b/net/minecraft/entity/mob/RavagerEntity.java
+@@ -44,6 +44,8 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldView;
+ 
++import net.minecraft.block.Blocks; // CraftBukkit
++
+ public class RavagerEntity extends RaiderEntity {
+ 
+     private static final Predicate<Entity> IS_NOT_RAVAGER = (entity) -> {
+@@ -66,7 +68,7 @@
+         this.goalSelector.add(5, new WanderAroundFarGoal(this, 0.4D));
+         this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
+         this.goalSelector.add(10, new LookAtEntityGoal(this, MobEntity.class, 8.0F));
+-        this.targetSelector.add(2, (new RevengeGoal(this, new Class[]{RaiderEntity.class})).setGroupRevenge());
++        this.targetSelector.add(2, (new RevengeGoal(this, new Class[]{RaiderEntity.class})).setGroupRevenge(new Class[0])); // CraftBukkit - decompile error
+         this.targetSelector.add(3, new FollowTargetGoal<>(this, PlayerEntity.class, true));
+         this.targetSelector.add(4, new FollowTargetGoal<>(this, AbstractTraderEntity.class, true));
+         this.targetSelector.add(4, new FollowTargetGoal<>(this, IronGolemEntity.class, true));
+@@ -147,7 +149,7 @@
+                     BlockState blockstate = this.world.getBlockState(blockpos);
+                     Block block = blockstate.getBlock();
+ 
+-                    if (block instanceof LeavesBlock) {
++                    if (block instanceof LeavesBlock && !org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(this, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) { // CraftBukkit
+                         flag = this.world.breakBlock(blockpos, true, this) || flag;
+                     }
+                 }

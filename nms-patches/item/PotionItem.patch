@@ -1,0 +1,11 @@
+--- a/net/minecraft/item/PotionItem.java
++++ b/net/minecraft/item/PotionItem.java
+@@ -45,7 +45,7 @@
+                 if (statuseffectinstance.getEffectType().isInstant()) {
+                     statuseffectinstance.getEffectType().applyInstantEffect(playerentity, playerentity, livingentity, statuseffectinstance.getAmplifier(), 1.0D);
+                 } else {
+-                    livingentity.addStatusEffect(new StatusEffectInstance(statuseffectinstance));
++                    livingentity.addStatusEffect(new StatusEffectInstance(statuseffectinstance), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.POTION_DRINK); // CraftBukkit
+                 }
+             }
+         }

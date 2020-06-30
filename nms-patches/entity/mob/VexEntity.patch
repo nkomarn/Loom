@@ -1,0 +1,20 @@
+--- a/net/minecraft/entity/mob/VexEntity.java
++++ b/net/minecraft/entity/mob/VexEntity.java
+@@ -76,7 +76,7 @@
+         this.goalSelector.add(8, new VexEntity.LookAtTargetGoal());
+         this.goalSelector.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 3.0F, 1.0F));
+         this.goalSelector.add(10, new LookAtEntityGoal(this, MobEntity.class, 8.0F));
+-        this.targetSelector.add(1, (new RevengeGoal(this, new Class[]{RaiderEntity.class})).setGroupRevenge());
++        this.targetSelector.add(1, (new RevengeGoal(this, new Class[]{RaiderEntity.class})).setGroupRevenge(new Class[0])); // CraftBukkit - decompile error
+         this.targetSelector.add(2, new VexEntity.TrackOwnerTargetGoal(this));
+         this.targetSelector.add(3, new FollowTargetGoal<>(this, PlayerEntity.class, true));
+     }
+@@ -206,7 +206,7 @@
+         }
+ 
+         public void start() {
+-            VexEntity.this.setTarget(VexEntity.this.owner.getTarget());
++            VexEntity.this.setTarget(VexEntity.this.owner.getTarget(), org.bukkit.event.entity.EntityTargetEvent.TargetReason.OWNER_ATTACKED_TARGET, true); // CraftBukkit
+             super.start();
+         }
+     }

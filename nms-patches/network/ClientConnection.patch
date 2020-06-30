@@ -1,0 +1,31 @@
+--- a/net/minecraft/network/ClientConnection.java
++++ b/net/minecraft/network/ClientConnection.java
+@@ -136,7 +136,7 @@
+     }
+ 
+     private static <T extends PacketListener> void handlePacket(Packet<T> packet, PacketListener packetlistener) {
+-        packet.apply(packetlistener);
++        packet.apply((T) packetlistener); // CraftBukkit - decompile error
+     }
+ 
+     public void setPacketListener(PacketListener packetlistener) {
+@@ -242,7 +242,7 @@
+ 
+     public void disconnect(Text text) {
+         if (this.channel.isOpen()) {
+-            this.channel.close().awaitUninterruptibly();
++            this.channel.close(); // CraftBukkit - We can't wait as this may be called from an event loop.
+             this.disconnectReason = text;
+         }
+ 
+@@ -320,9 +320,7 @@
+         }
+     }
+ 
+-    protected void channelRead0(ChannelHandlerContext channelhandlercontext, Object object) throws Exception {
+-        this.channelRead0(channelhandlercontext, (Packet) object);
+-    }
++    // Loom - decompile errors
+ 
+     static class QueuedPacket {
+ 

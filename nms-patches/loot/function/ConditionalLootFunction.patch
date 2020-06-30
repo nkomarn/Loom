@@ -1,0 +1,53 @@
+--- a/net/minecraft/loot/function/ConditionalLootFunction.java
++++ b/net/minecraft/loot/function/ConditionalLootFunction.java
+@@ -46,9 +46,7 @@
+         return new ConditionalLootFunction.Joiner(function);
+     }
+ 
+-    public Object apply(Object object, Object object1) {
+-        return this.apply((ItemStack) object, (LootContext) object1);
+-    }
++    // Loom - decompile errors
+ 
+     public abstract static class Serializer<T extends ConditionalLootFunction> implements JsonSerializer<T> {
+ 
+@@ -69,13 +67,7 @@
+ 
+         public abstract T fromJson(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootCondition[] args);
+ 
+-        public Object fromJson(JsonObject jsonobject, JsonDeserializationContext jsondeserializationcontext) {
+-            return this.fromJson(jsonobject, jsondeserializationcontext);
+-        }
+-
+-        public void toJson(JsonObject jsonobject, Object object, JsonSerializationContext jsonserializationcontext) {
+-            this.toJson(jsonobject, (ConditionalLootFunction) object, jsonserializationcontext);
+-        }
++        // Loom - decompile errors
+     }
+ 
+     static final class Joiner extends ConditionalLootFunction.Builder<ConditionalLootFunction.Joiner> {
+@@ -94,9 +86,7 @@
+             return (LootFunction) this.joiner.apply(this.getConditions());
+         }
+ 
+-        protected ConditionalLootFunction.Builder getThisBuilder() {
+-            return this.getThisBuilder();
+-        }
++        // Loom - decompile errors
+     }
+ 
+     public abstract static class Builder<T extends ConditionalLootFunction.Builder<T>> implements LootFunction.Builder, LootConditionConsumingBuilder<T> {
+@@ -120,12 +110,6 @@
+             return (LootCondition[]) this.conditionList.toArray(new LootCondition[0]);
+         }
+ 
+-        public Object getThis() {
+-            return this.getThis();
+-        }
+-
+-        public Object conditionally(LootCondition.Builder lootcondition_builder) {
+-            return this.conditionally(lootcondition_builder);
+-        }
++        // Loom - decompile errors
+     }
+ }

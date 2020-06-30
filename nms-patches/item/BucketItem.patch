@@ -1,0 +1,95 @@
+--- a/net/minecraft/item/BucketItem.java
++++ b/net/minecraft/item/BucketItem.java
+@@ -28,6 +28,17 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ 
++// CraftBukkit start
++import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
++import net.minecraft.server.world.ServerWorld;
++import net.minecraft.util.ActionResult;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.util.DummyGeneratorAccess;
++import org.bukkit.event.player.PlayerBucketEmptyEvent;
++import org.bukkit.event.player.PlayerBucketFillEvent;
++// CraftBukkit end
++
+ public class BucketItem extends Item {
+ 
+     private final Fluid fluid;
+@@ -57,12 +68,22 @@
+                 if (this.fluid == Fluids.EMPTY) {
+                     blockstate = world.getBlockState(blockpos);
+                     if (blockstate.getBlock() instanceof FluidDrainable) {
++                        // CraftBukkit start
++                        Fluid dummyFluid = ((FluidDrainable) blockstate.getBlock()).tryDrainFluid(DummyGeneratorAccess.INSTANCE, blockpos, blockstate);
++                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent((ServerWorld) world, playerentity, blockpos, blockpos, blockhitresult.getSide(), itemstack, dummyFluid.getBucketItem());
++
++                        if (event.isCancelled()) {
++                            ((ServerPlayerEntity) playerentity).networkHandler.sendPacket(new BlockUpdateS2CPacket(world, blockpos)); // SPIGOT-5163 (see PlayerInteractManager)
++                            ((ServerPlayerEntity) playerentity).getBukkitEntity().updateInventory(); // SPIGOT-4541
++                            return new TypedActionResult(ActionResult.FAIL, itemstack);
++                        }
++                        // CraftBukkit end
+                         Fluid fluid = ((FluidDrainable) blockstate.getBlock()).tryDrainFluid(world, blockpos, blockstate);
+ 
+                         if (fluid != Fluids.EMPTY) {
+                             playerentity.incrementStat(Stats.USED.getOrCreateStat(this));
+                             playerentity.playSound(fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
+-                            ItemStack itemstack1 = ItemUsage.method_30012(itemstack, playerentity, new ItemStack(fluid.getBucketItem()));
++                            ItemStack itemstack1 = ItemUsage.method_30012(itemstack, playerentity, CraftItemStack.asNMSCopy(event.getItemStack())); // CraftBukkit
+ 
+                             if (!world.isClient) {
+                                 Criteria.FILLED_BUCKET.trigger((ServerPlayerEntity) playerentity, new ItemStack(fluid.getBucketItem()));
+@@ -77,7 +98,7 @@
+                     blockstate = world.getBlockState(blockpos);
+                     BlockPos blockpos2 = blockstate.getBlock() instanceof FluidFillable && this.fluid == Fluids.WATER ? blockpos : blockpos1;
+ 
+-                    if (this.placeFluid(playerentity, world, blockpos2, blockhitresult1)) {
++                    if (this.placeFluid(playerentity, world, blockpos2, blockhitresult1, blockhitresult1.getSide(), blockpos, itemstack)) { // CraftBukkit
+                         this.onEmptied(world, itemstack, blockpos2);
+                         if (playerentity instanceof ServerPlayerEntity) {
+                             Criteria.PLACED_BLOCK.trigger((ServerPlayerEntity) playerentity, blockpos2, itemstack);
+@@ -102,6 +123,12 @@
+     public void onEmptied(World world, ItemStack itemstack, BlockPos blockpos) {}
+ 
+     public boolean placeFluid(@Nullable PlayerEntity playerentity, World world, BlockPos blockpos, @Nullable BlockHitResult blockhitresult) {
++        // CraftBukkit begin - split
++        return this.placeFluid(playerentity, world, blockpos, blockhitresult), null, null, null
++    }
++
++    public boolean placeFluid(@Nullable PlayerEntity playerentity, World world, BlockPos blockpos, @Nullable BlockHitResult blockhitresult, Direction direction, BlockPos clicked, ItemStack itemstack) {
++        // CraftBukkit end
+         if (!(this.fluid instanceof FlowableFluid)) {
+             return false;
+         } else {
+@@ -111,6 +138,17 @@
+             boolean flag = blockstate.canBucketPlace(this.fluid);
+             boolean flag1 = blockstate.isAir() || flag || block instanceof FluidFillable && ((FluidFillable) block).canFillWithFluid(world, blockpos, blockstate, this.fluid);
+ 
++            // CraftBukkit start
++            if (flag1 && playerentity != null) {
++                PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent((ServerWorld) world, playerentity, blockpos, clicked, direction, itemstack);
++                if (event.isCancelled()) {
++                    ((ServerPlayerEntity) playerentity).networkHandler.sendPacket(new BlockUpdateS2CPacket(world, blockpos)); // SPIGOT-4238: needed when looking through entity
++                    ((ServerPlayerEntity) playerentity).getBukkitEntity().updateInventory(); // SPIGOT-4541
++                    return false;
++                }
++            }
++            // CraftBukkit end
++
+             if (!flag1) {
+                 return blockhitresult != null && this.placeFluid(playerentity, world, blockhitresult.getBlockPos().offset(blockhitresult.getSide()), (BlockHitResult) null);
+             } else if (world.getDimension().isUltrawarm() && this.fluid.isIn(FluidTags.WATER)) {
+@@ -149,4 +187,10 @@
+ 
+         worldaccess.playSound(playerentity, blockpos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+     }
++
++    // Loom start
++    public Fluid getFluid() {
++        return fluid;
++    }
++    // Loom end
+ }

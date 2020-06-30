@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/ai/goal/SitGoal.java
++++ b/net/minecraft/entity/ai/goal/SitGoal.java
+@@ -20,7 +20,7 @@
+ 
+     public boolean canStart() {
+         if (!this.tameable.isTamed()) {
+-            return false;
++            return this.tameable.isSitting() && this.tameable.getTarget() == null; // CraftBukkit - Allow sitting for wild animals
+         } else if (this.tameable.isInsideWaterOrBubbleColumn()) {
+             return false;
+         } else if (!this.tameable.isOnGround()) {

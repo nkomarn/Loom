@@ -1,0 +1,24 @@
+--- a/net/minecraft/entity/ai/goal/EscapeDangerGoal.java
++++ b/net/minecraft/entity/ai/goal/EscapeDangerGoal.java
+@@ -10,6 +10,8 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.BlockView;
+ 
++import net.minecraft.entity.LivingEntity; // CraftBukkit
++
+ public class EscapeDangerGoal extends Goal {
+ 
+     protected final MobEntityWithAi mob;
+@@ -71,6 +73,12 @@
+     }
+ 
+     public boolean shouldContinue() {
++        // CraftBukkit start - introduce a temporary timeout hack until this is fixed properly
++        if ((this.mob.age - this.mob.hurtTime) > 100) { // TODO check what the correct fields are (Luyten cannot decompile the Spigot EntityLiving class)
++            this.mob.setAttacker((LivingEntity) null);
++            return false;
++        }
++        // CraftBukkit end
+         return !this.mob.getNavigation().isIdle();
+     }
+ 

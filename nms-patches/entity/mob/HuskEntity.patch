@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/mob/HuskEntity.java
++++ b/net/minecraft/entity/mob/HuskEntity.java
+@@ -52,7 +52,7 @@
+         if (flag && this.getMainHandStack().isEmpty() && entity instanceof LivingEntity) {
+             float f = this.world.getLocalDifficulty(this.getBlockPos()).getLocalDifficulty();
+ 
+-            ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 140 * (int) f));
++            ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 140 * (int) f), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+         }
+ 
+         return flag;

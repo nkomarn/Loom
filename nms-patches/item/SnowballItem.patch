@@ -1,0 +1,45 @@
+--- a/net/minecraft/item/SnowballItem.java
++++ b/net/minecraft/item/SnowballItem.java
+@@ -2,6 +2,7 @@
+ 
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.entity.projectile.thrown.SnowballEntity;
++import net.minecraft.server.network.ServerPlayerEntity;
+ import net.minecraft.sound.SoundCategory;
+ import net.minecraft.sound.SoundEvents;
+ import net.minecraft.stat.Stats;
+@@ -18,19 +19,32 @@
+     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerentity, Hand hand) {
+         ItemStack itemstack = playerentity.getStackInHand(hand);
+ 
+-        world.playSound((PlayerEntity) null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (SnowballItem.RANDOM.nextFloat() * 0.4F + 0.8F));
++        // CraftBukkit - moved down
++        // world.playSound((PlayerEntity) null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (SnowballItem.RANDOM.nextFloat() * 0.4F + 0.8F));
+         if (!world.isClient) {
+             SnowballEntity snowballentity = new SnowballEntity(world, playerentity);
+ 
+             snowballentity.setItem(itemstack);
+             snowballentity.setProperties(playerentity, playerentity.pitch, playerentity.yaw, 0.0F, 1.5F, 1.0F);
+-            world.spawnEntity(snowballentity);
++            if (world.spawnEntity(snowballentity)) {
++                if (!playerentity.abilities.canInstantlyBuild) {
++                    itemstack.decrement(1);
++                }
++
++                world.playSound((PlayerEntity) null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (SnowballItem.RANDOM.nextFloat() * 0.4F + 0.8F));
++            } else if (playerentity instanceof ServerPlayerEntity) {
++                ((ServerPlayerEntity) playerentity).getBukkitEntity().updateInventory();
++            }
+         }
++        // CraftBukkit end
+ 
+         playerentity.incrementStat(Stats.USED.getOrCreateStat(this));
++        // CraftBukkit start - moved up
++        /*
+         if (!playerentity.abilities.creativeMode) {
+             itemstack.decrement(1);
+         }
++        */
+ 
+         return TypedActionResult.method_29237(itemstack, world.isClient());
+     }

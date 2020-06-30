@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/packet/c2s/play/ClientSettingsC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/ClientSettingsC2SPacket.java
+@@ -57,7 +57,15 @@
+         return this.mainArm;
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
++    // Loom - start
++    public String getLanguage() {
++        return language;
+     }
++
++    public int getViewDistance() {
++        return viewDistance;
++    }
++    // Loom - end
++
++    // Loom - decompile errors
+ }

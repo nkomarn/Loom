@@ -1,0 +1,31 @@
+--- a/net/minecraft/item/FireChargeItem.java
++++ b/net/minecraft/item/FireChargeItem.java
+@@ -23,12 +23,28 @@
+         boolean flag = false;
+ 
+         if (CampfireBlock.method_30035(blockstate)) {
++            // CraftBukkit start - fire BlockIgniteEvent
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, blockpos, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FIREBALL, itemusagecontext.getPlayer()).isCancelled()) {
++                if (!itemusagecontext.getPlayer().abilities.canInstantlyBuild) {
++                    itemusagecontext.getStack().decrement(1);
++                }
++                return ActionResult.PASS;
++            }
++            // CraftBukkit end
+             this.playUseSound(world, blockpos);
+             world.setBlockState(blockpos, (BlockState) blockstate.with(CampfireBlock.LIT, true));
+             flag = true;
+         } else {
+             blockpos = blockpos.offset(itemusagecontext.getSide());
+             if (AbstractFireBlock.method_30032(world, blockpos)) {
++                // CraftBukkit start - fire BlockIgniteEvent
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, blockpos, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FIREBALL, itemusagecontext.getPlayer()).isCancelled()) {
++                    if (!itemusagecontext.getPlayer().abilities.canInstantlyBuild) {
++                        itemusagecontext.getStack().decrement(1);
++                    }
++                    return ActionResult.PASS;
++                }
++                // CraftBukkit end
+                 this.playUseSound(world, blockpos);
+                 world.setBlockState(blockpos, AbstractFireBlock.getState(world, blockpos));
+                 flag = true;

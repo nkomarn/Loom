@@ -26,13 +26,13 @@
 +            if (itemstack1.isEmpty()) return itemstack.getCount();
 +
 +            if (this.canStackAddMore(itemstack1, itemstack)) {
-+                remains -= (itemstack1.getMaxCount() < this.getMaxStackSize() ? itemstack1.getMaxCount() : this.getMaxStackSize()) - itemstack1.getCount();
++                remains -= (itemstack1.getMaxCount() < this.getMaxCountPerStack() ? itemstack1.getMaxCount() : this.getMaxCountPerStack()) - itemstack1.getCount();
 +            }
 +            if (remains <= 0) return itemstack.getCount();
 +        }
 +        ItemStack offhandItemStack = this.getStack(this.main.size() + this.armor.size());
 +        if (this.canStackAddMore(offhandItemStack, itemstack)) {
-+            remains -= (offhandItemStack.getMaxCount() < this.getMaxStackSize() ? offhandItemStack.getMaxCount() : this.getMaxStackSize()) - offhandItemStack.getCount();
++            remains -= (offhandItemStack.getMaxCount() < this.getMaxCountPerStack() ? offhandItemStack.getMaxCount() : this.getMaxCountPerStack()) - offhandItemStack.getCount();
 +        }
 +        if (remains <= 0) return itemstack.getCount();
 +
@@ -106,11 +106,11 @@
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
++    public int getMaxCountPerStack() {
 +        return maxStack;
 +    }
 +
-+    public void setMaxStackSize(int size) {
++    public void setMaxCountPerStack(int size) {
 +        maxStack = size;
 +    }
 +

@@ -1,0 +1,124 @@
+--- a/net/minecraft/server/world/ChunkHolder.java
++++ b/net/minecraft/server/world/ChunkHolder.java
+@@ -30,6 +30,8 @@
+ import net.minecraft.world.chunk.WorldChunk;
+ import net.minecraft.world.chunk.light.LightingProvider;
+ 
++import net.minecraft.server.MinecraftServer; // CraftBukkit
++
+ public class ChunkHolder {
+ 
+     public static final Either<Chunk, ChunkHolder.Unloaded> UNLOADED_CHUNK = Either.right(ChunkHolder.Unloaded.INSTANCE);
+@@ -62,7 +64,7 @@
+         this.borderFuture = ChunkHolder.UNLOADED_WORLD_CHUNK_FUTURE;
+         this.tickingFuture = ChunkHolder.UNLOADED_WORLD_CHUNK_FUTURE;
+         this.entityTickingFuture = ChunkHolder.UNLOADED_WORLD_CHUNK_FUTURE;
+-        this.future = CompletableFuture.completedFuture((Object) null);
++        this.future = CompletableFuture.completedFuture(null); // CraftBukkit - decompile error
+         this.blockUpdatePositions = new short[64];
+         this.pos = chunkpos;
+         this.lightingProvider = lightingprovider;
+@@ -99,9 +101,9 @@
+     @Nullable
+     public WorldChunk getWorldChunk() {
+         CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>> completablefuture = this.getTickingFuture();
+-        Either<WorldChunk, ChunkHolder.Unloaded> either = (Either) completablefuture.getNow((Object) null);
++        Either<WorldChunk, ChunkHolder.Unloaded> either = (Either) completablefuture.getNow(null); // CraftBukkit - decompile error
+ 
+-        return either == null ? null : (WorldChunk) either.left().orElse((Object) null);
++        return either == null ? null : (WorldChunk) either.left().orElse(null); // CraftBukkit - decompile error
+     }
+ 
+     @Nullable
+@@ -230,7 +232,7 @@
+         CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> completablefuture = (CompletableFuture) this.futuresByStatus.get(i);
+ 
+         if (completablefuture != null) {
+-            Either<Chunk, ChunkHolder.Unloaded> either = (Either) completablefuture.getNow((Object) null);
++            Either<Chunk, ChunkHolder.Unloaded> either = (Either) completablefuture.getNow(null); // CraftBukkit - decompile error
+ 
+             if (either == null || either.left().isPresent()) {
+                 return completablefuture;
+@@ -285,6 +287,30 @@
+         boolean flag1 = this.level <= ThreadedAnvilChunkStorage.MAX_LEVEL;
+         ChunkHolder.LevelType chunkholder_leveltype = getLevelType(this.lastTickLevel);
+         ChunkHolder.LevelType chunkholder_leveltype1 = getLevelType(this.level);
++        // CraftBukkit start
++        // ChunkUnloadEvent: Called before the chunk is unloaded: isChunkLoaded is still true and chunk can still be modified by plugins.
++        if (chunkholder_leveltype.isAfter(ChunkHolder.LevelType.BORDER) && !chunkholder_leveltype1.isAfter(ChunkHolder.LevelType.BORDER)) {
++            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
++                Chunk chunk = (Chunk)either.left().orElse(null);
++                if (chunk != null) {
++                    threadedanvilchunkstorage.callbackExecutor.execute(() -> {
++                        // Minecraft will apply the chunks tick lists to the world once the chunk got loaded, and then store the tick
++                        // lists again inside the chunk once the chunk becomes inaccessible and set the chunk's needsSaving flag.
++                        // These actions may however happen deferred, so we manually set the needsSaving flag already here.
++                        chunk.setShouldSave(true);
++                        chunk.unloadCallback();
++                    });
++                }
++            }).exceptionally((throwable) -> {
++                // ensure exceptions are printed, by default this is not the case
++                MinecraftServer.LOGGER.fatal("Failed to schedule unload callback for chunk " + ChunkHolder.this.pos, throwable);
++                return null;
++            });
++
++            // Run callback right away if the future was already done
++            threadedanvilchunkstorage.callbackExecutor.run();
++        }
++        // CraftBukkit end
+         CompletableFuture completablefuture;
+ 
+         if (flag) {
+@@ -316,7 +342,7 @@
+         if (flag2 && !flag3) {
+             completablefuture = this.borderFuture;
+             this.borderFuture = ChunkHolder.UNLOADED_WORLD_CHUNK_FUTURE;
+-            this.updateFuture(completablefuture.thenApply((either1) -> {
++            this.updateFuture(((CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>>) completablefuture).thenApply((either1) -> { // CraftBukkit - decompile error
+                 threadedanvilchunkstorage.getClass();
+                 return either1.ifLeft(threadedanvilchunkstorage::method_20576);
+             }));
+@@ -354,6 +380,26 @@
+ 
+         this.levelUpdateListener.updateLevel(this.pos, this::getCompletedLevel, this.level, this::setCompletedLevel);
+         this.lastTickLevel = this.level;
++        // CraftBukkit start
++        // ChunkLoadEvent: Called after the chunk is loaded: isChunkLoaded returns true and chunk is ready to be modified by plugins.
++        if (!chunkholder_leveltype.isAfter(ChunkHolder.LevelType.BORDER) && chunkholder_leveltype1.isAfter(ChunkHolder.LevelType.BORDER)) {
++            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
++                Chunk chunk = (Chunk)either.left().orElse(null);
++                if (chunk != null) {
++                    threadedanvilchunkstorage.callbackExecutor.execute(() -> {
++                        chunk.loadCallback();
++                    });
++                }
++            }).exceptionally((throwable) -> {
++                // ensure exceptions are printed, by default this is not the case
++                MinecraftServer.LOGGER.fatal("Failed to schedule load callback for chunk " + ChunkHolder.this.location, throwable);
++                return null;
++            });
++
++            // Run callback right away if the future was already done
++            threadedanvilchunkstorage.callbackExecutor.run();
++        }
++        // CraftBukkit end
+     }
+ 
+     public static ChunkStatus getTargetGenerationStatus(int i) {
+@@ -388,6 +434,15 @@
+         this.updateFuture(CompletableFuture.completedFuture(Either.left(readonlychunk.getWrappedChunk())));
+     }
+ 
++    // CraftBukkit start
++    public Chunk getFullChunk() {
++        if (!getLevelType(this.completedLevel).isAfter(ChunkHolder.LevelType.BORDER)) return null; // note: using oldTicketLevel for isLoaded checks
++        CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> statusFuture = this.getFuture(ChunkStatus.FULL);
++        Either<Chunk, ChunkHolder.Unloaded> either = (Either<Chunk, ChunkHolder.Unloaded>) statusFuture.getNow(null);
++        return either == null ? null : (Chunk) either.left().orElse(null);
++    }
++    // CraftBukkit end
++
+     public interface PlayersWatchingChunkProvider {
+ 
+         Stream<ServerPlayerEntity> getPlayersWatchingChunk(ChunkPos arg, boolean bl);

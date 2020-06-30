@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.attribute;
 
 import com.google.common.base.Preconditions;
+import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -14,7 +15,7 @@ public class CraftAttributeMap implements Attributable {
 
     private final EntityAttributeModifier handle;
 
-    public CraftAttributeMap(EntityAttributeModifier handle) {
+    public CraftAttributeMap(AttributeContainer handle) {
         this.handle = handle;
     }
 

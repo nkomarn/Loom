@@ -1,0 +1,28 @@
+--- a/net/minecraft/entity/ai/goal/StepAndDestroyBlockGoal.java
++++ b/net/minecraft/entity/ai/goal/StepAndDestroyBlockGoal.java
+@@ -20,6 +20,12 @@
+ import net.minecraft.world.chunk.Chunk;
+ import net.minecraft.world.chunk.ChunkStatus;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.event.entity.EntityInteractEvent;
++// CraftBukkit end
++
+ public class StepAndDestroyBlockGoal extends MoveToTargetPosGoal {
+ 
+     private final Block targetBlock;
+@@ -94,6 +100,12 @@
+             }
+ 
+             if (this.counter > 60) {
++                // CraftBukkit start - Step on eggs
++                EntityInteractEvent event = new EntityInteractEvent(this.stepAndDestroyMob.getBukkitEntity(), CraftBlock.at(world, blockpos1));
++                Bukkit.getPluginManager().callEvent((EntityInteractEvent) event);
++                if (event.isCancelled()) return;
++                // CraftBukkit end
++
+                 world.removeBlock(blockpos1, false);
+                 if (!world.isClient) {
+                     for (int i = 0; i < 20; ++i) {

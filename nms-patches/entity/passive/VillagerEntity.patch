@@ -1,0 +1,121 @@
+--- a/net/minecraft/entity/passive/VillagerEntity.java
++++ b/net/minecraft/entity/passive/VillagerEntity.java
+@@ -87,6 +87,17 @@
+ import net.minecraft.world.poi.PointOfInterestType;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.entity.CraftVillager;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftMerchantRecipe;
++import org.bukkit.entity.Villager;
++import org.bukkit.event.entity.EntityTransformEvent;
++import org.bukkit.event.entity.VillagerAcquireTradeEvent;
++import org.bukkit.event.entity.VillagerReplenishTradeEvent;
++// CraftBukkit end
++
+ public class VillagerEntity extends AbstractTraderEntity implements InteractionObserver, VillagerDataContainer {
+ 
+     private static final TrackedData<VillagerData> VILLAGER_DATA = DataTracker.registerData(VillagerEntity.class, TrackedDataHandlerRegistry.VILLAGER_DATA);
+@@ -131,7 +142,7 @@
+     }
+ 
+     public Brain<VillagerEntity> getBrain() {
+-        return super.getBrain();
++        return (Brain<VillagerEntity>) super.getBrain(); // CraftBukkit - decompile error
+     }
+ 
+     protected Brain.Profile<VillagerEntity> createBrainProfile() {
+@@ -210,7 +221,7 @@
+                     this.levelingUp = false;
+                 }
+ 
+-                this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200, 0));
++                this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200, 0), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.VILLAGER_TRADE); // CraftBukkit
+             }
+         }
+ 
+@@ -416,7 +427,14 @@
+             while (iterator.hasNext()) {
+                 TradeOffer tradeoffer = (TradeOffer) iterator.next();
+ 
+-                tradeoffer.increaseSpecialPrice(-MathHelper.floor((float) i * tradeoffer.getPriceMultiplier()));
++                // CraftBukkit start
++                int bonus = -MathHelper.floor((float) i * tradeoffer.getPriceMultiplier());
++                VillagerReplenishTradeEvent event = new VillagerReplenishTradeEvent((Villager) this.getBukkitEntity(), tradeoffer.asBukkit(), bonus);
++                Bukkit.getPluginManager().callEvent(event);
++                if (!event.isCancelled()) {
++                    tradeoffer.increaseSpecialPrice(event.getBonus());
++                }
++                // CraftBukkit end
+             }
+         }
+ 
+@@ -443,7 +461,7 @@
+ 
+     public void writeCustomDataToTag(CompoundTag compoundtag) {
+         super.writeCustomDataToTag(compoundtag);
+-        DataResult dataresult = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData());
++        DataResult<Tag> dataresult = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()); // CraftBukkit decompile error
+         Logger logger = VillagerEntity.LOGGER;
+ 
+         logger.getClass();
+@@ -737,7 +755,12 @@
+             }
+ 
+             witchentity.setPersistent();
+-            this.world.spawnEntity(witchentity);
++            // CraftBukkit start
++            if (CraftEventFactory.callEntityTransformEvent(this, witchentity, EntityTransformEvent.TransformReason.LIGHTNING).isCancelled()) {
++                return;
++            }
++            this.world.spawnEntity(witchentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.LIGHTNING);
++            // CraftBukkit end
+             this.remove();
+         } else {
+             super.onStruckByLightning(lightningentity);
+@@ -851,7 +874,7 @@
+     }
+ 
+     private void setGolemLastSeenTime(long i) {
+-        this.brain.remember(MemoryModuleType.GOLEM_LAST_SEEN_TIME, (Object) i);
++        this.brain.remember(MemoryModuleType.GOLEM_LAST_SEEN_TIME, i); // CraftBukkit - decompile error
+     }
+ 
+     private boolean hasSeenGolemRecently(long i) {
+@@ -884,7 +907,7 @@
+ 
+                 if (irongolementity != null) {
+                     if (irongolementity.canSpawn(this.world, SpawnReason.MOB_SUMMONED) && irongolementity.canSpawn(this.world)) {
+-                        this.world.spawnEntity(irongolementity);
++                        this.world.spawnEntity(irongolementity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.VILLAGE_DEFENSE); // CraftBukkit
+                         return irongolementity;
+                     }
+ 
+@@ -958,14 +981,14 @@
+ 
+     public void sleep(BlockPos blockpos) {
+         super.sleep(blockpos);
+-        this.brain.remember(MemoryModuleType.LAST_SLEPT, (Object) this.world.getTime());
++        this.brain.remember(MemoryModuleType.LAST_SLEPT, this.world.getTime()); // CraftBukkit - decompile error
+         this.brain.forget(MemoryModuleType.WALK_TARGET);
+         this.brain.forget(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+     }
+ 
+     public void wakeUp() {
+         super.wakeUp();
+-        this.brain.remember(MemoryModuleType.LAST_WOKEN, (Object) this.world.getTime());
++        this.brain.remember(MemoryModuleType.LAST_WOKEN, this.world.getTime()); // CraftBukkit - decompile error
+     }
+ 
+     private boolean hasRecentlyWorkedAndSlept(long i) {
+@@ -974,7 +997,5 @@
+         return optional.isPresent() ? i - (Long) optional.get() < 24000L : false;
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile errors
+ }

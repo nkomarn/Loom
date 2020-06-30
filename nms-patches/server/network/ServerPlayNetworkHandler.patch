@@ -9,37 +9,7 @@
  import net.minecraft.entity.passive.HorseBaseEntity;
  import net.minecraft.entity.player.PlayerInventory;
  import net.minecraft.entity.projectile.PersistentProjectileEntity;
-@@ -96,25 +98,18 @@
- import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
- import net.minecraft.network.packet.c2s.play.UpdateStructureBlockC2SPacket;
- import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
--import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
--import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
--import net.minecraft.network.packet.s2c.play.ConfirmGuiActionS2CPacket;
--import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
--import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
--import net.minecraft.network.packet.s2c.play.HeldItemChangeS2CPacket;
--import net.minecraft.network.packet.s2c.play.KeepAliveS2CPacket;
--import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
--import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
--import net.minecraft.network.packet.s2c.play.TagQueryResponseS2CPacket;
--import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
-+import net.minecraft.network.packet.s2c.play.*;
-+import net.minecraft.recipe.Recipe;
- import net.minecraft.screen.AbstractRecipeScreenHandler;
- import net.minecraft.screen.AnvilScreenHandler;
- import net.minecraft.screen.BeaconScreenHandler;
- import net.minecraft.screen.MerchantScreenHandler;
- import net.minecraft.screen.ScreenHandler;
- import net.minecraft.screen.slot.Slot;
-+import net.minecraft.screen.slot.SlotActionType;
- import net.minecraft.server.MinecraftServer;
- import net.minecraft.server.command.ServerCommandSource;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.text.LiteralText;
- import net.minecraft.text.MutableText;
- import net.minecraft.text.Text;
-@@ -131,21 +126,60 @@
+@@ -132,21 +134,60 @@
  import net.minecraft.util.crash.CrashReportSection;
  import net.minecraft.util.function.BooleanBiFunction;
  import net.minecraft.util.hit.BlockHitResult;
@@ -109,7 +79,7 @@
  public class ServerPlayNetworkHandler implements ServerPlayPacketListener {
  
      private static final Logger LOGGER = LogManager.getLogger();
-@@ -156,7 +190,10 @@
+@@ -157,7 +198,10 @@
      private long lastKeepAliveTime;
      private boolean waitingForKeepAlive;
      private long keepAliveId;
@@ -121,7 +91,7 @@
      private int creativeItemDropThreshold;
      private final Int2ShortMap transactions = new Int2ShortOpenHashMap();
      private double lastTickX;
-@@ -182,12 +219,32 @@
+@@ -183,12 +227,32 @@
      private int movePacketsCount;
      private int lastTickMovePacketsCount;
  
@@ -154,7 +124,7 @@
      }
  
      public void tick() {
-@@ -237,7 +294,7 @@
+@@ -238,7 +302,7 @@
          this.server.getProfiler().push("keepAlive");
          long i = Util.getMeasuringTimeMs();
  
@@ -163,7 +133,7 @@
              if (this.waitingForKeepAlive) {
                  this.disconnect(new TranslatableText("disconnect.timeout"));
              } else {
-@@ -247,20 +304,25 @@
+@@ -248,20 +312,25 @@
                  this.sendPacket(new KeepAliveS2CPacket(this.keepAliveId));
              }
          }
@@ -191,7 +161,7 @@
      }
  
      public void syncWithPlayerPosition() {
-@@ -280,16 +342,43 @@
+@@ -281,16 +350,43 @@
          return this.server.isHost(this.player.getGameProfile());
      }
  
@@ -236,7 +206,7 @@
      }
  
      public void onPlayerInput(PlayerInputC2SPacket playerinputc2spacket) {
-@@ -328,7 +417,34 @@
+@@ -329,7 +425,34 @@
                  double d9 = entity.getVelocity().lengthSquared();
                  double d10 = d6 * d6 + d7 * d7 + d8 * d8;
  
@@ -272,7 +242,7 @@
                      ServerPlayNetworkHandler.LOGGER.warn("{} (vehicle of {}) moved too quickly! {},{},{}", (Object) entity.getName().getString(), this.player.getName().getString(), d6, d7, d8);
                      this.connection.send(new VehicleMoveS2CPacket(entity));
                      return;
-@@ -358,14 +474,72 @@
+@@ -359,14 +482,72 @@
                  }
  
                  entity.updatePositionAndAngles(d3, d4, d5, f, f1);
@@ -345,7 +315,7 @@
                  this.player.getServerWorld().getChunkManager().updateCameraPosition(this.player);
                  this.player.increaseTravelMotionStats(this.player.getX() - d0, this.player.getY() - d1, this.player.getZ() - d2);
                  this.ridingEntity = d11 >= -0.03125D && !this.server.isFlightEnabled() && this.method_29780(entity);
-@@ -383,7 +557,7 @@
+@@ -384,7 +565,7 @@
  
      public void onTeleportConfirm(TeleportConfirmC2SPacket teleportconfirmc2spacket) {
          NetworkThreadUtils.forceMainThread(teleportconfirmc2spacket, this, this.player.getServerWorld());
@@ -354,7 +324,7 @@
              this.player.updatePositionAndAngles(this.requestedTeleportPos.x, this.requestedTeleportPos.y, this.requestedTeleportPos.z, this.player.yaw, this.player.pitch);
              this.updatedX = this.requestedTeleportPos.x;
              this.updatedY = this.requestedTeleportPos.y;
-@@ -393,6 +567,7 @@
+@@ -394,6 +575,7 @@
              }
  
              this.requestedTeleportPos = null;
@@ -362,7 +332,7 @@
          }
  
      }
-@@ -400,8 +575,8 @@
+@@ -401,8 +583,8 @@
      public void onRecipeBookData(RecipeBookDataC2SPacket recipebookdatac2spacket) {
          NetworkThreadUtils.forceMainThread(recipebookdatac2spacket, this, this.player.getServerWorld());
          if (recipebookdatac2spacket.getMode() == RecipeBookDataC2SPacket.Mode.SHOWN) {
@@ -373,7 +343,7 @@
  
              optional.ifPresent(serverrecipebook::onRecipeDisplayed);
          } else if (recipebookdatac2spacket.getMode() == RecipeBookDataC2SPacket.Mode.SETTINGS) {
-@@ -432,6 +607,12 @@
+@@ -433,6 +615,12 @@
  
      public void onRequestCommandCompletions(RequestCommandCompletionsC2SPacket requestcommandcompletionsc2spacket) {
          NetworkThreadUtils.forceMainThread(requestcommandcompletionsc2spacket, this, this.player.getServerWorld());
@@ -386,7 +356,7 @@
          StringReader stringreader = new StringReader(requestcommandcompletionsc2spacket.getPartialCommand());
  
          if (stringreader.canRead() && stringreader.peek() == '/') {
-@@ -441,6 +622,7 @@
+@@ -442,6 +630,7 @@
          ParseResults<ServerCommandSource> parseresults = this.server.getCommandManager().getDispatcher().parse(stringreader, this.player.getCommandSource());
  
          this.server.getCommandManager().getDispatcher().getCompletionSuggestions(parseresults).thenAccept((suggestions) -> {
@@ -394,7 +364,7 @@
              this.connection.send(new CommandSuggestionsS2CPacket(requestcommandcompletionsc2spacket.getCompletionId(), suggestions));
          });
      }
-@@ -660,6 +842,7 @@
+@@ -661,6 +850,7 @@
  
          if (screenhandler instanceof MerchantScreenHandler) {
              MerchantScreenHandler merchantscreenhandler = (MerchantScreenHandler) screenhandler;
@@ -402,7 +372,7 @@
  
              merchantscreenhandler.setRecipeIndex(i);
              merchantscreenhandler.switchTo(i);
-@@ -669,6 +852,14 @@
+@@ -670,6 +860,14 @@
  
      public void onBookUpdate(BookUpdateC2SPacket bookupdatec2spacket) {
          NetworkThreadUtils.forceMainThread(bookupdatec2spacket, this, this.player.getServerWorld());
@@ -417,7 +387,7 @@
          ItemStack itemstack = bookupdatec2spacket.getBook();
  
          if (!itemstack.isEmpty()) {
-@@ -697,9 +888,11 @@
+@@ -698,9 +896,11 @@
                          }
  
                          itemstack2.putSubTag("pages", listtag);
@@ -430,7 +400,7 @@
                      }
                  }
  
-@@ -738,7 +931,7 @@
+@@ -739,7 +939,7 @@
          } else {
              ServerWorld serverworld = this.player.getServerWorld();
  
@@ -439,7 +409,7 @@
                  if (this.ticks == 0) {
                      this.syncWithPlayerPosition();
                  }
-@@ -748,13 +941,21 @@
+@@ -749,13 +949,21 @@
                          this.teleportRequestTick = this.ticks;
                          this.requestTeleport(this.requestedTeleportPos.x, this.requestedTeleportPos.y, this.requestedTeleportPos.z, this.player.yaw, this.player.pitch);
                      }
@@ -462,7 +432,7 @@
                          double d0 = this.player.getX();
                          double d1 = this.player.getY();
                          double d2 = this.player.getZ();
-@@ -778,16 +979,33 @@
+@@ -779,16 +987,33 @@
                          } else {
                              ++this.movePacketsCount;
                              int i = this.movePacketsCount - this.lastTickMovePacketsCount;
@@ -498,7 +468,7 @@
                                      ServerPlayNetworkHandler.LOGGER.warn("{} moved too quickly! {},{},{}", (Object) this.player.getName().getString(), d7, d8, d9);
                                      this.requestTeleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.yaw, this.player.pitch);
                                      return;
-@@ -827,7 +1045,72 @@
+@@ -828,7 +1053,72 @@
                              if (!this.player.noClip && !this.player.isSleeping() && (flag1 && serverworld.doesNotCollide(this.player, box) || this.isPlayerNotCollidingWithBlocks(serverworld, box))) {
                                  this.requestTeleport(d0, d1, d2, f, f1);
                              } else {
@@ -572,7 +542,7 @@
                                  this.player.getServerWorld().getChunkManager().updateCameraPosition(this.player);
                                  this.player.handleFall(this.player.getY() - d3, playermovec2spacket.isOnGround());
                                  this.player.setOnGround(playermovec2spacket.isOnGround());
-@@ -862,7 +1145,63 @@
+@@ -863,7 +1153,63 @@
          this.teleportRequest(d0, d1, d2, f, f1, Collections.emptySet());
      }
  
@@ -636,7 +606,7 @@
          double d3 = set.contains(PlayerPositionLookS2CPacket.Flag.X) ? this.player.getX() : 0.0D;
          double d4 = set.contains(PlayerPositionLookS2CPacket.Flag.Y) ? this.player.getY() : 0.0D;
          double d5 = set.contains(PlayerPositionLookS2CPacket.Flag.Z) ? this.player.getZ() : 0.0D;
-@@ -874,6 +1213,14 @@
+@@ -875,6 +1221,14 @@
              this.requestedTeleportId = 0;
          }
  
@@ -651,7 +621,7 @@
          this.teleportRequestTick = this.ticks;
          this.player.updatePositionAndAngles(d0, d1, d2, f, f1);
          this.player.networkHandler.sendPacket(new PlayerPositionLookS2CPacket(d0 - d3, d1 - d4, d2 - d5, f - f2, f1 - f3, set, this.requestedTeleportId));
-@@ -881,6 +1228,7 @@
+@@ -882,6 +1236,7 @@
  
      public void onPlayerAction(PlayerActionC2SPacket playeractionc2spacket) {
          NetworkThreadUtils.forceMainThread(playeractionc2spacket, this, this.player.getServerWorld());
@@ -659,7 +629,7 @@
          BlockPos blockpos = playeractionc2spacket.getPos();
  
          this.player.updateLastActionTime();
-@@ -891,14 +1239,48 @@
+@@ -892,14 +1247,48 @@
                  if (!this.player.isSpectator()) {
                      ItemStack itemstack = this.player.getStackInHand(Hand.OFF_HAND);
  
@@ -710,7 +680,7 @@
                      this.player.dropSelectedItem(false);
                  }
  
-@@ -934,6 +1316,7 @@
+@@ -935,6 +1324,7 @@
  
      public void onPlayerInteractBlock(PlayerInteractBlockC2SPacket playerinteractblockc2spacket) {
          NetworkThreadUtils.forceMainThread(playerinteractblockc2spacket, this, this.player.getServerWorld());
@@ -718,7 +688,7 @@
          ServerWorld serverworld = this.player.getServerWorld();
          Hand hand = playerinteractblockc2spacket.getHand();
          ItemStack itemstack = this.player.getStackInHand(hand);
-@@ -944,6 +1327,14 @@
+@@ -945,6 +1335,14 @@
          this.player.updateLastActionTime();
          if (blockpos.getY() < this.server.getWorldHeight()) {
              if (this.requestedTeleportPos == null && this.player.squaredDistanceTo((double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.5D, (double) blockpos.getZ() + 0.5D) < 64.0D && serverworld.canPlayerModifyAt(this.player, blockpos)) {
@@ -733,7 +703,7 @@
                  ActionResult actionresult = this.player.interactionManager.interactBlock(this.player, serverworld, itemstack, hand, blockhitresult);
  
                  if (direction == Direction.UP && !actionresult.isAccepted() && blockpos.getY() >= this.server.getWorldHeight() - 1 && canPlace(this.player, itemstack)) {
-@@ -966,12 +1357,51 @@
+@@ -967,12 +1365,51 @@
  
      public void onPlayerInteractItem(PlayerInteractItemC2SPacket playerinteractitemc2spacket) {
          NetworkThreadUtils.forceMainThread(playerinteractitemc2spacket, this, this.player.getServerWorld());
@@ -785,7 +755,7 @@
              ActionResult actionresult = this.player.interactionManager.interactItem(this.player, serverworld, itemstack, hand);
  
              if (actionresult.shouldSwingHand()) {
-@@ -991,7 +1421,7 @@
+@@ -992,7 +1429,7 @@
                  Entity entity = spectatorteleportc2spacket.getTarget(serverworld);
  
                  if (entity != null) {
@@ -794,7 +764,7 @@
                      return;
                  }
              }
-@@ -999,7 +1429,10 @@
+@@ -1000,7 +1437,10 @@
  
      }
  
@@ -806,7 +776,7 @@
  
      public void onBoatPaddleState(BoatPaddleStateC2SPacket boatpaddlestatec2spacket) {
          NetworkThreadUtils.forceMainThread(boatpaddlestatec2spacket, this, this.player.getServerWorld());
-@@ -1012,11 +1445,26 @@
+@@ -1013,11 +1453,26 @@
      }
  
      public void onDisconnected(Text text) {
@@ -834,7 +804,7 @@
          if (this.isHost()) {
              ServerPlayNetworkHandler.LOGGER.info("Stopping singleplayer server as player logged out");
              this.server.stop(false);
-@@ -1042,6 +1490,15 @@
+@@ -1043,6 +1498,15 @@
              }
          }
  
@@ -850,7 +820,7 @@
          try {
              this.connection.send(packet, genericfuturelistener);
          } catch (Throwable throwable) {
-@@ -1057,7 +1514,16 @@
+@@ -1058,7 +1522,16 @@
  
      public void onUpdateSelectedSlot(UpdateSelectedSlotC2SPacket updateselectedslotc2spacket) {
          NetworkThreadUtils.forceMainThread(updateselectedslotc2spacket, this, this.player.getServerWorld());
@@ -867,7 +837,7 @@
              if (this.player.inventory.selectedSlot != updateselectedslotc2spacket.getSelectedSlot() && this.player.getActiveHand() == Hand.MAIN_HAND) {
                  this.player.clearActiveItem();
              }
-@@ -1066,12 +1532,23 @@
+@@ -1067,12 +1540,23 @@
              this.player.updateLastActionTime();
          } else {
              ServerPlayNetworkHandler.LOGGER.warn("{} tried to set an invalid carried item", (Object) this.player.getName().getString());
@@ -893,7 +863,7 @@
              this.sendPacket(new GameMessageS2CPacket((new TranslatableText("chat.cannotSend")).formatted(Formatting.RED), MessageType.SYSTEM, Util.NIL_UUID));
          } else {
              this.player.updateLastActionTime();
-@@ -1079,39 +1556,251 @@
+@@ -1080,39 +1564,251 @@
  
              for (int i = 0; i < s.length(); ++i) {
                  if (!SharedConstants.isValidChar(s.charAt(i))) {
@@ -1152,7 +1122,7 @@
          this.player.updateLastActionTime();
          JumpingMount jumpingmount;
  
-@@ -1168,6 +1857,7 @@
+@@ -1169,6 +1865,7 @@
  
      public void onPlayerInteractEntity(PlayerInteractEntityC2SPacket playerinteractentityc2spacket) {
          NetworkThreadUtils.forceMainThread(playerinteractentityc2spacket, this, this.player.getServerWorld());
@@ -1160,7 +1130,7 @@
          ServerWorld serverworld = this.player.getServerWorld();
          Entity entity = playerinteractentityc2spacket.getEntity(serverworld);
  
-@@ -1180,18 +1870,72 @@
+@@ -1181,18 +1878,72 @@
                  Hand hand = playerinteractentityc2spacket.getHand();
                  Optional<ActionResult> optional = Optional.empty();
  
@@ -1234,7 +1204,7 @@
                  }
  
                  if (optional.isPresent() && ((ActionResult) optional.get()).isAccepted()) {
-@@ -1236,14 +1980,18 @@
+@@ -1237,14 +1988,18 @@
  
      public void onGuiClose(GuiCloseC2SPacket guiclosec2spacket) {
          NetworkThreadUtils.forceMainThread(guiclosec2spacket, this, this.player.getServerWorld());
@@ -1255,7 +1225,7 @@
                  DefaultedList<ItemStack> defaultedlist = DefaultedList.of();
  
                  for (int i = 0; i < this.player.currentScreenHandler.slots.size(); ++i) {
-@@ -1252,8 +2000,276 @@
+@@ -1253,8 +2008,276 @@
  
                  this.player.onHandlerRegistered(this.player.currentScreenHandler, defaultedlist);
              } else {
@@ -1533,7 +1503,7 @@
                  if (ItemStack.areEqual(clickwindowc2spacket.getStack(), itemstack)) {
                      this.player.networkHandler.sendPacket(new ConfirmGuiActionS2CPacket(clickwindowc2spacket.getSyncId(), clickwindowc2spacket.getActionId(), true));
                      this.player.skipPacketSlotUpdates = true;
-@@ -1291,6 +2307,7 @@
+@@ -1292,6 +2315,7 @@
  
      public void onButtonClick(ButtonClickC2SPacket buttonclickc2spacket) {
          NetworkThreadUtils.forceMainThread(buttonclickc2spacket, this, this.player.getServerWorld());
@@ -1541,7 +1511,7 @@
          this.player.updateLastActionTime();
          if (this.player.currentScreenHandler.syncId == buttonclickc2spacket.getSyncId() && this.player.currentScreenHandler.isNotRestricted(this.player) && !this.player.isSpectator()) {
              this.player.currentScreenHandler.onButtonClick(this.player, buttonclickc2spacket.getButtonId());
-@@ -1323,6 +2340,44 @@
+@@ -1324,6 +2348,44 @@
              boolean flag1 = creativeinventoryactionc2spacket.getSlot() >= 1 && creativeinventoryactionc2spacket.getSlot() <= 45;
              boolean flag2 = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
  
@@ -1586,7 +1556,7 @@
              if (flag1 && flag2) {
                  if (itemstack.isEmpty()) {
                      this.player.playerScreenHandler.setStackInSlot(creativeinventoryactionc2spacket.getSlot(), ItemStack.EMPTY);
-@@ -1342,6 +2397,7 @@
+@@ -1343,6 +2405,7 @@
  
      public void onConfirmTransaction(ConfirmGuiActionC2SPacket confirmguiactionc2spacket) {
          NetworkThreadUtils.forceMainThread(confirmguiactionc2spacket, this, this.player.getServerWorld());
@@ -1594,7 +1564,7 @@
          int i = this.player.currentScreenHandler.syncId;
  
          if (i == confirmguiactionc2spacket.getWindowId() && this.transactions.getOrDefault(i, (short) (confirmguiactionc2spacket.getSyncId() + 1)) == confirmguiactionc2spacket.getSyncId() && !this.player.currentScreenHandler.isNotRestricted(this.player) && !this.player.isSpectator()) {
-@@ -1352,6 +2408,7 @@
+@@ -1353,6 +2416,7 @@
  
      public void onSignUpdate(UpdateSignC2SPacket updatesignc2spacket) {
          NetworkThreadUtils.forceMainThread(updatesignc2spacket, this, this.player.getServerWorld());
@@ -1602,7 +1572,7 @@
          this.player.updateLastActionTime();
          ServerWorld serverworld = this.player.getServerWorld();
          BlockPos blockpos = updatesignc2spacket.getPos();
-@@ -1368,14 +2425,31 @@
+@@ -1369,14 +2433,31 @@
  
              if (!signblockentity.isEditable() || signblockentity.getEditor() != this.player) {
                  ServerPlayNetworkHandler.LOGGER.warn("Player {} just tried to change non-editable sign", (Object) this.player.getName().getString());
@@ -1635,7 +1605,7 @@
  
              signblockentity.markDirty();
              serverworld.updateListeners(blockpos, blockstate, blockstate, 3);
-@@ -1384,6 +2458,7 @@
+@@ -1385,6 +2466,7 @@
      }
  
      public void onKeepAlive(KeepAliveC2SPacket keepalivec2spacket) {
@@ -1643,7 +1613,7 @@
          if (this.waitingForKeepAlive && keepalivec2spacket.getId() == this.keepAliveId) {
              int i = (int) (Util.getMeasuringTimeMs() - this.lastKeepAliveTime);
  
-@@ -1397,7 +2472,18 @@
+@@ -1398,7 +2480,18 @@
  
      public void onPlayerAbilities(UpdatePlayerAbilitiesC2SPacket updateplayerabilitiesc2spacket) {
          NetworkThreadUtils.forceMainThread(updateplayerabilitiesc2spacket, this, this.player.getServerWorld());
@@ -1663,7 +1633,7 @@
      }
  
      public void onClientSettings(ClientSettingsC2SPacket clientsettingsc2spacket) {
-@@ -1405,7 +2491,49 @@
+@@ -1406,7 +2499,49 @@
          this.player.setClientSettings(clientsettingsc2spacket);
      }
  
@@ -1714,7 +1684,7 @@
  
      public void onUpdateDifficulty(UpdateDifficultyC2SPacket updatedifficultyc2spacket) {
          NetworkThreadUtils.forceMainThread(updatedifficultyc2spacket, this, this.player.getServerWorld());
-@@ -1420,4 +2548,10 @@
+@@ -1421,4 +2556,10 @@
              this.server.setDifficultyLocked(updatedifficultylockc2spacket.isDifficultyLocked());
          }
      }

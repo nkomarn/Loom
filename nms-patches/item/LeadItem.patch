@@ -1,0 +1,35 @@
+--- a/net/minecraft/item/LeadItem.java
++++ b/net/minecraft/item/LeadItem.java
+@@ -11,6 +11,8 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.Box;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.event.hanging.HangingPlaceEvent; // CraftBukkit
+ 
+ public class LeadItem extends Item {
+ 
+@@ -52,7 +54,23 @@
+             if (mobentity.getHoldingEntity() == playerentity) {
+                 if (leashknotentity == null) {
+                     leashknotentity = LeashKnotEntity.getOrCreate(world, blockpos);
++
++                    // CraftBukkit start - fire HangingPlaceEvent
++                    HangingPlaceEvent event = new HangingPlaceEvent((org.bukkit.entity.Hanging) leashknotentity.getBukkitEntity(), playerentity != null ? (org.bukkit.entity.Player) playerentity.getBukkitEntity() : null, world.getCraftWorld().getBlockAt(i, j, k), org.bukkit.block.BlockFace.SELF);
++                    Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        leashknotentity.die();
++                        return ActionResult.PASS;
++                    }
++                    // CraftBukkit end
++                }
++
++                // CraftBukkit start
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerLeashEntityEvent(mobentity, leashknotentity, playerentity).isCancelled()) {
++                    continue;
+                 }
++                // CraftBukkit end
+ 
+                 mobentity.attachLeash(leashknotentity, true);
+                 flag = true;

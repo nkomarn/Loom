@@ -1,0 +1,129 @@
+--- a/net/minecraft/server/Main.java
++++ b/net/minecraft/server/Main.java
+@@ -50,6 +50,7 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.SaveProperties;
+ import net.minecraft.world.World;
++import net.minecraft.world.dimension.DimensionOptions;
+ import net.minecraft.world.gen.GeneratorOptions;
+ import net.minecraft.world.level.LevelInfo;
+ import net.minecraft.world.level.LevelProperties;
+@@ -64,7 +65,8 @@
+ 
+     public Main() {}
+ 
+-    public static void main(String[] astring) {
++    public static void main(final OptionSet optionset) { // CraftBukkit - replaces main(String[] astring)
++        /* CraftBukkit start - Replace everything
+         OptionParser optionparser = new OptionParser();
+         OptionSpec<Void> optionspec = optionparser.accepts("nogui");
+         OptionSpec<Void> optionspec1 = optionparser.accepts("initSettings", "Initializes 'server.properties' and 'eula.txt', then quits");
+@@ -88,19 +90,20 @@
+                 optionparser.printHelpOn((OutputStream) System.err);
+                 return;
+             }
+-
++            */ // CraftBukkit end
++        try {
+             CrashReport.initCrashReport();
+             Bootstrap.initialize();
+             Bootstrap.logMissing();
+             Util.method_29476();
+             Path path = Paths.get("server.properties");
+-            ServerPropertiesLoader serverpropertiesloader = new ServerPropertiesLoader(path);
++            ServerPropertiesLoader serverpropertiesloader = new ServerPropertiesLoader(optionset); // CraftBukkit - CLI argument support
+ 
+             serverpropertiesloader.store();
+             Path path1 = Paths.get("eula.txt");
+             EulaReader eulareader = new EulaReader(path1);
+ 
+-            if (optionset.has((OptionSpec) optionspec1)) {
++            if (optionset.has("initSettings")) { // CraftBukkit
+                 Main.LOGGER.info("Initialized '{}' and '{}'", (Object) path.toAbsolutePath(), (Object) path1.toAbsolutePath());
+                 return;
+             }
+@@ -110,18 +113,19 @@
+                 return;
+             }
+ 
+-            File file = new File((String) optionset.valueOf((OptionSpec) optionspec9));
++            File file = (File) optionset.valueOf("universe"); // CraftBukkit
+             YggdrasilAuthenticationService yggdrasilauthenticationservice = new YggdrasilAuthenticationService(Proxy.NO_PROXY, UUID.randomUUID().toString());
+             MinecraftSessionService minecraftsessionservice = yggdrasilauthenticationservice.createMinecraftSessionService();
+             GameProfileRepository gameprofilerepository = yggdrasilauthenticationservice.createProfileRepository();
+             UserCache usercache = new UserCache(gameprofilerepository, new File(file, MinecraftServer.USER_CACHE_FILE.getName()));
+-            String s = (String) Optional.ofNullable(optionset.valueOf((OptionSpec) optionspec10)).orElse(serverpropertiesloader.getPropertiesHandler().levelName);
++            // CraftBukkit start
++            String s = (String) Optional.ofNullable(optionset.valueOf("world")).orElse(serverpropertiesloader.getPropertiesHandler().levelName);
+             LevelStorage levelstorage = LevelStorage.create(file.toPath());
+-            LevelStorage.Session levelstorage_session = levelstorage.createSession(s);
++            LevelStorage.Session levelstorage_session = levelstorage.createSession(s, DimensionOptions.OVERWORLD);
+ 
+             MinecraftServer.convertLevel(levelstorage_session);
+             DataPackSettings datapacksettings = levelstorage_session.method_29585();
+-            boolean flag = optionset.has((OptionSpec) optionspec6);
++            boolean flag = optionset.has("safeMode");
+ 
+             if (flag) {
+                 Main.LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
+@@ -143,6 +147,7 @@
+ 
+             serverresourcemanager.loadRegistryTags();
+             RegistryTracker.Modifiable registrytracker_modifiable = RegistryTracker.create();
++            /*
+             RegistryOps<Tag> registryops = RegistryOps.of(NbtOps.INSTANCE, serverresourcemanager.getResourceManager(), registrytracker_modifiable);
+             Object object = levelstorage_session.readLevelProperties(registryops, datapacksettings1);
+ 
+@@ -170,21 +175,33 @@
+             }
+ 
+             levelstorage_session.method_27425(registrytracker_modifiable, (SaveProperties) object);
++             */
+             final MinecraftDedicatedServer minecraftdedicatedserver = (MinecraftDedicatedServer) MinecraftServer.startServer((thread) -> {
+-                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, object, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
++                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(optionset, datapacksettings1, thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, object, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
+ 
++                /*
+                 minecraftdedicatedserver1.setServerName((String) optionset.valueOf(optionspec8));
+                 minecraftdedicatedserver1.setServerPort((Integer) optionset.valueOf(optionspec11));
+                 minecraftdedicatedserver1.setDemo(optionset.has(optionspec2));
+                 minecraftdedicatedserver1.setServerId((String) optionset.valueOf(optionspec12));
+                 boolean flag1 = !optionset.has(optionspec) && !optionset.valuesOf(nonoptionargumentspec).contains("nogui");
++                */
++                boolean flag1 = !optionset.has("nogui") && !optionset.nonOptionArguments().contains("nogui");
+ 
+                 if (flag1 && !GraphicsEnvironment.isHeadless()) {
+                     minecraftdedicatedserver1.createGui();
+                 }
+ 
++                if (optionset.has("port")) {
++                    int port = (Integer) optionset.valueOf("port");
++                    if (port > 0) {
++                        minecraftdedicatedserver1.setServerPort(port);
++                    }
++                }
++
+                 return minecraftdedicatedserver1;
+             });
++            /* CraftBukkit start
+             Thread thread = new Thread("Server Shutdown Thread") {
+                 public void run() {
+                     minecraftdedicatedserver.stop(true);
+@@ -193,14 +210,15 @@
+ 
+             thread.setUncaughtExceptionHandler(new UncaughtExceptionLogger(Main.LOGGER));
+             Runtime.getRuntime().addShutdownHook(thread);
++             */ // CraftBukkit end
+         } catch (Exception exception1) {
+             Main.LOGGER.fatal("Failed to start the minecraft server", (Throwable) exception1);
+         }
+ 
+     }
+ 
+-    private static void method_29173(LevelStorage.Session levelstorage_session, DataFixer datafixer, boolean flag, BooleanSupplier booleansupplier, ImmutableSet<RegistryKey<World>> immutableset) {
+-        Main.LOGGER.info("Forcing world upgrade!");
++    public static void method_29173(LevelStorage.Session levelstorage_session, DataFixer datafixer, boolean flag, BooleanSupplier booleansupplier, ImmutableSet<RegistryKey<World>> immutableset) {
++        Main.LOGGER.info("Forcing world upgrade! {}", levelstorage_session.getDirectoryName()); // CraftBukkit
+         WorldUpdater worldupdater = new WorldUpdater(levelstorage_session, datafixer, immutableset, flag);
+         Text text = null;
+ 

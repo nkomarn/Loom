@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/ModifiableWorld.java
++++ b/net/minecraft/world/ModifiableWorld.java
+@@ -28,4 +28,10 @@
+     default boolean spawnEntity(Entity entity) {
+         return false;
+     }
++
++    // CraftBukkit start (Loom: renamed from addEntity to spawnEntity)
++    default boolean spawnEntity(Entity entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason reason) {
++        return false;
++    }
++    // CraftBukkit end
+ }

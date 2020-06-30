@@ -1,0 +1,38 @@
+--- a/net/minecraft/server/BanEntry.java
++++ b/net/minecraft/server/BanEntry.java
+@@ -24,7 +24,7 @@
+     }
+ 
+     protected BanEntry(T t0, JsonObject jsonobject) {
+-        super(t0);
++        super(checkExpiry(t0, jsonobject));
+ 
+         Date date;
+ 
+@@ -73,4 +73,26 @@
+         jsonobject.addProperty("expires", this.expiryDate == null ? "forever" : BanEntry.DATE_FORMAT.format(this.expiryDate));
+         jsonobject.addProperty("reason", this.reason);
+     }
++
++    // CraftBukkit start
++    public Date getCreated() {
++        return this.creationDate;
++    }
++
++    private static <T> T checkExpiry(T object, JsonObject jsonobject) {
++        Date expires = null;
++
++        try {
++            expires = jsonobject.has("expires") ? a.parse(jsonobject.get("expires").getAsString()) : null;
++        } catch (ParseException ex) {
++            // Guess we don't have a date
++        }
++
++        if (expires == null || expires.after(new Date())) {
++            return object;
++        } else {
++            return null;
++        }
++    }
++    // CraftBukkit end
+ }

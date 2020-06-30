@@ -1,26 +1,19 @@
 --- a/net/minecraft/entity/ai/brain/task/GoToWorkTask.java
 +++ b/net/minecraft/entity/ai/brain/task/GoToWorkTask.java
-@@ -1,7 +1,9 @@
- package net.minecraft.entity.ai.brain.task;
- 
- import com.google.common.collect.ImmutableMap;
-+
- import java.util.Optional;
-+
- import net.minecraft.entity.LivingEntity;
- import net.minecraft.entity.ai.brain.MemoryModuleState;
- import net.minecraft.entity.ai.brain.MemoryModuleType;
-@@ -14,6 +16,9 @@
+@@ -14,6 +14,12 @@
  import net.minecraft.util.registry.Registry;
  import net.minecraft.village.VillagerProfession;
- import net.minecraft.world.poi.PointOfInterestType;
+ 
++// CraftBukkit start
 +import org.bukkit.craftbukkit.entity.CraftVillager;
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.event.entity.VillagerCareerChangeEvent;
- 
++// CraftBukkit end
++
  public class GoToWorkTask extends Task<VillagerEntity> {
  
-@@ -31,7 +36,7 @@
+     public GoToWorkTask() {
+@@ -30,7 +36,7 @@
          GlobalPos globalpos = (GlobalPos) villagerentity.getBrain().getOptionalMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
  
          villagerentity.getBrain().forget(MemoryModuleType.POTENTIAL_JOB_SITE);
@@ -29,7 +22,7 @@
          if (villagerentity.getVillagerData().getProfession() == VillagerProfession.NONE) {
              MinecraftServer minecraftserver = serverworld.getServer();
  
-@@ -42,7 +47,14 @@
+@@ -41,17 +47,18 @@
                      return villagerprofession.getWorkStation() == pointofinteresttype;
                  }).findFirst();
              }).ifPresent((villagerprofession) -> {
@@ -45,3 +38,14 @@
                  villagerentity.reinitializeBrain(serverworld);
              });
          }
+     }
+ 
+-    protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
+-        return this.shouldRun(serverworld, (VillagerEntity) livingentity);
+-    }
+-
+-    protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
+-        this.run(serverworld, (VillagerEntity) livingentity, i);
+-    }
++    // Loom - decompile errors
+ }

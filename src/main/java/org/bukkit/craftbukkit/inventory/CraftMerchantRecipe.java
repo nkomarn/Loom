@@ -2,14 +2,16 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.base.Preconditions;
 import java.util.List;
+
+import net.minecraft.village.TradeOffer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 
 public class CraftMerchantRecipe extends MerchantRecipe {
 
-    private final net.minecraft.server.MerchantRecipe handle;
+    private final TradeOffer handle;
 
-    public CraftMerchantRecipe(net.minecraft.server.MerchantRecipe merchantRecipe) {
+    public CraftMerchantRecipe(TradeOffer merchantRecipe) {
         super(CraftItemStack.asBukkitCopy(merchantRecipe.sellingItem), 0);
         this.handle = merchantRecipe;
         addIngredient(CraftItemStack.asBukkitCopy(merchantRecipe.buyingItem1));
@@ -18,9 +20,9 @@ public class CraftMerchantRecipe extends MerchantRecipe {
 
     public CraftMerchantRecipe(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier) {
         super(result, uses, maxUses, experienceReward, experience, priceMultiplier);
-        this.handle = new net.minecraft.server.MerchantRecipe(
-                net.minecraft.server.ItemStack.b,
-                net.minecraft.server.ItemStack.b,
+        this.handle = new TradeOffer(
+                net.minecraft.item.ItemStack.EMPTY,
+                net.minecraft.item.ItemStack.EMPTY,
                 CraftItemStack.asNMSCopy(result),
                 uses,
                 maxUses,
@@ -33,7 +35,7 @@ public class CraftMerchantRecipe extends MerchantRecipe {
 
     @Override
     public int getUses() {
-        return handle.uses;
+        return handle.getUses();
     }
 
     @Override
@@ -43,7 +45,7 @@ public class CraftMerchantRecipe extends MerchantRecipe {
 
     @Override
     public int getMaxUses() {
-        return handle.maxUses;
+        return handle.getMaxUses();
     }
 
     @Override
@@ -81,7 +83,7 @@ public class CraftMerchantRecipe extends MerchantRecipe {
         handle.priceMultiplier = priceMultiplier;
     }
 
-    public net.minecraft.server.MerchantRecipe toMinecraft() {
+    public TradeOffer toMinecraft() {
         List<ItemStack> ingredients = getIngredients();
         Preconditions.checkState(!ingredients.isEmpty(), "No offered ingredients");
         handle.buyingItem1 = CraftItemStack.asNMSCopy(ingredients.get(0));

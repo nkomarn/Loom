@@ -1,0 +1,55 @@
+--- a/net/minecraft/inventory/CraftingResultInventory.java
++++ b/net/minecraft/inventory/CraftingResultInventory.java
+@@ -8,11 +8,52 @@
+ import net.minecraft.recipe.RecipeUnlocker;
+ import net.minecraft.util.collection.DefaultedList;
+ 
++// CraftBukkit start
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++// CraftBukkit end
++
+ public class CraftingResultInventory implements Inventory, RecipeUnlocker {
+ 
+     private final DefaultedList<ItemStack> stacks;
+     private Recipe<?> lastRecipe;
+ 
++    // CraftBukkit start
++    private int maxStack = MAX_STACK;
++
++    public java.util.List<ItemStack> getContents() {
++        return this.stacks;
++    }
++
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++        return null; // Result slots don't get an owner
++    }
++
++    // Don't need a transaction; the InventoryCrafting keeps track of it for us
++    public void onOpen(CraftHumanEntity who) {}
++    public void onClose(CraftHumanEntity who) {}
++    public java.util.List<HumanEntity> getViewers() {
++        return new java.util.ArrayList<HumanEntity>();
++    }
++
++    @Override
++    public int getMaxCountPerStack() {
++        return maxStack;
++    }
++
++    @Override
++    public void setMaxCountPerStack(int size) {
++        maxStack = size;
++    }
++
++    @Override
++    public Location getLocation() {
++        return null;
++    }
++    // CraftBukkit end
++
++
+     public CraftingResultInventory() {
+         this.stacks = DefaultedList.ofSize(1, ItemStack.EMPTY);
+     }

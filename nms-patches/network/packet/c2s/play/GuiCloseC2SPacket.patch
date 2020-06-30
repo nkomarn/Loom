@@ -1,0 +1,24 @@
+--- a/net/minecraft/network/packet/c2s/play/GuiCloseC2SPacket.java
++++ b/net/minecraft/network/packet/c2s/play/GuiCloseC2SPacket.java
+@@ -12,6 +12,12 @@
+ 
+     public GuiCloseC2SPacket() {}
+ 
++    // CraftBukkit start
++    public GuiCloseC2SPacket(int id) {
++        this.id = id;
++    }
++    // CraftBukkit end
++
+     public void apply(ServerPlayPacketListener serverplaypacketlistener) {
+         serverplaypacketlistener.onGuiClose(this);
+     }
+@@ -24,7 +30,5 @@
+         packetbytebuf.writeByte(this.id);
+     }
+ 
+-    public void apply(PacketListener packetlistener) {
+-        this.apply((ServerPlayPacketListener) packetlistener);
+-    }
++    // Loom - decompile errors
+ }

@@ -1,0 +1,67 @@
+--- a/net/minecraft/world/storage/VersionedChunkStorage.java
++++ b/net/minecraft/world/storage/VersionedChunkStorage.java
+@@ -15,6 +15,13 @@
+ import net.minecraft.world.PersistentStateManager;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import net.minecraft.server.world.ServerChunkManager;
++import net.minecraft.server.world.ServerWorld;
++import net.minecraft.world.WorldAccess;
++import net.minecraft.world.chunk.ChunkStatus;
++// CraftBukkit end
++
+ public class VersionedChunkStorage implements AutoCloseable {
+ 
+     private final StorageIoWorker worker;
+@@ -27,10 +34,49 @@
+         this.worker = new StorageIoWorker(file, flag, "chunk");
+     }
+ 
+-    public CompoundTag updateChunkTag(RegistryKey<World> registrykey, Supplier<PersistentStateManager> supplier, CompoundTag compoundtag) {
++    // CraftBukkit start
++    private boolean check(ServerChunkManager cps, int x, int z) throws IOException {
++        ChunkPos pos = new ChunkPos(x, z);
++        if (cps != null) {
++            com.google.common.base.Preconditions.checkState(org.bukkit.Bukkit.isPrimaryThread(), "primary thread");
++            if (cps.isChunkLoaded(x, z)) {
++                return true;
++            }
++        }
++
++        CompoundTag nbt = getNbt(pos);
++        if (nbt != null) {
++            CompoundTag level = nbt.getCompound("Level");
++            if (level.getBoolean("TerrainPopulated")) {
++                return true;
++            }
++
++            ChunkStatus status = ChunkStatus.get(level.getString("Status"));
++            if (status.isAtLeast(ChunkStatus.FEATURES)) {
++                return true;
++            }
++        }
++
++        return false;
++    }
++    // CraftBukkit end
++
++    public CompoundTag updateChunkTag(RegistryKey<World> registrykey, Supplier<PersistentStateManager> supplier, CompoundTag compoundtag, ChunkPos pos, WorldAccess generatoraccess) throws IOException {
+         int i = getDataVersion(compoundtag);
+         boolean flag = true;
+ 
++        // CraftBukkit start
++        if (i < 1466) {
++            CompoundTag level = compoundtag.getCompound("Level");
++            if (level.getBoolean("TerrainPopulated") && !level.getBoolean("LightPopulated")) {
++                ServerChunkManager cps = (generatoraccess == null) ? null : ((ServerWorld) generatoraccess).getChunkManager();
++                if (check(cps, pos.x - 1, pos.z) && check(cps, pos.x - 1, pos.z - 1) && check(cps, pos.x, pos.z - 1)) {
++                    level.putBoolean("LightPopulated", true);
++                }
++            }
++        }
++        // CraftBukkit end
++
+         if (i < 1493) {
+             compoundtag = NbtHelper.update(this.dataFixer, DataFixTypes.CHUNK, compoundtag, i, 1493);
+             if (compoundtag.getCompound("Level").getBoolean("hasLegacyStructureData")) {

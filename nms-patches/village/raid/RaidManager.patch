@@ -1,0 +1,38 @@
+--- a/net/minecraft/village/raid/RaidManager.java
++++ b/net/minecraft/village/raid/RaidManager.java
+@@ -110,19 +110,34 @@
+                 boolean flag = false;
+ 
+                 if (!raid.hasStarted()) {
++                    /* CraftBukkit - moved down
+                     if (!this.raids.containsKey(raid.getRaidId())) {
+                         this.raids.put(raid.getRaidId(), raid);
+                     }
++                     */
+ 
+                     flag = true;
+-                } else if (raid.getBadOmenLevel() < raid.getMaxAcceptableBadOmenLevel()) {
++                    // CraftBukkit start - fixed a bug with raid: players could add up Bad Omen level even when the raid had finished
++                } else if (raid.isInProgress() && raid.getBadOmenLevel() < raid.getMaxAcceptableBadOmenLevel()) {
+                     flag = true;
++                    // CraftBukkit end
+                 } else {
+                     serverplayerentity.removeStatusEffect(StatusEffects.BAD_OMEN);
+                     serverplayerentity.networkHandler.sendPacket(new EntityStatusS2CPacket(serverplayerentity, (byte) 43));
+                 }
+ 
+                 if (flag) {
++                    // CraftBukkit start
++                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.callRaidTriggerEvent(raid, serverplayerentity)) {
++                        serverplayerentity.removeStatusEffect(StatusEffects.BAD_OMEN);
++                        return null;
++                    }
++
++                    if (!this.raids.containsKey(raid.getRaidId())) {
++                        this.raids.put(raid.getRaidId(), raid);
++                    }
++                    // CraftBukkit end
++
+                     raid.start(serverplayerentity);
+                     serverplayerentity.networkHandler.sendPacket(new EntityStatusS2CPacket(serverplayerentity, (byte) 43));
+                     if (!raid.hasSpawned()) {

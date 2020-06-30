@@ -1,0 +1,20 @@
+--- a/net/minecraft/entity/passive/PufferfishEntity.java
++++ b/net/minecraft/entity/passive/PufferfishEntity.java
+@@ -128,7 +128,7 @@
+         int i = this.getPuffState();
+ 
+         if (mobentity.damage(DamageSource.mob(this), (float) (1 + i))) {
+-            mobentity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 60 * i, 0));
++            mobentity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 60 * i, 0), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+             this.playSound(SoundEvents.ENTITY_PUFFER_FISH_STING, 1.0F, 1.0F);
+         }
+ 
+@@ -142,7 +142,7 @@
+                 ((ServerPlayerEntity) playerentity).networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.PUFFERFISH_STING, 0.0F));
+             }
+ 
+-            playerentity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 60 * i, 0));
++            playerentity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 60 * i, 0), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+         }
+ 
+     }

@@ -1,0 +1,66 @@
+--- a/net/minecraft/item/TridentItem.java
++++ b/net/minecraft/item/TridentItem.java
+@@ -13,6 +13,7 @@
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.entity.projectile.PersistentProjectileEntity;
+ import net.minecraft.entity.projectile.TridentEntity;
++import net.minecraft.server.network.ServerPlayerEntity;
+ import net.minecraft.sound.SoundCategory;
+ import net.minecraft.sound.SoundEvent;
+ import net.minecraft.sound.SoundEvents;
+@@ -60,9 +61,12 @@
+ 
+                 if (k <= 0 || playerentity.isTouchingWaterOrRain()) {
+                     if (!world.isClient) {
++                        // CraftBukkit - moved down
++                        /*
+                         itemstack.damage(1, (LivingEntity) playerentity, (playerentity1) -> {
+                             playerentity1.sendToolBreakStatus(livingentity.getActiveHand());
+                         });
++                        */
+                         if (k == 0) {
+                             TridentEntity tridententity = new TridentEntity(world, playerentity, itemstack);
+ 
+@@ -71,16 +75,41 @@
+                                 tridententity.pickupType = PersistentProjectileEntity.PickupPermission.CREATIVE_ONLY;
+                             }
+ 
+-                            world.spawnEntity(tridententity);
++//                            world.spawnEntity(tridententity);
++                            // CraftBukkit start
++                            if (!world.spawnEntity(tridententity)) {
++                                if (playerentity instanceof ServerPlayerEntity) {
++                                    ((ServerPlayerEntity) playerentity).getBukkitEntity().updateInventory();
++                                }
++                                return;
++                            }
++
++                            itemstack.damage(1, playerentity, (entityhuman1) -> {
++                                entityhuman1.sendToolBreakStatus(livingentity.getActiveHand());
++                            });
++                            tridententity.tridentStack = itemstack.copy(); // SPIGOT-4511 update since damage call moved
++                            // CraftBukkit end
++
+                             world.playSoundFromEntity((PlayerEntity) null, tridententity, SoundEvents.ITEM_TRIDENT_THROW, SoundCategory.PLAYERS, 1.0F, 1.0F);
+                             if (!playerentity.abilities.creativeMode) {
+                                 playerentity.inventory.removeOne(itemstack);
+                             }
+                         }
++                        // CraftBukkit start - SPIGOT-5458 also need in this branch :(
++                        else {
++                            itemstack.damage(1, playerentity, (entityhuman1) -> {
++                                entityhuman1.sendToolBreakStatus(livingentity.getActiveHand());
++                            });
++                        }
++                        // CraftBukkkit end
+                     }
+ 
+                     playerentity.incrementStat(Stats.USED.getOrCreateStat(this));
+                     if (k > 0) {
++                        // CraftBukkit start
++                        org.bukkit.event.player.PlayerRiptideEvent event = new org.bukkit.event.player.PlayerRiptideEvent((org.bukkit.entity.Player) playerentity.getBukkitEntity(), org.bukkit.craftbukkit.inventory.CraftItemStack.asCraftMirror(itemstack));
++                        event.getPlayer().getServer().getPluginManager().callEvent(event);
++                        // CraftBukkit end
+                         float f = playerentity.yaw;
+                         float f1 = playerentity.pitch;
+                         float f2 = -MathHelper.sin(f * 0.017453292F) * MathHelper.cos(f1 * 0.017453292F);

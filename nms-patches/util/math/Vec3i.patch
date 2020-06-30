@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/math/Vec3i.java
++++ b/net/minecraft/util/math/Vec3i.java
+@@ -128,7 +128,5 @@
+         return MoreObjects.toStringHelper((Object) this).add("x", this.getX()).add("y", this.getY()).add("z", this.getZ()).toString();
+     }
+ 
+-    public int compareTo(Object object) {
+-        return this.compareTo((Vec3i) object);
+-    }
++    // Loom - decompile errors
+ }

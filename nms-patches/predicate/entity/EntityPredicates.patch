@@ -1,0 +1,11 @@
+--- a/net/minecraft/predicate/entity/EntityPredicates.java
++++ b/net/minecraft/predicate/entity/EntityPredicates.java
+@@ -44,7 +44,7 @@
+         AbstractTeam.CollisionRule abstractteam_collisionrule = abstractteam == null ? AbstractTeam.CollisionRule.ALWAYS : abstractteam.getCollisionRule();
+ 
+         return (Predicate) (abstractteam_collisionrule == AbstractTeam.CollisionRule.NEVER ? Predicates.alwaysFalse() : EntityPredicates.EXCEPT_SPECTATOR.and((entity1) -> {
+-            if (!entity1.isPushable()) {
++            if (!entity1.canCollideWith(entity) || !entity.canCollideWith(entity1)) { // CraftBukkit - collidable API
+                 return false;
+             } else if (entity.world.isClient && (!(entity1 instanceof PlayerEntity) || !((PlayerEntity) entity1).isMainPlayer())) {
+                 return false;

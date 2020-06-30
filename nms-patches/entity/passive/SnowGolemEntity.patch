@@ -1,0 +1,40 @@
+--- a/net/minecraft/entity/passive/SnowGolemEntity.java
++++ b/net/minecraft/entity/passive/SnowGolemEntity.java
+@@ -36,6 +36,7 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory; // Craftbukkit
+ 
+ public class SnowGolemEntity extends GolemEntity implements Shearable, RangedAttackMob {
+ 
+@@ -89,7 +90,7 @@
+             int k = MathHelper.floor(this.getZ());
+ 
+             if (this.world.getBiome(new BlockPos(i, 0, k)).getTemperature(new BlockPos(i, j, k)) > 1.0F) {
+-                this.damage(DamageSource.ON_FIRE, 1.0F);
++                this.damage(CraftEventFactory.MELTING, 1.0F); // Craftbukkit - DamageSource.ON_FIRE -> CraftEventFactory.MELTING
+             }
+ 
+             if (!this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
+@@ -105,7 +106,7 @@
+                 BlockPos blockpos = new BlockPos(i, j, k);
+ 
+                 if (this.world.getBlockState(blockpos).isAir() && this.world.getBiome(blockpos).getTemperature(blockpos) < 0.8F && blockstate.canPlaceAt(this.world, blockpos)) {
+-                    this.world.setBlockState(blockpos, blockstate);
++                    org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockFormEvent(this.world, blockpos, blockstate, this); // CraftBukkit
+                 }
+             }
+         }
+@@ -133,6 +134,11 @@
+         ItemStack itemstack = playerentity.getStackInHand(hand);
+ 
+         if (itemstack.getItem() == Items.SHEARS && this.isShearable()) {
++            // CraftBukkit start
++            if (!CraftEventFactory.handlePlayerShearEntityEvent(playerentity, this, itemstack, hand)) {
++                return ActionResult.PASS;
++            }
++            // CraftBukkit end
+             this.sheared(SoundCategory.PLAYERS);
+             if (!this.world.isClient) {
+                 itemstack.damage(1, (LivingEntity) playerentity, (playerentity1) -> {

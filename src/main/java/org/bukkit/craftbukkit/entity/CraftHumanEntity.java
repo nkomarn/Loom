@@ -231,7 +231,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         perm.recalculatePermissions();
     }
 
-    @Override
+    @OverrideEntityHuman
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
         return perm.getEffectivePermissions();
     }

@@ -1,14 +1,15 @@
 package org.bukkit.craftbukkit.potion;
 
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.server.MobEffectList;
 import org.bukkit.Color;
 import org.bukkit.potion.PotionEffectType;
 
 public class CraftPotionEffectType extends PotionEffectType {
-    private final MobEffectList handle;
+    private final StatusEffect handle;
 
-    public CraftPotionEffectType(MobEffectList handle) {
-        super(MobEffectList.getId(handle));
+    public CraftPotionEffectType(StatusEffect handle) {
+        super(StatusEffect.getRawId(handle));
         this.handle = handle;
     }
 
@@ -17,7 +18,7 @@ public class CraftPotionEffectType extends PotionEffectType {
         return 1.0D;
     }
 
-    public MobEffectList getHandle() {
+    public StatusEffect getHandle() {
         return handle;
     }
 

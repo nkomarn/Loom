@@ -1,0 +1,9 @@
+--- a/net/minecraft/recipe/Recipe.java
++++ b/net/minecraft/recipe/Recipe.java
+@@ -42,4 +42,6 @@
+     RecipeSerializer<?> getSerializer();
+ 
+     RecipeType<?> getType();
++
++    org.bukkit.inventory.Recipe toBukkitRecipe(); // CraftBukkit
+ }

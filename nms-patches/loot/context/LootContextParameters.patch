@@ -1,0 +1,10 @@
+--- a/net/minecraft/loot/context/LootContextParameters.java
++++ b/net/minecraft/loot/context/LootContextParameters.java
+@@ -23,6 +23,7 @@
+     public static final LootContextParameter<BlockEntity> BLOCK_ENTITY = register("block_entity");
+     public static final LootContextParameter<ItemStack> TOOL = register("tool");
+     public static final LootContextParameter<Float> EXPLOSION_RADIUS = register("explosion_radius");
++    public static final LootContextParameter<Integer> LOOTING_MOD = register("bukkit:looting_mod"); // CraftBukkit
+ 
+     private static <T> LootContextParameter<T> register(String s) {
+         return new LootContextParameter<>(new Identifier(s));

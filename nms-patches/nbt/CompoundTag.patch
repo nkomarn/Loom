@@ -1,6 +1,17 @@
 --- a/net/minecraft/nbt/CompoundTag.java
 +++ b/net/minecraft/nbt/CompoundTag.java
-@@ -530,7 +530,5 @@
+@@ -74,9 +74,7 @@
+             return "TAG_Compound";
+         }
+ 
+-        public Tag read(DataInput datainput, int i, PositionTracker positiontracker) throws IOException {
+-            return this.read(datainput, i, positiontracker);
+-        }
++        // Loom - decompile error
+     };
+     private final Map<String, Tag> tags;
+ 
+@@ -530,7 +528,5 @@
          return Collections.unmodifiableMap(this.tags);
      }
  

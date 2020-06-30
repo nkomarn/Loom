@@ -1,0 +1,76 @@
+--- a/net/minecraft/entity/LightningEntity.java
++++ b/net/minecraft/entity/LightningEntity.java
+@@ -19,6 +19,11 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++// CraftBukkit end
++
+ public class LightningEntity extends Entity {
+ 
+     private int ambientTick;
+@@ -57,7 +62,25 @@
+                 this.spawnFire(4);
+             }
+ 
+-            this.world.playSound((PlayerEntity) null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F);
++
++            // CraftBukkit start - Use relative location for far away sounds
++            // this.world.playSound((PlayerEntity) null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F);
++            float pitch = 0.8F + this.random.nextFloat() * 0.2F;
++            int viewDistance = (this.world).getCraftServer().getViewDistance() * 16;
++            for (ServerPlayerEntity player : (List<ServerPlayerEntity>) (List) this.world.getPlayers()) {
++                double deltaX = this.getX() - player.getX();
++                double deltaZ = this.getZ() - player.getZ();
++                double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
++                if (distanceSquared > viewDistance * viewDistance) {
++                    double deltaLength = Math.sqrt(distanceSquared);
++                    double relativeX = player.getX() + (deltaX / deltaLength) * viewDistance;
++                    double relativeZ = player.getZ() + (deltaZ / deltaLength) * viewDistance;
++                    player.networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, relativeX, this.getY(), relativeZ, 10000.0F, pitch));
++                } else {
++                    player.networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, this.getX(), this.getY(), this.getX(), 10000.0F, pitch));
++                }
++            }
++            // CraftBukkit end
+             this.world.playSound((PlayerEntity) null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
+         }
+ 
+@@ -73,7 +96,7 @@
+             }
+         }
+ 
+-        if (this.ambientTick >= 0) {
++        if (this.ambientTick >= 0 && !this.cosmetic) { // CraftBukkit - add !this.isEffect
+             if (this.world.isClient) {
+                 this.world.setLightningTicksLeft(2);
+             } else if (!this.cosmetic) {
+@@ -101,7 +124,11 @@
+             BlockState blockstate = AbstractFireBlock.getState(this.world, blockpos);
+ 
+             if (this.world.getBlockState(blockpos).isAir() && blockstate.canPlaceAt(this.world, blockpos)) {
+-                this.world.setBlockState(blockpos, blockstate);
++                // CraftBukkit start - add "!cosmetic"
++                if (!this.cosmetic && !CraftEventFactory.callBlockIgniteEvent(world, blockpos, this).isCancelled()) {
++                    this.world.setBlockState(blockpos, blockstate);
++                }
++                // CraftBukkit end
+             }
+ 
+             for (int j = 0; j < i; ++j) {
+@@ -109,7 +136,11 @@
+ 
+                 blockstate = AbstractFireBlock.getState(this.world, blockpos1);
+                 if (this.world.getBlockState(blockpos1).isAir() && blockstate.canPlaceAt(this.world, blockpos1)) {
+-                    this.world.setBlockState(blockpos1, blockstate);
++                    // CraftBukkit start - add "!cosmetic"
++                    if (!this.cosmetic && !CraftEventFactory.callBlockIgniteEvent(world, blockpos1, this).isCancelled()) {
++                        this.world.setBlockState(blockpos1, blockstate);
++                    }
++                    // CraftBukkit end
+                 }
+             }
+ 

@@ -1,0 +1,57 @@
+--- a/net/minecraft/entity/player/HungerManager.java
++++ b/net/minecraft/entity/player/HungerManager.java
+@@ -14,9 +14,17 @@
+     private float foodSaturationLevel = 5.0F;
+     private float exhaustion;
+     private int foodStarvationTimer;
++    private PlayerEntity entityhuman; // CraftBukkit
+     private int prevFoodLevel = 20;
+ 
+-    public HungerManager() {}
++    public HungerManager() { throw new AssertionError("Whoopsie, we missed the bukkit."); } // CraftBukkit start - throw an error
++
++    // CraftBukkit start - added EntityHuman constructor
++    public HungerManager(PlayerEntity entityhuman) {
++        org.apache.commons.lang.Validate.notNull(entityhuman);
++        this.entityhuman = entityhuman;
++    }
++    // CraftBukkit end
+ 
+     public void add(int i, float f) {
+         this.foodLevel = Math.min(i + this.foodLevel, 20);
+@@ -26,8 +34,17 @@
+     public void eat(Item item, ItemStack itemstack) {
+         if (item.isFood()) {
+             FoodComponent foodcomponent = item.getFoodComponent();
++            // CraftBukkit start
++            int oldFoodLevel = foodLevel;
++
++            org.bukkit.event.entity.FoodLevelChangeEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callFoodLevelChangeEvent(entityhuman, foodcomponent.getHunger() + oldFoodLevel, itemstack);
++
++            if (!event.isCancelled()) {
++                this.add(event.getFoodLevel() - oldFoodLevel, foodcomponent.getSaturationModifier());
++            }
+ 
+-            this.add(foodcomponent.getHunger(), foodcomponent.getSaturationModifier());
++            ((PlayerEntity) entityhuman).getBukkitEntity().sendHealthUpdate();
++            // CraftBukkit end
+         }
+ 
+     }
+@@ -52,14 +69,14 @@
+             if (this.foodStarvationTimer >= 10) {
+                 float f = Math.min(this.foodSaturationLevel, 6.0F);
+ 
+-                playerentity.heal(f / 6.0F);
++                playerentity.heal(f / 6.0F, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.SATIATED); // CraftBukkit - added RegainReason
+                 this.addExhaustion(f);
+                 this.foodStarvationTimer = 0;
+             }
+         } else if (flag && this.foodLevel >= 18 && playerentity.canFoodHeal()) {
+             ++this.foodStarvationTimer;
+             if (this.foodStarvationTimer >= 80) {
+-                playerentity.heal(1.0F);
++                playerentity.heal(1.0F, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.SATIATED); // CraftBukkit - added RegainReason
+                 this.addExhaustion(6.0F);
+                 this.foodStarvationTimer = 0;
+             }

@@ -1,0 +1,46 @@
+--- a/net/minecraft/world/BlockView.java
++++ b/net/minecraft/world/BlockView.java
+@@ -40,20 +40,26 @@
+         return BlockPos.method_29715(box).map(this::getBlockState);
+     }
+ 
+-    default BlockHitResult rayTrace(RayTraceContext raytracecontext) {
+-        return (BlockHitResult) rayTrace(raytracecontext, (raytracecontext1, blockpos) -> {
++    // CraftBukkit start - moved block handling into separate method for use by Block#rayTrace
++    default BlockHitResult rayTraceBlock(RayTraceContext raytracecontext, BlockPos blockpos) {
+             BlockState blockstate = this.getBlockState(blockpos);
+             FluidState fluidstate = this.getFluidState(blockpos);
+-            Vec3d vec3d = raytracecontext1.getStart();
+-            Vec3d vec3d1 = raytracecontext1.getEnd();
+-            VoxelShape voxelshape = raytracecontext1.getBlockShape(blockstate, this, blockpos);
++            Vec3d vec3d = raytracecontext.getStart();
++            Vec3d vec3d1 = raytracecontext.getEnd();
++            VoxelShape voxelshape = raytracecontext.getBlockShape(blockstate, this, blockpos);
+             BlockHitResult blockhitresult = this.rayTraceBlock(vec3d, vec3d1, blockpos, voxelshape, blockstate);
+-            VoxelShape voxelshape1 = raytracecontext1.getFluidShape(fluidstate, this, blockpos);
++            VoxelShape voxelshape1 = raytracecontext.getFluidShape(fluidstate, this, blockpos);
+             BlockHitResult blockhitresult1 = voxelshape1.rayTrace(vec3d, vec3d1, blockpos);
+-            double d0 = blockhitresult == null ? Double.MAX_VALUE : raytracecontext1.getStart().squaredDistanceTo(blockhitresult.getPos());
+-            double d1 = blockhitresult1 == null ? Double.MAX_VALUE : raytracecontext1.getStart().squaredDistanceTo(blockhitresult1.getPos());
++            double d0 = blockhitresult == null ? Double.MAX_VALUE : raytracecontext.getStart().squaredDistanceTo(blockhitresult.getPos());
++            double d1 = blockhitresult1 == null ? Double.MAX_VALUE : raytracecontext.getStart().squaredDistanceTo(blockhitresult1.getPos());
+ 
+             return d0 <= d1 ? blockhitresult : blockhitresult1;
++    }
++    // CraftBukkit end
++
++    default BlockHitResult rayTrace(RayTraceContext raytracecontext) {
++        return (BlockHitResult) rayTrace(raytracecontext, (raytrace1, blockposition) -> {
++            return this.rayTraceBlock(raytrace1, blockposition); // CraftBukkit - moved into separate method
+         }, (raytracecontext1) -> {
+             Vec3d vec3d = raytracecontext1.getStart().subtract(raytracecontext1.getEnd());
+ 
+@@ -111,7 +117,7 @@
+                 double d13 = d10 * (i1 > 0 ? 1.0D - MathHelper.fractionalPart(d4) : MathHelper.fractionalPart(d4));
+                 double d14 = d11 * (j1 > 0 ? 1.0D - MathHelper.fractionalPart(d5) : MathHelper.fractionalPart(d5));
+ 
+-                Object object;
++                T object; // CraftBukkit - decompile error
+ 
+                 do {
+                     if (d12 > 1.0D && d13 > 1.0D && d14 > 1.0D) {

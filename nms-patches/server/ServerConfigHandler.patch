@@ -1,0 +1,99 @@
+--- a/net/minecraft/server/ServerConfigHandler.java
++++ b/net/minecraft/server/ServerConfigHandler.java
+@@ -26,6 +26,11 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import net.minecraft.nbt.CompoundTag;
++import net.minecraft.nbt.NbtIo;
++// CraftBukkit end
++
+ public class ServerConfigHandler {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+@@ -84,7 +89,7 @@
+                 try {
+                     bannedplayerlist.load();
+                 } catch (IOException ioexception) {
+-                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) bannedplayerlist.getFile().getName(), (Object) ioexception);
++                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) bannedplayerlist.getFile().getName()); // CraftBukkit - don't print stacktrace
+                 }
+             }
+ 
+@@ -142,7 +147,7 @@
+                 try {
+                     bannediplist.load();
+                 } catch (IOException ioexception) {
+-                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) bannediplist.getFile().getName(), (Object) ioexception);
++                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) bannediplist.getFile().getName()); // CraftBukkit - don't print stacktrace
+                 }
+             }
+ 
+@@ -183,7 +188,7 @@
+                 try {
+                     operatorlist.load();
+                 } catch (IOException ioexception) {
+-                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) operatorlist.getFile().getName(), (Object) ioexception);
++                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) operatorlist.getFile().getName()); // CraftBukkit - don't print stacktrace
+                 }
+             }
+ 
+@@ -227,7 +232,7 @@
+                 try {
+                     whitelist.load();
+                 } catch (IOException ioexception) {
+-                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) whitelist.getFile().getName(), (Object) ioexception);
++                    ServerConfigHandler.LOGGER.warn("Could not load existing file {}", (Object) whitelist.getFile().getName()); // CraftBukkit - don't print stacktrace
+                 }
+             }
+ 
+@@ -283,7 +288,7 @@
+                     }
+                 };
+ 
+-                lookupProfile(minecraftserver, Lists.newArrayList((Object[]) (s)), profilelookupcallback);
++                lookupProfile(minecraftserver, Lists.newArrayList(s), profilelookupcallback); // Loom - decompile errors
+                 return !list.isEmpty() && ((GameProfile) list.get(0)).getId() != null ? ((GameProfile) list.get(0)).getId() : null;
+             } else {
+                 return PlayerEntity.getUuidFromProfile(new GameProfile((UUID) null, s));
+@@ -350,6 +355,30 @@
+                         File file5 = new File(file, s2 + ".dat");
+                         File file6 = new File(file4, s3 + ".dat");
+ 
++                        // CraftBukkit start - Use old file name to seed lastKnownName
++                        CompoundTag root = null;
++
++                        try {
++                            root = NbtIo.readCompressed(new java.io.FileInputStream(file5));
++                        } catch (Exception exception) {
++                            exception.printStackTrace();
++                        }
++
++                        if (root != null) {
++                            if (!root.contains("bukkit")) {
++                                root.put("bukkit", new CompoundTag());
++                            }
++                            CompoundTag data = root.getCompound("bukkit");
++                            data.putString("lastKnownName", s2);
++
++                            try {
++                                NbtIo.writeCompressed(root, new java.io.FileOutputStream(file2));
++                            } catch (Exception exception) {
++                                exception.printStackTrace();
++                            }
++                       }
++                        // CraftBukkit end
++
+                         ServerConfigHandler.createDirectory(file4);
+                         if (!file5.renameTo(file6)) {
+                             throw new ServerConfigHandler.ServerConfigException("Could not convert file for " + s2);
+@@ -378,7 +407,7 @@
+                     }
+                 };
+ 
+-                lookupProfile(minecraftdedicatedserver, Lists.newArrayList((Object[]) astring), profilelookupcallback);
++                lookupProfile(minecraftdedicatedserver, Lists.newArrayList(astring), profilelookupcallback); // Loom - decompile error
+                 return true;
+             } catch (ServerConfigHandler.ServerConfigException serverconfighandler_serverconfigexception) {
+                 ServerConfigHandler.LOGGER.error("Conversion failed, please try again later", (Throwable) serverconfighandler_serverconfigexception);

@@ -1,0 +1,11 @@
+--- a/net/minecraft/item/MilkBucketItem.java
++++ b/net/minecraft/item/MilkBucketItem.java
+@@ -29,7 +29,7 @@
+         }
+ 
+         if (!world.isClient) {
+-            livingentity.clearStatusEffects();
++            livingentity.clearStatusEffects(org.bukkit.event.entity.EntityPotionEffectEvent.Cause.MILK); // CraftBukkit
+         }
+ 
+         return itemstack.isEmpty() ? new ItemStack(Items.BUCKET) : itemstack;

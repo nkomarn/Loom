@@ -1,0 +1,71 @@
+--- a/net/minecraft/server/network/ServerHandshakeNetworkHandler.java
++++ b/net/minecraft/server/network/ServerHandshakeNetworkHandler.java
+@@ -11,8 +11,18 @@
+ import net.minecraft.text.Text;
+ import net.minecraft.text.TranslatableText;
+ 
++// CraftBukkit start
++import java.net.InetAddress;
++import java.util.HashMap;
++// CraftBukkit end
++
+ public class ServerHandshakeNetworkHandler implements ServerHandshakePacketListener {
+ 
++    // CraftBukkit start - add fields
++    private static final HashMap<InetAddress, Long> throttleTracker = new HashMap<InetAddress, Long>();
++    private static int throttleCounter = 0;
++    // CraftBukkit end
++
+     private static final Text IGNORING_STATUS_REQUEST_MESSAGE = new LiteralText("Ignoring status request");
+     private final MinecraftServer server;
+     private final ClientConnection connection;
+@@ -28,6 +38,41 @@
+                 this.connection.setState(NetworkState.LOGIN);
+                 TranslatableText translatabletext;
+ 
++                // CraftBukkit start - Connection throttle
++                try {
++                    long currentTime = System.currentTimeMillis();
++                    long connectionThrottle = this.server.server.getConnectionThrottle();
++                    InetAddress address = ((java.net.InetSocketAddress) this.connection.getAddress()).getAddress();
++
++                    synchronized (throttleTracker) {
++                        if (throttleTracker.containsKey(address) && !"127.0.0.1".equals(address.getHostAddress()) && currentTime - throttleTracker.get(address) < connectionThrottle) {
++                            throttleTracker.put(address, currentTime);
++                            translatabletext = new TranslatableText("Connection throttled! Please wait before reconnecting.");
++                            this.connection.send(new LoginDisconnectS2CPacket(translatabletext));
++                            this.connection.disconnect(translatabletext);
++                            return;
++                        }
++
++                        throttleTracker.put(address, currentTime);
++                        throttleCounter++;
++                        if (throttleCounter > 200) {
++                            throttleCounter = 0;
++
++                            // Cleanup stale entries
++                            java.util.Iterator iter = throttleTracker.entrySet().iterator();
++                            while (iter.hasNext()) {
++                                java.util.Map.Entry<InetAddress, Long> entry = (java.util.Map.Entry) iter.next();
++                                if (entry.getValue() > connectionThrottle) {
++                                    iter.remove();
++                                }
++                            }
++                        }
++                    }
++                } catch (Throwable t) {
++                    org.apache.logging.log4j.LogManager.getLogger().debug("Failed to check connection throttle", t);
++                }
++                // CraftBukkit end
++
+                 if (handshakec2spacket.getProtocolVersion() > SharedConstants.getGameVersion().getProtocolVersion()) {
+                     translatabletext = new TranslatableText("multiplayer.disconnect.outdated_server", new Object[]{SharedConstants.getGameVersion().getName()});
+                     this.connection.send(new LoginDisconnectS2CPacket(translatabletext));
+@@ -38,6 +83,7 @@
+                     this.connection.disconnect(translatabletext);
+                 } else {
+                     this.connection.setPacketListener(new ServerLoginNetworkHandler(this.server, this.connection));
++                    ((ServerLoginNetworkHandler) this.connection.getPacketListener()).hostname = handshakec2spacket.getAddress() + ":" + handshakec2spacket.getPort(); // CraftBukkit - set hostname
+                 }
+                 break;
+             case STATUS:

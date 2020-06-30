@@ -1,16 +1,6 @@
 --- a/net/minecraft/network/NetworkThreadUtils.java
 +++ b/net/minecraft/network/NetworkThreadUtils.java
-@@ -1,6 +1,9 @@
- package net.minecraft.network;
- 
- import net.minecraft.network.listener.PacketListener;
-+import net.minecraft.server.MinecraftServer;
-+import net.minecraft.server.network.ServerPlayNetworkHandler;
-+import net.minecraft.server.world.ServerWorld;
- import net.minecraft.util.thread.ThreadExecutor;
- import org.apache.logging.log4j.LogManager;
- import org.apache.logging.log4j.Logger;
-@@ -16,6 +19,7 @@
+@@ -17,6 +17,7 @@
      public static <T extends PacketListener> void forceMainThread(Packet<T> packet, T t0, ThreadExecutor<?> threadexecutor) throws OffThreadException {
          if (!threadexecutor.isOnThread()) {
              threadexecutor.execute(() -> {
@@ -18,7 +8,7 @@
                  if (t0.getConnection().isOpen()) {
                      packet.apply(t0);
                  } else {
-@@ -25,5 +29,10 @@
+@@ -26,5 +27,10 @@
              });
              throw OffThreadException.INSTANCE;
          }

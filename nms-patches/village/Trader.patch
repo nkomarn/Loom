@@ -1,0 +1,9 @@
+--- a/net/minecraft/village/Trader.java
++++ b/net/minecraft/village/Trader.java
+@@ -51,4 +51,6 @@
+         }
+ 
+     }
++
++    org.bukkit.craftbukkit.inventory.CraftMerchant getCraftMerchant(); // CraftBukkit
+ }

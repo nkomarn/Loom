@@ -1,0 +1,84 @@
+--- a/net/minecraft/entity/passive/SheepEntity.java
++++ b/net/minecraft/entity/passive/SheepEntity.java
+@@ -58,6 +58,14 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ 
++// CraftBukkit start
++import net.minecraft.item.Item;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.SheepRegrowWoolEvent;
++import org.bukkit.inventory.InventoryView;
++// CraftBukkit end
++
+ public class SheepEntity extends AnimalEntity implements Shearable {
+ 
+     private static final TrackedData<Byte> COLOR = DataTracker.registerData(SheepEntity.class, TrackedDataHandlerRegistry.BYTE);
+@@ -182,6 +190,11 @@
+ 
+         if (itemstack.getItem() == Items.SHEARS) {
+             if (!this.world.isClient && this.isShearable()) {
++                // CraftBukkit start
++                if (!CraftEventFactory.handlePlayerShearEntityEvent(playerentity, this, itemstack, hand)) {
++                    return ActionResult.PASS;
++                }
++                // CraftBukkit end
+                 this.sheared(SoundCategory.PLAYERS);
+                 itemstack.damage(1, (LivingEntity) playerentity, (playerentity1) -> {
+                     playerentity1.sendToolBreakStatus(hand);
+@@ -201,7 +214,9 @@
+         int i = 1 + this.random.nextInt(3);
+ 
+         for (int j = 0; j < i; ++j) {
++            this.forceDrops = true; // CraftBukkit
+             ItemEntity itementity = this.dropItem((ItemConvertible) SheepEntity.DROPS.get(this.getColor()), 1);
++            this.forceDrops = false; // CraftBukkit
+ 
+             if (itementity != null) {
+                 itementity.setVelocity(itementity.getVelocity().add((double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double) (this.random.nextFloat() * 0.05F), (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
+@@ -282,6 +297,12 @@
+     }
+ 
+     public void onEatingGrass() {
++        // CraftBukkit start
++        SheepRegrowWoolEvent event = new SheepRegrowWoolEvent((org.bukkit.entity.Sheep) this.getBukkitEntity());
++        Bukkit.getPluginManager().callEvent(event);
++
++        if (event.isCancelled()) return;
++        // CraftBukkit end
+         this.setSheared(false);
+         if (this.isBaby()) {
+             this.growUp(60);
+@@ -299,7 +320,7 @@
+         DyeColor dyecolor = ((SheepEntity) animalentity).getColor();
+         DyeColor dyecolor1 = ((SheepEntity) animalentity1).getColor();
+         CraftingInventory craftinginventory = createDyeMixingCraftingInventory(dyecolor, dyecolor1);
+-        Optional optional = this.world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftinginventory, this.world).map((craftingrecipe) -> {
++        Optional<Item> optional = this.world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftinginventory, this.world).map((craftingrecipe) -> { // Eclipse fail
+             return craftingrecipe.craft(craftinginventory);
+         }).map(ItemStack::getItem);
+ 
+@@ -316,6 +337,13 @@
+             public boolean canUse(PlayerEntity playerentity) {
+                 return false;
+             }
++
++            // CraftBukkit start
++            @Override
++            public InventoryView getBukkitView() {
++                return null; // TODO: O.O
++            }
++            // CraftBukkit end
+         }, 2, 1);
+ 
+         craftinginventory.setStack(0, new ItemStack(DyeItem.byColor(dyecolor)));
+@@ -327,7 +355,5 @@
+         return 0.95F * entitydimensions.height;
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile errors
+ }

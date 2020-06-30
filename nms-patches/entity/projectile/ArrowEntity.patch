@@ -1,0 +1,55 @@
+--- a/net/minecraft/entity/projectile/ArrowEntity.java
++++ b/net/minecraft/entity/projectile/ArrowEntity.java
+@@ -18,6 +18,7 @@
+ import net.minecraft.potion.Potion;
+ import net.minecraft.potion.PotionUtil;
+ import net.minecraft.potion.Potions;
++import net.minecraft.util.Identifier;
+ import net.minecraft.util.registry.Registry;
+ import net.minecraft.world.World;
+ 
+@@ -136,6 +137,26 @@
+         }
+     }
+ 
++    // CraftBukkit start accessor methods
++    public void refreshEffects() {
++        this.getDataTracker().set(ArrowEntity.COLOR, PotionUtil.getColor((Collection) PotionUtil.getPotionEffects(this.potion, (Collection) this.effects)));
++    }
++
++    public String getArrowType() {
++        return Registry.POTION.getKey(this.potion).toString();
++    }
++
++    public void setArrowType(String string) {
++        this.potion = Registry.POTION.get(new Identifier(string));
++        this.getDataTracker().set(ArrowEntity.COLOR, PotionUtil.getColor((Collection) PotionUtil.getPotionEffects(this.potion, (Collection) this.effects)));
++    }
++
++    public boolean isTipped() {
++        return !(this.effects.isEmpty() && this.potion == Potions.EMPTY);
++    }
++    // CraftBukkit end
++
++
+     public int getColor() {
+         return (Integer) this.dataTracker.get(ArrowEntity.COLOR);
+     }
+@@ -200,7 +221,7 @@
+ 
+         while (iterator.hasNext()) {
+             statuseffectinstance = (StatusEffectInstance) iterator.next();
+-            livingentity.addStatusEffect(new StatusEffectInstance(statuseffectinstance.getEffectType(), Math.max(statuseffectinstance.getDuration() / 8, 1), statuseffectinstance.getAmplifier(), statuseffectinstance.isAmbient(), statuseffectinstance.shouldShowParticles()));
++            livingentity.addStatusEffect(new StatusEffectInstance(statuseffectinstance.getEffectType(), Math.max(statuseffectinstance.getDuration() / 8, 1), statuseffectinstance.getAmplifier(), statuseffectinstance.isAmbient(), statuseffectinstance.shouldShowParticles()), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ARROW); // CraftBukkit
+         }
+ 
+         if (!this.effects.isEmpty()) {
+@@ -208,7 +229,7 @@
+ 
+             while (iterator.hasNext()) {
+                 statuseffectinstance = (StatusEffectInstance) iterator.next();
+-                livingentity.addStatusEffect(statuseffectinstance);
++                livingentity.addStatusEffect(statuseffectinstance, org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ARROW); // CraftBukkit
+             }
+         }
+ 

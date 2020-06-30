@@ -1,0 +1,23 @@
+--- a/net/minecraft/server/command/CommandOutput.java
++++ b/net/minecraft/server/command/CommandOutput.java
+@@ -19,6 +19,13 @@
+         public boolean shouldBroadcastConsoleToOps() {
+             return false;
+         }
++
++        // CraftBukkit start
++        @Override
++        public org.bukkit.command.CommandSender getBukkitSender(ServerCommandSource wrapper) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++        // CraftBukkit end
+     };
+ 
+     void sendSystemMessage(Text arg, UUID uUID);
+@@ -28,4 +35,6 @@
+     boolean shouldTrackOutput();
+ 
+     boolean shouldBroadcastConsoleToOps();
++
++    org.bukkit.command.CommandSender getBukkitSender(ServerCommandSource wrapper); // CraftBukkit
+ }

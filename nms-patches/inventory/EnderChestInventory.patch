@@ -1,0 +1,35 @@
+--- a/net/minecraft/inventory/EnderChestInventory.java
++++ b/net/minecraft/inventory/EnderChestInventory.java
+@@ -6,12 +6,31 @@
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.ListTag;
+ 
++// CraftBukkit start
++import org.bukkit.Location;
++import org.bukkit.inventory.InventoryHolder;
++// CraftBukkit end
++
+ public class EnderChestInventory extends SimpleInventory {
+ 
+     private EnderChestBlockEntity activeBlockEntity;
+ 
+-    public EnderChestInventory() {
++    // CraftBukkit start
++    private final PlayerEntity owner;
++
++    public InventoryHolder getBukkitOwner() {
++        return owner.getBukkitEntity();
++    }
++
++    @Override
++    public Location getLocation() {
++        return new Location(this.activeBlockEntity.getWorld().getCraftWorld(), this.activeBlockEntity.getPos().getX(), this.activeBlockEntity.getPos().getY(), this.activeBlockEntity.getPos().getZ());
++    }
++
++    public EnderChestInventory(PlayerEntity owner) {
+         super(27);
++        this.owner = owner;
++        // CraftBukkit end
+     }
+ 
+     public void setActiveBlockEntity(EnderChestBlockEntity enderchestblockentity) {

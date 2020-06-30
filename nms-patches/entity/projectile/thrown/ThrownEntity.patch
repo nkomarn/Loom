@@ -1,0 +1,14 @@
+--- a/net/minecraft/entity/projectile/thrown/ThrownEntity.java
++++ b/net/minecraft/entity/projectile/thrown/ThrownEntity.java
+@@ -59,6 +59,11 @@
+ 
+         if (hitresult.getType() != HitResult.Type.MISS && !flag) {
+             this.onCollision(hitresult);
++            // CraftBukkit start
++            if (this.removed) {
++                org.bukkit.craftbukkit.event.CraftEventFactory.callProjectileHitEvent(this, hitresult);
++            }
++            // CraftBukkit end
+         }
+ 
+         Vec3d vec3d = this.getVelocity();

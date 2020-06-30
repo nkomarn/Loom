@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/gen/PhantomSpawner.java
++++ b/net/minecraft/world/gen/PhantomSpawner.java
+@@ -73,7 +73,7 @@
+ 
+                                                 phantomentity.refreshPositionAndAngles(blockpos1, 0.0F, 0.0F);
+                                                 entitydata = phantomentity.initialize(serverworld, localdifficulty, SpawnReason.NATURAL, entitydata, (CompoundTag) null);
+-                                                serverworld.spawnEntity(phantomentity);
++                                                serverworld.spawnEntity(phantomentity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.NATURAL); // CraftBukkit
+                                             }
+ 
+                                             i += k;

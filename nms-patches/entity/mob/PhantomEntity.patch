@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/mob/PhantomEntity.java
++++ b/net/minecraft/entity/mob/PhantomEntity.java
+@@ -219,7 +219,7 @@
+                         PlayerEntity playerentity = (PlayerEntity) iterator.next();
+ 
+                         if (PhantomEntity.this.isTarget(playerentity, TargetPredicate.DEFAULT)) {
+-                            PhantomEntity.this.setTarget(playerentity);
++                            PhantomEntity.this.setTarget(playerentity, org.bukkit.event.entity.EntityTargetEvent.TargetReason.CLOSEST_PLAYER, true); // CraftBukkit - reason
+                             return true;
+                         }
+                     }

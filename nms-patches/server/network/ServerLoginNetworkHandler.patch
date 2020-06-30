@@ -1,0 +1,147 @@
+--- a/net/minecraft/server/network/ServerLoginNetworkHandler.java
++++ b/net/minecraft/server/network/ServerLoginNetworkHandler.java
+@@ -32,6 +32,14 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import net.minecraft.text.LiteralText;
++
++import org.bukkit.craftbukkit.util.Waitable;
++import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
++import org.bukkit.event.player.PlayerPreLoginEvent;
++// CraftBukkit end
++
+ public class ServerLoginNetworkHandler implements ServerLoginPacketListener {
+ 
+     private static final AtomicInteger authenticatorThreadId = new AtomicInteger(0);
+@@ -46,6 +54,7 @@
+     private final String serverId;
+     private SecretKey secretKey;
+     private ServerPlayerEntity player;
++    public String hostname = ""; // CraftBukkit - add field
+ 
+     public ServerLoginNetworkHandler(MinecraftServer minecraftserver, ClientConnection clientconnection) {
+         this.state = ServerLoginNetworkHandler.State.HELLO;
+@@ -78,6 +87,20 @@
+         return this.connection;
+     }
+ 
++    // CraftBukkit start
++    @Deprecated
++    public void disconnect(String s) {
++        try {
++            Text ichatbasecomponent = new LiteralText(s);
++            ServerLoginNetworkHandler.LOGGER.info("Disconnecting {}: {}", this.getConnectionInfo(), s);
++            this.connection.send(new LoginDisconnectS2CPacket(ichatbasecomponent));
++            this.connection.disconnect(ichatbasecomponent);
++        } catch (Exception exception) {
++            ServerLoginNetworkHandler.LOGGER.error("Error whilst disconnecting player", exception);
++        }
++    }
++    // CraftBukkit end
++
+     public void disconnect(Text text) {
+         try {
+             ServerLoginNetworkHandler.LOGGER.info("Disconnecting {}: {}", (Object) this.getConnectionInfo(), (Object) text.getString());
+@@ -94,10 +117,12 @@
+             this.profile = this.toOfflineProfile(this.profile);
+         }
+ 
+-        Text text = this.server.getPlayerManager().checkCanJoin(this.connection.getAddress(), this.profile);
++        // CraftBukkit start - fire PlayerLoginEvent
++        ServerPlayerEntity s = this.server.getPlayerManager().checkCanJoin(this, this.profile, this.hostname);
+ 
+-        if (text != null) {
+-            this.disconnect(text);
++        if (s != null) {
++            // this.disconnect(text);
++            // CraftBukkit end
+         } else {
+             this.state = ServerLoginNetworkHandler.State.ACCEPTED;
+             if (this.server.getNetworkCompressionThreshold() >= 0 && !this.connection.isLocal()) {
+@@ -111,9 +136,9 @@
+ 
+             if (serverplayerentity != null) {
+                 this.state = ServerLoginNetworkHandler.State.DELAY_ACCEPT;
+-                this.player = this.server.getPlayerManager().createPlayer(this.profile);
++                this.player = this.server.getPlayerManager().createPlayer(this.profile, s); // CraftBukkit - add player reference
+             } else {
+-                this.server.getPlayerManager().onPlayerConnect(this.connection, this.server.getPlayerManager().createPlayer(this.profile));
++                this.server.getPlayerManager().onPlayerConnect(this.connection, this.server.getPlayerManager().createPlayer(this.profile, s)); // CraftBukkit - add player reference
+             }
+         }
+ 
+@@ -158,8 +183,12 @@
+ 
+                         ServerLoginNetworkHandler.this.profile = ServerLoginNetworkHandler.this.server.getSessionService().hasJoinedServer(new GameProfile((UUID) null, gameprofile.getName()), s, this.getClientAddress());
+                         if (ServerLoginNetworkHandler.this.profile != null) {
+-                            ServerLoginNetworkHandler.LOGGER.info("UUID of player {} is {}", (Object) ServerLoginNetworkHandler.this.profile.getName(), (Object) ServerLoginNetworkHandler.this.profile.getId());
+-                            ServerLoginNetworkHandler.this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
++                            // CraftBukkit start - fire PlayerPreLoginEvent
++                            if (!connection.isOpen()) {
++                                return;
++                            }
++                            new LoginHandler().fireEvents(); // based on spigot patch
++                            // CraftBukkit end
+                         } else if (ServerLoginNetworkHandler.this.server.isSinglePlayer()) {
+                             ServerLoginNetworkHandler.LOGGER.warn("Failed to verify username but will let them in anyway!");
+                             ServerLoginNetworkHandler.this.profile = ServerLoginNetworkHandler.this.toOfflineProfile(gameprofile);
+@@ -177,8 +206,11 @@
+                             ServerLoginNetworkHandler.this.disconnect(new TranslatableText("multiplayer.disconnect.authservers_down"));
+                             ServerLoginNetworkHandler.LOGGER.error("Couldn't verify username because servers are unavailable");
+                         }
++                    } catch (Exception exception) { // CraftBukkit start - catch all exceptions
++                        disconnect("Failed to verify username!");
++                        server.server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + gameprofile.getName(), exception);
++                        // CraftBukkit end
+                     }
+-
+                 }
+ 
+                 @Nullable
+@@ -210,4 +242,44 @@
+ 
+         private State() {}
+     }
++
++    public class LoginHandler {
++        public void fireEvents() throws Exception {
++            // CraftBukkit start - fire PlayerPreLoginEvent
++            String playerName = profile.getName();
++            java.net.InetAddress address = ((java.net.InetSocketAddress) connection.getAddress()).getAddress();
++            java.util.UUID uniqueId = profile.getId();
++            final org.bukkit.craftbukkit.CraftServer server = ServerLoginNetworkHandler.this.server.server;
++
++            AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address, uniqueId);
++            server.getPluginManager().callEvent(asyncEvent);
++
++            if (PlayerPreLoginEvent.getHandlerList().getRegisteredListeners().length != 0) {
++                final PlayerPreLoginEvent event = new PlayerPreLoginEvent(playerName, address, uniqueId);
++                if (asyncEvent.getResult() != PlayerPreLoginEvent.Result.ALLOWED) {
++                    event.disallow(asyncEvent.getResult(), asyncEvent.getKickMessage());
++                }
++                Waitable<PlayerPreLoginEvent.Result> waitable = new Waitable<PlayerPreLoginEvent.Result>() {
++                    @Override
++                    protected PlayerPreLoginEvent.Result evaluate() {
++                        server.getPluginManager().callEvent(event);
++                        return event.getResult();
++                    }};
++
++                ServerLoginNetworkHandler.this.server.processQueue.add(waitable);
++                if (waitable.get() != PlayerPreLoginEvent.Result.ALLOWED) {
++                    disconnect(event.getKickMessage());
++                    return;
++                }
++            } else {
++                if (asyncEvent.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
++                    disconnect(asyncEvent.getKickMessage());
++                    return;
++                }
++            }
++            // CraftBukkit end
++            ServerLoginNetworkHandler.LOGGER.info("UUID of player {} is {}", (Object) ServerLoginNetworkHandler.this.profile.getName(), (Object) ServerLoginNetworkHandler.this.profile.getId());
++            ServerLoginNetworkHandler.this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
++        }
++    }
+ }

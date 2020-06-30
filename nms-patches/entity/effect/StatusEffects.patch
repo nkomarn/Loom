@@ -1,0 +1,17 @@
+--- a/net/minecraft/entity/effect/StatusEffects.java
++++ b/net/minecraft/entity/effect/StatusEffects.java
+@@ -63,6 +63,14 @@
+     });
+     public static final StatusEffect HERO_OF_THE_VILLAGE = register(32, "hero_of_the_village", new StatusEffect(StatusEffectType.BENEFICIAL, 4521796));
+ 
++    // CraftBukkit start
++    static {
++        for (Object effect : Registry.STATUS_EFFECT) {
++            org.bukkit.potion.PotionEffectType.registerPotionEffectType(new org.bukkit.craftbukkit.potion.CraftPotionEffectType((StatusEffect) effect));
++        }
++    }
++    // CraftBukkit end
++
+     private static StatusEffect register(int i, String s, StatusEffect statuseffect) {
+         return (StatusEffect) Registry.register(Registry.STATUS_EFFECT, i, s, statuseffect);
+     }

@@ -106,6 +106,7 @@ import net.minecraft.server.WorldServer;
 import net.minecraft.server.WorldSettings;
 import net.minecraft.server.dedicated.DedicatedPlayerManager;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.apache.commons.lang.Validate;
@@ -698,7 +699,7 @@ public final class CraftServer implements Server {
         return new ArrayList<World>(worlds.values());
     }
 
-    public DedicatedPlayerList getHandle() {
+    public DedicatedPlayerManager getHandle() {
         return playerList;
     }
 
@@ -1085,7 +1086,7 @@ public final class CraftServer implements Server {
         return true;
     }
 
-    public DedicatedServer getServer() {
+    public MinecraftDedicatedServer getServer() {
         return console;
     }
 

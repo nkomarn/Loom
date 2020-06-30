@@ -1,0 +1,44 @@
+--- a/net/minecraft/fluid/LavaFluid.java
++++ b/net/minecraft/fluid/LavaFluid.java
+@@ -50,6 +50,13 @@
+ 
+                     if (blockstate.isAir()) {
+                         if (this.canLightFire(world, blockpos1)) {
++                            // CraftBukkit start - Prevent lava putting something on fire
++                            if (world.getBlockState(blockpos1).getBlock() != Blocks.FIRE) {
++                                if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, blockpos1, blockpos).isCancelled()) {
++                                    continue;
++                                }
++                            }
++                            // CraftBukkit end
+                             world.setBlockState(blockpos1, AbstractFireBlock.getState(world, blockpos1));
+                             return;
+                         }
+@@ -66,6 +73,14 @@
+                     }
+ 
+                     if (world.isAir(blockpos2.up()) && this.hasBurnableBlock(world, blockpos2)) {
++                        // CraftBukkit start - Prevent lava putting something on fire
++                        BlockPos up = blockpos2.up();
++                        if (world.getBlockState(up).getBlock() != Blocks.FIRE) {
++                            if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, up, blockpos).isCancelled()) {
++                                continue;
++                            }
++                        }
++                        // CraftBukkit end
+                         world.setBlockState(blockpos2.up(), AbstractFireBlock.getState(world, blockpos2));
+                     }
+                 }
+@@ -145,7 +160,11 @@
+ 
+             if (this.isIn(FluidTags.LAVA) && fluidstate1.isIn(FluidTags.WATER)) {
+                 if (blockstate.getBlock() instanceof FluidBlock) {
+-                    worldaccess.setBlockState(blockpos, Blocks.STONE.getDefaultState(), 3);
++                    // CraftBukkit start
++                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockFormEvent(worldaccess.getWorld(), blockpos, Blocks.STONE.getDefaultState(), 3)) {
++                        return;
++                    }
++                    // CraftBukkit end
+                 }
+ 
+                 this.playExtinguishEvent(worldaccess, blockpos);

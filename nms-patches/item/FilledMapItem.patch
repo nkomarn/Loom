@@ -1,0 +1,35 @@
+--- a/net/minecraft/item/FilledMapItem.java
++++ b/net/minecraft/item/FilledMapItem.java
+@@ -27,6 +27,11 @@
+ import net.minecraft.world.biome.Biome;
+ import net.minecraft.world.chunk.WorldChunk;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.event.server.MapInitializeEvent;
++// CraftBukkit end
++
+ public class FilledMapItem extends NetworkSyncedItem {
+ 
+     public FilledMapItem(Item.Settings item_settings) {
+@@ -59,7 +64,7 @@
+     public static int getMapId(ItemStack itemstack) {
+         CompoundTag compoundtag = itemstack.getTag();
+ 
+-        return compoundtag != null && compoundtag.contains("map", 99) ? compoundtag.getInt("map") : 0;
++        return compoundtag != null && compoundtag.contains("map", 99) ? compoundtag.getInt("map") : -1; // CraftBukkit - make new maps for no tag
+     }
+ 
+     private static MapState createMapState(ItemStack itemstack, World world, int i, int j, int k, boolean flag, boolean flag1, RegistryKey<World> registrykey) {
+@@ -69,6 +74,11 @@
+         mapstate.init(i, j, k, flag, flag1, registrykey);
+         world.putMapState(mapstate);
+         itemstack.getOrCreateTag().putInt("map", l);
++
++        // CraftBukkit start
++        MapInitializeEvent event = new MapInitializeEvent(mapstate.mapView);
++        Bukkit.getServer().getPluginManager().callEvent(event);
++        // CraftBukkit end
+         return mapstate;
+     }
+ 
