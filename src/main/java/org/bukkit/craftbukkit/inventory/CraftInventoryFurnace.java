@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.TileEntityFurnace;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import org.bukkit.block.Furnace;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftInventoryFurnace extends CraftInventory implements FurnaceInventory {
-    public CraftInventoryFurnace(TileEntityFurnace inventory) {
+    public CraftInventoryFurnace(AbstractFurnaceBlockEntity inventory) {
         super(inventory);
     }
 

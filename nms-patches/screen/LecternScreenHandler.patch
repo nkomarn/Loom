@@ -1,0 +1,82 @@
+--- a/net/minecraft/screen/LecternScreenHandler.java
++++ b/net/minecraft/screen/LecternScreenHandler.java
+@@ -1,21 +1,45 @@
+ package net.minecraft.screen;
+ 
+ import net.minecraft.entity.player.PlayerEntity;
++import net.minecraft.entity.player.PlayerInventory;
+ import net.minecraft.inventory.Inventory;
+ import net.minecraft.inventory.SimpleInventory;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.screen.slot.Slot;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.inventory.CraftInventoryLectern;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+ 
+ public class LecternScreenHandler extends ScreenHandler {
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private Player player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryLectern inventory = new CraftInventoryLectern(this.inventory);
++        bukkitEntity = new CraftInventoryView(this.player, inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
++
+     private final Inventory inventory;
+     private final PropertyDelegate propertyDelegate;
+ 
+-    public LecternScreenHandler(int i) {
+-        this(i, new SimpleInventory(1), new ArrayPropertyDelegate(1));
++    // CraftBukkit start - add player
++    public LecternScreenHandler(int i, PlayerInventory playerinventory) {
++        this(i, new SimpleInventory(1), new ArrayPropertyDelegate(1), playerinventory);
+     }
+ 
+-    public LecternScreenHandler(int i, Inventory inventory, PropertyDelegate propertydelegate) {
++    public LecternScreenHandler(int i, Inventory inventory, PropertyDelegate propertydelegate, PlayerInventory playerinventory) {
++        // CraftBukkit end
+         super(ScreenHandlerType.LECTERN, i);
+         checkSize(inventory, 1);
+         checkDataCount(propertydelegate, 1);
+@@ -28,6 +52,7 @@
+             }
+         });
+         this.addProperties(propertydelegate);
++        player = (Player) playerinventory.player.getBukkitEntity(); // CraftBukkit
+     }
+ 
+     public boolean onButtonClick(PlayerEntity playerentity, int i) {
+@@ -52,6 +77,14 @@
+                         return false;
+                     }
+ 
++                    // CraftBukkit start - Event for taking the book
++                    PlayerTakeLecternBookEvent event = new PlayerTakeLecternBookEvent(player, ((CraftInventoryLectern) getBukkitView().getTopInventory()).getHolder());
++                    Bukkit.getServer().getPluginManager().callEvent(event);
++                    if (event.isCancelled()) {
++                        return false;
++                    }
++                    // CraftBukkit end
++
+                     ItemStack itemstack = this.inventory.removeStack(0);
+ 
+                     this.inventory.markDirty();
+@@ -72,6 +105,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return this.inventory.canPlayerUse(playerentity);
+     }
+ }

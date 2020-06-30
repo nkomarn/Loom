@@ -1,6 +1,41 @@
 --- a/net/minecraft/world/level/storage/LevelStorage.java
 +++ b/net/minecraft/world/level/storage/LevelStorage.java
-@@ -216,6 +216,12 @@
+@@ -41,6 +41,7 @@
+ import net.minecraft.world.SaveProperties;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldSaveHandler;
++import net.minecraft.world.dimension.DimensionOptions;
+ import net.minecraft.world.dimension.DimensionType;
+ import net.minecraft.world.gen.GeneratorOptions;
+ import net.minecraft.world.level.LevelInfo;
+@@ -195,8 +196,10 @@
+         };
+     }
+ 
+-    public LevelStorage.Session createSession(String s) throws IOException {
+-        return new LevelStorage.Session(s);
++    // CraftBukkit start
++    public LevelStorage.Session createSession(String s, RegistryKey<DimensionOptions> dimensionType) throws IOException {
++        return new LevelStorage.Session(s, dimensionType);
++        // CraftBukkit end
+     }
+ 
+     public class Session implements AutoCloseable {
+@@ -205,8 +208,12 @@
+         private final Path directory;
+         private final String directoryName;
+         private final Map<WorldSavePath, Path> field_24190 = Maps.newHashMap();
++        // CraftBukkit start
++        private final RegistryKey<DimensionOptions> dimensionType;
+ 
+-        public Session(String s) throws IOException {
++        public Session(String s, RegistryKey<DimensionOptions> dimensionType) throws IOException {
++            this.dimensionType = dimensionType;
++            // CraftBukkit end
+             this.directoryName = s;
+             this.directory = LevelStorage.this.savesDirectory.resolve(s);
+             this.lock = SessionLock.create(this.directory);
+@@ -216,6 +223,12 @@
              return this.directoryName;
          }
  
@@ -13,3 +48,27 @@
          public Path getDirectory(WorldSavePath worldsavepath) {
              return (Path) this.field_24190.computeIfAbsent(worldsavepath, (worldsavepath1) -> {
                  return this.directory.resolve(worldsavepath1.getRelativePath());
+@@ -223,8 +236,22 @@
+         }
+ 
+         public File method_27424(RegistryKey<World> registrykey) {
+-            return DimensionType.getSaveDirectory(registrykey, this.directory.toFile());
++            // CraftBukkit start
++            return this.getFolder(this.directory.toFile());
++        }
++
++        private File getFolder(File file) {
++            if (dimensionType == DimensionOptions.OVERWORLD) {
++                return file;
++            }  else if (dimensionType == DimensionOptions.NETHER) {
++                return new File(file, "DIM-1");
++            } else if (dimensionType == DimensionOptions.END) {
++                return new File(file, "DIM1");
++            } else {
++                throw new IllegalArgumentException("Unknwon dimension " + this.dimensionType);
++            }
+         }
++        // CraftBukkit end
+ 
+         private void checkValid() {
+             if (!this.lock.isValid()) {

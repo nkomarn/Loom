@@ -1,0 +1,47 @@
+--- a/net/minecraft/screen/MerchantScreenHandler.java
++++ b/net/minecraft/screen/MerchantScreenHandler.java
+@@ -14,12 +14,27 @@
+ import net.minecraft.village.Trader;
+ import net.minecraft.village.TraderInventory;
+ import net.minecraft.village.TraderOfferList;
++import org.bukkit.craftbukkit.inventory.CraftInventoryMerchant;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class MerchantScreenHandler extends ScreenHandler {
+ 
+     private final Trader trader;
+     private final TraderInventory traderInventory;
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity == null) {
++            bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), new CraftInventoryMerchant(trader, traderInventory), this);
++        }
++        return bukkitEntity;
++    }
++    // CraftBukkit end
++
+     public MerchantScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, new SimpleTrader(playerinventory.player));
+     }
+@@ -31,6 +46,7 @@
+         this.addSlot(new Slot(this.traderInventory, 0, 136, 37));
+         this.addSlot(new Slot(this.traderInventory, 1, 162, 37));
+         this.addSlot(new TradeOutputSlot(playerinventory.player, trader, this.traderInventory, 2, 220, 37));
++        this.player = playerinventory; // CraftBukkit - save player
+ 
+         int j;
+ 
+@@ -107,7 +123,7 @@
+     }
+ 
+     private void playYesSound() {
+-        if (!this.trader.getTraderWorld().isClient) {
++        if (!this.trader.getTraderWorld().isClient && this.trader instanceof Entity) { // CraftBukkit - SPIGOT-5035
+             Entity entity = (Entity) this.trader;
+ 
+             this.trader.getTraderWorld().playSound(entity.getX(), entity.getY(), entity.getZ(), this.trader.getYesSound(), SoundCategory.NEUTRAL, 1.0F, 1.0F, false);

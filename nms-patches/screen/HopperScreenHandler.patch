@@ -1,0 +1,48 @@
+--- a/net/minecraft/screen/HopperScreenHandler.java
++++ b/net/minecraft/screen/HopperScreenHandler.java
+@@ -6,11 +6,29 @@
+ import net.minecraft.inventory.SimpleInventory;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.screen.slot.Slot;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class HopperScreenHandler extends ScreenHandler {
+ 
+     private final Inventory inventory;
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory = new CraftInventory(this.inventory);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
++
+     public HopperScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, new SimpleInventory(5));
+     }
+@@ -18,6 +36,7 @@
+     public HopperScreenHandler(int i, PlayerInventory playerinventory, Inventory inventory) {
+         super(ScreenHandlerType.HOPPER, i);
+         this.inventory = inventory;
++        this.player = playerinventory; // CraftBukkit - save player
+         checkSize(inventory, 5);
+         inventory.onOpen(playerinventory.player);
+         boolean flag = true;
+@@ -41,6 +60,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return this.inventory.canPlayerUse(playerentity);
+     }
+ 

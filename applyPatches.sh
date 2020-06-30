@@ -41,7 +41,7 @@ then
     cp -a "$minecraftSource." "$src"
 fi
 
-for patchFile in $(/bin/find "nms-patches" -name '*.patch')
+for patchFile in $(find "nms-patches" -name '*.patch')
 do
   patchFileClean=${patchFile#"nms-patches/"}
   file="$(echo $patchFileClean | cut -d. -f1).java"

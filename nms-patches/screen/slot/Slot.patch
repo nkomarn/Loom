@@ -1,0 +1,11 @@
+--- a/net/minecraft/screen/slot/Slot.java
++++ b/net/minecraft/screen/slot/Slot.java
+@@ -30,7 +30,7 @@
+ 
+     protected void onCrafted(ItemStack itemstack, int i) {}
+ 
+-    protected void onTake(int i) {}
++    public void onTake(int i) {} // Loom - change access
+ 
+     protected void onCrafted(ItemStack itemstack) {}
+ 

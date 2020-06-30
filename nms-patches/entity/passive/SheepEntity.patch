@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/passive/SheepEntity.java
 +++ b/net/minecraft/entity/passive/SheepEntity.java
-@@ -58,6 +58,14 @@
+@@ -60,6 +60,14 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldAccess;
  
@@ -15,7 +15,7 @@
  public class SheepEntity extends AnimalEntity implements Shearable {
  
      private static final TrackedData<Byte> COLOR = DataTracker.registerData(SheepEntity.class, TrackedDataHandlerRegistry.BYTE);
-@@ -182,6 +190,11 @@
+@@ -184,6 +192,11 @@
  
          if (itemstack.getItem() == Items.SHEARS) {
              if (!this.world.isClient && this.isShearable()) {
@@ -27,7 +27,7 @@
                  this.sheared(SoundCategory.PLAYERS);
                  itemstack.damage(1, (LivingEntity) playerentity, (playerentity1) -> {
                      playerentity1.sendToolBreakStatus(hand);
-@@ -201,7 +214,9 @@
+@@ -203,7 +216,9 @@
          int i = 1 + this.random.nextInt(3);
  
          for (int j = 0; j < i; ++j) {
@@ -37,7 +37,7 @@
  
              if (itementity != null) {
                  itementity.setVelocity(itementity.getVelocity().add((double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double) (this.random.nextFloat() * 0.05F), (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)));
-@@ -282,6 +297,12 @@
+@@ -284,6 +299,12 @@
      }
  
      public void onEatingGrass() {
@@ -50,7 +50,7 @@
          this.setSheared(false);
          if (this.isBaby()) {
              this.growUp(60);
-@@ -299,7 +320,7 @@
+@@ -301,7 +322,7 @@
          DyeColor dyecolor = ((SheepEntity) animalentity).getColor();
          DyeColor dyecolor1 = ((SheepEntity) animalentity1).getColor();
          CraftingInventory craftinginventory = createDyeMixingCraftingInventory(dyecolor, dyecolor1);
@@ -59,7 +59,7 @@
              return craftingrecipe.craft(craftinginventory);
          }).map(ItemStack::getItem);
  
-@@ -316,6 +337,13 @@
+@@ -318,6 +339,13 @@
              public boolean canUse(PlayerEntity playerentity) {
                  return false;
              }
@@ -73,7 +73,7 @@
          }, 2, 1);
  
          craftinginventory.setStack(0, new ItemStack(DyeItem.byColor(dyecolor)));
-@@ -327,7 +355,5 @@
+@@ -329,7 +357,5 @@
          return 0.95F * entitydimensions.height;
      }
  

@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/vehicle/AbstractMinecartEntity.java
 +++ b/net/minecraft/entity/vehicle/AbstractMinecartEntity.java
-@@ -47,6 +47,16 @@
+@@ -48,6 +48,16 @@
  import net.minecraft.world.GameRules;
  import net.minecraft.world.World;
  
@@ -17,7 +17,7 @@
  public abstract class AbstractMinecartEntity extends Entity {
  
      private static final TrackedData<Integer> DAMAGE_WOBBLE_TICKS = DataTracker.registerData(AbstractMinecartEntity.class, TrackedDataHandlerRegistry.INTEGER);
-@@ -85,6 +95,17 @@
+@@ -86,6 +96,17 @@
      private double clientYaw;
      private double clientPitch;
  
@@ -35,7 +35,7 @@
      protected AbstractMinecartEntity(EntityType<?> entitytype, World world) {
          super(entitytype, world);
          this.inanimate = true;
-@@ -198,6 +219,19 @@
+@@ -199,6 +220,19 @@
              if (this.isInvulnerableTo(damagesource)) {
                  return false;
              } else {
@@ -55,7 +55,7 @@
                  this.setDamageWobbleSide(-this.getDamageWobbleSide());
                  this.setDamageWobbleTicks(10);
                  this.scheduleVelocityUpdate();
-@@ -205,6 +239,15 @@
+@@ -206,6 +240,15 @@
                  boolean flag = damagesource.getAttacker() instanceof PlayerEntity && ((PlayerEntity) damagesource.getAttacker()).abilities.creativeMode;
  
                  if (flag || this.getDamageWobbleStrength() > 40.0F) {
@@ -71,7 +71,7 @@
                      this.removeAllPassengers();
                      if (flag && !this.hasCustomName()) {
                          this.remove();
-@@ -253,6 +296,14 @@
+@@ -254,6 +297,14 @@
      }
  
      public void tick() {
@@ -86,7 +86,7 @@
          if (this.getDamageWobbleTicks() > 0) {
              this.setDamageWobbleTicks(this.getDamageWobbleTicks() - 1);
          }
-@@ -265,7 +316,7 @@
+@@ -266,7 +317,7 @@
              this.destroy();
          }
  
@@ -95,7 +95,7 @@
          if (this.world.isClient) {
              if (this.clientInterpolationSteps > 0) {
                  double d0 = this.getX() + (this.clientX - this.getX()) / (double) this.clientInterpolationSteps;
-@@ -328,6 +379,18 @@
+@@ -329,6 +380,18 @@
              }
  
              this.setRotation(this.yaw, this.pitch);
@@ -114,7 +114,7 @@
              if (this.getMinecartType() == AbstractMinecartEntity.Type.RIDEABLE && squaredHorizontalLength(this.getVelocity()) > 0.01D) {
                  List<Entity> list = this.world.getEntities((Entity) this, this.getBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D), EntityPredicates.canBePushedBy(this));
  
-@@ -336,8 +399,26 @@
+@@ -337,8 +400,26 @@
                          Entity entity = (Entity) list.get(l);
  
                          if (!(entity instanceof PlayerEntity) && !(entity instanceof IronGolemEntity) && !(entity instanceof AbstractMinecartEntity) && !this.hasPassengers() && !entity.hasVehicle()) {
@@ -141,7 +141,7 @@
                              entity.pushAwayFrom(this);
                          }
                      }
-@@ -349,6 +430,14 @@
+@@ -350,6 +431,14 @@
                      Entity entity1 = (Entity) iterator.next();
  
                      if (!this.hasPassenger(entity1) && entity1.isPushable() && entity1 instanceof AbstractMinecartEntity) {
@@ -156,7 +156,7 @@
                          entity1.pushAwayFrom(this);
                      }
                  }
-@@ -359,7 +448,7 @@
+@@ -360,7 +449,7 @@
      }
  
      protected double getMaxOffRailSpeed() {
@@ -165,7 +165,7 @@
      }
  
      public void onActivatorRail(int i, int j, int k, boolean flag) {}
-@@ -370,12 +459,16 @@
+@@ -371,12 +460,16 @@
  
          this.setVelocity(MathHelper.clamp(vec3d.x, -d0, d0), vec3d.y, MathHelper.clamp(vec3d.z, -d0, d0));
          if (this.onGround) {
@@ -184,7 +184,7 @@
          }
  
      }
-@@ -562,7 +655,7 @@
+@@ -563,7 +656,7 @@
      }
  
      protected void applySlowdown() {
@@ -193,7 +193,7 @@
  
          this.setVelocity(this.getVelocity().multiply(d0, 0.0D, d0));
      }
-@@ -642,6 +735,14 @@
+@@ -643,6 +736,14 @@
          if (!this.world.isClient) {
              if (!entity.noClip && !this.noClip) {
                  if (!this.hasPassenger(entity)) {
@@ -208,7 +208,7 @@
                      double d0 = entity.getX() - this.getX();
                      double d1 = entity.getZ() - this.getZ();
                      double d2 = d0 * d0 + d1 * d1;
-@@ -770,6 +871,29 @@
+@@ -771,6 +872,29 @@
          return new EntitySpawnS2CPacket(this);
      }
  

@@ -1,0 +1,34 @@
+--- a/net/minecraft/screen/HorseScreenHandler.java
++++ b/net/minecraft/screen/HorseScreenHandler.java
+@@ -8,14 +8,31 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.Items;
+ import net.minecraft.screen.slot.Slot;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.inventory.InventoryView;
+ 
+ public class HorseScreenHandler extends ScreenHandler {
+ 
+     private final Inventory inventory;
+     private final HorseBaseEntity entity;
+ 
++    // CraftBukkit start
++    CraftInventoryView bukkitEntity;
++    PlayerInventory player;
++
++    @Override
++    public InventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        return bukkitEntity = new CraftInventoryView(player.player.getBukkitEntity(), inventory.getOwner().getInventory(), this);
++    }
++    // CraftBukkit end
++
+     public HorseScreenHandler(int i, PlayerInventory playerinventory, Inventory inventory, final HorseBaseEntity horsebaseentity) {
+         super((ScreenHandlerType) null, i);
++        player = playerinventory; // CraftBukkit
+         this.inventory = inventory;
+         this.entity = horsebaseentity;
+         boolean flag = true;

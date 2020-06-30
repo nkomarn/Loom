@@ -1,0 +1,82 @@
+--- a/net/minecraft/screen/LoomScreenHandler.java
++++ b/net/minecraft/screen/LoomScreenHandler.java
+@@ -18,9 +18,28 @@
+ import net.minecraft.util.DyeColor;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.inventory.CraftInventoryLoom;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.entity.Player;
+ 
+ public class LoomScreenHandler extends ScreenHandler {
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private Player player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryLoom inventory = new CraftInventoryLoom(this.input, this.output);
++        bukkitEntity = new CraftInventoryView(this.player, inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+     private final ScreenHandlerContext context;
+     private final Property selectedPattern;
+     private Runnable inventoryChangeListener;
+@@ -47,12 +66,26 @@
+                 LoomScreenHandler.this.onContentChanged(this);
+                 LoomScreenHandler.this.inventoryChangeListener.run();
+             }
++
++            // CraftBukkit start
++            @Override
++            public Location getLocation() {
++                return context.getLocation();
++            }
++            // CraftBukkit end
+         };
+         this.output = new SimpleInventory(1) {
+             public void markDirty() {
+                 super.markDirty();
+                 LoomScreenHandler.this.inventoryChangeListener.run();
+             }
++
++            // CraftBukkit start
++            @Override
++            public Location getLocation() {
++                return context.getLocation();
++            }
++            // CraftBukkit end
+         };
+         this.context = screenhandlercontext;
+         this.bannerSlot = this.addSlot(new Slot(this.input, 0, 13, 26) {
+@@ -108,9 +141,11 @@
+         }
+ 
+         this.addProperty(this.selectedPattern);
++        player = (Player) playerinventory.player.getBukkitEntity(); // CraftBukkit
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return canUse(this.context, playerentity, Blocks.LOOM);
+     }
+ 
+@@ -225,6 +260,11 @@
+ 
+                 if (compoundtag.contains("Patterns", 9)) {
+                     listtag = compoundtag.getList("Patterns", 10);
++                    // CraftBukkit start
++                    while (listtag.size() > 20) {
++                        listtag.remove(20);
++                    }
++                    // CraftBukkit end
+                 } else {
+                     listtag = new ListTag();
+                     compoundtag.put("Patterns", listtag);

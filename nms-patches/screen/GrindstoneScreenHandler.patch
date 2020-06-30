@@ -1,0 +1,61 @@
+--- a/net/minecraft/screen/GrindstoneScreenHandler.java
++++ b/net/minecraft/screen/GrindstoneScreenHandler.java
+@@ -19,9 +19,28 @@
+ import net.minecraft.screen.slot.Slot;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.inventory.CraftInventoryGrindstone;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.entity.Player;
+ 
+ public class GrindstoneScreenHandler extends ScreenHandler {
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private Player player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryGrindstone inventory = new CraftInventoryGrindstone(this.input, this.result);
++        bukkitEntity = new CraftInventoryView(this.player, inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+     private final Inventory result;
+     private final Inventory input;
+     private final ScreenHandlerContext context;
+@@ -38,6 +57,13 @@
+                 super.markDirty();
+                 GrindstoneScreenHandler.this.onContentChanged(this);
+             }
++
++            // CraftBukkit start
++            @Override
++            public Location getLocation() {
++                return context.getLocation();
++            }
++            // CraftBukkit end
+         };
+         this.context = screenhandlercontext;
+         this.addSlot(new Slot(this.input, 0, 49, 19) {
+@@ -118,6 +144,7 @@
+             this.addSlot(new Slot(playerinventory, j, 8 + j * 18, 142));
+         }
+ 
++        player = (Player) playerinventory.player.getBukkitEntity(); // CraftBukkit
+     }
+ 
+     public void onContentChanged(Inventory inventory) {
+@@ -242,6 +269,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return canUse(this.context, playerentity, Blocks.GRINDSTONE);
+     }
+ 

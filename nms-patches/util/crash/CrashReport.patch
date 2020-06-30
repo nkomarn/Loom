@@ -1,0 +1,10 @@
+--- a/net/minecraft/util/crash/CrashReport.java
++++ b/net/minecraft/util/crash/CrashReport.java
+@@ -71,6 +71,7 @@
+ 
+             return String.format("%d total; %s", list.size(), list.stream().collect(Collectors.joining(" ")));
+         });
++        this.systemDetailsSection.add("CraftBukkit Information", (CrashCallable) new org.bukkit.craftbukkit.CraftCrashReport()); // CraftBukkit
+     }
+ 
+     public String getMessage() {

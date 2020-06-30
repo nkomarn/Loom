@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/network/ServerPlayerEntity.java
 +++ b/net/minecraft/server/network/ServerPlayerEntity.java
-@@ -126,13 +126,40 @@
+@@ -129,13 +129,40 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -42,7 +42,7 @@
      private final PlayerAdvancementTracker advancementTracker;
      private final ServerStatHandler statHandler;
      private float lastHealthScore = Float.MIN_VALUE;
-@@ -168,6 +195,20 @@
+@@ -171,6 +198,20 @@
      public int pingMilliseconds;
      public boolean notInAnyWorld;
  
@@ -63,7 +63,7 @@
      public ServerPlayerEntity(MinecraftServer minecraftserver, ServerWorld serverworld, GameProfile gameprofile, ServerPlayerInteractionManager serverplayerinteractionmanager) {
          super(serverworld, serverworld.getSpawnPos(), gameprofile);
          this.spawnPointDimension = World.OVERWORLD;
-@@ -178,8 +219,56 @@
+@@ -181,8 +222,56 @@
          this.advancementTracker = minecraftserver.getPlayerManager().getAdvancementTracker(this);
          this.stepHeight = 1.0F;
          this.moveToSpawn(serverworld);
@@ -120,7 +120,7 @@
      private void moveToSpawn(ServerWorld serverworld) {
          BlockPos blockpos = serverworld.getSpawnPos();
  
-@@ -248,11 +337,20 @@
+@@ -251,11 +340,20 @@
          if (compoundtag.contains("recipeBook", 10)) {
              this.recipeBook.fromTag(compoundtag.getCompound("recipeBook"), this.server.getRecipeManager());
          }
@@ -141,7 +141,7 @@
          if (compoundtag.contains("SpawnX", 99) && compoundtag.contains("SpawnY", 99) && compoundtag.contains("SpawnZ", 99)) {
              this.spawnPointPosition = new BlockPos(compoundtag.getInt("SpawnX"), compoundtag.getInt("SpawnY"), compoundtag.getInt("SpawnZ"));
              this.spawnPointSet = compoundtag.getBoolean("SpawnForced");
-@@ -284,7 +382,20 @@
+@@ -287,7 +385,20 @@
          Entity entity = this.getRootVehicle();
          Entity entity1 = this.getVehicle();
  
@@ -163,7 +163,7 @@
              CompoundTag compoundtag2 = new CompoundTag();
              CompoundTag compoundtag3 = new CompoundTag();
  
-@@ -301,7 +412,7 @@
+@@ -304,7 +415,7 @@
              compoundtag.putInt("SpawnY", this.spawnPointPosition.getY());
              compoundtag.putInt("SpawnZ", this.spawnPointPosition.getZ());
              compoundtag.putBoolean("SpawnForced", this.spawnPointSet);
@@ -172,7 +172,7 @@
              Logger logger = ServerPlayerEntity.LOGGER;
  
              logger.getClass();
-@@ -309,8 +420,31 @@
+@@ -312,8 +423,31 @@
                  compoundtag.put("SpawnDimension", tag);
              });
          }
@@ -204,7 +204,7 @@
  
      public void setExperiencePoints(int i) {
          float f = (float) this.getNextLevelExperience();
-@@ -358,6 +492,11 @@
+@@ -361,6 +495,11 @@
      }
  
      public void tick() {
@@ -216,7 +216,7 @@
          this.interactionManager.update();
          --this.joinInvulnerabilityTicks;
          if (this.timeUntilRegen > 0) {
-@@ -425,7 +564,7 @@
+@@ -428,7 +567,7 @@
              }
  
              if (this.getHealth() != this.syncedHealth || this.syncedFoodLevel != this.hungerManager.getFoodLevel() || this.hungerManager.getSaturationLevel() == 0.0F != this.syncedSaturationIsZero) {
@@ -225,7 +225,7 @@
                  this.syncedHealth = this.getHealth();
                  this.syncedFoodLevel = this.hungerManager.getFoodLevel();
                  this.syncedSaturationIsZero = this.hungerManager.getSaturationLevel() == 0.0F;
-@@ -451,6 +590,12 @@
+@@ -454,6 +593,12 @@
                  this.updateScores(ScoreboardCriterion.ARMOR, MathHelper.ceil((float) this.lastArmorScore));
              }
  
@@ -238,7 +238,7 @@
              if (this.totalExperience != this.lastExperienceScore) {
                  this.lastExperienceScore = this.totalExperience;
                  this.updateScores(ScoreboardCriterion.XP, MathHelper.ceil((float) this.lastExperienceScore));
-@@ -470,6 +615,17 @@
+@@ -473,6 +618,17 @@
                  Criteria.LOCATION.trigger(this);
              }
  
@@ -256,7 +256,7 @@
          } catch (Throwable throwable) {
              CrashReport crashreport = CrashReport.create(throwable, "Ticking player");
              CrashReportSection crashreportsection = crashreport.addElement("Player being ticked");
-@@ -480,7 +636,8 @@
+@@ -483,7 +639,8 @@
      }
  
      private void updateScores(ScoreboardCriterion scoreboardcriterion, int i) {
@@ -266,7 +266,7 @@
              scoreboardplayerscore.setScore(i);
          });
      }
-@@ -488,8 +645,46 @@
+@@ -491,8 +648,46 @@
      public void onDeath(DamageSource damagesource) {
          boolean flag = this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES);
  
@@ -315,7 +315,7 @@
  
              this.networkHandler.sendPacket(new CombatEventS2CPacket(this.getDamageTracker(), CombatEventS2CPacket.Type.ENTITY_DIED, text), (future) -> {
                  if (!future.isSuccess()) {
-@@ -524,11 +719,17 @@
+@@ -527,11 +722,17 @@
              this.forgiveMobAnger();
          }
  
@@ -336,7 +336,7 @@
          LivingEntity livingentity = this.getPrimeAdversary();
  
          if (livingentity != null) {
-@@ -563,10 +764,12 @@
+@@ -566,10 +767,12 @@
              String s = this.getEntityName();
              String s1 = entity.getEntityName();
  
@@ -351,7 +351,7 @@
              } else {
                  this.incrementStat(Stats.MOB_KILLS);
              }
-@@ -584,7 +787,8 @@
+@@ -587,7 +790,8 @@
              int i = team.n().getColorIndex();
  
              if (i >= 0 && i < ascoreboardcriterion.length) {
@@ -361,7 +361,7 @@
              }
          }
  
-@@ -626,16 +830,26 @@
+@@ -629,16 +833,26 @@
      }
  
      private boolean isPvpEnabled() {
@@ -390,7 +390,7 @@
              this.detach();
              this.getServerWorld().removePlayer(this);
              if (!this.notInAnyWorld) {
-@@ -646,6 +860,8 @@
+@@ -649,6 +863,8 @@
  
              return this;
          } else {
@@ -399,7 +399,7 @@
              WorldProperties worldproperties = serverworld.getLevelProperties();
  
              this.networkHandler.sendPacket(new PlayerRespawnS2CPacket(serverworld.getDimensionRegistryKey(), serverworld.getRegistryKey(), BiomeAccess.hashSeed(serverworld.getSeed()), this.interactionManager.getGameMode(), this.interactionManager.method_30119(), serverworld.isDebugWorld(), serverworld.isFlat(), true));
-@@ -655,6 +871,8 @@
+@@ -658,6 +874,8 @@
              playermanager.sendCommandTree(this);
              serverworld1.removePlayer(this);
              this.removed = false;
@@ -408,7 +408,7 @@
              double d0 = this.getX();
              double d1 = this.getY();
              double d2 = this.getZ();
-@@ -691,7 +909,26 @@
+@@ -694,7 +912,26 @@
                  }
              }
  
@@ -436,7 +436,7 @@
              serverworld1.getProfiler().pop();
              serverworld1.getProfiler().push("placing");
              double d4 = Math.min(-2.9999872E7D, serverworld.getWorldBorder().getBoundWest() + 16.0D);
-@@ -702,29 +939,79 @@
+@@ -705,29 +942,79 @@
  
              d0 = MathHelper.clamp(d0, d4, d5);
              d2 = MathHelper.clamp(d2, d3, d6);
@@ -530,7 +530,7 @@
              Iterator iterator = this.getStatusEffects().iterator();
  
              while (iterator.hasNext()) {
-@@ -737,6 +1024,11 @@
+@@ -740,11 +1027,16 @@
              this.syncedExperience = -1;
              this.syncedHealth = -1.0F;
              this.syncedFoodLevel = -1;
@@ -542,7 +542,13 @@
              return this;
          }
      }
-@@ -776,9 +1068,7 @@
+ 
+-    private void dimensionChanged(ServerWorld serverworld) {
++    public void dimensionChanged(ServerWorld serverworld) { // Loom - change access
+         RegistryKey<World> registrykey = serverworld.getRegistryKey();
+         RegistryKey<World> registrykey1 = this.world.getRegistryKey();
+ 
+@@ -779,9 +1071,7 @@
          this.currentScreenHandler.sendContentUpdates();
      }
  
@@ -553,7 +559,7 @@
          if (!this.isSleeping() && this.isAlive()) {
              if (!this.world.getDimension().isNatural()) {
                  return Either.left(PlayerEntity.SleepFailureReason.NOT_POSSIBLE_HERE);
-@@ -803,7 +1093,21 @@
+@@ -806,7 +1096,21 @@
                              return Either.left(PlayerEntity.SleepFailureReason.NOT_SAFE);
                          }
                      }
@@ -575,7 +581,7 @@
                      Either<PlayerEntity.SleepFailureReason, Unit> either = super.trySleep(blockpos).ifRight((unit) -> {
                          this.incrementStat(Stats.SLEEP_IN_BED);
                          Criteria.SLEPT_IN_BED.trigger(this);
-@@ -813,9 +1117,8 @@
+@@ -816,9 +1120,8 @@
                      return either;
                  }
              }
@@ -586,7 +592,7 @@
      }
  
      public void sleep(BlockPos blockpos) {
-@@ -840,6 +1143,7 @@
+@@ -843,6 +1146,7 @@
      }
  
      public void wakeUp(boolean flag, boolean flag1) {
@@ -594,7 +600,7 @@
          if (this.isSleeping()) {
              this.getServerWorld().getChunkManager().sendToNearbyPlayers(this, new EntityAnimationS2CPacket(this, 2));
          }
-@@ -905,8 +1209,9 @@
+@@ -908,8 +1212,9 @@
          this.networkHandler.sendPacket(new SignEditorOpenS2CPacket(signblockentity.getPos()));
      }
  
@@ -605,7 +611,7 @@
      }
  
      public OptionalInt openHandledScreen(@Nullable NamedScreenHandlerFactory namedscreenhandlerfactory) {
-@@ -920,6 +1225,25 @@
+@@ -923,6 +1228,25 @@
              this.incrementScreenHandlerSyncId();
              ScreenHandler screenhandler = namedscreenhandlerfactory.createMenu(this.screenHandlerSyncId, this.inventory, this);
  
@@ -631,7 +637,7 @@
              if (screenhandler == null) {
                  if (this.isSpectator()) {
                      this.sendMessage((new TranslatableText("container.spectatorCantOpen")).formatted(Formatting.RED), true);
-@@ -927,7 +1251,7 @@
+@@ -930,7 +1254,7 @@
  
                  return OptionalInt.empty();
              } else {
@@ -640,7 +646,7 @@
                  screenhandler.addListener(this);
                  this.currentScreenHandler = screenhandler;
                  return OptionalInt.of(this.screenHandlerSyncId);
-@@ -940,13 +1264,24 @@
+@@ -943,13 +1267,24 @@
      }
  
      public void openHorseInventory(HorseBaseEntity horsebaseentity, Inventory inventory) {
@@ -667,7 +673,7 @@
          this.currentScreenHandler.addListener(this);
      }
  
-@@ -987,6 +1322,11 @@
+@@ -990,6 +1325,11 @@
      public void onHandlerRegistered(ScreenHandler screenhandler, DefaultedList<ItemStack> defaultedlist) {
          this.networkHandler.sendPacket(new InventoryS2CPacket(screenhandler.syncId, defaultedlist));
          this.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(-1, -1, this.inventory.getCursorStack()));
@@ -679,7 +685,7 @@
      }
  
      public void onPropertyUpdate(ScreenHandler screenhandler, int i, int j) {
-@@ -994,6 +1334,7 @@
+@@ -997,6 +1337,7 @@
      }
  
      public void closeHandledScreen() {
@@ -687,7 +693,7 @@
          this.networkHandler.sendPacket(new CloseScreenS2CPacket(this.currentScreenHandler.syncId));
          this.closeCurrentScreen();
      }
-@@ -1027,14 +1368,14 @@
+@@ -1030,14 +1371,14 @@
  
      public void increaseStat(Stat<?> stat, int i) {
          this.statHandler.increaseStat(this, stat, i);
@@ -704,7 +710,7 @@
      }
  
      public int unlockRecipes(Collection<Recipe<?>> collection) {
-@@ -1079,8 +1420,17 @@
+@@ -1082,8 +1423,17 @@
  
      public void markHealthDirty() {
          this.syncedHealth = -1.0E8F;
@@ -722,7 +728,7 @@
      public void sendMessage(Text text, boolean flag) {
          this.networkHandler.sendPacket(new GameMessageS2CPacket(text, flag ? MessageType.GAME_INFO : MessageType.CHAT, Util.NIL_UUID));
      }
-@@ -1131,12 +1481,14 @@
+@@ -1134,12 +1484,14 @@
          this.syncedExperience = -1;
          this.syncedHealth = -1.0F;
          this.syncedFoodLevel = -1;
@@ -738,7 +744,7 @@
      }
  
      protected void onStatusEffectApplied(StatusEffectInstance statuseffectinstance) {
-@@ -1195,6 +1547,18 @@
+@@ -1198,6 +1550,18 @@
      }
  
      public void setGameMode(GameMode gamemode) {
@@ -757,7 +763,7 @@
          this.interactionManager.method_30118(gamemode);
          this.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.GAME_MODE_CHANGED, (float) gamemode.getId()));
          if (gamemode == GameMode.SPECTATOR) {
-@@ -1241,7 +1605,19 @@
+@@ -1244,7 +1608,19 @@
          return s;
      }
  
@@ -777,7 +783,7 @@
          this.clientChatVisibility = clientsettingsc2spacket.getChatVisibility();
          this.clientChatColorsEnabled = clientsettingsc2spacket.hasChatColors();
          this.getDataTracker().set(ServerPlayerEntity.PLAYER_MODEL_PARTS, (byte) clientsettingsc2spacket.getPlayerModelBitMask());
-@@ -1305,7 +1681,7 @@
+@@ -1308,7 +1684,7 @@
          this.cameraEntity = (Entity) (entity == null ? this : entity);
          if (entity1 != this.cameraEntity) {
              this.networkHandler.sendPacket(new SetCameraEntityS2CPacket(this.cameraEntity));
@@ -786,7 +792,7 @@
          }
  
      }
-@@ -1332,7 +1708,7 @@
+@@ -1335,7 +1711,7 @@
  
      @Nullable
      public Text getPlayerListName() {
@@ -795,7 +801,7 @@
      }
  
      public void swingHand(Hand hand) {
-@@ -1353,8 +1729,15 @@
+@@ -1356,8 +1732,15 @@
      }
  
      public void teleport(ServerWorld serverworld, double d0, double d1, double d2, float f, float f1) {
@@ -811,7 +817,7 @@
          if (serverworld == this.world) {
              this.networkHandler.requestTeleport(d0, d1, d2, f, f1);
          } else {
-@@ -1375,7 +1758,9 @@
+@@ -1378,7 +1761,9 @@
              this.server.getPlayerManager().sendWorldInfo(this, serverworld);
              this.server.getPlayerManager().sendPlayerStatus(this);
          }
@@ -822,7 +828,7 @@
      }
  
      @Nullable
-@@ -1458,4 +1843,144 @@
+@@ -1461,4 +1846,144 @@
              return itementity;
          }
      }

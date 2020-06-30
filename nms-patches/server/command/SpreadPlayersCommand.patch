@@ -34,7 +34,7 @@
 +
 +        // CraftBukkit start - add a version of getType which force loads chunks
 +        private static BlockState getType(BlockView blockview, BlockPos blockpos) {
-+            ((ServerWorld) blockview).getChunkManager().getChunkAt(blockpos.getX() >> 4, blockpos.getZ() >> 4, true);
++            ((ServerWorld) blockview).getChunkManager().getWorldChunk(blockpos.getX() >> 4, blockpos.getZ() >> 4, true);
 +            return blockview.getBlockState(blockpos);
 +        }
 +        // CraftBukkit end

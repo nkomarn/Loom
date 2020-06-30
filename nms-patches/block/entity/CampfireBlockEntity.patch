@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/entity/CampfireBlockEntity.java
 +++ b/net/minecraft/block/entity/CampfireBlockEntity.java
-@@ -21,6 +21,11 @@
+@@ -22,6 +22,11 @@
  import net.minecraft.util.math.Direction;
  import net.minecraft.util.math.MathHelper;
  import net.minecraft.world.World;
@@ -12,7 +12,7 @@
  
  public class CampfireBlockEntity extends BlockEntity implements Clearable, Tickable {
  
-@@ -72,6 +77,21 @@
+@@ -73,6 +78,21 @@
                      }).orElse(itemstack);
                      BlockPos blockpos = this.getPos();
  

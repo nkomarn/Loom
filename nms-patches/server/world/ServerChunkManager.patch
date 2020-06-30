@@ -1,5 +1,20 @@
 --- a/net/minecraft/server/world/ServerChunkManager.java
 +++ b/net/minecraft/server/world/ServerChunkManager.java
+@@ -168,12 +168,12 @@
+             if (chunkholder == null) {
+                 return null;
+             } else {
+-                Either<Chunk, ChunkHolder.Unloaded> either = (Either) chunkholder.getNowFuture(ChunkStatus.FULL).getNow((Object) null);
++                Either<Chunk, ChunkHolder.Unloaded> either = (Either) chunkholder.getNowFuture(ChunkStatus.FULL).getNow(null); // Loom - decompile error
+ 
+                 if (either == null) {
+                     return null;
+                 } else {
+-                    Chunk chunk1 = (Chunk) either.left().orElse((Object) null);
++                    Chunk chunk1 = (Chunk) either.left().orElse(null); // Loom - decompile error
+ 
+                     if (chunk1 != null) {
+                         this.putInCache(k, chunk1, ChunkStatus.FULL);
 @@ -487,13 +487,7 @@
          return this.spawnEntry;
      }
