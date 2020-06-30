@@ -1,0 +1,39 @@
+--- a/net/minecraft/server/command/TimeCommand.java
++++ b/net/minecraft/server/command/TimeCommand.java
+@@ -8,6 +8,8 @@
+ import net.minecraft.command.arguments.TimeArgumentType;
+ import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.text.TranslatableText;
++import org.bukkit.Bukkit;
++import org.bukkit.event.world.TimeSkipEvent;
+ 
+ public class TimeCommand {
+ 
+@@ -51,6 +53,13 @@
+             ServerWorld serverworld = (ServerWorld) iterator.next();
+ 
+             serverworld.method_29199((long) i);
++            // CraftBukkit start
++            TimeSkipEvent event = new TimeSkipEvent(serverworld.getCraftWorld(), TimeSkipEvent.SkipReason.COMMAND, i - serverworld.getTimeOfDay());
++            Bukkit.getPluginManager().callEvent(event);
++            if (!event.isCancelled()) {
++                serverworld.setDayTime((long) serverworld.getTimeOfDay() + event.getSkipAmount());
++            }
++            // CraftBukkit end
+         }
+ 
+         servercommandsource.sendFeedback(new TranslatableText("commands.time.set", new Object[]{i}), true);
+@@ -64,6 +73,13 @@
+             ServerWorld serverworld = (ServerWorld) iterator.next();
+ 
+             serverworld.method_29199(serverworld.getTimeOfDay() + (long) i);
++            // CraftBukkit start
++            TimeSkipEvent event = new TimeSkipEvent(serverworld.getCraftWorld(), TimeSkipEvent.SkipReason.COMMAND, i);
++            Bukkit.getPluginManager().callEvent(event);
++            if (!event.isCancelled()) {
++                serverworld.setDayTime(serverworld.getTimeOfDay() + event.getSkipAmount());
++            }
++            // CraftBukkit end
+         }
+ 
+         int j = getDayTime(servercommandsource.getWorld());

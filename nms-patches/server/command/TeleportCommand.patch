@@ -1,0 +1,49 @@
+--- a/net/minecraft/server/command/TeleportCommand.java
++++ b/net/minecraft/server/command/TeleportCommand.java
+@@ -33,6 +33,11 @@
+ import net.minecraft.util.math.Vec2f;
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.event.entity.EntityTeleportEvent;
++import org.bukkit.event.player.PlayerTeleportEvent;
+ 
+ public class TeleportCommand {
+ 
+@@ -149,9 +154,9 @@
+                 }
+ 
+                 if (serverworld == entity.world) {
+-                    ((ServerPlayerEntity) entity).networkHandler.teleportRequest(d0, d1, d2, f, f1, set);
++                    ((ServerPlayerEntity) entity).networkHandler.teleportRequest(d0, d1, d2, f, f1, set, PlayerTeleportEvent.TeleportCause.COMMAND); // CraftBukkit
+                 } else {
+-                    ((ServerPlayerEntity) entity).teleport(serverworld, d0, d1, d2, f, f1);
++                    ((ServerPlayerEntity) entity).teleport(serverworld, d0, d1, d2, f, f1, PlayerTeleportEvent.TeleportCause.COMMAND); // CraftBukkit
+                 }
+ 
+                 entity.setHeadYaw(f);
+@@ -160,6 +165,22 @@
+                 float f3 = MathHelper.wrapDegrees(f1);
+ 
+                 f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
++                // CraftBukkit start - Teleport event
++                Location to = new Location(serverworld.getCraftWorld(), d0, d1, d2, f2, f3);
++                EntityTeleportEvent event = new EntityTeleportEvent(entity.getBukkitEntity(), entity.getBukkitEntity().getLocation(), to);
++                Bukkit.getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return;
++                }
++
++                d0 = to.getX();
++                d1 = to.getY();
++                d2 = to.getZ();
++                f2 = to.getYaw();
++                f3 = to.getPitch();
++                serverworld = ((CraftWorld) to.getWorld()).getHandle();
++                // CraftBukkit end
+                 if (serverworld == entity.world) {
+                     entity.refreshPositionAndAngles(d0, d1, d2, f2, f3);
+                     entity.setHeadYaw(f2);

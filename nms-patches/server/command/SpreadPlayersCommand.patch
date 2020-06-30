@@ -1,0 +1,42 @@
+--- a/net/minecraft/server/command/SpreadPlayersCommand.java
++++ b/net/minecraft/server/command/SpreadPlayersCommand.java
+@@ -76,7 +76,7 @@
+             if (entity instanceof PlayerEntity) {
+                 set.add(entity.getScoreboardTeam());
+             } else {
+-                set.add((Object) null);
++                set.add(null); // CraftBukkit - decompile error
+             }
+         }
+ 
+@@ -285,7 +285,7 @@
+ 
+             for (boolean flag2 = blockview.getBlockState(blockpos_mutable).isAir(); blockpos_mutable.getY() > 0; flag2 = flag1) {
+                 blockpos_mutable.move(Direction.DOWN);
+-                flag1 = blockview.getBlockState(blockpos_mutable).isAir();
++                flag1 = getType(blockview, blockpos_mutable).isAir(); // CraftBukkit
+                 if (!flag1 && flag2 && flag) {
+                     return blockpos_mutable.getY() + 1;
+                 }
+@@ -298,7 +298,7 @@
+ 
+         public boolean isSafe(BlockView blockview, int i) {
+             BlockPos blockpos = new BlockPos(this.x, (double) (this.getY(blockview, i) - 1), this.z);
+-            BlockState blockstate = blockview.getBlockState(blockpos);
++            BlockState blockstate = getType(blockview, blockpos); // CraftBukkit
+             Material material = blockstate.getMaterial();
+ 
+             return blockpos.getY() < i && !material.isLiquid() && material != Material.FIRE;
+@@ -308,5 +308,12 @@
+             this.x = MathHelper.nextDouble(random, d0, d2);
+             this.z = MathHelper.nextDouble(random, d1, d3);
+         }
++
++        // CraftBukkit start - add a version of getType which force loads chunks
++        private static BlockState getType(BlockView blockview, BlockPos blockpos) {
++            ((ServerWorld) blockview).getChunkManager().getChunkAt(blockpos.getX() >> 4, blockpos.getZ() >> 4, true);
++            return blockview.getBlockState(blockpos);
++        }
++        // CraftBukkit end
+     }
+ }

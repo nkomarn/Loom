@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/command/GameRuleCommand.java
++++ b/net/minecraft/server/command/GameRuleCommand.java
+@@ -27,7 +27,7 @@
+ 
+     private static <T extends GameRules.Rule<T>> int executeSet(CommandContext<ServerCommandSource> commandcontext, GameRules.Key<T> gamerules_key) {
+         ServerCommandSource servercommandsource = (ServerCommandSource) commandcontext.getSource();
+-        T t0 = servercommandsource.getMinecraftServer().getGameRules().get(gamerules_key);
++        T t0 = servercommandsource.getWorld().getGameRules().get(gamerules_key); // CraftBukkit
+ 
+         t0.set(commandcontext, "value");
+         servercommandsource.sendFeedback(new TranslatableText("commands.gamerule.set", new Object[]{gamerules_key.getName(), t0.toString()}), true);
+@@ -35,7 +35,7 @@
+     }
+ 
+     private static <T extends GameRules.Rule<T>> int executeQuery(ServerCommandSource servercommandsource, GameRules.Key<T> gamerules_key) {
+-        T t0 = servercommandsource.getMinecraftServer().getGameRules().get(gamerules_key);
++        T t0 = servercommandsource.getWorld().getGameRules().get(gamerules_key); // CraftBukkit
+ 
+         servercommandsource.sendFeedback(new TranslatableText("commands.gamerule.query", new Object[]{gamerules_key.getName(), t0.toString()}), false);
+         return t0.getCommandResult();

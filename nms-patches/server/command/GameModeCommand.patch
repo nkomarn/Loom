@@ -1,0 +1,23 @@
+--- a/net/minecraft/server/command/GameModeCommand.java
++++ b/net/minecraft/server/command/GameModeCommand.java
+@@ -8,6 +8,7 @@
+ import java.util.Iterator;
+ import net.minecraft.command.arguments.EntityArgumentType;
+ import net.minecraft.server.network.ServerPlayerEntity;
++import net.minecraft.text.LiteralText;
+ import net.minecraft.text.TranslatableText;
+ import net.minecraft.util.Util;
+ import net.minecraft.world.GameMode;
+@@ -61,6 +62,12 @@
+ 
+             if (serverplayerentity.interactionManager.getGameMode() != gamemode) {
+                 serverplayerentity.setGameMode(gamemode);
++                // CraftBukkit start - handle event cancelling the change
++                if (serverplayerentity.interactionManager.getGameMode() != gamemode) {
++                    commandcontext.getSource().sendError(new LiteralText("Failed to set the gamemode of '" + serverplayerentity.getName() + "'"));
++                    continue;
++                }
++                // CraftBukkit end
+                 setGameMode((ServerCommandSource) commandcontext.getSource(), serverplayerentity, gamemode);
+                 ++i;
+             }

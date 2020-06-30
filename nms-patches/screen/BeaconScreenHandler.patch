@@ -1,0 +1,64 @@
+--- a/net/minecraft/screen/BeaconScreenHandler.java
++++ b/net/minecraft/screen/BeaconScreenHandler.java
+@@ -2,12 +2,16 @@
+ 
+ import net.minecraft.block.Blocks;
+ import net.minecraft.entity.player.PlayerEntity;
++import net.minecraft.entity.player.PlayerInventory;
+ import net.minecraft.inventory.Inventory;
+ import net.minecraft.inventory.SimpleInventory;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.screen.slot.Slot;
+ import net.minecraft.tag.ItemTags;
+ import net.minecraft.tag.Tag;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryBeacon;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class BeaconScreenHandler extends ScreenHandler {
+ 
+@@ -15,6 +19,10 @@
+     private final BeaconScreenHandler.PaymentSlot paymentSlot;
+     private final ScreenHandlerContext context;
+     private final PropertyDelegate propertyDelegate;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++    // CraftBukkit end
+ 
+     public BeaconScreenHandler(int i, Inventory inventory) {
+         this(i, inventory, new ArrayPropertyDelegate(3), ScreenHandlerContext.EMPTY);
+@@ -22,6 +30,7 @@
+ 
+     public BeaconScreenHandler(int i, Inventory inventory, PropertyDelegate propertydelegate, ScreenHandlerContext screenhandlercontext) {
+         super(ScreenHandlerType.BEACON, i);
++        player = (PlayerInventory) inventory; // CraftBukkit - TODO: check this
+         this.payment = new SimpleInventory(1) {
+             public boolean isValid(int j, ItemStack itemstack) {
+                 return itemstack.getItem().isIn((Tag) ItemTags.BEACON_PAYMENT_ITEMS);
+@@ -67,6 +76,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return canUse(this.context, playerentity, Blocks.BEACON);
+     }
+ 
+@@ -144,4 +154,17 @@
+             return 1;
+         }
+     }
++
++    // CraftBukkit start
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory = new CraftInventoryBeacon(this.payment);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ }

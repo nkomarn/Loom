@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/WitherRoseBlock.java
++++ b/net/minecraft/block/WitherRoseBlock.java
+@@ -10,6 +10,7 @@
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.World;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
+ 
+ public class WitherRoseBlock extends FlowerBlock {
+ 
+@@ -27,7 +28,7 @@
+                 LivingEntity livingentity = (LivingEntity) entity;
+ 
+                 if (!livingentity.isInvulnerableTo(DamageSource.WITHER)) {
+-                    livingentity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 40));
++                    livingentity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 40), EntityPotionEffectEvent.Cause.WITHER_ROSE); // CraftBukkit
+                 }
+             }
+ 

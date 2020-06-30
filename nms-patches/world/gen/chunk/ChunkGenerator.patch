@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/gen/chunk/ChunkGenerator.java
++++ b/net/minecraft/world/gen/chunk/ChunkGenerator.java
+@@ -243,7 +243,15 @@
+         while (iterator.hasNext()) {
+             ConfiguredStructureFeature<?, ?> configuredstructurefeature = (ConfiguredStructureFeature) iterator.next();
+ 
+-            this.method_28508(configuredstructurefeature, structureaccessor, chunk, structuremanager, i, chunkpos, biome);
++            // CraftBukkit start
++            if (configuredstructurefeature.field_24835 == StructureFeature.STRONGHOLD) {
++                synchronized (configuredstructurefeature) {
++                    this.method_28508(configuredstructurefeature, structureaccessor, chunk, structuremanager, i, chunkpos, biome);
++                }
++            } else {
++                this.method_28508(configuredstructurefeature, structureaccessor, chunk, structuremanager, i, chunkpos, biome);
++            }
++            // CraftBukkit end
+         }
+ 
+     }

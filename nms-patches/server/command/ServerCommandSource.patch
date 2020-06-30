@@ -1,0 +1,80 @@
+--- a/net/minecraft/server/command/ServerCommandSource.java
++++ b/net/minecraft/server/command/ServerCommandSource.java
+@@ -14,6 +14,8 @@
+ import java.util.function.BinaryOperator;
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
++
++import com.mojang.brigadier.tree.CommandNode;
+ import net.minecraft.command.arguments.EntityAnchorArgumentType;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.server.MinecraftServer;
+@@ -33,6 +35,8 @@
+ import net.minecraft.util.registry.RegistryKey;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
++import org.bukkit.command.CommandSender;
++import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
+ 
+ public class ServerCommandSource implements CommandSource {
+ 
+@@ -51,6 +55,7 @@
+     private final ResultConsumer<ServerCommandSource> resultConsumer;
+     private final EntityAnchorArgumentType.EntityAnchor entityAnchor;
+     private final Vec2f rotation;
++    public CommandNode currentCommand; // CraftBukkit
+ 
+     public ServerCommandSource(CommandOutput commandoutput, Vec3d vec3d, Vec2f vec2f, ServerWorld serverworld, int i, String s, Text text, MinecraftServer minecraftserver, @Nullable Entity entity) {
+         this(commandoutput, vec3d, vec2f, serverworld, i, s, text, minecraftserver, entity, false, (commandcontext, flag, j) -> {
+@@ -139,9 +144,22 @@
+     }
+ 
+     public boolean hasPermissionLevel(int i) {
++        // CraftBukkit start
++        if (currentCommand != null) {
++            return hasPermission(i, VanillaCommandWrapper.getPermission(currentCommand));
++        }
++        // CraftBukkit end
++
+         return this.level >= i;
+     }
+ 
++    // CraftBukkit start
++    public boolean hasPermission(int i, String bukkitPermission) {
++        // World is null when loading functions
++        return ((getWorld() == null || !getWorld().getServer().ignoreVanillaPermissions) && this.level >= i) || getBukkitSender().hasPermission(bukkitPermission);
++    }
++    // CraftBukkit end
++
+     public Vec3d getPosition() {
+         return this.position;
+     }
+@@ -203,7 +221,7 @@
+             while (iterator.hasNext()) {
+                 ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) iterator.next();
+ 
+-                if (serverplayerentity != this.output && this.server.getPlayerManager().isOperator(serverplayerentity.getGameProfile())) {
++                if (serverplayerentity != this.output && serverplayerentity.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) { // CraftBukkit
+                     serverplayerentity.sendSystemMessage(mutabletext, Util.NIL_UUID);
+                 }
+             }
+@@ -230,7 +248,7 @@
+     }
+ 
+     public Collection<String> getPlayerNames() {
+-        return Lists.newArrayList((Object[]) this.server.getPlayerNames());
++        return Lists.newArrayList(this.server.getPlayerNames()); // Loom - decompile error
+     }
+ 
+     public Collection<String> getTeamNames() {
+@@ -252,4 +270,10 @@
+     public Set<RegistryKey<World>> method_29310() {
+         return this.server.getWorldRegistryKeys();
+     }
++
++    // CraftBukkit start
++    public CommandSender getBukkitSender() {
++        return output.getBukkitSender(this);
++    }
++    // CraftBukkit end
+ }

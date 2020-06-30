@@ -1,0 +1,104 @@
+--- a/net/minecraft/screen/AnvilScreenHandler.java
++++ b/net/minecraft/screen/AnvilScreenHandler.java
+@@ -18,13 +18,21 @@
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryAnvil;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class AnvilScreenHandler extends ForgingScreenHandler {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+     private int repairItemUsage;
+-    private String newItemName;
+-    private final Property levelCost;
++    public String newItemName; // Loom - change access
++    public final Property levelCost; // Loom - change access
++    // CraftBukkit start
++    public int maximumRepairCost = 40;
++    private CraftInventoryView bukkitEntity;
++    // CraftBukkit end
+ 
+     public AnvilScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, ScreenHandlerContext.EMPTY);
+@@ -94,7 +102,7 @@
+         byte b1 = 0;
+ 
+         if (itemstack.isEmpty()) {
+-            this.output.setStack(0, ItemStack.EMPTY);
++            CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.EMPTY); // CraftBukkit
+             this.levelCost.set(0);
+         } else {
+             ItemStack itemstack1 = itemstack.copy();
+@@ -112,7 +120,7 @@
+                 if (itemstack1.isDamageable() && itemstack1.getItem().canRepair(itemstack, itemstack2)) {
+                     k = Math.min(itemstack1.getDamage(), itemstack1.getMaxDamage() / 4);
+                     if (k <= 0) {
+-                        this.output.setStack(0, ItemStack.EMPTY);
++                        CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.EMPTY); // CraftBukkit
+                         this.levelCost.set(0);
+                         return;
+                     }
+@@ -127,7 +135,7 @@
+                     this.repairItemUsage = i1;
+                 } else {
+                     if (!flag && (itemstack1.getItem() != itemstack2.getItem() || !itemstack1.isDamageable())) {
+-                        this.output.setStack(0, ItemStack.EMPTY);
++                        CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.EMPTY); // CraftBukkit
+                         this.levelCost.set(0);
+                         return;
+                     }
+@@ -217,7 +225,7 @@
+                     }
+ 
+                     if (flag2 && !flag1) {
+-                        this.output.setStack(0, ItemStack.EMPTY);
++                        CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.EMPTY); // CraftBukkit
+                         this.levelCost.set(0);
+                         return;
+                     }
+@@ -241,11 +249,11 @@
+                 itemstack1 = ItemStack.EMPTY;
+             }
+ 
+-            if (b1 == i && b1 > 0 && this.levelCost.get() >= 40) {
+-                this.levelCost.set(39);
++            if (b1 == i && b1 > 0 && this.levelCost.get() >= maximumRepairCost) { // CraftBukkit
++                this.levelCost.set(maximumRepairCost - 1); // CraftBukkit
+             }
+ 
+-            if (this.levelCost.get() >= 40 && !this.player.abilities.creativeMode) {
++            if (this.levelCost.get() >= maximumRepairCost && !this.player.abilities.creativeMode) { // CraftBukkit
+                 itemstack1 = ItemStack.EMPTY;
+             }
+ 
+@@ -264,7 +272,7 @@
+                 EnchantmentHelper.set(map, itemstack1);
+             }
+ 
+-            this.output.setStack(0, itemstack1);
++            CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), itemstack1); // CraftBukkit
+             this.sendContentUpdates();
+         }
+     }
+@@ -287,4 +295,17 @@
+ 
+         this.updateResult();
+     }
++
++    // CraftBukkit start
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory = new CraftInventoryAnvil(this.context.getLocation(), this.input, this.output, this);
++        bukkitEntity = new CraftInventoryView(this.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ }

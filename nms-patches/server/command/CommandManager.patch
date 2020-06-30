@@ -1,0 +1,162 @@
+--- a/net/minecraft/server/command/CommandManager.java
++++ b/net/minecraft/server/command/CommandManager.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server.command;
+ 
++import com.google.common.base.Joiner;
+ import com.google.common.collect.Maps;
+ import com.mojang.brigadier.CommandDispatcher;
+ import com.mojang.brigadier.ParseResults;
+@@ -14,6 +15,7 @@
+ import com.mojang.brigadier.tree.RootCommandNode;
+ import java.util.Collection;
+ import java.util.Iterator;
++import java.util.LinkedHashSet;
+ import java.util.Map;
+ import java.util.function.Predicate;
+ import javax.annotation.Nullable;
+@@ -47,6 +49,9 @@
+ import net.minecraft.util.Util;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
++import org.bukkit.event.player.PlayerCommandSendEvent;
++import org.bukkit.event.server.ServerCommandEvent;
+ 
+ public class CommandManager {
+ 
+@@ -54,6 +59,7 @@
+     private final CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
+ 
+     public CommandManager(CommandManager.RegistrationEnvironment commandmanager_registrationenvironment) {
++        this(); // CraftBukkit
+         AdvancementCommand.register(this.dispatcher);
+         AttributeCommand.register(this.dispatcher);
+         ExecuteCommand.register(this.dispatcher);
+@@ -134,14 +140,60 @@
+         }
+ 
+         this.dispatcher.findAmbiguities((commandnode, commandnode1, commandnode2, collection) -> {
+-            CommandManager.LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {}", (Object) this.dispatcher.getPath(commandnode1), this.dispatcher.getPath(commandnode2), collection);
++            //CommandManager.LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {}", (Object) this.dispatcher.getPath(commandnode1), this.dispatcher.getPath(commandnode2), collection);
+         });
++        /*this.dispatcher.setConsumer((commandcontext, flag, i) -> {
++            ((ServerCommandSource) commandcontext.getSource()).onCommandComplete(commandcontext, flag, i);
++        });*/
++    }
++
++    // CraftBukkit start
++    public CommandManager() {
+         this.dispatcher.setConsumer((commandcontext, flag, i) -> {
+             ((ServerCommandSource) commandcontext.getSource()).onCommandComplete(commandcontext, flag, i);
+         });
+     }
+ 
++    public int dispatchServerCommand(ServerCommandSource sender, String command) {
++        Joiner joiner = Joiner.on(" ");
++        if (command.startsWith("/")) {
++            command = command.substring(1);
++        }
++
++        ServerCommandEvent event = new ServerCommandEvent(sender.getBukkitSender(), command);
++        Bukkit.getPluginManager().callEvent(event);
++        if (event.isCancelled()) {
++            return 0;
++        }
++
++        command = event.getCommand();
++        String[] args = command.split(" ");
++        String cmd = args[0];
++
++        if (cmd.startsWith("minecraft:")) cmd = cmd.substring("minecraft:".length());
++        if (cmd.startsWith("bukkit:")) cmd = cmd.substring("bukkit:".length());
++
++        // Block disallowed commands
++        if (cmd.equalsIgnoreCase("stop") || cmd.equalsIgnoreCase("kick") || cmd.equalsIgnoreCase("op")
++                || cmd.equalsIgnoreCase("deop") || cmd.equalsIgnoreCase("ban") || cmd.equalsIgnoreCase("ban-ip")
++                || cmd.equalsIgnoreCase("pardon") || cmd.equalsIgnoreCase("pardon-ip") || cmd.equalsIgnoreCase("reload")) {
++            return 0;
++        }
++
++        // Handle vanilla commands;
++        if (sender.getWorld().getServer().getCommandBlockOverride(args[0])) {
++            args[0] = "minecraft:" + args[0];
++        }
++
++        return this.execute(sender, joiner.join(args));
++    }
++
+     public int execute(ServerCommandSource servercommandsource, String s) {
++        return this.execute(servercommandsource, s, s);
++    }
++
++    public int execute(ServerCommandSource servercommandsource, String s, String label) {
++        // CraftBukkit end
+         StringReader stringreader = new StringReader(s);
+ 
+         if (stringreader.canRead() && stringreader.peek() == '/') {
+@@ -168,7 +220,7 @@
+                 if (commandsyntaxexception.getInput() != null && commandsyntaxexception.getCursor() >= 0) {
+                     int j = Math.min(commandsyntaxexception.getInput().length(), commandsyntaxexception.getCursor());
+                     MutableText mutabletext = (new LiteralText("")).formatted(Formatting.GRAY).styled((style) -> {
+-                        return style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, s));
++                        return style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, label)); // CraftBukkit
+                     });
+ 
+                     if (j > 10) {
+@@ -218,11 +270,36 @@
+     }
+ 
+     public void sendCommandTree(ServerPlayerEntity serverplayerentity) {
+-        Map<CommandNode<ServerCommandSource>, CommandNode<CommandSource>> map = Maps.newHashMap();
++        // CraftBukkit start
++        // Register Vanilla commands into builtRoot as before
++        Map<CommandNode<ServerCommandSource>, CommandNode<CommandSource>> map = Maps.newIdentityHashMap(); // Use identity to prevent aliasing issues
++        RootCommandNode vanillaRoot = new RootCommandNode();
++
++        RootCommandNode<ServerCommandSource> vanilla = serverplayerentity.server.vanillaCommandDispatcher.a().getRoot(); //TODO
++        map.put(vanilla, vanillaRoot);
++        this.makeTreeForSource(vanilla, vanillaRoot, serverplayerentity.getCommandSource(), map);
++
++        // Now build the global commands in a second pass
+         RootCommandNode<CommandSource> rootcommandnode = new RootCommandNode<>();
+ 
+         map.put(this.dispatcher.getRoot(), rootcommandnode);
+         this.makeTreeForSource(this.dispatcher.getRoot(), rootcommandnode, serverplayerentity.getCommandSource(), map);
++
++        Collection<String> bukkit = new LinkedHashSet<>();
++        for (CommandNode node : rootcommandnode.getChildren()) {
++            bukkit.add(node.getName());
++        }
++
++        PlayerCommandSendEvent event = new PlayerCommandSendEvent(serverplayerentity.getBukkitEntity(), new LinkedHashSet<>(bukkit));
++        Bukkit.getServer().getPluginManager().callEvent(event);
++
++        // Remove labels that were removed during the event
++        for (String orig : bukkit) {
++            if (!event.getCommands().contains(orig)) {
++                rootcommandnode.removeCommand(orig);
++            }
++        }
++        // CraftBukkit end
+         serverplayerentity.networkHandler.sendPacket(new CommandTreeS2CPacket(rootcommandnode));
+     }
+ 
+@@ -233,7 +310,7 @@
+             CommandNode<ServerCommandSource> commandnode2 = (CommandNode) iterator.next();
+ 
+             if (commandnode2.canUse(servercommandsource)) {
+-                ArgumentBuilder<CommandSource, ?> argumentbuilder = commandnode2.createBuilder();
++                ArgumentBuilder argumentbuilder = commandnode2.createBuilder(); // CraftBukkit - decompile error
+ 
+                 argumentbuilder.requires((commandsource) -> {
+                     return true;
+@@ -256,7 +333,7 @@
+                     argumentbuilder.redirect((CommandNode) map.get(argumentbuilder.getRedirect()));
+                 }
+ 
+-                CommandNode<CommandSource> commandnode3 = argumentbuilder.build();
++                CommandNode commandnode3 = argumentbuilder.build(); // CraftBukkit - decompile error
+ 
+                 map.put(commandnode2, commandnode3);
+                 commandnode1.addChild(commandnode3);

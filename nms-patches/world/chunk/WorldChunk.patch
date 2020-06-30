@@ -1,0 +1,253 @@
+--- a/net/minecraft/world/chunk/WorldChunk.java
++++ b/net/minecraft/world/chunk/WorldChunk.java
+@@ -6,12 +6,8 @@
+ import it.unimi.dsi.fastutil.longs.LongSet;
+ import it.unimi.dsi.fastutil.shorts.ShortList;
+ import it.unimi.dsi.fastutil.shorts.ShortListIterator;
+-import java.util.Collection;
+-import java.util.Collections;
+-import java.util.Iterator;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.Set;
++
++import java.util.*;
+ import java.util.Map.Entry;
+ import java.util.function.Consumer;
+ import java.util.function.Predicate;
+@@ -19,10 +15,8 @@
+ import java.util.stream.Stream;
+ import java.util.stream.StreamSupport;
+ import javax.annotation.Nullable;
+-import net.minecraft.block.Block;
+-import net.minecraft.block.BlockEntityProvider;
+-import net.minecraft.block.BlockState;
+-import net.minecraft.block.Blocks;
++
++import net.minecraft.block.*;
+ import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.client.world.DummyClientTickScheduler;
+ import net.minecraft.entity.Entity;
+@@ -56,6 +50,10 @@
+ import net.minecraft.world.gen.feature.StructureFeature;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.CraftChunk;
++import org.bukkit.event.world.ChunkUnloadEvent;
++import org.bukkit.generator.BlockPopulator;
+ 
+ public class WorldChunk implements Chunk {
+ 
+@@ -66,7 +64,7 @@
+     private BiomeArray biomeArray;
+     private final Map<BlockPos, CompoundTag> pendingBlockEntityTags;
+     private boolean loadedToWorld;
+-    private final World world;
++    private final ServerWorld world; // CraftBukkit - type
+     private final Map<Heightmap.Type, Heightmap> heightmaps;
+     private final UpgradeData upgradeData;
+     private final Map<BlockPos, BlockEntity> blockEntities;
+@@ -100,7 +98,7 @@
+         this.structureReferences = Maps.newHashMap();
+         this.postProcessingLists = new ShortList[16];
+         this.entitySections = (TypeFilterableList[]) (new TypeFilterableList[16]);
+-        this.world = world;
++        this.world = (ServerWorld) world; // CraftBukkit - type
+         this.pos = chunkpos;
+         this.upgradeData = upgradedata;
+         Heightmap.Type[] aheightmap_type = Heightmap.Type.values();
+@@ -131,8 +129,19 @@
+             }
+         }
+ 
++        // CraftBukkit start
++        this.bukkitChunk = new CraftChunk(this);
++    }
++
++    public org.bukkit.Chunk bukkitChunk;
++    public org.bukkit.Chunk getBukkitChunk() {
++        return bukkitChunk;
+     }
+ 
++    public boolean mustNotSave;
++    public boolean needsDecoration;
++    // CraftBukkit end
++
+     public WorldChunk(World world, ProtoChunk protochunk) {
+         this(world, protochunk.getPos(), protochunk.getBiomeArray(), protochunk.getUpgradeData(), protochunk.getBlockTickScheduler(), protochunk.getFluidTickScheduler(), protochunk.getInhabitedTime(), protochunk.getSectionArray(), (Consumer) null);
+         Iterator iterator = protochunk.getEntities().iterator();
+@@ -174,6 +183,7 @@
+ 
+         this.setLightOn(protochunk.isLightOn());
+         this.shouldSave = true;
++        this.needsDecoration = true; // CraftBukkit
+     }
+ 
+     public Heightmap getHeightmap(Heightmap.Type heightmap_type) {
+@@ -259,8 +269,15 @@
+         }
+     }
+ 
++    // CraftBukkit start
+     @Nullable
+     public BlockState setBlockState(BlockPos blockpos, BlockState blockstate, boolean flag) {
++        return this.setBlockState(blockpos, blockstate, flag, true);
++    }
++
++    @Nullable
++    public BlockState setBlockState(BlockPos blockpos, BlockState blockstate, boolean flag, boolean doPlace) {
++        // CraftBukkit end
+         int i = blockpos.getX() & 15;
+         int j = blockpos.getY();
+         int k = blockpos.getZ() & 15;
+@@ -312,7 +329,8 @@
+                     }
+                 }
+ 
+-                if (!this.world.isClient) {
++                // CraftBukkit - Don't place while processing the BlockPlaceEvent, unless it's a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
++                if (!this.world.isClient && doPlace && (!this.world.captureBlockStates || block instanceof BlockWithEntity)) {
+                     blockstate.onBlockAdded(this.world, blockpos, blockstate1, flag);
+                 }
+ 
+@@ -403,7 +421,12 @@
+ 
+     @Nullable
+     public BlockEntity getBlockEntity(BlockPos blockpos, WorldChunk.CreationType worldchunk_creationtype) {
+-        BlockEntity blockentity = (BlockEntity) this.blockEntities.get(blockpos);
++        // CraftBukkit start
++        BlockEntity blockentity = world.capturedBlockEntities.get(blockpos);
++        if (blockentity == null) {
++            blockentity = (BlockEntity) this.blockEntities.get(blockpos);
++        }
++        // CraftBukkit end
+ 
+         if (blockentity == null) {
+             CompoundTag compoundtag = (CompoundTag) this.pendingBlockEntityTags.remove(blockpos);
+@@ -447,7 +470,13 @@
+             if (blockentity1 != null && blockentity1 != blockentity) {
+                 blockentity1.markRemoved();
+             }
+-
++            // CraftBukkit start
++        } else {
++            BlockPos blockentitypos = blockentity.getPos();
++            System.out.println("Attempted to place a tile entity (" + blockentity + ") at " + blockentitypos.getX() + "," + blockentitypos.getY() + "," + blockentitypos.getZ() + " (" + getBlockState(blockpos) + ") where there was no entity tile!");
++            System.out.println("Chunk coordinates: " + (this.pos.x * 16) + "," + (this.pos.z * 16));
++            new Exception().printStackTrace();
++            // CraftBukkit end
+         }
+     }
+ 
+@@ -494,6 +523,50 @@
+ 
+     }
+ 
++    // CraftBukkit start
++    public void loadCallback() {
++        org.bukkit.Server server = this.world.getCraftServer();
++        if (server != null) {
++            /*
++             * If it's a new world, the first few chunks are generated inside
++             * the World constructor. We can't reliably alter that, so we have
++             * no way of creating a CraftWorld/CraftServer at that point.
++             */
++            Bukkit.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(this.bukkitChunk, this.needsDecoration));
++
++            if (this.needsDecoration) {
++                this.needsDecoration = false;
++                Random random = new java.util.Random();
++                random.setSeed(world.getSeed());
++                long xRand = random.nextLong() / 2L * 2L + 1L;
++                long zRand = random.nextLong() / 2L * 2L + 1L;
++                random.setSeed((long) this.pos.x * xRand + (long) this.pos.z * zRand ^ world.getSeed());
++
++                org.bukkit.World world = this.world.getCraftWorld();
++                if (world != null) {
++                    this.world.populating = true;
++                    try {
++                        for (BlockPopulator populator : world.getPopulators()) {
++                            populator.populate(world, random, bukkitChunk);
++                        }
++                    } finally {
++                        this.world.populating = false;
++                    }
++                }
++                Bukkit.getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(bukkitChunk));
++            }
++        }
++    }
++
++    public void unloadCallback() {
++        org.bukkit.Server server = this.world.getCraftServer();
++        ChunkUnloadEvent unloadEvent = new ChunkUnloadEvent(this.bukkitChunk, this.needsSaving());
++        Bukkit.getPluginManager().callEvent(unloadEvent);
++        // note: saving can be prevented, but not forced if no saving is actually required
++        this.mustNotSave = !unloadEvent.isSaveChunk();
++    }
++    // CraftBukkit end
++
+     public void markDirty() {
+         this.shouldSave = true;
+     }
+@@ -547,7 +620,7 @@
+             Iterator iterator = this.entitySections[k].getAllOfType(Entity.class).iterator();
+ 
+             while (iterator.hasNext()) {
+-                Entity entity = (Entity) iterator.next();
++                T entity = (T) iterator.next(); // CraftBukkit - decompile error
+ 
+                 if ((entitytype == null || entity.getType() == entitytype) && entity.getBoundingBox().intersects(box) && predicate.test(entity)) {
+                     list.add(entity);
+@@ -568,7 +641,7 @@
+             Iterator iterator = this.entitySections[k].getAllOfType(oclass).iterator();
+ 
+             while (iterator.hasNext()) {
+-                T t0 = (Entity) iterator.next();
++                T t0 = (T) iterator.next(); // CraftBukkit - decompile error
+ 
+                 if (t0.getBoundingBox().intersects(box) && (predicate == null || predicate.test(t0))) {
+                     list.add(t0);
+@@ -633,7 +706,7 @@
+     }
+ 
+     public boolean needsSaving() {
+-        return this.shouldSave || this.unsaved && this.world.getTime() != this.lastSaveTime;
++        return (this.shouldSave || this.unsaved && this.world.getTime() != this.lastSaveTime) && !this.mustNotSave; // CraftBukkit
+     }
+ 
+     public void setUnsaved(boolean flag) {
+@@ -762,7 +835,7 @@
+ 
+     public void disableTickSchedulers() {
+         if (this.blockTickScheduler instanceof ChunkTickScheduler) {
+-            ((ChunkTickScheduler) this.blockTickScheduler).tick(this.world.getBlockTickScheduler(), (blockpos) -> {
++            ((ChunkTickScheduler<Block>) this.blockTickScheduler).tick(this.world.getBlockTickScheduler(), (blockpos) -> { // CraftBukkit - decompile error
+                 return this.getBlockState(blockpos).getBlock();
+             });
+             this.blockTickScheduler = DummyClientTickScheduler.get();
+@@ -772,7 +845,7 @@
+         }
+ 
+         if (this.fluidTickScheduler instanceof ChunkTickScheduler) {
+-            ((ChunkTickScheduler) this.fluidTickScheduler).tick(this.world.getFluidTickScheduler(), (blockpos) -> {
++            ((ChunkTickScheduler<Fluid>) this.fluidTickScheduler).tick(this.world.getFluidTickScheduler(), (blockpos) -> {
+                 return this.getFluidState(blockpos).getFluid();
+             });
+             this.fluidTickScheduler = DummyClientTickScheduler.get();
+@@ -784,12 +857,12 @@
+     }
+ 
+     public void enableTickSchedulers(ServerWorld serverworld) {
+-        if (this.blockTickScheduler == DummyClientTickScheduler.get()) {
++        if (this.blockTickScheduler == DummyClientTickScheduler.<Block>get()) { // CraftBukkit - decompile error
+             this.blockTickScheduler = new SimpleTickScheduler<>(Registry.BLOCK::getId, serverworld.getBlockTickScheduler().getScheduledTicksInChunk(this.pos, true, false), serverworld.getTime());
+             this.setShouldSave(true);
+         }
+ 
+-        if (this.fluidTickScheduler == DummyClientTickScheduler.get()) {
++        if (this.fluidTickScheduler == DummyClientTickScheduler.<Fluid>get()) { // CraftBukkit - decompile error
+             this.fluidTickScheduler = new SimpleTickScheduler<>(Registry.FLUID::getId, serverworld.getFluidTickScheduler().getScheduledTicksInChunk(this.pos, true, false), serverworld.getTime());
+             this.setShouldSave(true);
+         }

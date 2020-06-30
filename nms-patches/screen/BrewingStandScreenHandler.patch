@@ -1,0 +1,56 @@
+--- a/net/minecraft/screen/BrewingStandScreenHandler.java
++++ b/net/minecraft/screen/BrewingStandScreenHandler.java
+@@ -13,6 +13,8 @@
+ import net.minecraft.recipe.BrewingRecipeRegistry;
+ import net.minecraft.screen.slot.Slot;
+ import net.minecraft.server.network.ServerPlayerEntity;
++import org.bukkit.craftbukkit.inventory.CraftInventoryBrewer;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class BrewingStandScreenHandler extends ScreenHandler {
+ 
+@@ -20,12 +22,18 @@
+     private final PropertyDelegate propertyDelegate;
+     private final Slot ingredientSlot;
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++    // CraftBukkit end
++
+     public BrewingStandScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, new SimpleInventory(5), new ArrayPropertyDelegate(2));
+     }
+ 
+     public BrewingStandScreenHandler(int i, PlayerInventory playerinventory, Inventory inventory, PropertyDelegate propertydelegate) {
+         super(ScreenHandlerType.BREWING_STAND, i);
++        player = playerinventory; // CraftBukkit
+         checkSize(inventory, 5);
+         checkDataCount(propertydelegate, 2);
+         this.inventory = inventory;
+@@ -52,6 +60,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return this.inventory.canPlayerUse(playerentity);
+     }
+ 
+@@ -176,4 +185,17 @@
+             return item == Items.POTION || item == Items.SPLASH_POTION || item == Items.LINGERING_POTION || item == Items.GLASS_BOTTLE;
+         }
+     }
++
++    // CraftBukkit start
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryBrewer inventory = new CraftInventoryBrewer(this.inventory);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ }

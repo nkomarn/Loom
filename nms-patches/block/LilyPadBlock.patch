@@ -1,0 +1,19 @@
+--- a/net/minecraft/block/LilyPadBlock.java
++++ b/net/minecraft/block/LilyPadBlock.java
+@@ -9,6 +9,7 @@
+ import net.minecraft.util.shape.VoxelShape;
+ import net.minecraft.world.BlockView;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class LilyPadBlock extends PlantBlock {
+ 
+@@ -20,7 +21,7 @@
+ 
+     public void onEntityCollision(BlockState blockstate, World world, BlockPos blockpos, Entity entity) {
+         super.onEntityCollision(blockstate, world, blockpos, entity);
+-        if (world instanceof ServerWorld && entity instanceof BoatEntity) {
++        if (world instanceof ServerWorld && entity instanceof BoatEntity && !CraftEventFactory.callEntityChangeBlockEvent(entity, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) { // CraftBukkit
+             world.breakBlock(new BlockPos(blockpos), true, entity);
+         }
+ 

@@ -1,0 +1,24 @@
+--- a/net/minecraft/text/Style.java
++++ b/net/minecraft/text/Style.java
+@@ -118,6 +118,21 @@
+         return new Style(this.color, this.bold, obool, this.underlined, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
+     }
+ 
++    // CraftBukkit start
++    public Style setStrikethrough(@Nullable Boolean obool) {
++        return new Style(this.color, this.bold, this.italic, this.underlined, obool, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
++    }
++
++    public Style setUnderline(@Nullable Boolean obool) {
++        return new Style(this.color, this.bold, this.italic, obool, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
++    }
++
++    public Style setRandom(@Nullable Boolean obool) {
++        return new Style(this.color, this.bold, this.italic, this.underlined, this.strikethrough, obool, this.clickEvent, this.hoverEvent, this.insertion, this.font);
++    }
++    // CraftBukkit end
++
++
+     public Style withClickEvent(@Nullable ClickEvent clickevent) {
+         return new Style(this.color, this.bold, this.italic, this.underlined, this.strikethrough, this.obfuscated, clickevent, this.hoverEvent, this.insertion, this.font);
+     }

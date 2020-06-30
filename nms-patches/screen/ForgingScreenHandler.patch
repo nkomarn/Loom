@@ -1,0 +1,10 @@
+--- a/net/minecraft/screen/ForgingScreenHandler.java
++++ b/net/minecraft/screen/ForgingScreenHandler.java
+@@ -82,6 +82,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return (Boolean) this.context.run((world, blockpos) -> {
+             return !this.canUse(world.getBlockState(blockpos)) ? false : playerentity.squaredDistanceTo((double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.5D, (double) blockpos.getZ() + 0.5D) <= 64.0D;
+         }, true);

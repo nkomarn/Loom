@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/VineBlock.java
 +++ b/net/minecraft/block/VineBlock.java
-@@ -18,6 +18,7 @@
+@@ -19,6 +19,7 @@
  import net.minecraft.world.BlockView;
  import net.minecraft.world.WorldAccess;
  import net.minecraft.world.WorldView;
@@ -8,7 +8,7 @@
  
  public class VineBlock extends Block {
  
-@@ -176,10 +177,13 @@
+@@ -177,20 +178,24 @@
                          BlockPos blockpos3 = blockpos2.offset(direction1);
                          BlockPos blockpos4 = blockpos2.offset(direction2);
  
@@ -20,7 +20,39 @@
 +                            CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos2, this.getDefaultState().with(getFacingProperty(direction1), true), 2);
                          } else if (flag1 && shouldConnectTo(serverworld, blockpos4, direction2)) {
 -                            serverworld.setBlockState(blockpos2, (BlockState) this.getDefaultState().with(getFacingProperty(direction2), true), 2);
-+                            CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos2, this.getDefaultState().set(getFacingProperty(direction2), true), 2);
++                            CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos2, this.getDefaultState().with(getFacingProperty(direction2), true), 2);
                          } else {
                              Direction direction3 = direction.getOpposite();
  
+                             if (flag && serverworld.isAir(blockpos3) && shouldConnectTo(serverworld, blockpos.offset(direction1), direction3)) {
+-                                serverworld.setBlockState(blockpos3, (BlockState) this.getDefaultState().with(getFacingProperty(direction3), true), 2);
++                                CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos3, this.getDefaultState().with(getFacingProperty(direction3), true), 2);
+                             } else if (flag1 && serverworld.isAir(blockpos4) && shouldConnectTo(serverworld, blockpos.offset(direction2), direction3)) {
+-                                serverworld.setBlockState(blockpos4, (BlockState) this.getDefaultState().with(getFacingProperty(direction3), true), 2);
++                                CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos4, this.getDefaultState().with(getFacingProperty(direction3), true), 2);
+                             } else if ((double) serverworld.random.nextFloat() < 0.05D && shouldConnectTo(serverworld, blockpos2.up(), Direction.UP)) {
+-                                serverworld.setBlockState(blockpos2, (BlockState) this.getDefaultState().with(VineBlock.UP, true), 2);
++                                CraftEventFactory.handleBlockSpreadEvent(serverworld, source, blockpos2, this.getDefaultState().with(UP, true), 2);
+                             }
++                            // CraftBukkit end
+                         }
+                     } else if (shouldConnectTo(serverworld, blockpos2, direction)) {
+                         serverworld.setBlockState(blockpos, (BlockState) blockstate.with(getFacingProperty(direction), true), 2);
+@@ -220,7 +225,7 @@
+                         }
+ 
+                         if (this.hasHorizontalSide(blockstate2)) {
+-                            serverworld.setBlockState(blockpos1, blockstate2, 2);
++                            CraftEventFactory.handleBlockSpreadEvent(serverworld, blockpos, blockpos1, blockstate2, 2); // CraftBukkit
+                         }
+ 
+                         return;
+@@ -235,7 +240,7 @@
+                         BlockState blockstate4 = this.getGrownState(blockstate, blockstate3, random);
+ 
+                         if (blockstate3 != blockstate4 && this.hasHorizontalSide(blockstate4)) {
+-                            serverworld.setBlockState(blockpos2, blockstate4, 2);
++                            CraftEventFactory.handleBlockSpreadEvent(serverworld, blockpos, blockpos2, blockstate4, 2); // CraftBukkit
+                         }
+                     }
+                 }

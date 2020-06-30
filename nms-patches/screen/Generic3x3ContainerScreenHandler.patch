@@ -1,0 +1,55 @@
+--- a/net/minecraft/screen/Generic3x3ContainerScreenHandler.java
++++ b/net/minecraft/screen/Generic3x3ContainerScreenHandler.java
+@@ -6,10 +6,16 @@
+ import net.minecraft.inventory.SimpleInventory;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.screen.slot.Slot;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class Generic3x3ContainerScreenHandler extends ScreenHandler {
+ 
+     private final Inventory inventory;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++    // CraftBukkit end
+ 
+     public Generic3x3ContainerScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, new SimpleInventory(9));
+@@ -17,6 +23,9 @@
+ 
+     public Generic3x3ContainerScreenHandler(int i, PlayerInventory playerinventory, Inventory inventory) {
+         super(ScreenHandlerType.GENERIC_3X3, i);
++        // CraftBukkit start - Save player
++        this.player = playerinventory;
++        // CraftBukkit end
+         checkSize(inventory, 9);
+         this.inventory = inventory;
+         inventory.onOpen(playerinventory.player);
+@@ -43,6 +52,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return this.inventory.canPlayerUse(playerentity);
+     }
+ 
+@@ -82,4 +92,17 @@
+         super.close(playerentity);
+         this.inventory.onClose(playerentity);
+     }
++
++    // CraftBukkit start
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory = new CraftInventory(this.inventory);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ }

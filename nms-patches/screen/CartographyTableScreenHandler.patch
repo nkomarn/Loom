@@ -1,0 +1,57 @@
+--- a/net/minecraft/screen/CartographyTableScreenHandler.java
++++ b/net/minecraft/screen/CartographyTableScreenHandler.java
+@@ -16,9 +16,28 @@
+ import net.minecraft.sound.SoundEvents;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.inventory.CraftInventoryCartography;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.entity.Player;
+ 
+ public class CartographyTableScreenHandler extends ScreenHandler {
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private Player player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryCartography inventory = new CraftInventoryCartography(this.inventory, this.resultSlot);
++        bukkitEntity = new CraftInventoryView(this.player, inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+     private final ScreenHandlerContext context;
+     private boolean currentlyTakingItem;
+     private long lastTakeResultTime;
+@@ -42,6 +61,13 @@
+                 CartographyTableScreenHandler.this.onContentChanged(this);
+                 super.markDirty();
+             }
++
++            // CraftBukkit start
++            @Override
++            public Location getLocation() {
++                return context.getLocation();
++            }
++            // CraftBukkit end
+         };
+         this.context = screenhandlercontext;
+         this.addSlot(new Slot(this.inventory, 0, 15, 15) {
+@@ -113,9 +139,11 @@
+             this.addSlot(new Slot(playerinventory, j, 8 + j * 18, 142));
+         }
+ 
++        player = (Player) playerinventory.player.getBukkitEntity(); // CraftBukkit
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return canUse(this.context, playerentity, Blocks.CARTOGRAPHY_TABLE);
+     }
+ 

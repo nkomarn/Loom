@@ -1,0 +1,143 @@
+--- a/net/minecraft/server/world/ChunkTicketManager.java
++++ b/net/minecraft/server/world/ChunkTicketManager.java
+@@ -16,6 +16,8 @@
+ import it.unimi.dsi.fastutil.objects.ObjectIterator;
+ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+ import it.unimi.dsi.fastutil.objects.ObjectSet;
++
++import java.util.Iterator;
+ import java.util.Set;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.concurrent.Executor;
+@@ -66,7 +68,7 @@
+         while (objectiterator.hasNext()) {
+             Long2ObjectMap.Entry<SortedArraySet<ChunkTicket<?>>> long2objectmap_entry = (Long2ObjectMap.Entry) objectiterator.next();
+ 
+-            if (((SortedArraySet) long2objectmap_entry.getValue()).removeIf((chunkticket) -> {
++            if ((long2objectmap_entry.getValue()).removeIf((chunkticket) -> { // CraftBukkit - decompile error
+                 return chunkticket.isExpired(this.age);
+             })) {
+                 this.distanceFromTicketTracker.updateLevel(long2objectmap_entry.getLongKey(), getLevel((SortedArraySet) long2objectmap_entry.getValue()), false);
+@@ -102,10 +104,25 @@
+         }
+ 
+         if (!this.chunkHolders.isEmpty()) {
+-            this.chunkHolders.forEach((chunkholder) -> {
++            // CraftBukkit start
++            // Iterate pending chunk updates with protection against concurrent modification exceptions
++            Iterator<ChunkHolder> iter = this.chunkHolders.iterator();
++            int expectedSize = this.chunkHolders.size();
++
++            do {
++                ChunkHolder chunkholder = iter.next();
++                iter.remove();
++                expectedSize--;
++
+                 chunkholder.tick(threadedanvilchunkstorage);
+-            });
+-            this.chunkHolders.clear();
++
++                // Reset iterator if set was modified using add()
++                if (this.chunkHolders.size() != expectedSize) {
++                    expectedSize = this.chunkHolders.size();
++                    iter = this.chunkHolders.iterator();
++                }
++            } while (iter.hasNext());
++            // CraftBukkit end
+             return true;
+         } else {
+             if (!this.chunkPositions.isEmpty()) {
+@@ -141,7 +158,7 @@
+         }
+     }
+ 
+-    private void addTicket(long i, ChunkTicket<?> chunkticket) {
++    private boolean addTicket(long i, ChunkTicket<?> chunkticket) { // CraftBukkit - void -> boolean
+         SortedArraySet<ChunkTicket<?>> sortedarrayset = this.getTicketSet(i);
+         int j = getLevel(sortedarrayset);
+         ChunkTicket<?> chunkticket1 = (ChunkTicket) sortedarrayset.addAndGet(chunkticket);
+@@ -151,13 +168,16 @@
+             this.distanceFromTicketTracker.updateLevel(i, chunkticket.getLevel(), true);
+         }
+ 
++        return chunkticket == chunkticket1; // CraftBukkit
+     }
+ 
+-    private void removeTicket(long i, ChunkTicket<?> chunkticket) {
++    private boolean removeTicket(long i, ChunkTicket<?> chunkticket) { // CraftBukkit - void -> boolean
+         SortedArraySet<ChunkTicket<?>> sortedarrayset = this.getTicketSet(i);
+ 
++        boolean removed = false; // CraftBukkit
+         if (sortedarrayset.remove(chunkticket)) {
+             ;
++            removed = true; // CraftBukkit
+         }
+ 
+         if (sortedarrayset.isEmpty()) {
+@@ -165,16 +185,28 @@
+         }
+ 
+         this.distanceFromTicketTracker.updateLevel(i, getLevel(sortedarrayset), false);
++        return removed; // CraftBukkit
+     }
+ 
+     public <T> void addTicketWithLevel(ChunkTicketType<T> chunktickettype, ChunkPos chunkpos, int i, T t0) {
+-        this.addTicket(chunkpos.toLong(), new ChunkTicket<>(chunktickettype, i, t0));
++        // CraftBukkit start
++        this.addTicketAtLevel(chunktickettype, chunkpos, i, t0);
++    }
++
++    public <T> boolean addTicketAtLevel(ChunkTicketType<T> ticketType, ChunkPos chunkcoordintpair, int level, T identifier) {
++        return this.addTicket(chunkcoordintpair.toLong(), new ChunkTicket<>(ticketType, level, identifier));
++        // CraftBukkit end
+     }
+ 
+     public <T> void removeTicketWithLevel(ChunkTicketType<T> chunktickettype, ChunkPos chunkpos, int i, T t0) {
+-        ChunkTicket<T> chunkticket = new ChunkTicket<>(chunktickettype, i, t0);
++        // CraftBukkit start
++        this.removeTicketAtLevel(chunktickettype, chunkpos, i, t0);
++    }
+ 
+-        this.removeTicket(chunkpos.toLong(), chunkticket);
++    public <T> boolean removeTicketAtLevel(ChunkTicketType<T> ticketType, ChunkPos chunkcoordintpair, int level, T identifier) {
++        ChunkTicket<T> ticket = new ChunkTicket<>(ticketType, level, identifier);
++        return this.removeTicket(chunkcoordintpair.toLong(), ticket);
++        // CraftBukkit end
+     }
+ 
+     public <T> void addTicket(ChunkTicketType<T> chunktickettype, ChunkPos chunkpos, int i, T t0) {
+@@ -258,6 +290,25 @@
+         return this.levelUpdateListener.getDebugString();
+     }
+ 
++    // CraftBukkit start
++    public <T> void removeAllTicketsFor(ChunkTicketType<T> ticketType, int ticketLevel, T ticketIdentifier) {
++        ChunkTicket<T> target = new ChunkTicket<>(ticketType, ticketLevel, ticketIdentifier);
++        for (Iterator<Long2ObjectMap.Entry<SortedArraySet<ChunkTicket<?>>>> iterator = this.ticketsByPosition.long2ObjectEntrySet().fastIterator(); iterator.hasNext();) {
++            Long2ObjectMap.Entry<SortedArraySet<ChunkTicket<?>>> entry = iterator.next();
++            SortedArraySet<ChunkTicket<?>> tickets = entry.getValue();
++            if (tickets.remove(target)) {
++                // copied from removeTicket
++                this.distanceFromTicketTracker.update(entry.getLongKey(), getLevel(tickets), false);
++
++                // can't use entry after it's removed
++                if (tickets.isEmpty()) {
++                    iterator.remove();
++                }
++            }
++        }
++    }
++    // CraftBukkit end
++
+     class TicketDistanceLevelPropagator extends ChunkPosDistanceLevelPropagator {
+ 
+         public TicketDistanceLevelPropagator() {
+@@ -300,6 +351,8 @@
+         }
+     }
+ 
++
++
+     class NearbyChunkTicketUpdater extends ChunkTicketManager.DistanceFromNearestPlayerTracker {
+ 
+         private int watchDistance = 0;

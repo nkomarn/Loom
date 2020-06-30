@@ -1,0 +1,65 @@
+--- a/net/minecraft/screen/GenericContainerScreenHandler.java
++++ b/net/minecraft/screen/GenericContainerScreenHandler.java
+@@ -2,15 +2,43 @@
+ 
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.entity.player.PlayerInventory;
++import net.minecraft.inventory.DoubleInventory;
+ import net.minecraft.inventory.Inventory;
+ import net.minecraft.inventory.SimpleInventory;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.screen.slot.Slot;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest;
++import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class GenericContainerScreenHandler extends ScreenHandler {
+ 
+     private final Inventory inventory;
+     private final int rows;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory;
++        if (this.inventory instanceof PlayerInventory) {
++            inventory = new CraftInventoryPlayer((PlayerInventory) this.inventory);
++        } else if (this.inventory instanceof DoubleInventory) {
++            inventory = new CraftInventoryDoubleChest((DoubleInventory) this.inventory);
++        } else {
++            inventory = new CraftInventory(this.inventory);
++        }
++
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ 
+     private GenericContainerScreenHandler(ScreenHandlerType<?> screenhandlertype, int i, PlayerInventory playerinventory, int j) {
+         this(screenhandlertype, i, playerinventory, new SimpleInventory(9 * j), j);
+@@ -56,6 +84,10 @@
+         inventory.onOpen(playerinventory.player);
+         int k = (this.rows - 4) * 18;
+ 
++        // CraftBukkit start - Save player
++        this.player = playerinventory;
++        // CraftBukkit end
++
+         int l;
+         int i1;
+ 
+@@ -78,6 +110,7 @@
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return this.inventory.canPlayerUse(playerentity);
+     }
+ 

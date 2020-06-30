@@ -1,0 +1,42 @@
+--- a/net/minecraft/screen/ScreenHandlerContext.java
++++ b/net/minecraft/screen/ScreenHandlerContext.java
+@@ -8,6 +8,20 @@
+ 
+ public interface ScreenHandlerContext {
+ 
++    // CraftBukkit start
++    default World getWorld() {
++        throw new UnsupportedOperationException("Not supported yet.");
++    }
++
++    default BlockPos getPosition() {
++        throw new UnsupportedOperationException("Not supported yet.");
++    }
++
++    default org.bukkit.Location getLocation() {
++        return new org.bukkit.Location(getWorld().getCraftWorld(), getPosition().getX(), getPosition().getY(), getPosition().getZ());
++    }
++    // CraftBukkit end
++
+     ScreenHandlerContext EMPTY = new ScreenHandlerContext() {
+         public <T> Optional<T> run(BiFunction<World, BlockPos, T> bifunction) {
+             return Optional.empty();
+@@ -16,6 +30,18 @@
+ 
+     static ScreenHandlerContext create(final World world, final BlockPos blockpos) {
+         return new ScreenHandlerContext() {
++            // CraftBukkit start
++            @Override
++            public World getWorld() {
++                return world;
++            }
++
++            @Override
++            public BlockPos getPosition() {
++                return blockpos;
++            }
++            // CraftBukkit end
++
+             public <T> Optional<T> run(BiFunction<World, BlockPos, T> bifunction) {
+                 return Optional.of(bifunction.apply(world, blockpos));
+             }
