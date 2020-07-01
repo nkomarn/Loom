@@ -1,9 +1,8 @@
 package org.bukkit.craftbukkit.command;
 
-import net.minecraft.server.CommandListenerWrapper;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.SystemUtils;
-import net.minecraft.server.TileEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import org.bukkit.block.Block;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.craftbukkit.block.CraftBlock;
@@ -13,10 +12,10 @@ import org.bukkit.craftbukkit.util.CraftChatMessage;
  * Represents input from a command block
  */
 public class CraftBlockCommandSender extends ServerCommandSender implements BlockCommandSender {
-    private final CommandListenerWrapper block;
-    private final TileEntity tile;
+    private final ServerCommandSource block;
+    private final BlockEntity tile;
 
-    public CraftBlockCommandSender(CommandListenerWrapper commandBlockListenerAbstract, TileEntity tile) {
+    public CraftBlockCommandSender(ServerCommandSource commandBlockListenerAbstract, BlockEntity tile) {
         super();
         this.block = commandBlockListenerAbstract;
         this.tile = tile;
@@ -24,12 +23,12 @@ public class CraftBlockCommandSender extends ServerCommandSender implements Bloc
 
     @Override
     public Block getBlock() {
-        return CraftBlock.at(tile.getWorld(), tile.getPosition());
+        return CraftBlock.at(tile.getWorld(), tile.getPos());
     }
 
     @Override
     public void sendMessage(String message) {
-        for (IChatBaseComponent component : CraftChatMessage.fromString(message)) {
+        for (Text component : CraftChatMessage.fromString(message)) {
             block.base.sendMessage(component, SystemUtils.b);
         }
     }
@@ -56,7 +55,7 @@ public class CraftBlockCommandSender extends ServerCommandSender implements Bloc
         throw new UnsupportedOperationException("Cannot change operator status of a block");
     }
 
-    public CommandListenerWrapper getWrapper() {
+    public ServerCommandSource getWrapper() {
         return block;
     }
 }

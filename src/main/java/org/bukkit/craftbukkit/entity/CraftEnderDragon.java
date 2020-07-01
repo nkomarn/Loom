@@ -3,9 +3,9 @@ package org.bukkit.craftbukkit.entity;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import java.util.Set;
-import net.minecraft.server.DragonControllerPhase;
-import net.minecraft.server.EntityComplexPart;
-import net.minecraft.server.EntityEnderDragon;
+
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
 import org.bukkit.craftbukkit.CraftServer;
@@ -16,7 +16,7 @@ import org.bukkit.entity.EntityType;
 
 public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderDragon {
 
-    public CraftEnderDragon(CraftServer server, EntityEnderDragon entity) {
+    public CraftEnderDragon(CraftServer server, EnderDragonEntity entity) {
         super(server, entity);
     }
 
@@ -32,8 +32,8 @@ public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderD
     }
 
     @Override
-    public EntityEnderDragon getHandle() {
-        return (EntityEnderDragon) entity;
+    public EnderDragonEntity getHandle() {
+        return (EnderDragonEntity) entity;
     }
 
     @Override
@@ -56,12 +56,12 @@ public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderD
         getHandle().getDragonControllerManager().setControllerPhase(getMinecraftPhase(phase));
     }
 
-    public static Phase getBukkitPhase(DragonControllerPhase phase) {
-        return Phase.values()[phase.b()];
+    public static Phase getBukkitPhase(PhaseType phase) {
+        return Phase.values()[phase.getTypeId()];
     }
 
-    public static DragonControllerPhase getMinecraftPhase(Phase phase) {
-        return DragonControllerPhase.getById(phase.ordinal());
+    public static PhaseType getMinecraftPhase(Phase phase) {
+        return PhaseType.getFromId(phase.ordinal());
     }
 
     @Override

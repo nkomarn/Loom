@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.enchantments;
 
-import net.minecraft.server.EnchantmentBinding;
-import net.minecraft.server.EnchantmentVanishing;
-import net.minecraft.server.IRegistry;
+import net.minecraft.enchantment.BindingCurseEnchantment;
+import net.minecraft.enchantment.VanishingCurseEnchantment;
+import org.bukkit.Registry;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -11,10 +11,10 @@ import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftEnchantment extends Enchantment {
-    private final net.minecraft.server.Enchantment target;
+    private final net.minecraft.enchantment.Enchantment target;
 
-    public CraftEnchantment(net.minecraft.server.Enchantment target) {
-        super(CraftNamespacedKey.fromMinecraft(IRegistry.ENCHANTMENT.getKey(target)));
+    public CraftEnchantment(net.minecraft.enchantment.Enchantment target) {
+        super(CraftNamespacedKey.fromMinecraft(Registry.ENCHANTMENT.getKey(target)));
         this.target = target;
     }
 
@@ -25,7 +25,7 @@ public class CraftEnchantment extends Enchantment {
 
     @Override
     public int getStartLevel() {
-        return target.getStartLevel();
+        return target.getMinLevel();
     }
 
     @Override
@@ -71,12 +71,12 @@ public class CraftEnchantment extends Enchantment {
 
     @Override
     public boolean isCursed() {
-        return target instanceof EnchantmentBinding || target instanceof EnchantmentVanishing;
+        return target instanceof BindingCurseEnchantment || target instanceof VanishingCurseEnchantment;
     }
 
     @Override
     public boolean canEnchantItem(ItemStack item) {
-        return target.canEnchant(CraftItemStack.asNMSCopy(item));
+        return target.isAcceptableItem(CraftItemStack.asNMSCopy(item));
     }
 
     @Override
@@ -188,7 +188,7 @@ public class CraftEnchantment extends Enchantment {
         return !target.isCompatible(ench.target);
     }
 
-    public net.minecraft.server.Enchantment getHandle() {
+    public net.minecraft.enchantment.Enchantment getHandle() {
         return target;
     }
 }

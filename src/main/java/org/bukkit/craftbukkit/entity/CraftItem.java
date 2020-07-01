@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityItem;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
@@ -9,25 +9,25 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftItem extends CraftEntity implements Item {
-    private final EntityItem item;
+    private final ItemEntity item;
 
-    public CraftItem(CraftServer server, Entity entity, EntityItem item) {
+    public CraftItem(CraftServer server, Entity entity, ItemEntity item) {
         super(server, entity);
         this.item = item;
     }
 
-    public CraftItem(CraftServer server, EntityItem entity) {
+    public CraftItem(CraftServer server, ItemEntity entity) {
         this(server, entity, entity);
     }
 
     @Override
     public ItemStack getItemStack() {
-        return CraftItemStack.asCraftMirror(item.getItemStack());
+        return CraftItemStack.asCraftMirror(item.getStack());
     }
 
     @Override
     public void setItemStack(ItemStack stack) {
-        item.setItemStack(CraftItemStack.asNMSCopy(stack));
+        item.setStack(CraftItemStack.asNMSCopy(stack));
     }
 
     @Override

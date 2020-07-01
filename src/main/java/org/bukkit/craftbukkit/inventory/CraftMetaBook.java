@@ -10,6 +10,7 @@ import net.minecraft.server.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.NBTTagList;
 import net.minecraft.server.NBTTagString;
+import net.minecraft.text.Text;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -31,7 +32,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
     protected String title;
     protected String author;
-    public List<IChatBaseComponent> pages = new ArrayList<IChatBaseComponent>();
+    public List<Text> pages = new ArrayList<Text>();
     protected Integer generation;
 
     CraftMetaBook(CraftMetaItem meta) {

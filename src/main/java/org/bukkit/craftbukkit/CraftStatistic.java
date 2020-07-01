@@ -10,6 +10,9 @@ import net.minecraft.server.Item;
 import net.minecraft.server.MinecraftKey;
 import net.minecraft.server.ServerStatisticManager;
 import net.minecraft.server.StatisticList;
+import net.minecraft.stat.Stat;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -100,12 +103,12 @@ public enum CraftStatistic {
     TARGET_HIT(StatisticList.TARGET_HIT),
     INTERACT_WITH_SMITHING_TABLE(StatisticList.INTERACT_WITH_SMITHING_TABLE),
     STRIDER_ONE_CM(StatisticList.STRIDER_ONE_CM);
-    private final MinecraftKey minecraftKey;
+    private final Identifier minecraftKey;
     private final org.bukkit.Statistic bukkit;
-    private static final BiMap<MinecraftKey, org.bukkit.Statistic> statistics;
+    private static final BiMap<Identifier, org.bukkit.Statistic> statistics;
 
     static {
-        ImmutableBiMap.Builder<MinecraftKey, org.bukkit.Statistic> statisticBuilder = ImmutableBiMap.builder();
+        ImmutableBiMap.Builder<Identifier, org.bukkit.Statistic> statisticBuilder = ImmutableBiMap.builder();
         for (CraftStatistic statistic : CraftStatistic.values()) {
             statisticBuilder.put(statistic.minecraftKey, statistic.bukkit);
         }
@@ -113,19 +116,19 @@ public enum CraftStatistic {
         statistics = statisticBuilder.build();
     }
 
-    private CraftStatistic(MinecraftKey minecraftKey) {
+    private CraftStatistic(Identifier minecraftKey) {
         this.minecraftKey = minecraftKey;
 
         this.bukkit = org.bukkit.Statistic.valueOf(this.name());
         Preconditions.checkState(bukkit != null, "Bukkit statistic %s does not exist", this.name());
     }
 
-    public static org.bukkit.Statistic getBukkitStatistic(net.minecraft.server.Statistic<?> statistic) {
-        IRegistry statRegistry = statistic.getWrapper().getRegistry();
-        MinecraftKey nmsKey = IRegistry.STATS.getKey(statistic.getWrapper());
+    public static org.bukkit.Statistic getBukkitStatistic(Stat<?> statistic) {
+        Registry statRegistry = statistic.getType().getRegistry();
+        Identifier nmsKey = Registry.STAT_TYPE.getId(statistic.getType());
 
-        if (statRegistry == IRegistry.CUSTOM_STAT) {
-            nmsKey = (MinecraftKey) statistic.b();
+        if (statRegistry == Registry.CUSTOM_STAT) {
+            nmsKey = (Identifier) statistic.getValue();
         }
 
         return statistics.get(nmsKey);
@@ -180,12 +183,12 @@ public enum CraftStatistic {
         return null;
     }
 
-    public static EntityType getEntityTypeFromStatistic(net.minecraft.server.Statistic<EntityTypes<?>> statistic) {
-        MinecraftKey name = EntityTypes.getName(statistic.b());
+    public static EntityType getEntityTypeFromStatistic(Stat<net.minecraft.entity.EntityType<?>> statistic) {
+        Identifier name = EntityTypes.getName(statistic.b());
         return EntityType.fromName(name.getKey());
     }
 
-    public static Material getMaterialFromStatistic(net.minecraft.server.Statistic<?> statistic) {
+    public static Material getMaterialFromStatistic(Stat<?> statistic) {
         if (statistic.b() instanceof Item) {
             return CraftMagicNumbers.getMaterial((Item) statistic.b());
         }

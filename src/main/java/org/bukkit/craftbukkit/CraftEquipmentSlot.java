@@ -1,32 +1,31 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.EnumItemSlot;
-import org.bukkit.inventory.EquipmentSlot;
+import net.minecraft.entity.EquipmentSlot;
 
 public class CraftEquipmentSlot {
 
-    private static final EnumItemSlot[] slots = new EnumItemSlot[EquipmentSlot.values().length];
-    private static final EquipmentSlot[] enums = new EquipmentSlot[EnumItemSlot.values().length];
+    private static final EquipmentSlot[] slots = new EquipmentSlot[EquipmentSlot.values().length];
+    private static final org.bukkit.inventory.EquipmentSlot[] enums = new org.bukkit.inventory.EquipmentSlot[org.bukkit.inventory.EquipmentSlot.values().length];
 
     static {
-        set(EquipmentSlot.HAND, EnumItemSlot.MAINHAND);
-        set(EquipmentSlot.OFF_HAND, EnumItemSlot.OFFHAND);
-        set(EquipmentSlot.FEET, EnumItemSlot.FEET);
-        set(EquipmentSlot.LEGS, EnumItemSlot.LEGS);
-        set(EquipmentSlot.CHEST, EnumItemSlot.CHEST);
-        set(EquipmentSlot.HEAD, EnumItemSlot.HEAD);
+        set(org.bukkit.inventory.EquipmentSlot.HAND, EquipmentSlot.MAINHAND);
+        set(org.bukkit.inventory.EquipmentSlot.OFF_HAND, EquipmentSlot.OFFHAND);
+        set(org.bukkit.inventory.EquipmentSlot.FEET, EquipmentSlot.FEET);
+        set(org.bukkit.inventory.EquipmentSlot.LEGS, EquipmentSlot.LEGS);
+        set(org.bukkit.inventory.EquipmentSlot.CHEST, EquipmentSlot.CHEST);
+        set(org.bukkit.inventory.EquipmentSlot.HEAD, EquipmentSlot.HEAD);
     }
 
-    private static void set(EquipmentSlot type, EnumItemSlot value) {
+    private static void set(org.bukkit.inventory.EquipmentSlot type, EquipmentSlot value) {
         slots[type.ordinal()] = value;
         enums[value.ordinal()] = type;
     }
 
-    public static EquipmentSlot getSlot(EnumItemSlot nms) {
+    public static org.bukkit.inventory.EquipmentSlot getSlot(EquipmentSlot nms) {
         return enums[nms.ordinal()];
     }
 
-    public static EnumItemSlot getNMS(EquipmentSlot slot) {
+    public static EquipmentSlot getNMS(EquipmentSlot slot) {
         return slots[slot.ordinal()];
     }
 }
