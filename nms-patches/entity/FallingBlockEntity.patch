@@ -1,0 +1,41 @@
+--- a/net/minecraft/entity/FallingBlockEntity.java
++++ b/net/minecraft/entity/FallingBlockEntity.java
+@@ -36,6 +36,7 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.RayTraceContext;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class FallingBlockEntity extends Entity {
+ 
+@@ -98,7 +99,7 @@
+ 
+             if (this.timeFalling++ == 0) {
+                 blockpos = this.getBlockPos();
+-                if (this.world.getBlockState(blockpos).isOf(block)) {
++                if (this.world.getBlockState(blockpos).isOf(block) && !CraftEventFactory.callEntityChangeBlockEvent(this, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) {
+                     this.world.removeBlock(blockpos, false);
+                 } else if (!this.world.isClient) {
+                     this.remove();
+@@ -150,6 +151,11 @@
+                                     this.block = (BlockState) this.block.with(Properties.WATERLOGGED, true);
+                                 }
+ 
++                                // CraftBukkit start
++                                if (CraftEventFactory.callEntityChangeBlockEvent(this, blockpos, this.block).isCancelled()) {
++                                    return;
++                                }
++                                // CraftBukkit end
+                                 if (this.world.setBlockState(blockpos, this.block, 3)) {
+                                     if (block instanceof FallingBlock) {
+                                         ((FallingBlock) block).onLanding(this.world, blockpos, this.block, blockstate, this);
+@@ -205,7 +211,9 @@
+                 while (iterator.hasNext()) {
+                     Entity entity = (Entity) iterator.next();
+ 
++                    CraftEventFactory.entityDamage = this; // CraftBukkit
+                     entity.damage(damagesource, (float) Math.min(MathHelper.floor((float) i * this.fallHurtAmount), this.fallHurtMax));
++                    CraftEventFactory.entityDamage = null; // CraftBukkit
+                 }
+ 
+                 if (flag && (double) this.random.nextFloat() < 0.05000000074505806D + (double) i * 0.05D) {

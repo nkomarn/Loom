@@ -1,0 +1,24 @@
+--- a/net/minecraft/enchantment/FrostWalkerEnchantment.java
++++ b/net/minecraft/enchantment/FrostWalkerEnchantment.java
+@@ -12,6 +12,7 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.util.math.Position;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class FrostWalkerEnchantment extends Enchantment {
+ 
+@@ -53,8 +54,11 @@
+                         BlockState blockstate2 = world.getBlockState(blockpos1);
+ 
+                         if (blockstate2.getMaterial() == Material.WATER && (Integer) blockstate2.get(FluidBlock.LEVEL) == 0 && blockstate.canPlaceAt(world, blockpos1) && world.canPlace(blockstate, blockpos1, ShapeContext.absent())) {
+-                            world.setBlockState(blockpos1, blockstate);
+-                            world.getBlockTickScheduler().schedule(blockpos1, Blocks.FROSTED_ICE, MathHelper.nextInt(livingentity.getRandom(), 60, 120));
++                            // CraftBukkit start - Call EntityBlockFormEvent for Frost Walker
++                            if (CraftEventFactory.handleBlockFormEvent(world, blockpos1, blockstate, livingentity)) {
++                                world.getBlockTickScheduler().schedule(blockpos1, Blocks.FROSTED_ICE, MathHelper.nextInt(livingentity.getRandom(), 60, 120));
++                            }
++                            // CraftBukkit end
+                         }
+                     }
+                 }

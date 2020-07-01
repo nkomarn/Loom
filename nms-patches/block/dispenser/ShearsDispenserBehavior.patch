@@ -1,0 +1,73 @@
+--- a/net/minecraft/block/dispenser/ShearsDispenserBehavior.java
++++ b/net/minecraft/block/dispenser/ShearsDispenserBehavior.java
+@@ -21,6 +21,12 @@
+ import net.minecraft.util.math.Box;
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.block.Block;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.block.BlockDispenseEvent;
++import org.bukkit.util.Vector;
+ 
+ public class ShearsDispenserBehavior extends FallibleItemDispenserBehavior {
+ 
+@@ -28,11 +34,35 @@
+ 
+     protected ItemStack dispenseSilently(BlockPointer blockpointer, ItemStack itemstack) {
+         World world = blockpointer.getWorld();
++        // CraftBukkit start
++        BlockPos blockpos1 = blockpointer.getBlockPos();
++        org.bukkit.block.Block bukkitBlock = world.getCraftWorld().getBlockAt(blockpos1.getX(), blockpos1.getY(), blockpos1.getZ());
++        CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack);
++
++        BlockDispenseEvent event = new BlockDispenseEvent(bukkitBlock, craftItem.clone(), new Vector(0, 0, 0));
++        if (!DispenserBlock.eventFired) {
++            Bukkit.getPluginManager().callEvent(event);
++        }
++
++        if (event.isCancelled()) {
++            return itemstack;
++        }
++
++        if (!event.getItem().equals(craftItem)) {
++            // Chain to handler for new item
++            ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
++            DispenserBehavior idispensebehavior = DispenserBlock.BEHAVIORS.get(eventStack.getItem());
++            if (idispensebehavior != DispenserBehavior.NOOP && idispensebehavior != this) {
++                idispensebehavior.dispense(blockpointer, eventStack);
++                return itemstack;
++            }
++        }
++        // CraftBukkit end
+ 
+         if (!world.isClient()) {
+             BlockPos blockpos = blockpointer.getBlockPos().offset((Direction) blockpointer.getBlockState().get(DispenserBlock.FACING));
+ 
+-            this.setSuccess(tryShearBlock((ServerWorld) world, blockpos) || tryShearEntity((ServerWorld) world, blockpos));
++            this.setSuccess(tryShearBlock((ServerWorld) world, blockpos) || tryShearEntity((ServerWorld) world, blockpos, bukkitBlock, craftItem)); // CraftBukkit
+             if (this.isSuccess() && itemstack.damage(1, world.getRandom(), (ServerPlayerEntity) null)) {
+                 itemstack.setCount(0);
+             }
+@@ -58,7 +88,7 @@
+         return false;
+     }
+ 
+-    private static boolean tryShearEntity(ServerWorld serverworld, BlockPos blockpos) {
++    private static boolean tryShearEntity(ServerWorld serverworld, BlockPos blockpos, Block bukkitBlock, CraftItemStack craftItem) {
+         List<LivingEntity> list = serverworld.getEntities(LivingEntity.class, new Box(blockpos), EntityPredicates.EXCEPT_SPECTATOR);
+         Iterator iterator = list.iterator();
+ 
+@@ -69,6 +99,11 @@
+                 Shearable shearable = (Shearable) livingentity;
+ 
+                 if (shearable.isShearable()) {
++                    // CraftBukkit start
++                    if (CraftEventFactory.callBlockShearEntityEvent(livingentity, bukkitBlock, craftItem).isCancelled()) {
++                        continue;
++                    }
++                    // CraftBukkit end
+                     shearable.sheared(SoundCategory.BLOCKS);
+                     return true;
+                 }

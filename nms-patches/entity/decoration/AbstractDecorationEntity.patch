@@ -1,0 +1,171 @@
+--- a/net/minecraft/entity/decoration/AbstractDecorationEntity.java
++++ b/net/minecraft/entity/decoration/AbstractDecorationEntity.java
+@@ -4,12 +4,14 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.block.AbstractRedstoneGateBlock;
+ import net.minecraft.block.BlockState;
++import net.minecraft.block.Material;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.EntityType;
+ import net.minecraft.entity.ItemEntity;
+ import net.minecraft.entity.LightningEntity;
+ import net.minecraft.entity.MovementType;
+ import net.minecraft.entity.damage.DamageSource;
++import net.minecraft.entity.damage.ProjectileDamageSource;
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.nbt.CompoundTag;
+@@ -22,6 +24,10 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
+ import org.apache.commons.lang3.Validate;
++import org.bukkit.Bukkit;
++import org.bukkit.entity.Hanging;
++import org.bukkit.event.hanging.HangingBreakByEntityEvent;
++import org.bukkit.event.hanging.HangingBreakEvent;
+ 
+ public abstract class AbstractDecorationEntity extends Entity {
+ 
+@@ -55,26 +61,39 @@
+ 
+     protected void updateAttachmentPosition() {
+         if (this.facing != null) {
+-            double d0 = (double) this.attachmentPos.getX() + 0.5D;
+-            double d1 = (double) this.attachmentPos.getY() + 0.5D;
+-            double d2 = (double) this.attachmentPos.getZ() + 0.5D;
++            // CraftBukkit start - code moved in to calculateBoundingBox
++            this.setBoundingBox(calculateBoundingBox(this, this.attachmentPos, this.facing, this.getWidthPixels(), this.getHeightPixels()));
++            // CraftBukkit end
++        }
++    }
++
++    // CraftBukkit start - break out BB calc into own method
++    public static Box calculateBoundingBox(@Nullable Entity entity, BlockPos blockPosition, Direction direction, int width, int height) {
++        {
++            double d0 = (double) blockPosition.getX() + 0.5D;
++            double d1 = (double) blockPosition.getY() + 0.5D;
++            double d2 = (double) blockPosition.getZ() + 0.5D;
+             double d3 = 0.46875D;
+-            double d4 = this.method_6893(this.getWidthPixels());
+-            double d5 = this.method_6893(this.getHeightPixels());
++            double d4 = method_6893(width);
++            double d5 = method_6893(height);
+ 
+-            d0 -= (double) this.facing.getOffsetX() * 0.46875D;
+-            d2 -= (double) this.facing.getOffsetZ() * 0.46875D;
++            d0 -= (double) direction.getOffsetX() * 0.46875D;
++            d2 -= (double) direction.getOffsetZ() * 0.46875D;
+             d1 += d5;
+-            Direction direction = this.facing.rotateYCounterclockwise();
++            Direction direction1 = direction.rotateYCounterclockwise();
+ 
+-            d0 += d4 * (double) direction.getOffsetX();
+-            d2 += d4 * (double) direction.getOffsetZ();
+-            this.setPos(d0, d1, d2);
+-            double d6 = (double) this.getWidthPixels();
+-            double d7 = (double) this.getHeightPixels();
+-            double d8 = (double) this.getWidthPixels();
++            d0 += d4 * (double) direction1.getOffsetX();
++            d2 += d4 * (double) direction1.getOffsetZ();
+ 
+-            if (this.facing.getAxis() == Direction.Axis.Z) {
++            if (entity != null) {
++                entity.setPos(d0, d1, d2);
++            }
++
++            double d6 = width;
++            double d7 = height;
++            double d8 = width;
++
++            if (direction.getAxis() == Direction.Axis.Z) {
+                 d8 = 1.0D;
+             } else {
+                 d6 = 1.0D;
+@@ -83,11 +102,12 @@
+             d6 /= 32.0D;
+             d7 /= 32.0D;
+             d8 /= 32.0D;
+-            this.setBoundingBox(new Box(d0 - d6, d1 - d7, d2 - d8, d0 + d6, d1 + d7, d2 + d8));
++            return new Box(d0 - d6, d1 - d7, d2 - d8, d0 + d6, d1 + d7, d2 + d8);
+         }
+     }
++    // CraftBukkit end
+ 
+-    private double method_6893(int i) {
++    private static double method_6893(int i) { // CraftBukkit - static
+         return i % 32 == 0 ? 0.5D : 0.0D;
+     }
+ 
+@@ -100,6 +120,23 @@
+             if (this.obstructionCheckCounter++ == 100) {
+                 this.obstructionCheckCounter = 0;
+                 if (!this.removed && !this.canStayAttached()) {
++                    // CraftBukkit start - fire break events
++                    Material material = this.world.getBlockState(this.getBlockPos()).getMaterial();
++                    HangingBreakEvent.RemoveCause cause;
++
++                    if (!material.equals(Material.AIR)) {
++                        // TODO: This feels insufficient to catch 100% of suffocation cases
++                        cause = HangingBreakEvent.RemoveCause.OBSTRUCTION;
++                    } else {
++                        cause = HangingBreakEvent.RemoveCause.PHYSICS;
++                    }
++
++                    HangingBreakEvent event = new HangingBreakEvent((Hanging) this.getBukkitEntity(), cause);
++                    Bukkit.getPluginManager().callEvent(event);
++                    if (removed || event.isCancelled()) {
++                        return;
++                    }
++                    // CraftBukkit end
+                     this.remove();
+                     this.onBreak((Entity) null);
+                 }
+@@ -159,6 +196,21 @@
+             return false;
+         } else {
+             if (!this.removed && !this.world.isClient) {
++                // CraftBukkit start - fire break events
++                Entity damager = (damagesource instanceof ProjectileDamageSource) ? ((ProjectileDamageSource) damagesource).getProximateDamageSource() : damagesource.getAttacker();
++                HangingBreakEvent event;
++
++                if (damager != null) {
++                    event = new HangingBreakByEntityEvent((Hanging) this.getBukkitEntity(), damager.getBukkitEntity(), damagesource.isExplosive() ? HangingBreakEvent.RemoveCause.EXPLOSION : HangingBreakEvent.RemoveCause.ENTITY);
++                } else {
++                    event = new HangingBreakEvent((Hanging) this.getBukkitEntity(), damagesource.isExplosive() ? HangingBreakEvent.RemoveCause.EXPLOSION : HangingBreakEvent.RemoveCause.DEFAULT);
++                }
++
++                Bukkit.getPluginManager().callEvent(event);
++                if (this.removed || event.isCancelled()) {
++                    return true;
++                }
++                // CraftBukkit end
+                 this.remove();
+                 this.scheduleVelocityUpdate();
+                 this.onBreak(damagesource.getAttacker());
+@@ -170,6 +222,17 @@
+ 
+     public void move(MovementType movementtype, Vec3d vec3d) {
+         if (!this.world.isClient && !this.removed && vec3d.lengthSquared() > 0.0D) {
++            if (this.removed) return; // CraftBukkit
++
++            // CraftBukkit start - fire break events
++            // TODO - Does this need its own cause? Seems to only be triggered by pistons
++            HangingBreakEvent event = new HangingBreakEvent((Hanging) this.getBukkitEntity(), HangingBreakEvent.RemoveCause.PHYSICS);
++            Bukkit.getPluginManager().callEvent(event);
++            if (this.removed || event.isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
++
+             this.remove();
+             this.onBreak((Entity) null);
+         }
+@@ -177,7 +240,7 @@
+     }
+ 
+     public void addVelocity(double d0, double d1, double d2) {
+-        if (!this.world.isClient && !this.removed && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
++        if (false && !this.world.isClient && !this.removed && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) { // CraftBukkit - not needed
+             this.remove();
+             this.onBreak((Entity) null);
+         }

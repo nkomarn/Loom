@@ -1,0 +1,13 @@
+--- a/net/minecraft/datafixer/fix/ItemInstanceMapIdFix.java
++++ b/net/minecraft/datafixer/fix/ItemInstanceMapIdFix.java
+@@ -33,8 +33,8 @@
+                 Typed<?> typed1 = typed.getOrCreateTyped(opticfinder1);
+                 Dynamic<?> dynamic1 = (Dynamic) typed1.get(DSL.remainderFinder());
+ 
+-                dynamic1 = dynamic1.set("map", dynamic1.createInt(dynamic.get("Damage").asInt(0)));
+-                return typed.set(opticfinder1, typed1.set(DSL.remainderFinder(), (Object) dynamic1));
++                if (!dynamic1.getElement("map").result().isPresent()) dynamic1 = dynamic1.set("map", dynamic1.createInt(dynamic.get("Damage").asInt(0))); // CraftBukkit
++                return typed.set(opticfinder1, typed1.set(DSL.remainderFinder(), dynamic1)); // Loom - decompile error
+             } else {
+                 return typed;
+             }

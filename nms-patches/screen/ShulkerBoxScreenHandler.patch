@@ -1,0 +1,37 @@
+--- a/net/minecraft/screen/ShulkerBoxScreenHandler.java
++++ b/net/minecraft/screen/ShulkerBoxScreenHandler.java
+@@ -7,10 +7,26 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.screen.slot.ShulkerBoxSlot;
+ import net.minecraft.screen.slot.Slot;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class ShulkerBoxScreenHandler extends ScreenHandler {
+ 
+     private final Inventory inventory;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity;
++    private PlayerInventory player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), new CraftInventory(this.inventory), this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ 
+     public ShulkerBoxScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, new SimpleInventory(27));
+@@ -20,6 +36,7 @@
+         super(ScreenHandlerType.SHULKER_BOX, i);
+         checkSize(inventory, 27);
+         this.inventory = inventory;
++        this.player = playerinventory; // CraftBukkit - save player
+         inventory.onOpen(playerinventory.player);
+         boolean flag = true;
+         boolean flag1 = true;

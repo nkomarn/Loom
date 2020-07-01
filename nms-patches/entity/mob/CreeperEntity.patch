@@ -1,0 +1,76 @@
+--- a/net/minecraft/entity/mob/CreeperEntity.java
++++ b/net/minecraft/entity/mob/CreeperEntity.java
+@@ -36,6 +36,11 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.CreatureSpawnEvent;
++import org.bukkit.event.entity.CreeperPowerEvent;
++import org.bukkit.event.entity.ExplosionPrimeEvent;
+ 
+ public class CreeperEntity extends HostileEntity {
+ 
+@@ -187,9 +192,19 @@
+ 
+     public void onStruckByLightning(LightningEntity lightningentity) {
+         super.onStruckByLightning(lightningentity);
+-        this.dataTracker.set(CreeperEntity.CHARGED, true);
++        // CraftBukkit start
++        if (CraftEventFactory.callCreeperPowerEvent(this, lightningentity, CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled()) {
++            return;
++        }
++
++        this.setPowered(true);
+     }
+ 
++    public void setPowered(boolean powered) {
++        this.dataTracker.set(CreeperEntity.CHARGED, powered);
++    }
++    // CraftBukkit end
++
+     protected ActionResult interactMob(PlayerEntity playerentity, Hand hand) {
+         ItemStack itemstack = playerentity.getStackInHand(hand);
+ 
+@@ -213,10 +228,19 @@
+             Explosion.DestructionType explosion_destructiontype = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE;
+             float f = this.T_() ? 2.0F : 1.0F;
+ 
+-            this.dead = true;
+-            this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), (float) this.explosionRadius * f, explosion_destructiontype);
+-            this.remove();
+-            this.spawnEffectsCloud();
++            // CraftBukkit start
++            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), this.explosionRadius * f, false);
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (!event.isCancelled()) {
++                this.dead = true;
++                this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), (float) this.explosionRadius * f, explosion_destructiontype);
++                this.remove();
++                this.spawnEffectsCloud();
++            } else {
++                fuseTime = 0;
++            }
++            // CraftBukkit end
+         }
+ 
+     }
+@@ -227,6 +251,7 @@
+         if (!collection.isEmpty()) {
+             AreaEffectCloudEntity areaeffectcloudentity = new AreaEffectCloudEntity(this.world, this.getX(), this.getY(), this.getZ());
+ 
++            areaeffectcloudentity.setOwner(this); // CraftBukkit
+             areaeffectcloudentity.setRadius(2.5F);
+             areaeffectcloudentity.setRadiusOnUse(-0.5F);
+             areaeffectcloudentity.setWaitTime(10);
+@@ -240,7 +265,7 @@
+                 areaeffectcloudentity.addEffect(new StatusEffectInstance(statuseffectinstance));
+             }
+ 
+-            this.world.spawnEntity(areaeffectcloudentity);
++            this.world.spawnEntity(areaeffectcloudentity, CreatureSpawnEvent.SpawnReason.EXPLOSION); // CraftBukkit
+         }
+ 
+     }

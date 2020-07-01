@@ -1,0 +1,49 @@
+--- a/net/minecraft/entity/decoration/EndCrystalEntity.java
++++ b/net/minecraft/entity/decoration/EndCrystalEntity.java
+@@ -19,6 +19,9 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
+ import net.minecraft.world.explosion.Explosion;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.ExplosionPrimeEvent;
+ 
+ public class EndCrystalEntity extends Entity {
+ 
+@@ -52,7 +55,11 @@
+             BlockPos blockpos = this.getBlockPos();
+ 
+             if (((ServerWorld) this.world).getEnderDragonFight() != null && this.world.getBlockState(blockpos).isAir()) {
++                // CraftBukkit start
++                if (!CraftEventFactory.callBlockIgniteEvent(this.world, blockpos, this).isCancelled()) {
+                 this.world.setBlockState(blockpos, AbstractFireBlock.getState(this.world, blockpos));
++                }
++                // CraftBukkit end
+             }
+         }
+ 
+@@ -88,9 +95,23 @@
+             return false;
+         } else {
+             if (!this.removed && !this.world.isClient) {
++                // CraftBukkit start - All non-living entities need this
++                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, f)) {
++                    return false;
++                }
++                // CraftBukkit end
+                 this.remove();
+                 if (!damagesource.isExplosive()) {
+-                    this.world.createExplosion((Entity) null, this.getX(), this.getY(), this.getZ(), 6.0F, Explosion.DestructionType.DESTROY);
++                    // CraftBukkit start
++                    ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), 6.0F, false);
++                    Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        this.removed = false;
++                        return false;
++                    }
++                    this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), event.getRadius(), event.getFire(), Explosion.DestructionType.DESTROY);
++                    // CraftBukkit end
+                 }
+ 
+                 this.crystalDestroyed(damagesource);

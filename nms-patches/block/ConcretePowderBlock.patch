@@ -37,7 +37,7 @@
 +        blockState.setData(this.hardenedState);
 +
 +        BlockFormEvent event = new BlockFormEvent(blockState.getBlock(), blockState);
-+        world.getServer().getPluginManager().callEvent(event);
++        Bukkit.getPluginManager().callEvent(event);
 +
 +        if (!event.isCancelled()) {
 +            return blockState.getHandle();

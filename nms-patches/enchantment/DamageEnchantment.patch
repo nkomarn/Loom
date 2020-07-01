@@ -1,0 +1,19 @@
+--- a/net/minecraft/enchantment/DamageEnchantment.java
++++ b/net/minecraft/enchantment/DamageEnchantment.java
+@@ -8,6 +8,7 @@
+ import net.minecraft.entity.effect.StatusEffects;
+ import net.minecraft.item.AxeItem;
+ import net.minecraft.item.ItemStack;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
+ 
+ public class DamageEnchantment extends Enchantment {
+ 
+@@ -53,7 +54,7 @@
+             if (this.typeIndex == 2 && livingentity1.getGroup() == EntityGroup.ARTHROPOD) {
+                 int j = 20 + livingentity.getRandom().nextInt(10 * i);
+ 
+-                livingentity1.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, j, 3));
++                livingentity1.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, j, 3), EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+             }
+         }
+ 

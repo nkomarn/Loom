@@ -1,0 +1,38 @@
+--- a/net/minecraft/structure/Structure.java
++++ b/net/minecraft/structure/Structure.java
+@@ -133,7 +133,7 @@
+     }
+ 
+     private static List<Structure.StructureBlockInfo> method_28055(List<Structure.StructureBlockInfo> list, List<Structure.StructureBlockInfo> list1, List<Structure.StructureBlockInfo> list2) {
+-        Comparator<Structure.StructureBlockInfo> comparator = Comparator.comparingInt((structure_structureblockinfo) -> {
++        Comparator<Structure.StructureBlockInfo> comparator = Comparator.<Structure.StructureBlockInfo>comparingInt((structure_structureblockinfo) -> { // CraftBukkit - decompile error
+             return structure_structureblockinfo.pos.getY();
+         }).thenComparingInt((structure_structureblockinfo) -> {
+             return structure_structureblockinfo.pos.getX();
+@@ -465,11 +465,13 @@
+     }
+ 
+     private static Optional<Entity> getEntity(WorldAccess worldaccess, CompoundTag compoundtag) {
+-        try {
++        // CraftBukkit start
++        //try {
+             return EntityType.getEntityFromTag(compoundtag, worldaccess.getWorld());
+-        } catch (Exception exception) {
+-            return Optional.empty();
+-        }
++        //} catch (Exception exception) {
++        //    return Optional.empty();
++        //}
++        // CraftBukkit end
+     }
+ 
+     public BlockPos getRotatedSize(BlockRotation blockrotation) {
+@@ -908,7 +910,7 @@
+         public BlockState getState(int i) {
+             BlockState blockstate = (BlockState) this.ids.get(i);
+ 
+-            return blockstate == null ? Structure.Palette.AIR : blockstate;
++            return blockstate == null ? AIR : blockstate; // CraftBukkit - decompile error
+         }
+ 
+         public Iterator<BlockState> iterator() {

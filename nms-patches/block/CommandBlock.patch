@@ -1,24 +1,25 @@
 --- a/net/minecraft/block/CommandBlock.java
 +++ b/net/minecraft/block/CommandBlock.java
-@@ -26,6 +26,7 @@
+@@ -26,6 +26,8 @@
  import net.minecraft.world.World;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
 +import org.bukkit.event.block.BlockRedstoneEvent;
  
  public class CommandBlock extends BlockWithEntity {
  
-@@ -54,6 +55,16 @@
+@@ -54,6 +56,16 @@
                  boolean flag1 = world.isReceivingRedstonePower(blockpos);
                  boolean flag2 = commandblockblockentity.isPowered();
  
 +                // CraftBukkit start
-+                org.bukkit.block.Block bukkitBlock = world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++                org.bukkit.block.Block bukkitBlock = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
 +                int old = flag2 ? 15 : 0;
 +                int current = flag1 ? 15 : 0;
 +
 +                BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(bukkitBlock, old, current);
-+                world.getServer().getPluginManager().callEvent(eventRedstone);
++                Bukkit.getPluginManager().callEvent(eventRedstone);
 +                flag1 = eventRedstone.getNewCurrent() > 0;
 +                // CraftBukkit end
 +

@@ -1,0 +1,51 @@
+--- a/net/minecraft/server/dedicated/ServerPropertiesHandler.java
++++ b/net/minecraft/server/dedicated/ServerPropertiesHandler.java
+@@ -3,6 +3,8 @@
+ import java.nio.file.Path;
+ import java.util.Properties;
+ import java.util.concurrent.TimeUnit;
++
++import joptsimple.OptionSet;
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.GameMode;
+@@ -10,6 +12,7 @@
+ 
+ public class ServerPropertiesHandler extends AbstractPropertiesHandler<ServerPropertiesHandler> {
+ 
++    public final boolean debug = this.parseBoolean("debug", false); // CraftBukkit
+     public final boolean onlineMode = this.parseBoolean("online-mode", true);
+     public final boolean preventProxyConnections = this.parseBoolean("prevent-proxy-connections", false);
+     public final String serverIp = this.getString("server-ip", "");
+@@ -58,8 +61,10 @@
+     public final AbstractPropertiesHandler<ServerPropertiesHandler>.PropertyAccessor<Boolean> whiteList;
+     public final GeneratorOptions field_24623;
+ 
+-    public ServerPropertiesHandler(Properties properties) {
+-        super(properties);
++    // CraftBukkit start
++    public ServerPropertiesHandler(Properties properties, OptionSet optionset) {
++        super(properties, optionset);
++        // CraftBukkit end
+         this.difficulty = (Difficulty) this.get("difficulty", combineParser(Difficulty::byOrdinal, Difficulty::byName), Difficulty::getName, Difficulty.EASY);
+         this.gameMode = (GameMode) this.get("gamemode", combineParser(GameMode::byId, GameMode::byName), GameMode::getName, GameMode.SURVIVAL);
+         this.levelName = this.getString("level-name", "world");
+@@ -108,12 +113,14 @@
+         this.field_24623 = GeneratorOptions.fromProperties(properties);
+     }
+ 
+-    public static ServerPropertiesHandler load(Path path) {
+-        return new ServerPropertiesHandler(loadProperties(path));
++    // CraftBukkit start
++    public static ServerPropertiesHandler load(Path path, OptionSet optionset) {
++        return new ServerPropertiesHandler(loadProperties(path), optionset);
+     }
+ 
+-    protected ServerPropertiesHandler create(Properties properties) {
+-        return new ServerPropertiesHandler(properties);
++    protected ServerPropertiesHandler create(Properties properties, OptionSet optionset) {
++        return new ServerPropertiesHandler(properties, optionset);
++        // CraftBukkit end
+     }
+ 
+     protected AbstractPropertiesHandler create(Properties properties) {

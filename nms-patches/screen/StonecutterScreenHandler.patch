@@ -1,0 +1,46 @@
+--- a/net/minecraft/screen/StonecutterScreenHandler.java
++++ b/net/minecraft/screen/StonecutterScreenHandler.java
+@@ -17,6 +17,9 @@
+ import net.minecraft.sound.SoundEvents;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.inventory.CraftInventoryStonecutter;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.entity.Player;
+ 
+ public class StonecutterScreenHandler extends ScreenHandler {
+ 
+@@ -31,6 +34,21 @@
+     private Runnable contentsChangedListener;
+     public final Inventory input;
+     private final CraftingResultInventory output;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private Player player;
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryStonecutter inventory = new CraftInventoryStonecutter(this.input, this.output);
++        bukkitEntity = new CraftInventoryView(this.player, inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ 
+     public StonecutterScreenHandler(int i, PlayerInventory playerinventory) {
+         this(i, playerinventory, ScreenHandlerContext.EMPTY);
+@@ -93,9 +111,11 @@
+         }
+ 
+         this.addProperty(this.selectedRecipe);
++        player = (Player) playerinventory.player.getBukkitEntity(); // CraftBukkit
+     }
+ 
+     public boolean canUse(PlayerEntity playerentity) {
++        if (!this.checkReachable) return true; // CraftBukkit
+         return canUse(this.context, playerentity, Blocks.STONECUTTER);
+     }
+ 

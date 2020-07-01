@@ -31,7 +31,7 @@
 +                playerentity.getHungerManager().add(event.getFoodLevel() - oldFoodLevel, 0.1f);
 +            }
 +
-+            playerentity.getBukkitEntity().sendHealthUpdate();
++            ((ServerPlayerEntity) playerentity).getBukkitEntity().sendHealthUpdate();
 +            // CraftBukkit end
              int i = (Integer) blockstate.get(CakeBlock.BITES);
  

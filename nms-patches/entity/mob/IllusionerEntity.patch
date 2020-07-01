@@ -1,0 +1,28 @@
+--- a/net/minecraft/entity/mob/IllusionerEntity.java
++++ b/net/minecraft/entity/mob/IllusionerEntity.java
+@@ -38,6 +38,7 @@
+ import net.minecraft.world.LocalDifficulty;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
+ 
+ public class IllusionerEntity extends SpellcastingIllagerEntity implements RangedAttackMob {
+ 
+@@ -189,7 +190,7 @@
+         }
+ 
+         protected void castSpell() {
+-            IllusionerEntity.this.getTarget().addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 400));
++            IllusionerEntity.this.getTarget().addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 400), EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit);
+         }
+ 
+         protected SoundEvent getSoundPrepare() {
+@@ -224,7 +225,7 @@
+         }
+ 
+         protected void castSpell() {
+-            IllusionerEntity.this.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, 1200));
++            IllusionerEntity.this.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, 1200), EntityPotionEffectEvent.Cause.ILLUSION); // CraftBukkit);
+         }
+ 
+         @Nullable

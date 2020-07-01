@@ -1,0 +1,19 @@
+--- a/net/minecraft/entity/mob/ElderGuardianEntity.java
++++ b/net/minecraft/entity/mob/ElderGuardianEntity.java
+@@ -16,6 +16,7 @@
+ import net.minecraft.sound.SoundEvent;
+ import net.minecraft.sound.SoundEvents;
+ import net.minecraft.world.World;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
+ 
+ public class ElderGuardianEntity extends GuardianEntity {
+ 
+@@ -73,7 +74,7 @@
+ 
+                 if (!serverplayerentity.hasStatusEffect(statuseffect) || serverplayerentity.getStatusEffect(statuseffect).getAmplifier() < 2 || serverplayerentity.getStatusEffect(statuseffect).getDuration() < 1200) {
+                     serverplayerentity.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.ELDER_GUARDIAN_EFFECT, this.isSilent() ? 0.0F : 1.0F));
+-                    serverplayerentity.addStatusEffect(new StatusEffectInstance(statuseffect, 6000, 2));
++                    serverplayerentity.addStatusEffect(new StatusEffectInstance(statuseffect, 6000, 2), EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+                 }
+             }
+         }

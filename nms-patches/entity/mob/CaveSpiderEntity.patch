@@ -1,0 +1,19 @@
+--- a/net/minecraft/entity/mob/CaveSpiderEntity.java
++++ b/net/minecraft/entity/mob/CaveSpiderEntity.java
+@@ -17,6 +17,7 @@
+ import net.minecraft.world.LocalDifficulty;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
+ 
+ public class CaveSpiderEntity extends SpiderEntity {
+ 
+@@ -40,7 +41,7 @@
+                 }
+ 
+                 if (b0 > 0) {
+-                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, b0 * 20, 0));
++                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, b0 * 20, 0), EntityPotionEffectEvent.Cause.ATTACK);
+                 }
+             }
+ 

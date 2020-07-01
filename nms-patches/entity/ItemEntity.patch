@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/ItemEntity.java
 +++ b/net/minecraft/entity/ItemEntity.java
-@@ -27,6 +27,13 @@
+@@ -27,15 +27,23 @@
  import net.minecraft.util.math.Vec3d;
  import net.minecraft.world.World;
  
@@ -14,7 +14,11 @@
  public class ItemEntity extends Entity {
  
      private static final TrackedData<ItemStack> STACK = DataTracker.registerData(ItemEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
-@@ -36,6 +43,7 @@
+-    private int age;
+-    private int pickupDelay;
++    public int age; // Loom - change access
++    public int pickupDelay; // Loom - change access
+     private int health;
      private UUID thrower;
      private UUID owner;
      public final float hoverHeight;

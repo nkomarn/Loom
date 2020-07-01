@@ -1,0 +1,11 @@
+--- a/net/minecraft/structure/StructureManager.java
++++ b/net/minecraft/structure/StructureManager.java
+@@ -30,7 +30,7 @@
+ public class StructureManager {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private final Map<Identifier, Structure> structures = Maps.newHashMap();
++    private final Map<Identifier, Structure> structures = Maps.newConcurrentMap(); // SPIGOT-5287
+     private final DataFixer dataFixer;
+     private ResourceManager field_25189;
+     private final Path generatedPath;

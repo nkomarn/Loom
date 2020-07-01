@@ -1,5 +1,21 @@
 --- a/net/minecraft/village/raid/Raid.java
 +++ b/net/minecraft/village/raid/Raid.java
+@@ -68,13 +68,13 @@
+     private final Map<Integer, RaiderEntity> waveToCaptain = Maps.newHashMap();
+     private final Map<Integer, Set<RaiderEntity>> waveToRaiders = Maps.newHashMap();
+     private final Set<UUID> heroesOfTheVillage = Sets.newHashSet();
+-    private long ticksActive;
++    public long ticksActive; // Loom - change access
+     private BlockPos center;
+     private final ServerWorld world;
+     private boolean started;
+     private final int id;
+     private float totalHealth;
+-    private int badOmenLevel;
++    public int badOmenLevel; // Loom - change access
+     private boolean active;
+     private int wavesSpawned;
+     private final ServerBossBar bar;
 @@ -227,6 +227,7 @@
  
                  this.active = this.world.isChunkLoaded(this.center);

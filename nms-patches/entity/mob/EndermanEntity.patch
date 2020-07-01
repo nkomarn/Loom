@@ -1,0 +1,65 @@
+--- a/net/minecraft/entity/mob/EndermanEntity.java
++++ b/net/minecraft/entity/mob/EndermanEntity.java
+@@ -55,6 +55,8 @@
+ import net.minecraft.world.RayTraceContext;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTargetEvent;
+ 
+ public class EndermanEntity extends HostileEntity implements Angerable {
+ 
+@@ -99,7 +101,17 @@
+     }
+ 
+     public void setTarget(@Nullable LivingEntity livingentity) {
+-        super.setTarget(livingentity);
++        // CraftBukkit start - fire event
++        setTarget(livingentity, EntityTargetEvent.TargetReason.UNKNOWN, true);
++    }
++
++    @Override
++    public boolean setTarget(LivingEntity livingentity, EntityTargetEvent.TargetReason reason, boolean fireEvent) {
++        if (!super.setTarget(livingentity, reason, fireEvent)) {
++            return false;
++        }
++        livingentity = getTarget();
++        // CraftBukkit end
+         EntityAttributeInstance entityattributeinstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+ 
+         if (livingentity == null) {
+@@ -114,7 +126,7 @@
+                 entityattributeinstance.addTemporaryModifier(EndermanEntity.ATTACKING_SPEED_BOOST);
+             }
+         }
+-
++        return true;
+     }
+ 
+     protected void initDataTracker() {
+@@ -386,8 +398,12 @@
+             boolean flag = blockhitresult.getBlockPos().equals(blockpos);
+ 
+             if (block.isIn(BlockTags.ENDERMAN_HOLDABLE) && flag) {
++                // CraftBukkit start - Pickup event
++                if (!CraftEventFactory.callEntityChangeBlockEvent(this.enderman, blockpos, Blocks.AIR.getDefaultState()).isCancelled()) {
+                 this.enderman.setCarriedBlock(blockstate);
+                 world.removeBlock(blockpos, false);
++                }
++                // CraftBukkit end
+             }
+ 
+         }
+@@ -418,8 +434,12 @@
+             BlockState blockstate2 = this.enderman.getCarriedBlock();
+ 
+             if (blockstate2 != null && this.canPlaceOn(world, blockpos, blockstate2, blockstate, blockstate1, blockpos1)) {
++                // CraftBukkit start - Place event
++                if (!CraftEventFactory.callEntityChangeBlockEvent(this.enderman, blockpos, blockstate2).isCancelled()) {
+                 world.setBlockState(blockpos, blockstate2, 3);
+                 this.enderman.setCarriedBlock((BlockState) null);
++                }
++                // CraftBukkit end
+             }
+ 
+         }

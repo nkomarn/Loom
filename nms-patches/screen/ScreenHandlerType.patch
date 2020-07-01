@@ -1,0 +1,30 @@
+--- a/net/minecraft/screen/ScreenHandlerType.java
++++ b/net/minecraft/screen/ScreenHandlerType.java
+@@ -22,7 +22,7 @@
+     public static final ScreenHandlerType<GrindstoneScreenHandler> GRINDSTONE = register("grindstone", GrindstoneScreenHandler::new);
+     public static final ScreenHandlerType<HopperScreenHandler> HOPPER = register("hopper", HopperScreenHandler::new);
+     public static final ScreenHandlerType<LecternScreenHandler> LECTERN = register("lectern", (i, playerinventory) -> {
+-        return new LecternScreenHandler(i);
++        return new LecternScreenHandler(i, playerinventory);
+     });
+     public static final ScreenHandlerType<LoomScreenHandler> LOOM = register("loom", LoomScreenHandler::new);
+     public static final ScreenHandlerType<MerchantScreenHandler> MERCHANT = register("merchant", MerchantScreenHandler::new);
+@@ -34,12 +34,16 @@
+     private final ScreenHandlerType.Factory<T> factory;
+ 
+     private static <T extends ScreenHandler> ScreenHandlerType<T> register(String s, ScreenHandlerType.Factory<T> screenhandlertype_factory) {
+-        return (ScreenHandlerType) Registry.register(Registry.SCREEN_HANDLER, s, new ScreenHandlerType<>(screenhandlertype_factory));
++        return (ScreenHandlerType) Registry.register(Registry.SCREEN_HANDLER, s, (new ScreenHandlerType<>(screenhandlertype_factory))); // CraftBukkit - decompile error
+     }
+ 
+     private ScreenHandlerType(ScreenHandlerType.Factory<T> screenhandlertype_factory) {
+         this.factory = screenhandlertype_factory;
+     }
+ 
+-    interface Factory<T extends ScreenHandler> {}
++    // CraftBukkit start
++    interface Factory<T extends ScreenHandler> {
++        T supply(int id, PlayerInventory playerinventory);
++    }
++    // CraftBukkit end
+ }

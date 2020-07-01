@@ -24,7 +24,7 @@
  
  public class BrewingStandBlockEntity extends LockableContainerBlockEntity implements SidedInventory, Tickable {
  
-@@ -97,18 +107,34 @@
+@@ -97,8 +107,19 @@
          ItemStack itemstack = (ItemStack) this.inventory.get(4);
  
          if (this.fuel <= 0 && itemstack.getItem() == Items.BLAZE_POWDER) {
@@ -46,15 +46,14 @@
              this.markDirty();
          }
  
-         boolean flag = this.canCraft();
+@@ -106,9 +127,14 @@
          boolean flag1 = this.brewTime > 0;
--        ItemStack itemstack1 = (ItemStack) this.inventory.get(3);
-+       ItemStack itemstack1 = (ItemStack) this.inventory.get(3);
-+
+         ItemStack itemstack1 = (ItemStack) this.inventory.get(3);
+ 
 +        // CraftBukkit start - Use wall time instead of ticks for brewing
 +        int elapsedTicks = DedicatedServer.currentTick - this.lastTick;
 +        this.lastTick = DedicatedServer.currentTick;
- 
++
          if (flag1) {
 -            --this.brewTime;
 -            boolean flag2 = this.brewTime == 0;

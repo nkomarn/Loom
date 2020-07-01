@@ -47,7 +47,7 @@
 +        // ChunkUnloadEvent: Called before the chunk is unloaded: isChunkLoaded is still true and chunk can still be modified by plugins.
 +        if (chunkholder_leveltype.isAfter(ChunkHolder.LevelType.BORDER) && !chunkholder_leveltype1.isAfter(ChunkHolder.LevelType.BORDER)) {
 +            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
-+                Chunk chunk = (Chunk)either.left().orElse(null);
++                WorldChunk chunk = (WorldChunk) either.left().orElse(null);
 +                if (chunk != null) {
 +                    threadedanvilchunkstorage.callbackExecutor.execute(() -> {
 +                        // Minecraft will apply the chunks tick lists to the world once the chunk got loaded, and then store the tick
@@ -79,7 +79,7 @@
                  threadedanvilchunkstorage.getClass();
                  return either1.ifLeft(threadedanvilchunkstorage::method_20576);
              }));
-@@ -354,6 +380,26 @@
+@@ -354,6 +380,24 @@
  
          this.levelUpdateListener.updateLevel(this.pos, this::getCompletedLevel, this.level, this::setCompletedLevel);
          this.lastTickLevel = this.level;
@@ -87,15 +87,13 @@
 +        // ChunkLoadEvent: Called after the chunk is loaded: isChunkLoaded returns true and chunk is ready to be modified by plugins.
 +        if (!chunkholder_leveltype.isAfter(ChunkHolder.LevelType.BORDER) && chunkholder_leveltype1.isAfter(ChunkHolder.LevelType.BORDER)) {
 +            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
-+                Chunk chunk = (Chunk)either.left().orElse(null);
++                WorldChunk chunk = (WorldChunk) either.left().orElse(null);
 +                if (chunk != null) {
-+                    threadedanvilchunkstorage.callbackExecutor.execute(() -> {
-+                        chunk.loadCallback();
-+                    });
++                    threadedanvilchunkstorage.callbackExecutor.execute(chunk::loadCallback);
 +                }
 +            }).exceptionally((throwable) -> {
 +                // ensure exceptions are printed, by default this is not the case
-+                MinecraftServer.LOGGER.fatal("Failed to schedule load callback for chunk " + ChunkHolder.this.location, throwable);
++                MinecraftServer.LOGGER.fatal("Failed to schedule load callback for chunk " + ChunkHolder.this.pos, throwable);
 +                return null;
 +            });
 +
@@ -106,7 +104,7 @@
      }
  
      public static ChunkStatus getTargetGenerationStatus(int i) {
-@@ -388,6 +434,15 @@
+@@ -388,6 +432,15 @@
          this.updateFuture(CompletableFuture.completedFuture(Either.left(readonlychunk.getWrappedChunk())));
      }
  

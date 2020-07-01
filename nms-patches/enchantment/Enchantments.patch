@@ -1,0 +1,17 @@
+--- a/net/minecraft/enchantment/Enchantments.java
++++ b/net/minecraft/enchantment/Enchantments.java
+@@ -45,6 +45,14 @@
+     public static final Enchantment MENDING = register("mending", new MendingEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.values()));
+     public static final Enchantment VANISHING_CURSE = register("vanishing_curse", new VanishingCurseEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.values()));
+ 
++    // CraftBukkit start
++    static {
++        for (Object enchantment : Registry.ENCHANTMENT) {
++            org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.enchantments.CraftEnchantment((Enchantment) enchantment));
++        }
++    }
++    // CraftBukkit end
++
+     private static Enchantment register(String s, Enchantment enchantment) {
+         return (Enchantment) Registry.register(Registry.ENCHANTMENT, s, enchantment);
+     }

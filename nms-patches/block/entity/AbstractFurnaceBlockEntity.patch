@@ -151,7 +151,7 @@
          while (j > 0) {
              int k = ExperienceOrbEntity.roundToOrbSize(j);
  
-@@ -506,4 +571,34 @@
+@@ -506,4 +571,33 @@
          }
  
      }
@@ -176,7 +176,6 @@
 +        return transaction;
 +    }
 +
-+    @Override
 +    public int getMaxStackSize() {
 +        return maxStack;
 +    }

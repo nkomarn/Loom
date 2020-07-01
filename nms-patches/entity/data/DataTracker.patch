@@ -1,0 +1,16 @@
+--- a/net/minecraft/entity/data/DataTracker.java
++++ b/net/minecraft/entity/data/DataTracker.java
+@@ -134,6 +134,13 @@
+ 
+     }
+ 
++    // CraftBukkit start - add method from above
++    public <T> void markDirty(TrackedData<T> datawatcherobject) {
++        this.getEntry(datawatcherobject).setDirty(true);
++        this.dirty = true;
++    }
++    // CraftBukkit end
++
+     public boolean isDirty() {
+         return this.dirty;
+     }

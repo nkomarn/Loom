@@ -16,20 +16,46 @@
  import net.minecraft.SharedConstants;
  import net.minecraft.advancement.criterion.Criteria;
  import net.minecraft.block.BedBlock;
-@@ -106,6 +108,12 @@
+@@ -106,11 +108,24 @@
  import net.minecraft.world.GameMode;
  import net.minecraft.world.GameRules;
  import net.minecraft.world.World;
++import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.util.CraftVector;
 +import org.bukkit.entity.Item;
 +import org.bukkit.entity.Player;
++import org.bukkit.event.entity.CreatureSpawnEvent;
++import org.bukkit.event.entity.EntityCombustByEntityEvent;
 +import org.bukkit.event.entity.EntityPotionEffectEvent;
 +import org.bukkit.event.entity.EntityRegainHealthEvent;
++import org.bukkit.event.player.PlayerBedLeaveEvent;
 +import org.bukkit.event.player.PlayerDropItemEvent;
++import org.bukkit.event.player.PlayerVelocityEvent;
  
  public abstract class PlayerEntity extends LivingEntity {
  
-@@ -148,6 +156,16 @@
+     public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.changing(0.6F, 1.8F);
+-    private static final Map<EntityPose, EntityDimensions> POSE_DIMENSIONS = ImmutableMap.builder().put(EntityPose.STANDING, PlayerEntity.STANDING_DIMENSIONS).put(EntityPose.SLEEPING, PlayerEntity.SLEEPING_DIMENSIONS).put(EntityPose.FALL_FLYING, EntityDimensions.changing(0.6F, 0.6F)).put(EntityPose.SWIMMING, EntityDimensions.changing(0.6F, 0.6F)).put(EntityPose.SPIN_ATTACK, EntityDimensions.changing(0.6F, 0.6F)).put(EntityPose.CROUCHING, EntityDimensions.changing(0.6F, 1.5F)).put(EntityPose.DYING, EntityDimensions.fixed(0.2F, 0.2F)).build();
++    // CraftBukkit - decompile error
++    private static final Map<EntityPose, EntityDimensions> POSE_DIMENSIONS = ImmutableMap.<EntityPose, EntityDimensions>builder().put(EntityPose.STANDING, PlayerEntity.STANDING_DIMENSIONS).put(EntityPose.SLEEPING, PlayerEntity.SLEEPING_DIMENSIONS).put(EntityPose.FALL_FLYING, EntityDimensions.changing(0.6F, 0.6F)).put(EntityPose.SWIMMING, EntityDimensions.changing(0.6F, 0.6F)).put(EntityPose.SPIN_ATTACK, EntityDimensions.changing(0.6F, 0.6F)).put(EntityPose.CROUCHING, EntityDimensions.changing(0.6F, 1.5F)).put(EntityPose.DYING, EntityDimensions.fixed(0.2F, 0.2F)).build();
+     private static final TrackedData<Float> ABSORPTION_AMOUNT = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.FLOAT);
+     private static final TrackedData<Integer> SCORE = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     protected static final TrackedData<Byte> PLAYER_MODEL_PARTS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.BYTE);
+@@ -119,10 +134,10 @@
+     protected static final TrackedData<CompoundTag> RIGHT_SHOULDER_ENTITY = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.TAG_COMPOUND);
+     private long shoulderEntityAddedTime;
+     public final PlayerInventory inventory = new PlayerInventory(this);
+-    protected EnderChestInventory enderChestInventory = new EnderChestInventory();
++    protected EnderChestInventory enderChestInventory = new EnderChestInventory(this); // CraftBukkit - add "this" to constructor
+     public final PlayerScreenHandler playerScreenHandler;
+     public ScreenHandler currentScreenHandler;
+-    protected HungerManager hungerManager = new HungerManager();
++    protected HungerManager hungerManager = new HungerManager(this); // CraftBukkit - add "this" to constructor
+     protected int abilityResyncCountdown;
+     public float prevStrideDistance;
+     public float strideDistance;
+@@ -148,6 +163,16 @@
      @Nullable
      public FishingBobberEntity fishHook;
  
@@ -46,7 +72,7 @@
      public PlayerEntity(World world, BlockPos blockpos, GameProfile gameprofile) {
          super(EntityType.PLAYER, world);
          this.selectedItem = ItemStack.EMPTY;
-@@ -283,7 +301,7 @@
+@@ -283,7 +308,7 @@
          ItemStack itemstack = this.getEquippedStack(EquipmentSlot.HEAD);
  
          if (itemstack.getItem() == Items.TURTLE_HELMET && !this.isSubmergedIn(FluidTags.WATER)) {
@@ -55,7 +81,7 @@
          }
  
      }
-@@ -437,7 +455,8 @@
+@@ -437,7 +462,8 @@
  
          if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {
              if (this.getHealth() < this.getMaxHealth() && this.age % 20 == 0) {
@@ -65,7 +91,7 @@
              }
  
              if (this.hungerManager.isNotFull() && this.age % 10 == 0) {
-@@ -618,6 +637,30 @@
+@@ -618,6 +644,30 @@
                  itementity.setVelocity((double) (-f3 * f2 * 0.3F) + Math.cos((double) f5) * (double) f6, (double) (-f1 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double) (f4 * f2 * 0.3F) + Math.sin((double) f5) * (double) f6);
              }
  
@@ -74,7 +100,7 @@
 +            Item drop = (Item) itementity.getBukkitEntity();
 +
 +            PlayerDropItemEvent event = new PlayerDropItemEvent(player, drop);
-+            this.world.getServer().getPluginManager().callEvent(event);
++            Bukkit.getPluginManager().callEvent(event);
 +
 +            if (event.isCancelled()) {
 +                org.bukkit.inventory.ItemStack cur = player.getInventory().getItemInHand();
@@ -96,7 +122,7 @@
              return itementity;
          }
      }
-@@ -740,16 +783,17 @@
+@@ -740,16 +790,17 @@
          if (this.isInvulnerableTo(damagesource)) {
              return false;
          } else if (this.abilities.invulnerable && !damagesource.isOutOfWorld()) {
@@ -116,7 +142,7 @@
                      }
  
                      if (this.world.getDifficulty() == Difficulty.EASY) {
-@@ -761,7 +805,13 @@
+@@ -761,7 +812,13 @@
                      }
                  }
  
@@ -131,12 +157,277 @@
              }
          }
      }
-@@ -1612,7 +1662,7 @@
+@@ -775,10 +832,29 @@
+     }
+ 
+     public boolean shouldDamagePlayer(PlayerEntity playerentity) {
+-        AbstractTeam abstractteam = this.getScoreboardTeam();
+-        AbstractTeam abstractteam1 = playerentity.getScoreboardTeam();
++        // CraftBukkit start - Change to check OTHER player's scoreboard team according to API
++        // To summarize this method's logic, it's "Can parameter hurt this"
++        org.bukkit.scoreboard.Team team;
++        if (playerentity instanceof ServerPlayerEntity) {
++            ServerPlayerEntity thatPlayer = (ServerPlayerEntity) playerentity;
++            team = thatPlayer.getBukkitEntity().getScoreboard().getPlayerTeam(thatPlayer.getBukkitEntity());
++            if (team == null || team.allowFriendlyFire()) {
++                return true;
++            }
++        } else {
++            // This should never be called, but is implemented anyway
++            org.bukkit.OfflinePlayer thisPlayer = playerentity.world.getCraftServer().getOfflinePlayer(playerentity.getEntityName());
++            team = playerentity.world.getCraftServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(thisPlayer);
++            if (team == null || team.allowFriendlyFire()) {
++                return true;
++            }
++        }
+ 
+-        return abstractteam == null ? true : (!abstractteam.isEqual(abstractteam1) ? true : abstractteam.isFriendlyFireAllowed());
++        if (this instanceof ServerPlayerEntity) {
++            return !team.hasPlayer(((ServerPlayerEntity) this).getBukkitEntity());
++        }
++        return !team.hasPlayer(this.world.getCraftServer().getOfflinePlayer(this.getEntityName()));
++        // CraftBukkit end
+     }
+ 
+     protected void damageArmor(DamageSource damagesource, float f) {
+@@ -813,7 +889,12 @@
+         }
+     }
+ 
+-    protected void applyDamage(DamageSource damagesource, float f) {
++    // CraftBukkit start
++    protected boolean applyDamage(DamageSource damagesource, float f) { // CraftBukkit - void -> boolean
++        if (true) {
++            return super.applyDamage(damagesource, f);
++        }
++        // CraftBukkit end
+         if (!this.isInvulnerableTo(damagesource)) {
+             f = this.applyArmorToDamage(damagesource, f);
+             f = this.applyEnchantmentsToDamage(damagesource, f);
+@@ -839,6 +920,7 @@
+ 
+             }
+         }
++        return false; // CraftBukkit
+     }
+ 
+     protected boolean isOnSoulSpeedBlock() {
+@@ -988,7 +1070,7 @@
+ 
+                 f *= 0.2F + f2 * f2 * 0.8F;
+                 f1 *= f2;
+-                this.resetLastAttackedTicks();
++                // this.resetLastAttackedTicks(); // CraftBukkit - Moved to LivingEntity to reset the cooldown after the damage is dealt
+                 if (f > 0.0F || f1 > 0.0F) {
+                     boolean flag = f2 > 0.9F;
+                     boolean flag1 = false;
+@@ -1027,8 +1109,14 @@
+                     if (entity instanceof LivingEntity) {
+                         f3 = ((LivingEntity) entity).getHealth();
+                         if (j > 0 && !entity.isOnFire()) {
++                            // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
++                            EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), 1);
++                            Bukkit.getPluginManager().callEvent(combustEvent);
++                            if (!combustEvent.isCancelled()) {
+                             flag4 = true;
+                             entity.setOnFireFor(1);
++                            }
++                            // CraftBukkit end
+                         }
+                     }
+ 
+@@ -1056,8 +1144,11 @@
+                                 LivingEntity livingentity = (LivingEntity) iterator.next();
+ 
+                                 if (livingentity != this && livingentity != entity && !this.isTeammate(livingentity) && (!(livingentity instanceof ArmorStandEntity) || !((ArmorStandEntity) livingentity).isMarker()) && this.squaredDistanceTo((Entity) livingentity) < 9.0D) {
++                                    // CraftBukkit start - Only apply knockback if the damage hits
++                                    if (livingentity.damage(DamageSource.player(this).sweep(), f4)) {
+                                     livingentity.takeKnockback(0.4F, (double) MathHelper.sin(this.yaw * 0.017453292F), (double) (-MathHelper.cos(this.yaw * 0.017453292F)));
+-                                    livingentity.damage(DamageSource.player(this), f4);
++                                    }
++                                    // CraftBukkit end
+                                 }
+                             }
+ 
+@@ -1066,9 +1157,25 @@
+                         }
+ 
+                         if (entity instanceof ServerPlayerEntity && entity.velocityModified) {
++                            // CraftBukkit start - Add Velocity Event
++                            boolean cancelled = false;
++                            Player player = (Player) entity.getBukkitEntity();
++                            org.bukkit.util.Vector velocity = CraftVector.toBukkit(vec3d);
++
++                            PlayerVelocityEvent event = new PlayerVelocityEvent(player, velocity.clone());
++                            Bukkit.getPluginManager().callEvent(event);
++                            if (event.isCancelled()) {
++                                cancelled = true;
++                            } else if (!velocity.equals(event.getVelocity())) {
++                                player.setVelocity(event.getVelocity());
++                            }
++
++                            if (!cancelled) {
+                             ((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
+                             entity.velocityModified = false;
+                             entity.setVelocity(vec3d);
++                            }
++                            // CraftBukkit end
+                         }
+ 
+                         if (flag2) {
+@@ -1113,7 +1220,13 @@
+ 
+                             this.increaseStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
+                             if (j > 0) {
+-                                entity.setOnFireFor(j * 4);
++                                // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
++                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), j * 4);
++                                Bukkit.getPluginManager().callEvent(combustEvent);
++                                if (!combustEvent.isCancelled()) {
++                                    entity.setOnFireFor(combustEvent.getDuration(), false);
++                                }
++                                // CraftBukkit end
+                             }
+ 
+                             if (this.world instanceof ServerWorld && f5 > 2.0F) {
+@@ -1129,6 +1242,12 @@
+                         if (flag4) {
+                             entity.extinguish();
+                         }
++
++                        // CraftBukkit start - resync on cancelled event
++                        if (this instanceof ServerPlayerEntity) {
++                            ((ServerPlayerEntity) this).getBukkitEntity().updateInventory();
++                        }
++                        // CraftBukkit end
+                     }
+                 }
+ 
+@@ -1187,17 +1306,40 @@
+     }
+ 
+     public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos) {
++        // CraftBukkit start
++        return this.trySleep(blockpos, false);
++    }
++
++    public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos, boolean force) {
++        // CraftBukkit end
+         this.sleep(blockpos);
+         this.sleepTimer = 0;
+         return Either.right(Unit.INSTANCE);
+     }
+ 
+     public void wakeUp(boolean flag, boolean flag1) {
++        BlockPos bedpos = this.getSleepingPosition().orElse(null); // CraftBukkit
+         super.wakeUp();
+         if (this.world instanceof ServerWorld && flag1) {
+             ((ServerWorld) this.world).updateSleepingPlayers();
+         }
+ 
++        // CraftBukkit start - fire PlayerBedLeaveEvent
++        if (this.getBukkitEntity() instanceof Player) {
++            Player player = (Player) this.getBukkitEntity();
++            org.bukkit.block.Block bed;
++
++            if (bedpos != null) {
++                bed = this.world.getCraftWorld().getBlockAt(bedpos.getX(), bedpos.getY(), bedpos.getZ());
++            } else {
++                bed = this.world.getCraftWorld().getBlockAt(player.getLocation());
++            }
++
++            PlayerBedLeaveEvent event = new PlayerBedLeaveEvent(player, bed, true);
++            Bukkit.getPluginManager().callEvent(event);
++        }
++        // CraftBukkit end
++
+         this.sleepTimer = flag ? 0 : 100;
+     }
+ 
+@@ -1304,7 +1446,11 @@
+             this.setVelocity(vec3d2.x, d3 * 0.6D, vec3d2.z);
+             this.flyingSpeed = f;
+             this.fallDistance = 0.0F;
++            // CraftBukkit start
++            if (getFlag(7) && !org.bukkit.craftbukkit.event.CraftEventFactory.callToggleGlideEvent(this, false).isCancelled()) {
+             this.setFlag(7, false);
++            }
++            // CraftBukkit end
+         } else {
+             super.travel(vec3d);
+         }
+@@ -1431,12 +1577,24 @@
+     }
+ 
+     public void startFallFlying() {
++        // CraftBukkit start
++        if (!org.bukkit.craftbukkit.event.CraftEventFactory.callToggleGlideEvent(this, true).isCancelled()) {
+         this.setFlag(7, true);
++        } else {
++            // SPIGOT-5542: must toggle like below
++            this.setFlag(7, true);
++            this.setFlag(7, false);
++        }
++        // CraftBukkit end
+     }
+ 
+     public void stopFallFlying() {
++        // CraftBukkit start
++        if (!org.bukkit.craftbukkit.event.CraftEventFactory.callToggleGlideEvent(this, false).isCancelled()) {
+         this.setFlag(7, true);
+         this.setFlag(7, false);
++        }
++        // CraftBukkit end
+     }
+ 
+     protected void onSwimmingStart() {
+@@ -1612,7 +1770,7 @@
      }
  
      public Iterable<ItemStack> getItemsHand() {
 -        return Lists.newArrayList((Object[])(this.getMainHandStack(), this.getOffHandStack()));
-+        return Lists.newArrayList((Object[]) (this.getMainHandStack(), this.getOffHandStack()));
++        return Lists.newArrayList(this.getMainHandStack(), this.getOffHandStack()); // Loom - decompile error
      }
  
      public Iterable<ItemStack> getArmorItems() {
+@@ -1639,26 +1797,31 @@
+ 
+     protected void dropShoulderEntities() {
+         if (this.shoulderEntityAddedTime + 20L < this.world.getTime()) {
+-            this.dropShoulderEntity(this.getShoulderEntityLeft());
+-            this.setShoulderEntityLeft(new CompoundTag());
+-            this.dropShoulderEntity(this.getShoulderEntityRight());
+-            this.setShoulderEntityRight(new CompoundTag());
++            // CraftBukkit start
++            if (this.dropShoulderEntity(this.getShoulderEntityLeft())) {
++                this.setShoulderEntityLeft(new CompoundTag());
++            }
++
++            if (this.dropShoulderEntity(this.getShoulderEntityRight())) {
++                this.setShoulderEntityRight(new CompoundTag());
++            }
++            // CraftBukkit end
+         }
+ 
+     }
+ 
+-    private void dropShoulderEntity(CompoundTag compoundtag) {
++    private boolean dropShoulderEntity(CompoundTag compoundtag) {  // CraftBukkit void->boolean
+         if (!this.world.isClient && !compoundtag.isEmpty()) {
+-            EntityType.getEntityFromTag(compoundtag, this.world).ifPresent((entity) -> {
++            return EntityType.getEntityFromTag(compoundtag, this.world).map((entity) -> { // CraftBukkit
+                 if (entity instanceof TameableEntity) {
+                     ((TameableEntity) entity).setOwnerUuid(this.uuid);
+                 }
+ 
+                 entity.updatePosition(this.getX(), this.getY() + 0.699999988079071D, this.getZ());
+-                ((ServerWorld) this.world).tryLoadEntity(entity);
+-            });
++                return ((ServerWorld) this.world).tryLoadEntity(entity, CreatureSpawnEvent.SpawnReason.SHOULDER_ENTITY); // CraftBukkit
++            }).orElse(true); // CraftBukkit
+         }
+-
++        return true; // CraftBukkit
+     }
+ 
+     public abstract boolean isSpectator();

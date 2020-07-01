@@ -1,0 +1,12 @@
+--- a/net/minecraft/entity/mob/GhastEntity.java
++++ b/net/minecraft/entity/mob/GhastEntity.java
+@@ -174,7 +174,8 @@
+ 
+                     FireballEntity fireballentity = new FireballEntity(world, this.ghast, d2, d3, d4);
+ 
+-                    fireballentity.explosionPower = this.ghast.getFireballStrength();
++                    // CraftBukkit - set bukkitYield when setting explosionpower
++                    fireballentity.bukkitYield = fireballentity.explosionPower = this.ghast.getFireballStrength();
+                     fireballentity.updatePosition(this.ghast.getX() + vec3d.x * 4.0D, this.ghast.getBodyY(0.5D) + 0.5D, fireballentity.getZ() + vec3d.z * 4.0D);
+                     world.spawnEntity(fireballentity);
+                     this.cooldown = -40;

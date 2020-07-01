@@ -1,0 +1,67 @@
+--- a/net/minecraft/entity/passive/BatEntity.java
++++ b/net/minecraft/entity/passive/BatEntity.java
+@@ -29,6 +29,7 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class BatEntity extends AmbientEntity {
+ 
+@@ -119,16 +120,24 @@
+                 }
+ 
+                 if (this.world.getClosestPlayer(BatEntity.CLOSE_PLAYER_PREDICATE, this) != null) {
+-                    this.setRoosting(false);
+-                    if (!flag) {
+-                        this.world.syncWorldEvent((PlayerEntity) null, 1025, blockpos, 0);
++                    // CraftBukkit start - Call BatToggleSleepEvent
++                    if (CraftEventFactory.handleBatToggleSleepEvent(this, true)) {
++                        this.setRoosting(false);
++                        if (!flag) {
++                            this.world.syncWorldEvent(null, 1025, blockpos, 0);
++                        }
+                     }
++                    // CraftBukkit end
+                 }
+             } else {
+-                this.setRoosting(false);
+-                if (!flag) {
+-                    this.world.syncWorldEvent((PlayerEntity) null, 1025, blockpos, 0);
++                // CraftBukkit start - Call BatToggleSleepEvent
++                if (CraftEventFactory.handleBatToggleSleepEvent(this, true)) {
++                    this.setRoosting(false);
++                    if (!flag) {
++                        this.world.syncWorldEvent(null, 1025, blockpos, 0);
++                    }
+                 }
++                // CraftBukkit - end
+             }
+         } else {
+             if (this.hangingPosition != null && (!this.world.isAir(this.hangingPosition) || this.hangingPosition.getY() < 1)) {
+@@ -152,7 +161,11 @@
+             this.forwardSpeed = 0.5F;
+             this.yaw += f1;
+             if (this.random.nextInt(100) == 0 && this.world.getBlockState(blockpos1).isSolidBlock(this.world, blockpos1)) {
+-                this.setRoosting(true);
++                // CraftBukkit start - Call BatToggleSleepEvent
++                if (CraftEventFactory.handleBatToggleSleepEvent(this, false)) {
++                    this.setRoosting(true);
++                }
++                // CraftBukkit End
+             }
+         }
+ 
+@@ -177,7 +190,11 @@
+             return false;
+         } else {
+             if (!this.world.isClient && this.isRoosting()) {
+-                this.setRoosting(false);
++                // CraftBukkit start - Call BatToggleSleepEvent
++                if (CraftEventFactory.handleBatToggleSleepEvent(this, true)) {
++                    this.setRoosting(false);
++                }
++                // CraftBukkit end
+             }
+ 
+             return super.damage(damagesource, f);

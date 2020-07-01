@@ -1,0 +1,79 @@
+--- a/net/minecraft/block/dispenser/ItemDispenserBehavior.java
++++ b/net/minecraft/block/dispenser/ItemDispenserBehavior.java
+@@ -4,9 +4,14 @@
+ import net.minecraft.entity.ItemEntity;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.math.BlockPointer;
++import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.Direction;
+ import net.minecraft.util.math.Position;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.util.CraftVector;
++import org.bukkit.event.block.BlockDispenseEvent;
+ 
+ public class ItemDispenserBehavior implements DispenserBehavior {
+ 
+@@ -25,11 +30,19 @@
+         Position position = DispenserBlock.getOutputLocation(blockpointer);
+         ItemStack itemstack1 = itemstack.split(1);
+ 
+-        spawnItem(blockpointer.getWorld(), itemstack1, 6, direction, position);
++        // CraftBukkit start
++        if (!spawnItem(blockpointer.getWorld(), itemstack1, 6, direction, blockpointer)) {
++            itemstack.increment(1);
++        }
++        // CraftBukkit end
+         return itemstack;
+     }
+ 
+-    public static void spawnItem(World world, ItemStack itemstack, int i, Direction direction, Position position) {
++    // CraftBukkit start - void -> boolean return, IPosition -> ISourceBlock last argument
++    public static boolean spawnItem(World world, ItemStack itemstack, int i, Direction direction, BlockPointer blockpointer) {
++        if (itemstack.isEmpty()) return true;
++        Position position = DispenserBlock.getOutputLocation(blockpointer);
++        // CraftBukkit end
+         double d0 = position.getX();
+         double d1 = position.getY();
+         double d2 = position.getZ();
+@@ -44,7 +57,39 @@
+         double d3 = world.random.nextDouble() * 0.1D + 0.2D;
+ 
+         itementity.setVelocity(world.random.nextGaussian() * 0.007499999832361937D * (double) i + (double) direction.getOffsetX() * d3, world.random.nextGaussian() * 0.007499999832361937D * (double) i + 0.20000000298023224D, world.random.nextGaussian() * 0.007499999832361937D * (double) i + (double) direction.getOffsetZ() * d3);
++
++        // CraftBukkit start
++        BlockPos blockpos = blockpointer.getBlockPos();
++        org.bukkit.block.Block block = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ());
++        CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack);
++
++        BlockDispenseEvent event = new BlockDispenseEvent(block, craftItem.clone(), CraftVector.toBukkit(itementity.getVelocity()));
++        if (!DispenserBlock.eventFired) {
++            Bukkit.getPluginManager().callEvent(event);
++        }
++
++        if (event.isCancelled()) {
++            return false;
++        }
++
++        itementity.setStack(CraftItemStack.asNMSCopy(event.getItem()));
++        itementity.setVelocity(CraftVector.toNMS(event.getVelocity()));
++
++        if (!event.getItem().getType().equals(craftItem.getType())) {
++            // Chain to handler for new item
++            ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
++            DispenserBehavior idispensebehavior = DispenserBlock.BEHAVIORS.get(eventStack.getItem());
++            if (idispensebehavior != DispenserBehavior.NOOP && idispensebehavior.getClass() != DispenserBehavior.class) {
++                idispensebehavior.dispense(blockpointer, eventStack);
++            } else {
++                world.spawnEntity(itementity);
++            }
++            return false;
++        }
++
+         world.spawnEntity(itementity);
++        return true;
++        // CraftBukkit end
+     }
+ 
+     protected void playSound(BlockPointer blockpointer) {

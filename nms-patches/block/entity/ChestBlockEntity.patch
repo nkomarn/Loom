@@ -59,13 +59,13 @@
              this.onInvOpenOrClose();
          }
  
-@@ -230,4 +258,41 @@
+@@ -230,4 +258,46 @@
      protected ScreenHandler createScreenHandler(int i, PlayerInventory playerinventory) {
          return GenericContainerScreenHandler.createGeneric9x3(i, playerinventory, this);
      }
 +
 +    // CraftBukkit start - add fields and methods
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    public List<HumanEntity> transaction = new java.util.ArrayList<>();
 +    private int maxStack = MAX_STACK;
 +
 +    public List<ItemStack> getContents() {
@@ -85,7 +85,12 @@
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
++    public void setMaxCountPerStack(int size) {
++
++    }
++
++    @Override
++    public int getMaxCountPerStack() {
 +        return maxStack;
 +    }
 +
@@ -94,10 +99,10 @@
 +    }
 +    // CraftBukkit end
 +
-+    // CraftBukkit start
++    /*// CraftBukkit start
 +    @Override
 +    public boolean isFilteredNBT() {
 +        return true;
 +    }
-+    // CraftBukkit end
++    // CraftBukkit end TODO */
  }

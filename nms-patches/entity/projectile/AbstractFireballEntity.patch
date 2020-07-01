@@ -1,0 +1,10 @@
+--- a/net/minecraft/entity/projectile/AbstractFireballEntity.java
++++ b/net/minecraft/entity/projectile/AbstractFireballEntity.java
+@@ -58,6 +58,6 @@
+         super.readCustomDataFromTag(compoundtag);
+         ItemStack itemstack = ItemStack.fromTag(compoundtag.getCompound("Item"));
+ 
+-        this.setItem(itemstack);
++        if (!itemstack.isEmpty()) this.setItem(itemstack); // CraftBukkit - SPIGOT-5474 probably came from bugged earlier versions
+     }
+ }

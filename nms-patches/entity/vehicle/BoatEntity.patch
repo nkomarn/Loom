@@ -1,0 +1,143 @@
+--- a/net/minecraft/entity/vehicle/BoatEntity.java
++++ b/net/minecraft/entity/vehicle/BoatEntity.java
+@@ -45,6 +45,10 @@
+ import net.minecraft.util.shape.VoxelShapes;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.Location;
++import org.bukkit.entity.Vehicle;
++import org.bukkit.event.vehicle.*;
+ 
+ public class BoatEntity extends Entity {
+ 
+@@ -80,6 +84,14 @@
+     private float bubbleWobble;
+     private float lastBubbleWobble;
+ 
++    // CraftBukkit start
++    // PAIL: Some of these haven't worked since a few updates, and since 1.9 they are less and less applicable. TODO
++    public double maxSpeed = 0.4D;
++    public double occupiedDeceleration = 0.2D;
++    public double unoccupiedDeceleration = -1;
++    public boolean landBoats = false;
++    // CraftBukkit end
++
+     public BoatEntity(EntityType<? extends BoatEntity> entitytype, World world) {
+         super(entitytype, world);
+         this.paddlePhases = new float[2];
+@@ -135,6 +147,17 @@
+         if (this.isInvulnerableTo(damagesource)) {
+             return false;
+         } else if (!this.world.isClient && !this.removed) {
++            // CraftBukkit start
++            Vehicle vehicle = (Vehicle) this.getBukkitEntity();
++            org.bukkit.entity.Entity attacker = (damagesource.getAttacker() == null) ? null : damagesource.getAttacker().getBukkitEntity();
++            VehicleDamageEvent event = new VehicleDamageEvent(vehicle, attacker, (double) f);
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return false;
++            }
++            // f = event.getDamage(); // TODO Why don't we do this?
++            // CraftBukkit end
+             this.setDamageWobbleSide(-this.getDamageWobbleSide());
+             this.setDamageWobbleTicks(10);
+             this.setDamageWobbleStrength(this.getDamageWobbleStrength() + f * 10.0F);
+@@ -142,6 +165,15 @@
+             boolean flag = damagesource.getAttacker() instanceof PlayerEntity && ((PlayerEntity) damagesource.getAttacker()).abilities.creativeMode;
+ 
+             if (flag || this.getDamageWobbleStrength() > 40.0F) {
++                // CraftBukkit start
++                VehicleDestroyEvent destroyEvent = new VehicleDestroyEvent(vehicle, attacker);
++                Bukkit.getPluginManager().callEvent(destroyEvent);
++
++                if (destroyEvent.isCancelled()) {
++                    this.setDamageWobbleStrength(40F); // Maximize damage so this doesn't get triggered again right away
++                    return true;
++                }
++                // CraftBukkit end
+                 if (!flag && this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
+                     this.dropItem(this.asItem());
+                 }
+@@ -174,9 +206,29 @@
+     public void pushAwayFrom(Entity entity) {
+         if (entity instanceof BoatEntity) {
+             if (entity.getBoundingBox().minY < this.getBoundingBox().maxY) {
++                // CraftBukkit start
++                if (!this.isConnectedThroughVehicle(entity)) {
++                    VehicleEntityCollisionEvent event = new VehicleEntityCollisionEvent((Vehicle) this.getBukkitEntity(), entity.getBukkitEntity());
++                    Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        return;
++                    }
++                }
++                // CraftBukkit end
+                 super.pushAwayFrom(entity);
+             }
+         } else if (entity.getBoundingBox().minY <= this.getBoundingBox().minY) {
++            // CraftBukkit start
++            if (!this.isConnectedThroughVehicle(entity)) {
++                VehicleEntityCollisionEvent event = new VehicleEntityCollisionEvent((Vehicle) this.getBukkitEntity(), entity.getBukkitEntity());
++                Bukkit.getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return;
++                }
++            }
++            // CraftBukkit end
+             super.pushAwayFrom(entity);
+         }
+ 
+@@ -208,6 +260,7 @@
+         return this.getHorizontalFacing().rotateYClockwise();
+     }
+ 
++    private org.bukkit.Location lastLoc; // CraftBukkit
+     public void tick() {
+         this.lastLocation = this.location;
+         this.location = this.checkLocation();
+@@ -247,6 +300,21 @@
+             this.setVelocity(Vec3d.ZERO);
+         }
+ 
++        // CraftBukkit start
++        org.bukkit.Server server = this.world.getCraftServer();
++        org.bukkit.World bworld = this.world.getCraftWorld();
++
++        org.bukkit.Location to = new org.bukkit.Location(bworld, this.getX(), this.getY(), this.getZ(), this.yaw, this.pitch);
++        Vehicle vehicle = (Vehicle) this.getBukkitEntity();
++        Bukkit.getPluginManager().callEvent(new VehicleUpdateEvent(vehicle));
++
++        if (lastLoc != null && !lastLoc.equals(to)) {
++            VehicleMoveEvent event = new VehicleMoveEvent(vehicle, lastLoc, to);
++            Bukkit.getPluginManager().callEvent(event);
++        }
++        lastLoc = vehicle.getLocation();
++        // CraftBukkit end
++
+         this.handleBubbleColumn();
+ 
+         for (int i = 0; i <= 1; ++i) {
+@@ -732,6 +800,12 @@
+ 
+                     this.handleFallDamage(this.fallDistance, 1.0F);
+                     if (!this.world.isClient && !this.removed) {
++                        // CraftBukkit start
++                        Vehicle vehicle = (Vehicle) this.getBukkitEntity();
++                        VehicleDestroyEvent destroyEvent = new VehicleDestroyEvent(vehicle, null);
++                        Bukkit.getPluginManager().callEvent(destroyEvent);
++
++                        if (!destroyEvent.isCancelled()) {
+                         this.remove();
+                         if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
+                             int i;
+@@ -745,6 +819,7 @@
+                             }
+                         }
+                     }
++                    } // CraftBukkit end
+                 }
+ 
+                 this.fallDistance = 0.0F;

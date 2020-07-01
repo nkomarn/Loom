@@ -140,25 +140,42 @@
  
      public void method_27910(int i, int j, boolean flag, boolean flag1) {
          this.field_24456.setClearWeatherTime(i);
-@@ -291,6 +353,7 @@
+@@ -291,36 +353,67 @@
              this.rainGradient = MathHelper.clamp(this.rainGradient, 0.0F, 1.0F);
          }
  
 +        /* CraftBukkit start
          if (this.rainGradientPrev != this.rainGradient) {
-             this.server.getPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient), this.getRegistryKey());
+-            this.server.getPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient), this.getRegistryKey());
++            this.server.getDedicatedPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient), this.getRegistryKey());
          }
-@@ -309,18 +372,48 @@
-             this.server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient));
-             this.server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, this.thunderGradient));
+ 
+         if (this.thunderGradientPrev != this.thunderGradient) {
+-            this.server.getPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, this.thunderGradient), this.getRegistryKey());
++            this.server.getDedicatedPlayerManager().sendToDimension(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, this.thunderGradient), this.getRegistryKey());
          }
+ 
+         if (flag != this.isRaining()) {
+             if (flag) {
+-                this.server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_STOPPED, 0.0F));
++                this.server.getDedicatedPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_STOPPED, 0.0F));
+             } else {
+-                this.server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_STARTED, 0.0F));
++                this.server.getDedicatedPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_STARTED, 0.0F));
++            }
++
++            this.server.getDedicatedPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient));
++            this.server.getDedicatedPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, this.thunderGradient));
++        }
 +        // */
 +        for (int idx = 0; idx < this.players.size(); ++idx) {
 +            if (((ServerPlayerEntity) this.players.get(idx)).world == this) {
 +                ((ServerPlayerEntity) this.players.get(idx)).tickWeather();
-+            }
+             }
 +        }
-+
+ 
+-            this.server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, this.rainGradient));
+-            this.server.getPlayerManager().sendToAll(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, this.thunderGradient));
 +        if (flag != this.isRaining()) {
 +            // Only send weather packets to those affected
 +            for (int idx = 0; idx < this.players.size(); ++idx) {
@@ -171,7 +188,7 @@
 +            if (((ServerPlayerEntity) this.players.get(idx)).world == this) {
 +                ((ServerPlayerEntity) this.players.get(idx)).updateWeather(this.rainGradientPrev, this.rainGradient, this.thunderGradientPrev, this.thunderGradient);
 +            }
-+        }
+         }
 +        // CraftBukkit end
  
          if (this.allPlayersSleeping && this.players.stream().noneMatch((serverplayerentity) -> {

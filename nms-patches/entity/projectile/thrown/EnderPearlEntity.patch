@@ -1,0 +1,63 @@
+--- a/net/minecraft/entity/projectile/thrown/EnderPearlEntity.java
++++ b/net/minecraft/entity/projectile/thrown/EnderPearlEntity.java
+@@ -16,6 +16,10 @@
+ import net.minecraft.util.hit.HitResult;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.World;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.CreatureSpawnEvent;
++import org.bukkit.event.player.PlayerTeleportEvent;
+ 
+ public class EnderPearlEntity extends ThrownItemEntity {
+ 
+@@ -49,21 +53,35 @@
+                 ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) entity;
+ 
+                 if (serverplayerentity.networkHandler.getConnection().isOpen() && serverplayerentity.world == this.world && !serverplayerentity.isSleeping()) {
+-                    if (this.random.nextFloat() < 0.05F && this.world.getGameRules().getBoolean(GameRules.DO_MOB_SPAWNING)) {
+-                        EndermiteEntity endermiteentity = (EndermiteEntity) EntityType.ENDERMITE.create(this.world);
+-
+-                        endermiteentity.setPlayerSpawned(true);
+-                        endermiteentity.refreshPositionAndAngles(entity.getX(), entity.getY(), entity.getZ(), entity.yaw, entity.pitch);
+-                        this.world.spawnEntity(endermiteentity);
+-                    }
+-
+-                    if (entity.hasVehicle()) {
+-                        entity.stopRiding();
++                    // CraftBukkit start - Fire PlayerTeleportEvent
++                    org.bukkit.craftbukkit.entity.CraftPlayer player = serverplayerentity.getBukkitEntity();
++                    org.bukkit.Location location = getBukkitEntity().getLocation();
++                    location.setPitch(player.getLocation().getPitch());
++                    location.setYaw(player.getLocation().getYaw());
++
++                    PlayerTeleportEvent teleEvent = new PlayerTeleportEvent(player, player.getLocation(), location, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
++                    Bukkit.getPluginManager().callEvent(teleEvent);
++
++                    if (!teleEvent.isCancelled() && !serverplayerentity.networkHandler.isDisconnected()) {
++                        if (this.random.nextFloat() < 0.05F && this.world.getGameRules().getBoolean(GameRules.DO_MOB_SPAWNING)) {
++                            EndermiteEntity endermiteentity = (EndermiteEntity) EntityType.ENDERMITE.create(this.world);
++
++                            endermiteentity.setPlayerSpawned(true);
++                            endermiteentity.refreshPositionAndAngles(entity.getX(), entity.getY(), entity.getZ(), entity.yaw, entity.pitch);
++                            this.world.spawnEntity(endermiteentity, CreatureSpawnEvent.SpawnReason.ENDER_PEARL);
++                        }
++
++                        if (entity.hasVehicle()) {
++                            entity.stopRiding();
++                        }
++
++                        serverplayerentity.networkHandler.teleport(teleEvent.getTo());
++                        entity.fallDistance = 0.0F;
++                        CraftEventFactory.entityDamage = this;
++                        entity.damage(DamageSource.FALL, 5.0F);
++                        CraftEventFactory.entityDamage = null;
+                     }
+-
+-                    entity.requestTeleport(this.getX(), this.getY(), this.getZ());
+-                    entity.fallDistance = 0.0F;
+-                    entity.damage(DamageSource.FALL, 5.0F);
++                    // CraftBukkit end
+                 }
+             } else if (entity != null) {
+                 entity.requestTeleport(this.getX(), this.getY(), this.getZ());

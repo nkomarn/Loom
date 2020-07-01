@@ -38,19 +38,19 @@
 +        transaction.remove(who);
 +    }
 +
-+   @Override
++    @Override
 +    public List<HumanEntity> getViewers() {
 +        return transaction;
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
-+       return maxStack;
++    public void setMaxCountPerStack(int size) {
++        maxStack = size;
 +    }
 +
 +    @Override
-+    public void setMaxStackSize(int i) {
-+        maxStack = i;
++    public int getMaxCountPerStack() {
++        return maxStack;
 +    }
 +    // CraftBukkit end
  }

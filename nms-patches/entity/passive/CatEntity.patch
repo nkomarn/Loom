@@ -1,0 +1,52 @@
+--- a/net/minecraft/entity/passive/CatEntity.java
++++ b/net/minecraft/entity/passive/CatEntity.java
+@@ -68,6 +68,7 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.gen.feature.StructureFeature;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class CatEntity extends TameableEntity {
+ 
+@@ -385,7 +386,7 @@
+                 }
+             } else if (this.isBreedingItem(itemstack)) {
+                 this.eat(playerentity, itemstack);
+-                if (this.random.nextInt(3) == 0) {
++                if (this.random.nextInt(3) == 0 && !CraftEventFactory.callEntityTameEvent(this, playerentity).isCancelled()) { // CraftBukkit
+                     this.setOwner(playerentity);
+                     this.setSitting(true);
+                     this.world.sendEntityStatus(this, (byte) 7);
+@@ -430,9 +431,9 @@
+ 
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
++    /*public PassiveEntity createChild(PassiveEntity passiveentity) {
+         return this.createChild(passiveentity);
+-    }
++    }*/ // Loom - duplicate method
+ 
+     static class SleepWithOwnerGoal extends Goal {
+ 
+@@ -568,7 +569,7 @@
+     static class TemptGoal extends net.minecraft.entity.ai.goal.TemptGoal {
+ 
+         @Nullable
+-        private PlayerEntity player;
++        private LivingEntity player; // CraftBukkit
+         private final CatEntity cat;
+ 
+         public TemptGoal(CatEntity catentity, double d0, Ingredient ingredient, boolean flag) {
+@@ -600,9 +601,9 @@
+         private final CatEntity cat;
+ 
+         public CatFleeGoal(CatEntity catentity, Class<T> oclass, float f, double d0, double d1) {
+-            Predicate predicate = EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR;
++            // Predicate predicate = EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR; // CraftBukkit - decompile error
+ 
+-            super(catentity, oclass, f, d0, d1, predicate::test);
++            super(catentity, oclass, f, d0, d1, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR::test); // CraftBukkit - decompile error
+             this.cat = catentity;
+         }
+ 

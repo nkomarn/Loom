@@ -509,7 +509,8 @@
  
          serverworldproperties.setWorldBorder(serverworld1.getWorldBorder().write());
          this.saveProperties.setCustomBossEvents(this.getBossBarManager().toTag());
-         this.session.method_27426(this.dimensionTracker, this.saveProperties, this.getPlayerManager().getUserData());
+-        this.session.method_27426(this.dimensionTracker, this.saveProperties, this.getPlayerManager().getUserData());
++        this.session.method_27426(this.dimensionTracker, this.saveProperties, this.getDedicatedPlayerManager().getUserData());
 +        */
 +        // CraftBukkit end
          return flag3;

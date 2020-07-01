@@ -1,0 +1,41 @@
+--- a/net/minecraft/entity/boss/dragon/phase/PhaseManager.java
++++ b/net/minecraft/entity/boss/dragon/phase/PhaseManager.java
+@@ -3,6 +3,9 @@
+ import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.entity.CraftEnderDragon;
++import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
+ 
+ public class PhaseManager {
+ 
+@@ -22,6 +25,20 @@
+                 this.current.endPhase();
+             }
+ 
++            // CraftBukkit start - Call EnderDragonChangePhaseEvent
++            EnderDragonChangePhaseEvent event = new EnderDragonChangePhaseEvent(
++                    (CraftEnderDragon) this.dragon.getBukkitEntity(),
++                    (this.current == null) ? null : CraftEnderDragon.getBukkitPhase(this.current.getType()),
++                    CraftEnderDragon.getBukkitPhase(phasetype)
++            );
++            Bukkit.getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return;
++            }
++            phasetype = CraftEnderDragon.getMinecraftPhase(event.getNewPhase());
++            // CraftBukkit end
++
+             this.current = this.create(phasetype);
+             if (!this.dragon.world.isClient) {
+                 this.dragon.getDataTracker().set(EnderDragonEntity.PHASE_TYPE, phasetype.getTypeId());
+@@ -43,6 +60,6 @@
+             this.phases[i] = phasetype.create(this.dragon);
+         }
+ 
+-        return this.phases[i];
++        return (T) this.phases[i]; // CraftBukkit - decompile error
+     }
+ }

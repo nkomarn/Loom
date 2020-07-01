@@ -1,0 +1,117 @@
+--- a/net/minecraft/entity/passive/FoxEntity.java
++++ b/net/minecraft/entity/passive/FoxEntity.java
+@@ -75,6 +75,9 @@
+ import net.minecraft.world.WorldView;
+ import net.minecraft.world.biome.Biome;
+ import net.minecraft.world.biome.Biomes;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.CreatureSpawnEvent;
++import org.bukkit.event.entity.EntityBreedEvent;
+ 
+ public class FoxEntity extends AnimalEntity {
+ 
+@@ -317,8 +320,8 @@
+     private List<UUID> getTrustedUuids() {
+         List<UUID> list = Lists.newArrayList();
+ 
+-        list.add(((Optional) this.dataTracker.get(FoxEntity.OWNER)).orElse((Object) null));
+-        list.add(((Optional) this.dataTracker.get(FoxEntity.OTHER_TRUSTED)).orElse((Object) null));
++        list.add((this.dataTracker.get(FoxEntity.OWNER)).orElse(null)); // CraftBukkit - decompile error
++        list.add((this.dataTracker.get(FoxEntity.OTHER_TRUSTED)).orElse(null)); // CraftBukkit - decompile error
+         return list;
+     }
+ 
+@@ -448,7 +451,7 @@
+     protected void loot(ItemEntity itementity) {
+         ItemStack itemstack = itementity.getStack();
+ 
+-        if (this.canPickupItem(itemstack)) {
++        if (!CraftEventFactory.callEntityPickupItemEvent(this, itementity, itemstack.getCount() - 1, !this.canPickupItem(itemstack)).isCancelled()) { // CraftBukkit - call EntityPickupItemEvent
+             int i = itemstack.getCount();
+ 
+             if (i > 1) {
+@@ -644,10 +647,6 @@
+         return true;
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
+-
+     class LookAtEntityGoal extends net.minecraft.entity.ai.goal.LookAtEntityGoal {
+ 
+         public LookAtEntityGoal(MobEntity mobentity, Class<? extends LivingEntity> oclass, float f) {
+@@ -936,6 +935,11 @@
+                     int i = (Integer) blockstate.get(SweetBerryBushBlock.AGE);
+ 
+                     blockstate.with(SweetBerryBushBlock.AGE, 1);
++                    // CraftBukkit start - call EntityChangeBlockEvent
++                    if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(FoxEntity.this, this.targetPos, blockstate.with(SweetBerryBushBlock.AGE, 1)).isCancelled()) {
++                        return;
++                    }
++                    // CraftBukkit end
+                     int j = 1 + FoxEntity.this.world.random.nextInt(2) + (i == 3 ? 1 : 0);
+                     ItemStack itemstack = FoxEntity.this.getEquippedStack(EquipmentSlot.MAINHAND);
+ 
+@@ -973,7 +977,7 @@
+         private int counter;
+ 
+         public SitDownAndLookAroundGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+             this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
+         }
+ 
+@@ -1020,7 +1024,7 @@
+         private int timer;
+ 
+         public DelayedCalmDownGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+             this.timer = FoxEntity.this.random.nextInt(140);
+             this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK, Goal.Control.JUMP));
+         }
+@@ -1088,10 +1092,6 @@
+         public boolean test(LivingEntity livingentity) {
+             return livingentity instanceof FoxEntity ? false : (!(livingentity instanceof ChickenEntity) && !(livingentity instanceof RabbitEntity) && !(livingentity instanceof HostileEntity) ? (livingentity instanceof TameableEntity ? !((TameableEntity) livingentity).isTamed() : (livingentity instanceof PlayerEntity && (livingentity.isSpectator() || ((PlayerEntity) livingentity).isCreative()) ? false : (FoxEntity.this.canTrust(livingentity.getUuid()) ? false : !livingentity.isSleeping() && !livingentity.isSneaky()))) : true);
+         }
+-
+-        public boolean test(Object object) {
+-            return this.test((LivingEntity) object);
+-        }
+     }
+ 
+     class AvoidDaylightGoal extends EscapeSunlightGoal {
+@@ -1209,6 +1209,15 @@
+                     foxentity.addTrustedUuid(serverplayerentity1.getUuid());
+                 }
+ 
++                // CraftBukkit start - call EntityBreedEvent
++                int experience = this.animal.getRandom().nextInt(7) + 1;
++                EntityBreedEvent entityBreedEvent = CraftEventFactory.callEntityBreedEvent(foxentity, animal, mate, serverplayerentity, this.animal.breedItem, experience);
++                if (entityBreedEvent.isCancelled()) {
++                    return;
++                }
++                experience = entityBreedEvent.getExperience();
++                // CraftBukkit end
++
+                 if (serverplayerentity2 != null) {
+                     serverplayerentity2.incrementStat(Stats.ANIMALS_BRED);
+                     Criteria.BRED_ANIMALS.trigger(serverplayerentity2, this.animal, this.mate, foxentity);
+@@ -1220,10 +1229,14 @@
+                 this.mate.resetLoveTicks();
+                 foxentity.setBreedingAge(-24000);
+                 foxentity.refreshPositionAndAngles(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0F, 0.0F);
+-                this.world.spawnEntity(foxentity);
++                this.world.spawnEntity(foxentity, CreatureSpawnEvent.SpawnReason.BREEDING); // CraftBukkit - added SpawnReason
+                 this.world.sendEntityStatus(this.animal, (byte) 18);
+                 if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+-                    this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
++                    // CraftBukkit start - use event experience
++                    if (experience > 0) {
++                        this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), experience));
++                    }
++                    // CraftBukkit end
+                 }
+ 
+             }

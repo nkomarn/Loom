@@ -1,0 +1,139 @@
+--- a/net/minecraft/entity/boss/dragon/EnderDragonEntity.java
++++ b/net/minecraft/entity/boss/dragon/EnderDragonEntity.java
+@@ -7,6 +7,7 @@
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockState;
+ import net.minecraft.block.Material;
++import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.EntityType;
+ import net.minecraft.entity.ExperienceOrbEntity;
+@@ -31,6 +32,9 @@
+ import net.minecraft.entity.mob.MobEntity;
+ import net.minecraft.entity.mob.Monster;
+ import net.minecraft.entity.player.PlayerEntity;
++import net.minecraft.item.ItemStack;
++import net.minecraft.loot.context.LootContext;
++import net.minecraft.loot.context.LootContextParameters;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.particle.ParticleTypes;
+ import net.minecraft.predicate.entity.EntityPredicates;
+@@ -46,9 +50,14 @@
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.Heightmap;
+ import net.minecraft.world.World;
++import net.minecraft.world.explosion.Explosion;
+ import net.minecraft.world.gen.feature.EndPortalFeature;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.event.entity.EntityExplodeEvent;
++import org.bukkit.event.entity.EntityRegainHealthEvent;
+ 
+ public class EnderDragonEntity extends MobEntity implements Monster {
+ 
+@@ -81,6 +90,7 @@
+     private final PathNode[] pathNodes = new PathNode[24];
+     private final int[] pathNodeConnections = new int[24];
+     private final PathMinHeap pathHeap = new PathMinHeap();
++    private Explosion explosionSource = new Explosion(null, this, null, null, Double.NaN, Double.NaN, Double.NaN, Float.NaN, true, Explosion.DestructionType.DESTROY); // CraftBukkit - reusable source for CraftTNTPrimed.getSource()
+ 
+     public EnderDragonEntity(EntityType<? extends EnderDragonEntity> entitytype, World world) {
+         super(EntityType.ENDER_DRAGON, world);
+@@ -216,7 +226,7 @@
+ 
+                     Vec3d vec3d1 = phase.getTarget();
+ 
+-                    if (vec3d1 != null) {
++                    if (vec3d1 != null && phaseManager.getCurrent() != PhaseType.HOVER) { // CraftBukkit - Don't move when hovering
+                         d0 = vec3d1.x - this.getX();
+                         d1 = vec3d1.y - this.getY();
+                         d2 = vec3d1.z - this.getZ();
+@@ -354,7 +364,14 @@
+             if (this.connectedCrystal.removed) {
+                 this.connectedCrystal = null;
+             } else if (this.age % 10 == 0 && this.getHealth() < this.getMaxHealth()) {
+-                this.setHealth(this.getHealth() + 1.0F);
++                // CraftBukkit start
++                EntityRegainHealthEvent event = new EntityRegainHealthEvent(this.getBukkitEntity(), 1.0F, EntityRegainHealthEvent.RegainReason.ENDER_CRYSTAL);
++                Bukkit.getPluginManager().callEvent(event);
++
++                if (!event.isCancelled()) {
++                    this.setHealth((float) (this.getHealth() + event.getAmount()));
++                }
++                // CraftBukkit end
+             }
+         }
+ 
+@@ -429,6 +446,9 @@
+         int j1 = MathHelper.floor(box.maxZ);
+         boolean flag = false;
+         boolean flag1 = false;
++        // CraftBukkit start - Create a list to hold all the destroyed blocks
++        List<org.bukkit.block.Block> destroyedBlocks = new java.util.ArrayList<>();
++        // CraftBukkit end
+ 
+         for (int k1 = i; k1 <= l; ++k1) {
+             for (int l1 = j; l1 <= i1; ++l1) {
+@@ -439,7 +459,11 @@
+ 
+                     if (!blockstate.isAir() && blockstate.getMaterial() != Material.FIRE) {
+                         if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) && !BlockTags.DRAGON_IMMUNE.contains(block)) {
+-                            flag1 = this.world.removeBlock(blockpos, false) || flag1;
++                            // CraftBukkit start - Add blocks to list rather than destroying them
++                            //flag1 = this.world.removeBlock(blockpos, false) || flag1;
++                            flag1 = true;
++                            destroyedBlocks.add(CraftBlock.at(world, blockpos));
++                            // CraftBukkit end
+                         } else {
+                             flag = true;
+                         }
+@@ -448,6 +472,47 @@
+             }
+         }
+ 
++        // CraftBukkit start - Set off an EntityExplodeEvent for the dragon exploding all these blocks
++        // SPIGOT-4882: don't fire event if nothing hit
++        if (!flag1) {
++            return flag;
++        }
++
++        org.bukkit.entity.Entity bukkitEntity = this.getBukkitEntity();
++        EntityExplodeEvent event = new EntityExplodeEvent(bukkitEntity, bukkitEntity.getLocation(), destroyedBlocks, 0F);
++        Bukkit.getPluginManager().callEvent(event);
++        if (event.isCancelled()) {
++            // This flag literally means 'Dragon hit something hard' (Obsidian, White Stone or Bedrock) and will cause the dragon to slow down.
++            // We should consider adding an event extension for it, or perhaps returning true if the event is cancelled.
++            return flag;
++        } else if (event.getYield() == 0F) {
++            // Yield zero ==> no drops
++            for (org.bukkit.block.Block block : event.blockList()) {
++                this.world.removeBlock(new BlockPos(block.getX(), block.getY(), block.getZ()), false);
++            }
++        } else {
++            for (org.bukkit.block.Block block : event.blockList()) {
++                org.bukkit.Material blockId = block.getType();
++                if (blockId.isAir()) {
++                    continue;
++                }
++
++                CraftBlock craftBlock = ((CraftBlock) block);
++                BlockPos blockposition = craftBlock.getPosition();
++
++                Block nmsBlock = craftBlock.getNMS().getBlock();
++                if (nmsBlock.shouldDropItemsOnExplosion(explosionSource)) {
++                    BlockEntity tileentity = nmsBlock.hasBlockEntity() ? this.world.getBlockEntity(blockposition) : null;
++                    LootContext.Builder loottableinfo_builder = (new LootContext.Builder((ServerWorld) this.world)).random(this.world.random).parameter(LootContextParameters.POSITION, blockposition).parameter(LootContextParameters.TOOL, ItemStack.EMPTY).parameter(LootContextParameters.EXPLOSION_RADIUS, 1.0F / event.getYield()).optionalParameter(LootContextParameters.BLOCK_ENTITY, tileentity);
++                    craftBlock.getNMS().getDroppedStacks(loottableinfo_builder).forEach((itemstack) -> Block.dropStack(world, blockposition, itemstack));
++                    craftBlock.getNMS().onStacksDropped(world, blockposition, ItemStack.EMPTY);
++                }
++                nmsBlock.onDestroyedByExplosion(world, blockposition, explosionSource);
++                this.world.removeBlock(blockposition, false);
++            }
++        }
++        // CraftBukkit end
++
+         if (flag1) {
+             BlockPos blockpos1 = new BlockPos(i + this.random.nextInt(l - i + 1), j + this.random.nextInt(i1 - j + 1), k + this.random.nextInt(j1 - k + 1));
+ 

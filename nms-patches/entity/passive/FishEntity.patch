@@ -1,0 +1,28 @@
+--- a/net/minecraft/entity/passive/FishEntity.java
++++ b/net/minecraft/entity/passive/FishEntity.java
+@@ -67,7 +67,7 @@
+     }
+ 
+     public boolean canImmediatelyDespawn(double d0) {
+-        return !this.isFromBucket() && !this.hasCustomName();
++        return true; // CraftBukkit
+     }
+ 
+     public int getLimitPerChunk() {
+@@ -85,6 +85,7 @@
+ 
+     public void setFromBucket(boolean flag) {
+         this.dataTracker.set(FishEntity.FROM_BUCKET, flag);
++        this.persistent = this.isPersistent(); // CraftBukkit - SPIGOT-4106 update persistence
+     }
+ 
+     public void writeCustomDataToTag(CompoundTag compoundtag) {
+@@ -104,7 +105,7 @@
+         Predicate predicate = EntityPredicates.EXCEPT_SPECTATOR;
+ 
+         predicate.getClass();
+-        goalselector.add(2, new FleeEntityGoal<>(this, PlayerEntity.class, 8.0F, 1.6D, 1.4D, predicate::test));
++        goalselector.add(2, new FleeEntityGoal(this, PlayerEntity.class, 8.0F, 1.6D, 1.4D, predicate::test)); // TODO new FleeEntityGoal<>
+         this.goalSelector.add(4, new FishEntity.SwimToRandomPlaceGoal(this));
+     }
+ 

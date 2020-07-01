@@ -1,0 +1,13 @@
+--- a/net/minecraft/entity/damage/ProjectileDamageSource.java
++++ b/net/minecraft/entity/damage/ProjectileDamageSource.java
+@@ -34,4 +34,10 @@
+ 
+         return !itemstack.isEmpty() && itemstack.hasCustomName() ? new TranslatableText(s1, new Object[]{livingentity.getDisplayName(), text, itemstack.toHoverableText()}) : new TranslatableText(s, new Object[]{livingentity.getDisplayName(), text});
+     }
++
++    // CraftBukkit start
++    public Entity getProximateDamageSource() {
++        return super.getAttacker();
++    }
++    // CraftBukkit end
+ }

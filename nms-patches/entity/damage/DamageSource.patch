@@ -1,0 +1,21 @@
+--- a/net/minecraft/entity/damage/DamageSource.java
++++ b/net/minecraft/entity/damage/DamageSource.java
+@@ -46,6 +46,18 @@
+     private boolean magic;
+     private boolean explosive;
+     public final String name;
++    // CraftBukkit start
++    private boolean sweep;
++
++    public boolean isSweep() {
++        return sweep;
++    }
++
++    public DamageSource sweep() {
++        this.sweep = true;
++        return this;
++    }
++    // CraftBukkit end
+ 
+     public static DamageSource sting(LivingEntity livingentity) {
+         return new EntityDamageSource("sting", livingentity);

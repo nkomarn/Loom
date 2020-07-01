@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/function/CommandFunctionManager.java
++++ b/net/minecraft/server/function/CommandFunctionManager.java
+@@ -36,7 +36,7 @@
+     }
+ 
+     public CommandDispatcher<ServerCommandSource> getDispatcher() {
+-        return this.server.getCommandManager().getDispatcher();
++        return this.server.vanillaCommandDispatcher.getDispatcher(); // CraftBukkit
+     }
+ 
+     public void tick() {

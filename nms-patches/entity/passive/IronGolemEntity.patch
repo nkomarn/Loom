@@ -1,0 +1,19 @@
+--- a/net/minecraft/entity/passive/IronGolemEntity.java
++++ b/net/minecraft/entity/passive/IronGolemEntity.java
+@@ -52,6 +52,7 @@
+ import net.minecraft.world.SpawnHelper;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldView;
++import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+ 
+ public class IronGolemEntity extends GolemEntity implements Angerable {
+ 
+@@ -99,7 +100,7 @@
+ 
+     protected void pushAway(Entity entity) {
+         if (entity instanceof Monster && !(entity instanceof CreeperEntity) && this.getRandom().nextInt(20) == 0) {
+-            this.setTarget((LivingEntity) entity);
++            this.setTarget((LivingEntity) entity, EntityTargetLivingEntityEvent.TargetReason.COLLISION, true); // CraftBukkit - set reason);
+         }
+ 
+         super.pushAway(entity);

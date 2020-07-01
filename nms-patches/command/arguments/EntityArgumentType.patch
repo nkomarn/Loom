@@ -1,0 +1,47 @@
+--- a/net/minecraft/command/arguments/EntityArgumentType.java
++++ b/net/minecraft/command/arguments/EntityArgumentType.java
+@@ -93,9 +93,14 @@
+     }
+ 
+     public EntitySelector parse(StringReader stringreader) throws CommandSyntaxException {
++        // CraftBukkit start
++        return parse(stringreader, false);
++    }
++
++    public EntitySelector parse(StringReader stringreader, boolean overridePermissions) throws CommandSyntaxException {
+         boolean flag = false;
+         EntitySelectorReader entityselectorreader = new EntitySelectorReader(stringreader);
+-        EntitySelector entityselector = entityselectorreader.read();
++        EntitySelector entityselector = entityselectorreader.read(overridePermissions); // CraftBukkit
+ 
+         if (entityselector.getLimit() > 1 && this.singleTarget) {
+             if (this.playersOnly) {
+@@ -142,10 +147,6 @@
+         return EntityArgumentType.EXAMPLES;
+     }
+ 
+-    public Object parse(StringReader stringreader) throws CommandSyntaxException {
+-        return this.parse(stringreader);
+-    }
+-
+     public static class Serializer implements ArgumentSerializer<EntityArgumentType> {
+ 
+         public Serializer() {}
+@@ -174,17 +175,5 @@
+             jsonobject.addProperty("amount", entityargumenttype.singleTarget ? "single" : "multiple");
+             jsonobject.addProperty("type", entityargumenttype.playersOnly ? "players" : "entities");
+         }
+-
+-        public void toJson(ArgumentType argumenttype, JsonObject jsonobject) {
+-            this.toJson((EntityArgumentType) argumenttype, jsonobject);
+-        }
+-
+-        public ArgumentType fromPacket(PacketByteBuf packetbytebuf) {
+-            return this.fromPacket(packetbytebuf);
+-        }
+-
+-        public void toPacket(ArgumentType argumenttype, PacketByteBuf packetbytebuf) {
+-            this.toPacket((EntityArgumentType) argumenttype, packetbytebuf);
+-        }
+     }
+ }

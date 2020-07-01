@@ -1,0 +1,24 @@
+--- a/net/minecraft/entity/passive/ChickenEntity.java
++++ b/net/minecraft/entity/passive/ChickenEntity.java
+@@ -68,6 +68,11 @@
+     }
+ 
+     public void tickMovement() {
++        // CraftBukkit start
++        if (this.hasJockey()) {
++            this.persistent = !this.canImmediatelyDespawn(0);
++        }
++        // CraftBukkit end
+         super.tickMovement();
+         this.prevFlapProgress = this.flapProgress;
+         this.prevMaxWingDeviation = this.maxWingDeviation;
+@@ -87,7 +92,9 @@
+         this.flapProgress += this.flapSpeed * 2.0F;
+         if (!this.world.isClient && this.isAlive() && !this.isBaby() && !this.hasJockey() && --this.eggLayTime <= 0) {
+             this.playSound(SoundEvents.ENTITY_CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
++            this.forceDrops = true; // CraftBukkit
+             this.dropItem(Items.EGG);
++            this.forceDrops = false; // CraftBukkit
+             this.eggLayTime = this.random.nextInt(6000) + 6000;
+         }
+ 

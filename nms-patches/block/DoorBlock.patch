@@ -1,14 +1,15 @@
 --- a/net/minecraft/block/DoorBlock.java
 +++ b/net/minecraft/block/DoorBlock.java
-@@ -27,6 +27,7 @@
+@@ -27,6 +27,8 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldAccess;
  import net.minecraft.world.WorldView;
++import org.bukkit.Bukkit;
 +import org.bukkit.event.block.BlockRedstoneEvent;
  
  public class DoorBlock extends Block {
  
-@@ -173,9 +174,26 @@
+@@ -173,9 +175,26 @@
      }
  
      public void neighborUpdate(BlockState blockstate, World world, BlockPos blockpos, Block block, BlockPos blockpos1, boolean flag) {
@@ -30,7 +31,7 @@
 +
 +        if (oldPower == 0 ^ power == 0) {
 +            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(bukkitBlock, oldPower, power);
-+            world.getServer().getPluginManager().callEvent(eventRedstone);
++            Bukkit.getPluginManager().callEvent(eventRedstone);
 +
 +            boolean flag1 = eventRedstone.getNewCurrent() > 0;
 +            // CraftBukkit end

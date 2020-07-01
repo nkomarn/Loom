@@ -1,0 +1,26 @@
+--- a/net/minecraft/server/dedicated/ServerPropertiesLoader.java
++++ b/net/minecraft/server/dedicated/ServerPropertiesLoader.java
+@@ -1,5 +1,8 @@
+ package net.minecraft.server.dedicated;
+ 
++import joptsimple.OptionSet;
++
++import java.io.File;
+ import java.nio.file.Path;
+ import java.util.function.UnaryOperator;
+ 
+@@ -8,9 +11,11 @@
+     private final Path path;
+     private ServerPropertiesHandler propertiesHandler;
+ 
+-    public ServerPropertiesLoader(Path path) {
+-        this.path = path;
+-        this.propertiesHandler = ServerPropertiesHandler.load(path);
++    // CraftBukkit start
++    public ServerPropertiesLoader(OptionSet optionset) {
++        this.path = ((File) optionset.valueOf("config")).toPath();
++        this.propertiesHandler = ServerPropertiesHandler.load(path, optionset);
++        // CraftBukkit end
+     }
+ 
+     public ServerPropertiesHandler getPropertiesHandler() {

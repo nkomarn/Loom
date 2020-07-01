@@ -157,7 +157,7 @@
 +    private boolean changeLevel(World world, BlockPos blockpos, BlockState blockstate, int i, Entity entity, CauldronLevelChangeEvent.ChangeReason reason) {
 +        int newLevel = MathHelper.clamp(i, 0, 3);
 +        CauldronLevelChangeEvent event = new CauldronLevelChangeEvent(
-+                world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()),
++                world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()),
 +                (entity == null) ? null : entity.getBukkitEntity(), reason, blockstate.get(LEVEL), newLevel
 +        );
 +        Bukkit.getPluginManager().callEvent(event);

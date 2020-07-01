@@ -1,0 +1,56 @@
+--- a/net/minecraft/entity/projectile/FireworkRocketEntity.java
++++ b/net/minecraft/entity/projectile/FireworkRocketEntity.java
+@@ -28,6 +28,7 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.RayTraceContext;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class FireworkRocketEntity extends ProjectileEntity {
+ 
+@@ -141,7 +142,11 @@
+         }
+ 
+         if (!this.world.isClient && this.life > this.lifeTime) {
+-            this.explodeAndRemove();
++            // CraftBukkit start
++            if (!CraftEventFactory.callFireworkExplodeEvent(this).isCancelled()) {
++                this.explodeAndRemove();
++            }
++            // CraftBukkit end
+         }
+ 
+     }
+@@ -155,7 +160,11 @@
+     protected void onEntityHit(EntityHitResult entityhitresult) {
+         super.onEntityHit(entityhitresult);
+         if (!this.world.isClient) {
+-            this.explodeAndRemove();
++            // CraftBukkit start
++            if (!CraftEventFactory.callFireworkExplodeEvent(this).isCancelled()) {
++                this.explodeAndRemove();
++            }
++            // CraftBukkit end
+         }
+     }
+ 
+@@ -190,7 +199,9 @@
+ 
+         if (f > 0.0F) {
+             if (this.shooter != null) {
++                CraftEventFactory.entityDamage = this; // CraftBukkit
+                 this.shooter.damage(DamageSource.firework(this, this.getOwner()), 5.0F + (float) (listtag.size() * 2));
++                CraftEventFactory.entityDamage = null; // CraftBukkit
+             }
+ 
+             double d0 = 5.0D;
+@@ -217,7 +228,9 @@
+                     if (flag) {
+                         float f1 = f * (float) Math.sqrt((5.0D - (double) this.distanceTo(livingentity)) / 5.0D);
+ 
++                        CraftEventFactory.entityDamage = this; // CraftBukkit
+                         livingentity.damage(DamageSource.firework(this, this.getOwner()), f1);
++                        CraftEventFactory.entityDamage = null; // CraftBukkit
+                     }
+                 }
+             }

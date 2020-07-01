@@ -21,7 +21,7 @@
      }
  
      public void onEntityCollision(BlockState blockstate, World world, BlockPos blockpos, Entity entity) {
-+        CraftEventFactory.blockDamage = world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()); // CraftBukkit
++        CraftEventFactory.blockDamage = world.getCraftWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()); // CraftBukkit
          entity.damage(DamageSource.CACTUS, 1.0F);
 +        CraftEventFactory.blockDamage = null; // CraftBukkit
      }

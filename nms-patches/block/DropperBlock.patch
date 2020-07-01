@@ -42,7 +42,7 @@
 +                        return;
 +                    }
 +
-+                    itemstack1 = HopperBlockEntity.transfer(dispenserblockentity, inventory, CraftItemStack.asNMSCopy(event.getItem()), direction.opposite());
++                    itemstack1 = HopperBlockEntity.transfer(dispenserblockentity, inventory, CraftItemStack.asNMSCopy(event.getItem()), direction.getOpposite());
 +                    if (event.getItem().equals(oitemstack) && itemstack1.isEmpty()) {
 +                        // CraftBukkit end
                          itemstack1 = itemstack.copy();

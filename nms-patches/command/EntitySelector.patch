@@ -5,7 +5,7 @@
  
      private void checkSourcePermission(ServerCommandSource servercommandsource) throws CommandSyntaxException {
 -        if (this.usesAt && !servercommandsource.hasPermissionLevel(2)) {
-+        if (this.usesAt && !servercommandsource.hasPermissionLevel(2, "minecraft.command.selector")) { // CraftBukkit
++        if (this.usesAt && !servercommandsource.hasPermission(2, "minecraft.command.selector")) { // CraftBukkit
              throw EntityArgumentType.NOT_ALLOWED_EXCEPTION.create();
          }
      }

@@ -1,0 +1,50 @@
+--- a/net/minecraft/entity/passive/DolphinEntity.java
++++ b/net/minecraft/entity/passive/DolphinEntity.java
+@@ -64,6 +64,8 @@
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.biome.Biomes;
+ import net.minecraft.world.gen.feature.StructureFeature;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
+ 
+ public class DolphinEntity extends WaterCreatureEntity {
+ 
+@@ -216,6 +218,11 @@
+             ItemStack itemstack = itementity.getStack();
+ 
+             if (this.canPickupItem(itemstack)) {
++                // CraftBukkit start - call EntityPickupItemEvent
++                if (CraftEventFactory.callEntityPickupItemEvent(this, itementity, 0, false).isCancelled()) {
++                    return;
++                }
++                // CraftBukkit end
+                 this.method_29499(itementity);
+                 this.equipStack(EquipmentSlot.MAINHAND, itemstack);
+                 this.handDropChances[EquipmentSlot.MAINHAND.getEntitySlotId()] = 2.0F;
+@@ -346,7 +353,7 @@
+         }
+ 
+         public boolean canStart() {
+-            return this.dolphin.hasFish() && this.dolphin.getAir() >= 100;
++            return this.dolphin.hasFish() && this.dolphin.getAir() >= 100 && this.dolphin.world.getCraftWorld().canGenerateStructures(); // MC-151364, SPIGOT-5494: hangs if generate-structures=false
+         }
+ 
+         public boolean shouldContinue() {
+@@ -448,7 +455,7 @@
+         }
+ 
+         public void start() {
+-            this.closestPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 100));
++            this.closestPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 100), EntityPotionEffectEvent.Cause.DOLPHIN); // CraftBukkit
+         }
+ 
+         public void stop() {
+@@ -465,7 +472,7 @@
+             }
+ 
+             if (this.closestPlayer.isSwimming() && this.closestPlayer.world.random.nextInt(6) == 0) {
+-                this.closestPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 100));
++                this.closestPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 100), EntityPotionEffectEvent.Cause.DOLPHIN); // CraftBukkit
+             }
+ 
+         }

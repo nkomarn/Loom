@@ -1,0 +1,101 @@
+--- a/net/minecraft/entity/passive/BeeEntity.java
++++ b/net/minecraft/entity/passive/BeeEntity.java
+@@ -85,6 +85,9 @@
+ import net.minecraft.world.poi.PointOfInterest;
+ import net.minecraft.world.poi.PointOfInterestStorage;
+ import net.minecraft.world.poi.PointOfInterestType;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityPotionEffectEvent;
++import org.bukkit.event.entity.EntityTargetEvent;
+ 
+ public class BeeEntity extends AnimalEntity implements Angerable, Flutterer {
+ 
+@@ -205,7 +208,7 @@
+                 }
+ 
+                 if (b0 > 0) {
+-                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, b0 * 20, 0));
++                    ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, b0 * 20, 0), EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
+                 }
+             }
+ 
+@@ -556,11 +559,13 @@
+         } else {
+             Entity entity = damagesource.getAttacker();
+ 
+-            if (!this.world.isClient) {
++            // CraftBukkit start
++            boolean result = super.damage(damagesource, f);
++            if (result && !this.world.isClient) {
+                 this.pollinateGoal.cancel();
+             }
+-
+-            return super.damage(damagesource, f);
++            return result;
++            // CraftBukkit end
+         }
+     }
+ 
+@@ -583,7 +588,7 @@
+     class EnterHiveGoal extends BeeEntity.NotAngryGoal {
+ 
+         private EnterHiveGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+         }
+ 
+         public boolean canBeeStart() {
+@@ -642,7 +647,7 @@
+     class GrowCropsGoal extends BeeEntity.NotAngryGoal {
+ 
+         private GrowCropsGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+         }
+ 
+         public boolean canBeeStart() {
+@@ -688,7 +693,7 @@
+                             }
+                         }
+ 
+-                        if (flag) {
++                        if (flag && !CraftEventFactory.callEntityChangeBlockEvent(BeeEntity.this, blockpos, blockstate.with(intproperty, blockstate.get(intproperty) + 1)).isCancelled()) { // Spigot
+                             BeeEntity.this.world.syncWorldEvent(2005, blockpos, 0);
+                             BeeEntity.this.world.setBlockState(blockpos, (BlockState) blockstate.with(intproperty, (Integer) blockstate.get(intproperty) + 1));
+                             BeeEntity.this.addCropCounter();
+@@ -707,7 +712,7 @@
+     class FindHiveGoal extends BeeEntity.NotAngryGoal {
+ 
+         private FindHiveGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+         }
+ 
+         public boolean canBeeStart() {
+@@ -772,7 +777,7 @@
+         private int ticks = 0;
+ 
+         PollinateGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+             this.setControls(EnumSet.of(Goal.Control.MOVE));
+         }
+ 
+@@ -949,7 +954,7 @@
+         private int ticks;
+ 
+         MoveToFlowerGoal() {
+-            super(null);
++            super(); // CraftBukkit - decompile error
+             this.ticks = BeeEntity.this.world.random.nextInt(10);
+             this.setControls(EnumSet.of(Goal.Control.MOVE));
+         }
+@@ -1228,7 +1233,7 @@
+ 
+         protected void setMobEntityTarget(MobEntity mobentity, LivingEntity livingentity) {
+             if (mobentity instanceof BeeEntity && this.mob.canSee(livingentity)) {
+-                mobentity.setTarget(livingentity);
++                mobentity.setTarget(livingentity, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY, true);
+             }
+ 
+         }

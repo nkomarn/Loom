@@ -484,7 +484,7 @@
 +
 +                    // CraftBukkit start
 +                    if (this instanceof ServerPlayerEntity) {
-+                        ((ServerPlayerEntity) this).dimensionChanged(serverworld1, PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
++                        ((ServerPlayerEntity) this).changeDimension(serverworld1, PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
 +                    } else {
 +                        this.changeDimension(serverworld1);
 +                    }

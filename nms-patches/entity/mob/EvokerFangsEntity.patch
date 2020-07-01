@@ -1,0 +1,12 @@
+--- a/net/minecraft/entity/mob/EvokerFangsEntity.java
++++ b/net/minecraft/entity/mob/EvokerFangsEntity.java
+@@ -120,7 +120,9 @@
+ 
+         if (livingentity.isAlive() && !livingentity.isInvulnerable() && livingentity != livingentity1) {
+             if (livingentity1 == null) {
++                org.bukkit.craftbukkit.event.CraftEventFactory.entityDamage = this; // CraftBukkit
+                 livingentity.damage(DamageSource.MAGIC, 6.0F);
++                org.bukkit.craftbukkit.event.CraftEventFactory.entityDamage = null; // CraftBukkit
+             } else {
+                 if (livingentity1.isTeammate(livingentity)) {
+                     return;

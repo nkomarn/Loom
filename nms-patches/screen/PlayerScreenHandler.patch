@@ -1,0 +1,71 @@
+--- a/net/minecraft/screen/PlayerScreenHandler.java
++++ b/net/minecraft/screen/PlayerScreenHandler.java
+@@ -13,7 +13,10 @@
+ import net.minecraft.recipe.RecipeFinder;
+ import net.minecraft.screen.slot.CraftingResultSlot;
+ import net.minecraft.screen.slot.Slot;
++import net.minecraft.text.TranslatableText;
+ import net.minecraft.util.Identifier;
++import org.bukkit.craftbukkit.inventory.CraftInventoryCrafting;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+ 
+ public class PlayerScreenHandler extends AbstractRecipeScreenHandler<CraftingInventory> {
+ 
+@@ -25,15 +28,28 @@
+     public static final Identifier EMPTY_OFFHAND_ARMOR_SLOT = new Identifier("item/empty_armor_slot_shield");
+     private static final Identifier[] EMPTY_ARMOR_SLOT_TEXTURES = new Identifier[]{PlayerScreenHandler.EMPTY_BOOTS_SLOT_TEXTURE, PlayerScreenHandler.EMPTY_LEGGINGS_SLOT_TEXTURE, PlayerScreenHandler.EMPTY_CHESTPLATE_SLOT_TEXTURE, PlayerScreenHandler.EMPTY_HELMET_SLOT_TEXTURE};
+     private static final EquipmentSlot[] EQUIPMENT_SLOT_ORDER = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+-    private final CraftingInventory craftingInput = new CraftingInventory(this, 2, 2);
+-    private final CraftingResultInventory craftingResult = new CraftingResultInventory();
++    // CraftBukkit start
++    private final CraftingInventory craftingInput;
++    private final CraftingResultInventory craftingResult;
++    // CraftBukkit end
+     public final boolean onServer;
+     private final PlayerEntity owner;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private PlayerInventory player;
++    // CraftBukkit end
+ 
+     public PlayerScreenHandler(PlayerInventory playerinventory, boolean flag, PlayerEntity playerentity) {
+         super((ScreenHandlerType) null, 0);
+         this.onServer = flag;
+         this.owner = playerentity;
++        // CraftBukkit start
++        this.craftingResult = new CraftingResultInventory(); // CraftBukkit - moved to before InventoryCrafting construction
++        this.craftingInput = new CraftingInventory(this, 2, 2, playerinventory.player); // CraftBukkit - pass player
++        this.craftingInput.resultInventory = this.craftingResult; // CraftBukkit - let InventoryCrafting know about its result slot
++        this.player = playerinventory; // CraftBukkit - save player
++        setTitle(new TranslatableText("container.crafting")); // SPIGOT-4722: Allocate title for player inventory
++        // CraftBukkit end
+         this.addSlot(new CraftingResultSlot(playerinventory.player, this.craftingInput, this.craftingResult, 0, 154, 28));
+ 
+         int i;
+@@ -93,7 +109,7 @@
+     }
+ 
+     public void onContentChanged(Inventory inventory) {
+-        CraftingScreenHandler.updateResult(this.syncId, this.owner.world, this.owner, this.craftingInput, this.craftingResult);
++        CraftingScreenHandler.updateResult(this.syncId, this.owner.world, this.owner, this.craftingInput, this.craftingResult, this); // CraftBukkit
+     }
+ 
+     public void close(PlayerEntity playerentity) {
+@@ -193,4 +209,17 @@
+     public CraftingInventory method_29281() {
+         return this.craftingInput;
+     }
++
++    // CraftBukkit start
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryCrafting inventory = new CraftInventoryCrafting(this.craftingInput, this.craftingResult);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ }

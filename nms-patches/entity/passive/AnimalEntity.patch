@@ -1,0 +1,89 @@
+--- a/net/minecraft/entity/passive/AnimalEntity.java
++++ b/net/minecraft/entity/passive/AnimalEntity.java
+@@ -24,11 +24,14 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldAccess;
+ import net.minecraft.world.WorldView;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.CreatureSpawnEvent;
+ 
+ public abstract class AnimalEntity extends PassiveEntity {
+ 
+     private int loveTicks;
+     private UUID lovingPlayer;
++    public ItemStack breedItem; // CraftBukkit - Add breedItem variable
+ 
+     protected AnimalEntity(EntityType<? extends AnimalEntity> entitytype, World world) {
+         super(entitytype, world);
+@@ -63,6 +66,9 @@
+ 
+     }
+ 
++    /* CraftBukkit start
++     // Function disabled as it has no special function anymore after
++     // setSitting is disabled.
+     public boolean damage(DamageSource damagesource, float f) {
+         if (this.isInvulnerableTo(damagesource)) {
+             return false;
+@@ -71,6 +77,7 @@
+             return super.damage(damagesource, f);
+         }
+     }
++    // CraftBukkit end */
+ 
+     public float getPathfindingFavor(BlockPos blockpos, WorldView worldview) {
+         return worldview.getBlockState(blockpos.down()).isOf(Blocks.GRASS_BLOCK) ? 10.0F : worldview.getBrightness(blockpos) - 0.5F;
+@@ -157,6 +164,7 @@
+         if (playerentity != null) {
+             this.lovingPlayer = playerentity.getUuid();
+         }
++        this.breedItem = playerentity.inventory.getMainHandStack(); // CraftBukkit
+ 
+         this.world.sendEntityStatus(this, (byte) 18);
+     }
+@@ -196,12 +204,28 @@
+         PassiveEntity passiveentity = this.createChild(animalentity);
+ 
+         if (passiveentity != null) {
++            // CraftBukkit start - set persistence for tame animals
++            if (passiveentity instanceof TameableEntity && ((TameableEntity) passiveentity).isTamed()) {
++                passiveentity.persistent = true;
++            }
++            // CraftBukkit end
++
+             ServerPlayerEntity serverplayerentity = this.getLovingPlayer();
+ 
+             if (serverplayerentity == null && animalentity.getLovingPlayer() != null) {
+                 serverplayerentity = animalentity.getLovingPlayer();
+             }
+ 
++            // CraftBukkit start - call EntityBreedEvent
++            int experience = this.getRandom().nextInt(7) + 1;
++            org.bukkit.event.entity.EntityBreedEvent entityBreedEvent = CraftEventFactory.callEntityBreedEvent(passiveentity, this, passiveentity, serverplayerentity, this.breedItem, experience);
++
++            if (entityBreedEvent.isCancelled()) {
++                return;
++            }
++            experience = entityBreedEvent.getExperience();
++            // CraftBukkit end
++
+             if (serverplayerentity != null) {
+                 serverplayerentity.incrementStat(Stats.ANIMALS_BRED);
+                 Criteria.BRED_ANIMALS.trigger(serverplayerentity, this, animalentity, passiveentity);
+@@ -213,10 +237,14 @@
+             animalentity.resetLoveTicks();
+             passiveentity.setBaby(true);
+             passiveentity.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+-            world.spawnEntity(passiveentity);
++            world.spawnEntity(passiveentity, CreatureSpawnEvent.SpawnReason.BREEDING); // CraftBukkit - added SpawnReason
+             world.sendEntityStatus(this, (byte) 18);
+             if (world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+-                world.spawnEntity(new ExperienceOrbEntity(world, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
++                // CraftBukkit start - use event experience
++                if (experience > 0) {
++                    world.spawnEntity(new ExperienceOrbEntity(world, this.getX(), this.getY(), this.getZ(), experience));
++                }
++                // CraftBukkit end
+             }
+ 
+         }
