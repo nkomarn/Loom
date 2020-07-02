@@ -5,20 +5,16 @@ import static org.junit.Assert.*;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockAccessAir;
-import net.minecraft.server.BlockBase;
-import net.minecraft.server.BlockFalling;
-import net.minecraft.server.BlockFire;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EnumHand;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemRecord;
-import net.minecraft.server.MovingObjectPositionBlock;
-import net.minecraft.server.TileEntityFurnace;
+
+import net.minecraft.block.*;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.MusicDiscItem;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EmptyBlockView;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -38,7 +34,7 @@ public class PerMaterialTest extends AbstractTestingBase {
 
     @BeforeClass
     public static void getFireValues() {
-        fireValues = Util.getInternalState(BlockFire.class, Blocks.FIRE, "flameChances");
+        fireValues = Util.getInternalState(FireBlock.class, Blocks.FIRE, "flameChances");
     }
 
     @Parameters(name = "{index}: {0}")
@@ -66,7 +62,7 @@ public class PerMaterialTest extends AbstractTestingBase {
         if (material == Material.AIR) {
             assertFalse(material.isSolid());
         } else if (material.isBlock()) {
-            assertThat(material.isSolid(), is(CraftMagicNumbers.getBlock(material).getBlockData().getMaterial().isSolid()));
+            assertThat(material.isSolid(), is(CraftMagicNumbers.getBlock(material).getDefaultState().getMaterial().isSolid()));
         } else {
             assertFalse(material.isSolid());
         }
@@ -83,7 +79,7 @@ public class PerMaterialTest extends AbstractTestingBase {
 
     @Test
     public void isRecord() {
-        assertThat(material.isRecord(), is(CraftMagicNumbers.getItem(material) instanceof ItemRecord));
+        assertThat(material.isRecord(), is(CraftMagicNumbers.getItem(material) instanceof MusicDiscItem));
     }
 
     @Test
@@ -94,7 +90,7 @@ public class PerMaterialTest extends AbstractTestingBase {
             assertThat((int) material.getMaxDurability(), is(0));
         } else if (material.isBlock()) {
             Item item = CraftMagicNumbers.getItem(material);
-            assertThat((int) material.getMaxDurability(), is(item.getMaxDurability()));
+            assertThat((int) material.getMaxDurability(), is(item.getMaxDamage()));
         }
     }
 
@@ -110,7 +106,7 @@ public class PerMaterialTest extends AbstractTestingBase {
             assertThat(bukkit.getMaxStackSize(), is(MAX_AIR_STACK));
             assertThat(craft.getMaxStackSize(), is(MAX_AIR_STACK));
         } else {
-            assertThat(material.getMaxStackSize(), is(CraftMagicNumbers.getItem(material).getMaxStackSize()));
+            assertThat(material.getMaxStackSize(), is(CraftMagicNumbers.getItem(material).getMaxCount()));
             assertThat(bukkit.getMaxStackSize(), is(material.getMaxStackSize()));
             assertThat(craft.getMaxStackSize(), is(material.getMaxStackSize()));
         }
@@ -130,7 +126,7 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void isFlammable() {
         if (material != Material.AIR && material.isBlock()) {
-            assertThat(material.isFlammable(), is(CraftMagicNumbers.getBlock(material).getBlockData().getMaterial().isBurnable()));
+            assertThat(material.isFlammable(), is(CraftMagicNumbers.getBlock(material).getDefaultState().getMaterial().isBurnable()));
         } else {
             assertFalse(material.isFlammable());
         }
@@ -148,13 +144,13 @@ public class PerMaterialTest extends AbstractTestingBase {
 
     @Test
     public void isFuel() {
-        assertThat(material.isFuel(), is(TileEntityFurnace.isFuel(new net.minecraft.server.ItemStack(CraftMagicNumbers.getItem(material)))));
+        assertThat(material.isFuel(), is(AbstractFurnaceBlockEntity.canUseAsFuel(new net.minecraft.item.ItemStack(CraftMagicNumbers.getItem(material)))));
     }
 
     @Test
     public void isOccluding() {
         if (material.isBlock()) {
-            assertThat(material.isOccluding(), is(CraftMagicNumbers.getBlock(material).getBlockData().isOccluding(BlockAccessAir.INSTANCE, BlockPosition.ZERO)));
+            assertThat(material.isOccluding(), is(CraftMagicNumbers.getBlock(material).getDefaultState().isSolidBlock(EmptyBlockView.INSTANCE, new BlockPos(BlockPos.ZERO))));
         } else {
             assertFalse(material.isOccluding());
         }
@@ -163,7 +159,7 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void hasGravity() {
         if (material.isBlock()) {
-            assertThat(material.hasGravity(), is(CraftMagicNumbers.getBlock(material) instanceof BlockFalling));
+            assertThat(material.hasGravity(), is(CraftMagicNumbers.getBlock(material) instanceof FallingBlock));
         } else {
             assertFalse(material.hasGravity());
         }
@@ -172,7 +168,7 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void usesDurability() {
         if (!material.isBlock()) {
-            assertThat(EnchantmentTarget.BREAKABLE.includes(material), is(CraftMagicNumbers.getItem(material).usesDurability()));
+            assertThat(EnchantmentTarget.BREAKABLE.includes(material), is(CraftMagicNumbers.getItem(material).isDamageable()));
         } else {
             assertFalse(EnchantmentTarget.BREAKABLE.includes(material));
         }
@@ -181,7 +177,7 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void testDurability() {
         if (!material.isBlock()) {
-            assertThat(material.getMaxDurability(), is((short) CraftMagicNumbers.getItem(material).getMaxDurability()));
+            assertThat(material.getMaxDurability(), is((short) CraftMagicNumbers.getItem(material).getMaxDamage()));
         } else {
             assertThat(material.getMaxDurability(), is((short) 0));
         }
@@ -199,7 +195,7 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void testAir() {
         if (material.isBlock()) {
-            assertThat(material.isAir(), is(equalTo(CraftMagicNumbers.getBlock(material).getBlockData().isAir())));
+            assertThat(material.isAir(), is(equalTo(CraftMagicNumbers.getBlock(material).getDefaultState().isAir())));
         } else {
             assertThat(material.isAir(), is(equalTo(false)));
         }
@@ -219,8 +215,8 @@ public class PerMaterialTest extends AbstractTestingBase {
         if (material.isBlock()) {
             assertThat(material.isInteractable(),
                     is(!CraftMagicNumbers.getBlock(material).getClass()
-                            .getMethod("interact", IBlockData.class, net.minecraft.server.World.class, BlockPosition.class, EntityHuman.class, EnumHand.class, MovingObjectPositionBlock.class)
-                            .getDeclaringClass().equals(BlockBase.class)));
+                            .getMethod("interact", BlockState.class, net.minecraft.world.World.class, BlockPos.class, PlayerEntity.class, Hand.class, BlockHitResult.class)
+                            .getDeclaringClass().equals(AbstractBlock.class)));
         } else {
             assertFalse(material.isInteractable());
         }
@@ -229,14 +225,14 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void testBlockHardness() {
         if (material.isBlock()) {
-            assertThat(material.getHardness(), is(CraftMagicNumbers.getBlock(material).getBlockData().strength));
+            assertThat(material.getHardness(), is(CraftMagicNumbers.getBlock(material).getDefaultState().hardness));
         }
     }
 
     @Test
     public void testBlastResistance() {
         if (material.isBlock()) {
-            assertThat(material.getBlastResistance(), is(CraftMagicNumbers.getBlock(material).getDurability()));
+            assertThat(material.getBlastResistance(), is(CraftMagicNumbers.getBlock(material).getBlastResistance()));
         }
     }
 
@@ -250,7 +246,7 @@ public class PerMaterialTest extends AbstractTestingBase {
     @Test
     public void testCraftingRemainingItem() {
         if (material.isItem()) {
-            Item expectedItem = CraftMagicNumbers.getItem(material).getCraftingRemainingItem();
+            Item expectedItem = CraftMagicNumbers.getItem(material).getRecipeRemainder();
             Material expected = expectedItem == null ? null : CraftMagicNumbers.getMaterial(expectedItem);
 
             assertThat(material.getCraftingRemainingItem(), is(expected));

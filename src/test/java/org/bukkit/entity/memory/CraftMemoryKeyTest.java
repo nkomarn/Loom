@@ -1,8 +1,8 @@
 package org.bukkit.entity.memory;
 
-import net.minecraft.server.GlobalPos;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MemoryModuleType;
+import net.minecraft.entity.ai.brain.MemoryModuleType;
+import net.minecraft.util.dynamic.GlobalPos;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.memory.CraftMemoryKey;
 import org.bukkit.support.AbstractTestingBase;
@@ -55,8 +55,8 @@ public class CraftMemoryKeyTest extends AbstractTestingBase {
 
     @Test
     public void shouldReturnNullWhenBukkitRepresentationOfKeyisNotAvailableAndSerializerIsNotPresent() {
-        for (MemoryModuleType<?> memoryModuleType : IRegistry.MEMORY_MODULE_TYPE) {
-            if (!memoryModuleType.getSerializer().isPresent()) {
+        for (MemoryModuleType<?> memoryModuleType : Registry.MEMORY_MODULE_TYPE) {
+            if (!memoryModuleType.getFactory().isPresent()) {
                 MemoryKey bukkitNoKey = CraftMemoryKey.toMemoryKey(memoryModuleType);
                 Assert.assertNull("MemoryModuleType should be null", bukkitNoKey);
             }
@@ -65,10 +65,10 @@ public class CraftMemoryKeyTest extends AbstractTestingBase {
 
     @Test
     public void shouldReturnAnInstanceOfMemoryKeyWhenBukkitRepresentationOfKeyisAvailableAndSerializerIsPresent() {
-        for (MemoryModuleType<?> memoryModuleType : IRegistry.MEMORY_MODULE_TYPE) {
-            if (memoryModuleType.getSerializer().isPresent()) {
+        for (MemoryModuleType<?> memoryModuleType : Registry.MEMORY_MODULE_TYPE) {
+            if (memoryModuleType.getFactory().isPresent()) {
                 MemoryKey bukkitNoKey = CraftMemoryKey.toMemoryKey(memoryModuleType);
-                Assert.assertNotNull("MemoryModuleType should not be null " + IRegistry.MEMORY_MODULE_TYPE.getKey(memoryModuleType), bukkitNoKey);
+                Assert.assertNotNull("MemoryModuleType should not be null " + Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType), bukkitNoKey);
             }
         }
     }

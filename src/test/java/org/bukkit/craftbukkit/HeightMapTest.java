@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit;
 
+import net.minecraft.world.Heightmap;
 import org.bukkit.HeightMap;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,7 +9,7 @@ public class HeightMapTest {
 
     @Test
     public void heightMapConversionFromNMSToBukkitShouldNotThrowExceptio() {
-        for (net.minecraft.server.HeightMap.Type nmsHeightMapType : net.minecraft.server.HeightMap.Type.values()) {
+        for (Heightmap.Type nmsHeightMapType : Heightmap.Type.values()) {
             Assert.assertNotNull("fromNMS", CraftHeightMap.fromNMS(nmsHeightMapType));
         }
     }

@@ -4,11 +4,12 @@ import static org.junit.Assert.*;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MobEffectList;
-import net.minecraft.server.PotionRegistry;
+
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.potion.Potion;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.support.AbstractTestingBase;
 import org.junit.Test;
 
@@ -16,10 +17,10 @@ public class PotionTest extends AbstractTestingBase {
     @Test
     public void testEffectCompleteness() throws Throwable {
         Map<PotionType, String> effects = new EnumMap(PotionType.class);
-        for (Object reg : IRegistry.POTION) {
-            List<MobEffect> eff = ((PotionRegistry) reg).a();
+        for (Object reg : Registry.POTION) {
+            List<StatusEffectInstance> eff = ((Potion) reg).getEffects();
             if (eff.size() != 1) continue;
-            int id = MobEffectList.getId(eff.get(0).getMobEffect());
+            int id = StatusEffect.getRawId(eff.get(0).getEffectType());
             PotionEffectType type = PotionEffectType.getById(id);
             assertNotNull(String.valueOf(id), PotionEffectType.getById(id));
 
@@ -34,10 +35,10 @@ public class PotionTest extends AbstractTestingBase {
 
     @Test
     public void testEffectType() {
-        for (MobEffectList nms : IRegistry.MOB_EFFECT) {
-            MinecraftKey key = IRegistry.MOB_EFFECT.getKey(nms);
+        for (StatusEffect nms : Registry.STATUS_EFFECT) {
+            Identifier key = Registry.STATUS_EFFECT.getId(nms);
 
-            int id = MobEffectList.getId(nms);
+            int id = StatusEffect.getRawId(nms);
             PotionEffectType bukkit = PotionEffectType.getById(id);
 
             assertNotNull("No Bukkit type for " + key, bukkit);

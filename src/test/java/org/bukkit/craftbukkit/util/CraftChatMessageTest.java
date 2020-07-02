@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.util;
 
 import static org.junit.Assert.assertEquals;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.IChatMutableComponent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import org.bukkit.support.AbstractTestingBase;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class CraftChatMessageTest extends AbstractTestingBase {
         testString("§0Foo!§0\\n§0\\n§0Bar\n", true);
 
         // dont retain line returns multiple components
-        IChatBaseComponent[] components = CraftChatMessage.fromString("Hello§0\n§rFoo\n§5Test");
+        Text[] components = CraftChatMessage.fromString("Hello§0\n§rFoo\n§5Test");
         assertEquals("Has 3 components", 3, components.length);
         assertEquals("Hello§0", CraftChatMessage.fromComponent(components[0]));
         assertEquals(/*§r*/"Foo", CraftChatMessage.fromComponent(components[1]));
@@ -51,10 +51,10 @@ public class CraftChatMessageTest extends AbstractTestingBase {
         testComponent("F§foo§bBar§rBaz", create("F§foo", "§bBar", "Baz"));
     }
 
-    private IChatBaseComponent create(String txt, String... rest) {
-        IChatMutableComponent cmp = CraftChatMessage.fromString(txt, false)[0].mutableCopy();
+    private Text create(String txt, String... rest) {
+        MutableText cmp = CraftChatMessage.fromString(txt, false)[0].copy();
         for (String s : rest) {
-            cmp.addSibling(CraftChatMessage.fromString(s, true)[0]);
+            cmp.append(CraftChatMessage.fromString(s, true)[0]);
         }
 
         return cmp;
@@ -73,16 +73,16 @@ public class CraftChatMessageTest extends AbstractTestingBase {
     }
 
     private void testString(String input, String expected, boolean keepNewLines) {
-        IChatBaseComponent cmp = CraftChatMessage.fromString(input, keepNewLines)[0];
+        Text cmp = CraftChatMessage.fromString(input, keepNewLines)[0];
         String actual = CraftChatMessage.fromComponent(cmp);
         assertEquals("\nComponent: " + cmp + "\n", expected, actual);
     }
 
-    private void testComponent(String expected, IChatBaseComponent cmp) {
+    private void testComponent(String expected, Text cmp) {
         String actual = CraftChatMessage.fromComponent(cmp);
         assertEquals("\nComponent: " + cmp + "\n", expected, actual);
 
-        IChatBaseComponent expectedCmp = CraftChatMessage.fromString(expected, true)[0];
+        Text expectedCmp = CraftChatMessage.fromString(expected, true)[0];
         String actualExpectedCmp = CraftChatMessage.fromComponent(expectedCmp);
         assertEquals("\nComponent: " + expectedCmp + "\n", expected, actualExpectedCmp);
     }

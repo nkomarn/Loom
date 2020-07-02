@@ -6,7 +6,8 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.server.NBTTagCompound;
+
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -93,7 +94,7 @@ public class PersistentDataContainerTest extends AbstractTestingBase {
     public void testNBTTagStoring() {
         CraftMetaItem itemMeta = createComplexItemMeta();
 
-        NBTTagCompound compound = new NBTTagCompound();
+        CompoundTag compound = new CompoundTag();
         itemMeta.applyToItem(compound);
 
         assertEquals(itemMeta, new CraftMetaItem(compound));
