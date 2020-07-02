@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.IntProperty;
 import org.bukkit.block.data.type.SeaPickle;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftSeaPickle extends CraftBlockData implements SeaPickle {
 
-    private static final net.minecraft.server.BlockStateInteger PICKLES = getInteger("pickles");
+    private static final IntProperty PICKLES = getInteger("pickles");
 
     @Override
     public int getPickles() {

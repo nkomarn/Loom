@@ -2,9 +2,10 @@ package org.bukkit.craftbukkit.entity;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import net.minecraft.server.EntityPotion;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.PotionUtil;
+
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.projectile.thrown.PotionEntity;
+import net.minecraft.potion.PotionUtil;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
@@ -16,14 +17,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 public class CraftThrownPotion extends CraftProjectile implements ThrownPotion {
-    public CraftThrownPotion(CraftServer server, EntityPotion entity) {
+    public CraftThrownPotion(CraftServer server, PotionEntity entity) {
         super(server, entity);
     }
 
     @Override
     public Collection<PotionEffect> getEffects() {
         ImmutableList.Builder<PotionEffect> builder = ImmutableList.builder();
-        for (MobEffect effect : PotionUtil.getEffects(getHandle().getItem())) {
+        for (StatusEffectInstance effect : PotionUtil.getPotionEffects(getHandle().getItem())) {
             builder.add(CraftPotionUtil.toBukkit(effect));
         }
         return builder.build();
@@ -46,12 +47,17 @@ public class CraftThrownPotion extends CraftProjectile implements ThrownPotion {
     }
 
     @Override
-    public EntityPotion getHandle() {
-        return (EntityPotion) entity;
+    public PotionEntity getHandle() {
+        return (PotionEntity) entity;
     }
 
     @Override
     public EntityType getType() {
         return EntityType.SPLASH_POTION;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

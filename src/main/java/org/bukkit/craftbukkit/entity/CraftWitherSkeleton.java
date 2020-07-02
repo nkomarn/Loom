@@ -1,13 +1,13 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySkeletonWither;
+import net.minecraft.entity.mob.WitherSkeletonEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.WitherSkeleton;
 
 public class CraftWitherSkeleton extends CraftSkeleton implements WitherSkeleton {
 
-    public CraftWitherSkeleton(CraftServer server, EntitySkeletonWither entity) {
+    public CraftWitherSkeleton(CraftServer server, WitherSkeletonEntity entity) {
         super(server, entity);
     }
 

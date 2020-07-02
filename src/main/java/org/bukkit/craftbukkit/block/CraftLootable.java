@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.server.MinecraftKey;
 import net.minecraft.server.TileEntityLootable;
 import org.bukkit.Bukkit;
@@ -10,7 +11,7 @@ import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.loot.LootTable;
 import org.bukkit.loot.Lootable;
 
-public abstract class CraftLootable<T extends TileEntityLootable> extends CraftContainer<T> implements Nameable, Lootable {
+public abstract class CraftLootable<T extends LootableContainerBlockEntity> extends CraftContainer<T> implements Nameable, Lootable {
 
     public CraftLootable(Block block, Class<T> tileEntityClass) {
         super(block, tileEntityClass);

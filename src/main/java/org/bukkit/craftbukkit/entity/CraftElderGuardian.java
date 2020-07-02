@@ -1,13 +1,13 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityGuardianElder;
+import net.minecraft.entity.mob.ElderGuardianEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.ElderGuardian;
 import org.bukkit.entity.EntityType;
 
 public class CraftElderGuardian extends CraftGuardian implements ElderGuardian {
 
-    public CraftElderGuardian(CraftServer server, EntityGuardianElder entity) {
+    public CraftElderGuardian(CraftServer server, ElderGuardianEntity entity) {
         super(server, entity);
     }
 

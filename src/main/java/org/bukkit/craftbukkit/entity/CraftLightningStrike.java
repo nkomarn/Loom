@@ -1,23 +1,23 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityLightning;
+import net.minecraft.entity.LightningEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LightningStrike;
 
 public class CraftLightningStrike extends CraftEntity implements LightningStrike {
-    public CraftLightningStrike(final CraftServer server, final EntityLightning entity) {
+    public CraftLightningStrike(final CraftServer server, final LightningEntity entity) {
         super(server, entity);
     }
 
     @Override
     public boolean isEffect() {
-        return getHandle().isEffect;
+        return getHandle().cosmetic;
     }
 
     @Override
-    public EntityLightning getHandle() {
-        return (EntityLightning) entity;
+    public LightningEntity getHandle() {
+        return (LightningEntity) entity;
     }
 
     @Override
@@ -28,5 +28,10 @@ public class CraftLightningStrike extends CraftEntity implements LightningStrike
     @Override
     public EntityType getType() {
         return EntityType.LIGHTNING;
+    }
+
+    @Override
+    public LightningStrike.Spigot spigot() {
+        return null;
     }
 }

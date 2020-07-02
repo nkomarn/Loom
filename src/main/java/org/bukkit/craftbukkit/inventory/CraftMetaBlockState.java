@@ -3,6 +3,10 @@ package org.bukkit.craftbukkit.inventory;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+
+import net.minecraft.block.entity.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.EnumColor;
 import net.minecraft.server.NBTBase;
 import net.minecraft.server.NBTTagCompound;
@@ -79,7 +83,7 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
     static final ItemMetaKey BLOCK_ENTITY_TAG = new ItemMetaKey("BlockEntityTag");
 
     final Material material;
-    NBTTagCompound blockEntityTag;
+    CompoundTag blockEntityTag;
 
     CraftMetaBlockState(CraftMetaItem meta, Material material) {
         super(meta);
@@ -95,11 +99,11 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         this.blockEntityTag = te.blockEntityTag;
     }
 
-    CraftMetaBlockState(NBTTagCompound tag, Material material) {
+    CraftMetaBlockState(CompoundTag tag, Material material) {
         super(tag);
         this.material = material;
 
-        if (tag.hasKeyOfType(BLOCK_ENTITY_TAG.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
+        if (tag.contains(BLOCK_ENTITY_TAG.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
             blockEntityTag = tag.getCompound(BLOCK_ENTITY_TAG.NBT);
         } else {
             blockEntityTag = null;
@@ -118,25 +122,25 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
     }
 
     @Override
-    void applyToItem(NBTTagCompound tag) {
+    void applyToItem(CompoundTag tag) {
         super.applyToItem(tag);
 
         if (blockEntityTag != null) {
-            tag.set(BLOCK_ENTITY_TAG.NBT, blockEntityTag);
+            tag.put(BLOCK_ENTITY_TAG.NBT, blockEntityTag);
         }
     }
 
     @Override
-    void deserializeInternal(NBTTagCompound tag, Object context) {
+    void deserializeInternal(CompoundTag tag, Object context) {
         super.deserializeInternal(tag, context);
 
-        if (tag.hasKeyOfType(BLOCK_ENTITY_TAG.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
+        if (tag.contains(BLOCK_ENTITY_TAG.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
             blockEntityTag = tag.getCompound(BLOCK_ENTITY_TAG.NBT);
         }
     }
 
     @Override
-    void serializeInternal(final Map<String, NBTBase> internalTags) {
+    void serializeInternal(final Map<String, Tag> internalTags) {
         if (blockEntityTag != null) {
             internalTags.put(BLOCK_ENTITY_TAG.NBT, blockEntityTag);
         }
@@ -251,7 +255,7 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
     public CraftMetaBlockState clone() {
         CraftMetaBlockState meta = (CraftMetaBlockState) super.clone();
         if (blockEntityTag != null) {
-            meta.blockEntityTag = blockEntityTag.clone();
+            meta.blockEntityTag = blockEntityTag.copy();
         }
         return meta;
     }
@@ -266,7 +270,7 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         if (blockEntityTag != null) {
             switch (material) {
                 case SHIELD:
-                    blockEntityTag.setString("id", "banner");
+                    blockEntityTag.putString("id", "banner");
                     break;
                 case SHULKER_BOX:
                 case WHITE_SHULKER_BOX:
@@ -285,15 +289,15 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
                 case GREEN_SHULKER_BOX:
                 case RED_SHULKER_BOX:
                 case BLACK_SHULKER_BOX:
-                    blockEntityTag.setString("id", "shulker_box");
+                    blockEntityTag.putString("id", "shulker_box");
                     break;
                 case BEE_NEST:
                 case BEEHIVE:
-                    blockEntityTag.setString("id", "beehive");
+                    blockEntityTag.putString("id", "beehive");
                     break;
             }
         }
-        TileEntity te = (blockEntityTag == null) ? null : TileEntity.create(CraftMagicNumbers.getBlock(material).getBlockData(), blockEntityTag);
+        BlockEntity te = (blockEntityTag == null) ? null : BlockEntity.create(CraftMagicNumbers.getBlock(material).getDefaultState(), blockEntityTag);
 
         switch (material) {
         case ACACIA_SIGN:
@@ -309,30 +313,30 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         case SPRUCE_SIGN:
         case SPRUCE_WALL_SIGN:
             if (te == null) {
-                te = new TileEntitySign();
+                te = new SignBlockEntity();
             }
-            return new CraftSign(material, (TileEntitySign) te);
+            return new CraftSign(material, (SignBlockEntity) te);
         case CHEST:
         case TRAPPED_CHEST:
             if (te == null) {
-                te = new TileEntityChest();
+                te = new ChestBlockEntity();
             }
-            return new CraftChest(material, (TileEntityChest) te);
+            return new CraftChest(material, (ChestBlockEntity) te);
         case FURNACE:
             if (te == null) {
-                te = new TileEntityFurnaceFurnace();
+                te = new FurnaceBlockEntity();
             }
-            return new CraftFurnace(material, (TileEntityFurnace) te);
+            return new CraftFurnace(material, (FurnaceBlockEntity) te);
         case DISPENSER:
             if (te == null) {
-                te = new TileEntityDispenser();
+                te = new DispenserBlockEntity();
             }
-            return new CraftDispenser(material, (TileEntityDispenser) te);
+            return new CraftDispenser(material, (DispenserBlockEntity) te);
         case DROPPER:
             if (te == null) {
-                te = new TileEntityDropper();
+                te = new DropperBlockEntity();
             }
-            return new CraftDropper(material, (TileEntityDropper) te);
+            return new CraftDropper(material, (DropperBlockEntity) te);
         case END_GATEWAY:
             if (te == null) {
                 te = new TileEntityEndGateway();

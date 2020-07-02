@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFireball;
-import net.minecraft.server.MathHelper;
+import net.minecraft.entity.projectile.ExplosiveProjectileEntity;
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
@@ -10,7 +9,7 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 public class CraftFireball extends AbstractProjectile implements Fireball {
-    public CraftFireball(CraftServer server, EntityFireball entity) {
+    public CraftFireball(CraftServer server, ExplosiveProjectileEntity entity) {
         super(server, entity);
     }
 
@@ -42,16 +41,16 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
     @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof CraftLivingEntity) {
-            getHandle().setShooter(((CraftLivingEntity) shooter).getHandle());
+            getHandle().setOwner(((CraftLivingEntity) shooter).getHandle());
         } else {
-            getHandle().setShooter(null);
+            getHandle().setOwner(null);
         }
         getHandle().projectileSource = shooter;
     }
 
     @Override
     public Vector getDirection() {
-        return new Vector(getHandle().dirX, getHandle().dirY, getHandle().dirZ);
+        return new Vector(getHandle().posX, getHandle().posY, getHandle().posZ);
     }
 
     @Override
@@ -61,8 +60,8 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
     }
 
     @Override
-    public EntityFireball getHandle() {
-        return (EntityFireball) entity;
+    public ExplosiveProjectileEntity getHandle() {
+        return (ExplosiveProjectileEntity) entity;
     }
 
     @Override
@@ -73,5 +72,10 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
     @Override
     public EntityType getType() {
         return EntityType.UNKNOWN;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

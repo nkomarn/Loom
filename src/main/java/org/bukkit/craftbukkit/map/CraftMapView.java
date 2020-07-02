@@ -9,9 +9,8 @@ import java.util.logging.Level;
 
 import net.minecraft.item.map.MapState;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ResourceKey;
-import net.minecraft.server.WorldMap;
-import net.minecraft.server.WorldServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -62,47 +61,47 @@ public final class CraftMapView implements MapView {
 
     @Override
     public World getWorld() {
-        ResourceKey<net.minecraft.server.World> dimension = worldMap.map;
-        WorldServer world = MinecraftServer.getServer().getWorldServer(dimension);
+        RegistryKey<net.minecraft.world.World> dimension = worldMap.dimension;
+        ServerWorld world = MinecraftServer.getServer().getWorld(dimension);
 
-        return (world == null) ? null : world.getWorld();
+        return (world == null) ? null : world.getCraftWorld();
     }
 
     @Override
     public void setWorld(World world) {
-        worldMap.map = ((CraftWorld) world).getHandle().getDimensionKey();
+        worldMap.dimension = ((CraftWorld) world).getHandle().getRegistryKey();
     }
 
     @Override
     public int getCenterX() {
-        return worldMap.centerX;
+        return worldMap.xCenter;
     }
 
     @Override
     public int getCenterZ() {
-        return worldMap.centerZ;
+        return worldMap.zCenter;
     }
 
     @Override
     public void setCenterX(int x) {
-        worldMap.centerX = x;
+        worldMap.xCenter = x;
     }
 
     @Override
     public void setCenterZ(int z) {
-        worldMap.centerZ = z;
+        worldMap.zCenter = z;
     }
 
     @Override
     public List<MapRenderer> getRenderers() {
-        return new ArrayList<MapRenderer>(renderers);
+        return new ArrayList<>(renderers);
     }
 
     @Override
     public void addRenderer(MapRenderer renderer) {
         if (!renderers.contains(renderer)) {
             renderers.add(renderer);
-            canvases.put(renderer, new HashMap<CraftPlayer, CraftMapCanvas>());
+            canvases.put(renderer, new HashMap<>());
             renderer.initialize(this);
         }
     }
@@ -179,12 +178,12 @@ public final class CraftMapView implements MapView {
 
     @Override
     public boolean isTrackingPosition() {
-        return worldMap.track;
+        return worldMap.showIcons;
     }
 
     @Override
     public void setTrackingPosition(boolean trackingPosition) {
-        worldMap.track = trackingPosition;
+        worldMap.showIcons = trackingPosition;
     }
 
     @Override

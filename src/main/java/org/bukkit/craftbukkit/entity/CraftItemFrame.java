@@ -1,11 +1,11 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityHanging;
-import net.minecraft.server.EntityItemFrame;
-import net.minecraft.server.EnumDirection;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.WorldServer;
+import net.minecraft.entity.decoration.AbstractDecorationEntity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Rotation;
 import org.bukkit.block.BlockFace;
@@ -17,19 +17,19 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 
 public class CraftItemFrame extends CraftHanging implements ItemFrame {
-    public CraftItemFrame(CraftServer server, EntityItemFrame entity) {
+    public CraftItemFrame(CraftServer server, ItemFrameEntity entity) {
         super(server, entity);
     }
 
     @Override
     public boolean setFacingDirection(BlockFace face, boolean force) {
-        EntityHanging hanging = getHandle();
-        EnumDirection oldDir = hanging.getDirection();
-        EnumDirection newDir = CraftBlock.blockFaceToNotch(face);
+        AbstractDecorationEntity hanging = getHandle();
+        Direction oldDir = hanging.getHorizontalFacing();
+        Direction newDir = CraftBlock.blockFaceToNotch(face);
 
-        getHandle().setDirection(newDir);
-        if (!force && !hanging.survives()) {
-            hanging.setDirection(oldDir);
+        getHandle().setFacing(newDir);
+        if (!force && !hanging.canStayAttached()) {
+            hanging.setFacing(oldDir);
             return false;
         }
 
@@ -39,18 +39,18 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
     }
 
     private void update() {
-        EntityItemFrame old = this.getHandle();
+        ItemFrameEntity old = this.getHandle();
 
-        WorldServer world = ((CraftWorld) getWorld()).getHandle();
-        BlockPosition position = old.getBlockPosition();
-        EnumDirection direction = old.getDirection();
-        ItemStack item = old.getItem() != null ? old.getItem().cloneItemStack() : null;
+        ServerWorld world = ((CraftWorld) getWorld()).getHandle();
+        BlockPos position = old.getBlockPos();
+        Direction direction = old.getHorizontalFacing();
+        ItemStack item = old.getHeldItemStack() != null ? old.getHeldItemStack().copy() : null;
 
-        old.die();
+        old.remove();
 
-        EntityItemFrame frame = new EntityItemFrame(world, position, direction);
-        frame.setItem(item);
-        world.addEntity(frame);
+        ItemFrameEntity frame = new ItemFrameEntity(world, position, direction);
+        frame.setHeldItemStack(item);
+        world.spawnEntity(frame); // TODO double check this is not addEntity
         this.entity = frame;
     }
 
@@ -61,12 +61,12 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
 
     @Override
     public void setItem(org.bukkit.inventory.ItemStack item, boolean playSound) {
-        getHandle().setItem(CraftItemStack.asNMSCopy(item), true, playSound);
+        getHandle().setHeldItemStack(CraftItemStack.asNMSCopy(item), true, playSound);
     }
 
     @Override
     public org.bukkit.inventory.ItemStack getItem() {
-        return CraftItemStack.asBukkitCopy(getHandle().getItem());
+        return CraftItemStack.asBukkitCopy(getHandle().getHeldItemStack());
     }
 
     @Override
@@ -104,6 +104,26 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
         getHandle().setRotation(toInteger(rotation));
     }
 
+    @Override
+    public boolean isVisible() {
+        return !getHandle().isInvisible();
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        getHandle().setInvisible(!visible);
+    }
+
+    @Override
+    public boolean isFixed() {
+        return getHandle().fixed;
+    }
+
+    @Override
+    public void setFixed(boolean fixed) {
+        getHandle().fixed = fixed;
+    }
+
     static int toInteger(Rotation rotation) {
         // Translate Bukkit API rotation to NMS integer
         switch (rotation) {
@@ -129,8 +149,8 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
     }
 
     @Override
-    public EntityItemFrame getHandle() {
-        return (EntityItemFrame) entity;
+    public ItemFrameEntity getHandle() {
+        return (ItemFrameEntity) entity;
     }
 
     @Override

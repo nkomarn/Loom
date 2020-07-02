@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.EnumProperty;
 import org.bukkit.block.data.type.Switch;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftSwitch extends CraftBlockData implements Switch {
 
-    private static final net.minecraft.server.BlockStateEnum<?> FACE = getEnum("face");
+    private static final EnumProperty<?> FACE = getEnum("face");
 
     @Override
     public Face getFace() {

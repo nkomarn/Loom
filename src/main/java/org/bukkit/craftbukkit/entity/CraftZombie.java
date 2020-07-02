@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityZombie;
-import net.minecraft.server.EntityZombieVillager;
+import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.entity.mob.ZombieVillagerEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
@@ -10,13 +10,13 @@ import org.bukkit.entity.Zombie;
 
 public class CraftZombie extends CraftMonster implements Zombie {
 
-    public CraftZombie(CraftServer server, EntityZombie entity) {
+    public CraftZombie(CraftServer server, ZombieEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityZombie getHandle() {
-        return (EntityZombie) entity;
+    public ZombieEntity getHandle() {
+        return (ZombieEntity) entity;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class CraftZombie extends CraftMonster implements Zombie {
 
     @Override
     public boolean isVillager() {
-        return getHandle() instanceof EntityZombieVillager;
+        return getHandle() instanceof ZombieVillagerEntity;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class CraftZombie extends CraftMonster implements Zombie {
 
     @Override
     public boolean isConverting() {
-        return getHandle().isDrownConverting();
+        return getHandle().isConvertingInWater();
     }
 
     @Override

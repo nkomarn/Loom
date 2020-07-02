@@ -57,4 +57,9 @@ public class CraftItem extends CraftEntity implements Item {
     public EntityType getType() {
         return EntityType.DROPPED_ITEM;
     }
+
+    @Override
+    public Spigot spigot() {
+        return null;
+    }
 }

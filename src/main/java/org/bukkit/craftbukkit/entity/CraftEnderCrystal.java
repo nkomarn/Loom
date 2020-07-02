@@ -1,47 +1,47 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityEnderCrystal;
+import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.EntityType;
 
 public class CraftEnderCrystal extends CraftEntity implements EnderCrystal {
-    public CraftEnderCrystal(CraftServer server, EntityEnderCrystal entity) {
+    public CraftEnderCrystal(CraftServer server, EndCrystalEntity entity) {
         super(server, entity);
     }
 
     @Override
     public boolean isShowingBottom() {
-        return getHandle().isShowingBottom();
+        return getHandle().getShowBottom();
     }
 
     @Override
     public void setShowingBottom(boolean showing) {
-        getHandle().setShowingBottom(showing);
+        getHandle().setShowBottom(showing);
     }
 
     @Override
     public Location getBeamTarget() {
-        BlockPosition pos = getHandle().getBeamTarget();
+        BlockPos pos = getHandle().getBeamTarget();
         return pos == null ? null : new Location(getWorld(), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
     public void setBeamTarget(Location location) {
         if (location == null) {
-            getHandle().setBeamTarget((BlockPosition) null);
+            getHandle().setBeamTarget(null);
         } else if (location.getWorld() != getWorld()) {
             throw new IllegalArgumentException("Cannot set beam target location to different world");
         } else {
-            getHandle().setBeamTarget(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+            getHandle().setBeamTarget(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
         }
     }
 
     @Override
-    public EntityEnderCrystal getHandle() {
-        return (EntityEnderCrystal) entity;
+    public EndCrystalEntity getHandle() {
+        return (EndCrystalEntity) entity;
     }
 
     @Override
@@ -52,5 +52,10 @@ public class CraftEnderCrystal extends CraftEntity implements EnderCrystal {
     @Override
     public EntityType getType() {
         return EntityType.ENDER_CRYSTAL;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

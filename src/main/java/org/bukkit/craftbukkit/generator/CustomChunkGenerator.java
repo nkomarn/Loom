@@ -1,35 +1,26 @@
 package org.bukkit.craftbukkit.generator;
 
 import com.google.common.base.Preconditions;
-import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.Random;
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.BiomeManager;
-import net.minecraft.server.BiomeStorage;
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.ChunkSection;
-import net.minecraft.server.DefinedStructureManager;
-import net.minecraft.server.DimensionManager;
-import net.minecraft.server.EnumCreatureType;
-import net.minecraft.server.GeneratorAccess;
-import net.minecraft.server.HeightMap;
-import net.minecraft.server.IBlockAccess;
-import net.minecraft.server.IChunkAccess;
-import net.minecraft.server.ITileEntity;
-import net.minecraft.server.ProtoChunk;
-import net.minecraft.server.RegionLimitedWorldAccess;
-import net.minecraft.server.RegistryMaterials;
-import net.minecraft.server.StructureManager;
-import net.minecraft.server.StructureSettings;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.WorldChunkManager;
-import net.minecraft.server.WorldDimension;
-import net.minecraft.server.WorldGenStage;
-import net.minecraft.server.WorldServer;
+
+import com.mojang.serialization.Codec;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.world.ServerWorld;
-import org.bukkit.World;
+import net.minecraft.structure.StructureManager;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.ChunkRegion;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.source.BiomeAccess;
+import net.minecraft.world.biome.source.BiomeArray;
+import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.ProtoChunk;
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.StructureAccessor;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.generator.ChunkGenerator;
@@ -37,16 +28,16 @@ import org.bukkit.generator.ChunkGenerator.BiomeGrid;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
 
 public class CustomChunkGenerator extends InternalChunkGenerator {
-    private final net.minecraft.server.ChunkGenerator delegate;
+    private net.minecraft.world.gen.chunk.ChunkGenerator delegate;
     private final ChunkGenerator generator;
-    private final WorldServer world;
+    private final ServerWorld world;
     private final Random random = new Random();
 
     private class CustomBiomeGrid implements BiomeGrid {
 
-        private final BiomeStorage biome; // SPIGOT-5529: stored in 4x4 grid
+        private final BiomeArray biome; // SPIGOT-5529: stored in 4x4 grid
 
-        public CustomBiomeGrid(BiomeStorage biome) {
+        public CustomBiomeGrid(BiomeArray biome) {
             this.biome = biome;
         }
 
@@ -57,14 +48,14 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
 
         @Override
         public void setBiome(int x, int z, Biome bio) {
-            for (int y = 0; y < world.getWorld().getMaxHeight(); y += 4) {
+            for (int y = 0; y < world.getCraftWorld().getMaxHeight(); y += 4) {
                 setBiome(x, y, z, bio);
             }
         }
 
         @Override
         public Biome getBiome(int x, int y, int z) {
-            return CraftBlock.biomeBaseToBiome(biome.getBiome(x >> 2, y >> 2, z >> 2));
+            return CraftBlock.biomeBaseToBiome(biome.getBiomeForNoiseGen(x >> 2, y >> 2, z >> 2));
         }
 
         @Override
@@ -74,7 +65,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     public CustomChunkGenerator(ServerWorld world, net.minecraft.world.gen.chunk.ChunkGenerator delegate, ChunkGenerator generator) {
-        super(delegate.getWorldChunkManager(), delegate.getSettings());
+        super(delegate.getBiomeSource(), delegate.getSettings());
 
         this.world = world;
         this.delegate = delegate;
@@ -82,18 +73,18 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public void createBiomes(IChunkAccess ichunkaccess) {
+    public void populateBiomes(Chunk chunk) {
         // Don't allow the server to override any custom biomes that have been set
     }
 
     @Override
-    public WorldChunkManager getWorldChunkManager() {
-        return delegate.getWorldChunkManager();
+    public BiomeSource getBiomeSource() {
+        return delegate.getBiomeSource();
     }
 
     @Override
-    public void storeStructures(GeneratorAccess generatoraccess, StructureManager structuremanager, IChunkAccess ichunkaccess) {
-        delegate.storeStructures(generatoraccess, structuremanager, ichunkaccess);
+    public void addStructureReferences(WorldAccess generatoraccess, StructureAccessor structuremanager, Chunk chunk) {
+        delegate.addStructureReferences(generatoraccess, structuremanager, chunk);
     }
 
     @Override
@@ -102,21 +93,21 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public void buildBase(RegionLimitedWorldAccess regionlimitedworldaccess, IChunkAccess ichunkaccess) {
+    public void buildBase(ChunkRegion chunkregion, Chunk chunk) {
         // Call the bukkit ChunkGenerator before structure generation so correct biome information is available.
-        int x = ichunkaccess.getPos().x;
-        int z = ichunkaccess.getPos().z;
+        int x = chunk.getPos().x;
+        int z = chunk.getPos().z;
         random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
 
         // Get default biome data for chunk
-        CustomBiomeGrid biomegrid = new CustomBiomeGrid(new BiomeStorage(ichunkaccess.getPos(), this.getWorldChunkManager()));
+        CustomBiomeGrid biomegrid = new CustomBiomeGrid(new BiomeArray(chunk.getPos(), this.getBiomeSource()));
 
         ChunkData data;
         if (generator.isParallelCapable()) {
-            data = generator.generateChunkData(this.world.getWorld(), random, x, z, biomegrid);
+            data = generator.generateChunkData(this.world.getCraftWorld(), random, x, z, biomegrid);
         } else {
             synchronized (this) {
-                data = generator.generateChunkData(this.world.getWorld(), random, x, z, biomegrid);
+                data = generator.generateChunkData(this.world.getCraftWorld(), random, x, z, biomegrid);
             }
         }
 
@@ -124,7 +115,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
         CraftChunkData craftData = (CraftChunkData) data;
         ChunkSection[] sections = craftData.getRawChunkData();
 
-        ChunkSection[] csect = ichunkaccess.getSections();
+        ChunkSection[] csect = chunk.getSectionArray();
         int scnt = Math.min(csect.length, sections.length);
 
         // Loop through returned sections
@@ -138,41 +129,41 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
         }
 
         // Set biome grid
-        ((ProtoChunk) ichunkaccess).a(biomegrid.biome);
+        ((ProtoChunk) chunk).a(biomegrid.biome);
 
         if (craftData.getTiles() != null) {
-            for (BlockPosition pos : craftData.getTiles()) {
+            for (BlockPos pos : craftData.getTiles()) {
                 int tx = pos.getX();
                 int ty = pos.getY();
                 int tz = pos.getZ();
                 Block block = craftData.getTypeId(tx, ty, tz).getBlock();
 
-                if (block.isTileEntity()) {
-                    TileEntity tile = ((ITileEntity) block).createTile(world);
-                    ichunkaccess.setTileEntity(new BlockPosition((x << 4) + tx, ty, (z << 4) + tz), tile);
+                if (block.hasBlockEntity()) {
+                    BlockEntity tile = ((BlockEntityProvider) block).createBlockEntity(world);
+                    chunk.setBlockEntity(new BlockPos((x << 4) + tx, ty, (z << 4) + tz), tile);
                 }
             }
         }
     }
 
     @Override
-    public void createStructures(StructureManager structuremanager, IChunkAccess ichunkaccess, DefinedStructureManager definedstructuremanager, long i) {
+    public void setStructureStarts(StructureAccessor structureaccessor, Chunk chunk, StructureManager definedstructuremanager, long i) {
         if (generator.shouldGenerateStructures()) {
             // Still need a way of getting the biome of this chunk to pass to createStructures
             // Using default biomes for now.
-            delegate.createStructures(structuremanager, ichunkaccess, definedstructuremanager, i);
+            delegate.setStructureStarts(structureaccessor, chunk, definedstructuremanager, i);
         }
     }
 
     @Override
-    public void doCarving(long i, BiomeManager biomemanager, IChunkAccess ichunkaccess, WorldGenStage.Features worldgenstage_features) {
+    public void carve(long i, BiomeAccess biomeaccess, Chunk chunk, GenerationStep.Carver generationstep_feature) {
         if (generator.shouldGenerateCaves()) {
-            delegate.doCarving(i, biomemanager, ichunkaccess, worldgenstage_features);
+            delegate.carve(i, biomeaccess, chunk, generationstep_feature);
         }
     }
 
     @Override
-    public void buildNoise(GeneratorAccess generatoraccess, StructureManager structuremanager, IChunkAccess ichunkaccess) {
+    public void buildNoise(WorldAccess worldaccess, StructureManager structuremanager, Chunk chunk) {
         // Disable vanilla generation
     }
 
@@ -211,12 +202,12 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public IBlockAccess a(int i, int j) {
-        return delegate.a(i, j);
+    public BlockView getColumnSample(int i, int j) {
+        return delegate.getColumnSample(i, j);
     }
 
     @Override
-    protected Codec<? extends net.minecraft.server.ChunkGenerator> a() {
+    protected Codec<? extends net.minecraft.world.gen.chunk.ChunkGenerator> method_28506() {
         throw new UnsupportedOperationException("Cannot serialize CustomChunkGenerator");
     }
 }

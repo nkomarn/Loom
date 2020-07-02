@@ -3,6 +3,10 @@ package org.bukkit.craftbukkit.inventory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+
+import net.minecraft.block.entity.*;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.CraftingInventory;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,6 +16,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MerchantInventory;
 
 public class CraftInventory implements Inventory {
     protected final net.minecraft.inventory.Inventory inventory;
@@ -26,12 +31,12 @@ public class CraftInventory implements Inventory {
 
     @Override
     public int getSize() {
-        return getInventory().getSize();
+        return getInventory().size();
     }
 
     @Override
     public ItemStack getItem(int index) {
-        ItemStack item = getInventory().getItem(index);
+        net.minecraft.item.ItemStack item = getInventory().getStack(index);
         return item.isEmpty() ? null : CraftItemStack.asCraftMirror(item);
     }
 
@@ -81,7 +86,7 @@ public class CraftInventory implements Inventory {
 
     @Override
     public void setItem(int index, ItemStack item) {
-        getInventory().setItem(index, CraftItemStack.asNMSCopy(item));
+        getInventory().setStack(index, CraftItemStack.asNMSCopy(item));
     }
 
     @Override
@@ -372,7 +377,7 @@ public class CraftInventory implements Inventory {
     }
 
     private int getMaxItemStack() {
-        return getInventory().getMaxStackSize();
+        return getInventory().getMaxCountPerStack();
     }
 
     @Override
@@ -430,29 +435,29 @@ public class CraftInventory implements Inventory {
     @Override
     public InventoryType getType() {
         // Thanks to Droppers extending Dispensers, Blast Furnaces & Smokers extending Furnace, order is important.
-        if (inventory instanceof InventoryCrafting) {
-            return inventory.getSize() >= 9 ? InventoryType.WORKBENCH : InventoryType.CRAFTING;
+        if (inventory instanceof CraftingInventory) {
+            return inventory.size() >= 9 ? InventoryType.WORKBENCH : InventoryType.CRAFTING;
         } else if (inventory instanceof PlayerInventory) {
             return InventoryType.PLAYER;
-        } else if (inventory instanceof TileEntityDropper) {
+        } else if (inventory instanceof DropperBlockEntity) {
             return InventoryType.DROPPER;
-        } else if (inventory instanceof TileEntityDispenser) {
+        } else if (inventory instanceof DispenserBlockEntity) {
             return InventoryType.DISPENSER;
-        } else if (inventory instanceof TileEntityBlastFurnace) {
+        } else if (inventory instanceof BlastFurnaceBlockEntity) {
             return InventoryType.BLAST_FURNACE;
-        } else if (inventory instanceof TileEntitySmoker) {
+        } else if (inventory instanceof SmokerBlockEntity) {
             return InventoryType.SMOKER;
-        } else if (inventory instanceof TileEntityFurnace) {
+        } else if (inventory instanceof FurnaceBlockEntity) {
             return InventoryType.FURNACE;
         } else if (this instanceof CraftInventoryEnchanting) {
             return InventoryType.ENCHANTING;
-        } else if (inventory instanceof TileEntityBrewingStand) {
+        } else if (inventory instanceof BrewingStandBlockEntity) {
             return InventoryType.BREWING;
         } else if (inventory instanceof CraftInventoryCustom.MinecraftInventory) {
             return ((CraftInventoryCustom.MinecraftInventory) inventory).getType();
-        } else if (inventory instanceof InventoryEnderChest) {
+        } else if (inventory instanceof EnderChestBlockEntity) {
             return InventoryType.ENDER_CHEST;
-        } else if (inventory instanceof InventoryMerchant) {
+        } else if (inventory instanceof MerchantInventory) {
             return InventoryType.MERCHANT;
         } else if (this instanceof CraftInventoryBeacon) {
             return InventoryType.BEACON;
@@ -460,13 +465,13 @@ public class CraftInventory implements Inventory {
             return InventoryType.ANVIL;
         } else if (this instanceof CraftInventorySmithing) {
             return InventoryType.SMITHING;
-        } else if (inventory instanceof IHopper) {
+        } else if (inventory instanceof Hopper) {
             return InventoryType.HOPPER;
-        } else if (inventory instanceof TileEntityShulkerBox) {
+        } else if (inventory instanceof ShulkerBoxBlockEntity) {
             return InventoryType.SHULKER_BOX;
-        } else if (inventory instanceof TileEntityBarrel) {
+        } else if (inventory instanceof BarrelBlockEntity) {
             return InventoryType.BARREL;
-        } else if (inventory instanceof TileEntityLectern.LecternInventory) {
+        } else if (inventory instanceof LecternBlockEntity.LecternInventory) {
             return InventoryType.LECTERN;
         } else if (this instanceof CraftInventoryLoom) {
             return InventoryType.LOOM;
@@ -488,12 +493,12 @@ public class CraftInventory implements Inventory {
 
     @Override
     public int getMaxStackSize() {
-        return inventory.getMaxStackSize();
+        return inventory.getMaxCountPerStack();
     }
 
     @Override
     public void setMaxStackSize(int size) {
-        inventory.setMaxStackSize(size);
+        inventory.setMaxCountPerStack(size);
     }
 
     @Override

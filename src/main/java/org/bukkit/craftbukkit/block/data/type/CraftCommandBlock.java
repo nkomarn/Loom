@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.BooleanProperty;
 import org.bukkit.block.data.type.CommandBlock;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftCommandBlock extends CraftBlockData implements CommandBlock {
 
-    private static final net.minecraft.server.BlockStateBoolean CONDITIONAL = getBoolean("conditional");
+    private static final BooleanProperty CONDITIONAL = getBoolean("conditional");
 
     @Override
     public boolean isConditional() {

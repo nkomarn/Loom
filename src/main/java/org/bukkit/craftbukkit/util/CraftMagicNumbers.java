@@ -17,25 +17,21 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.datafixer.NbtOps;
+import net.minecraft.datafixer.Schemas;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.Item;
-import net.minecraft.server.AdvancementDataWorld;
-import net.minecraft.server.Block;
-import net.minecraft.server.ChatDeserializer;
-import net.minecraft.server.DataConverterRegistry;
-import net.minecraft.server.DataConverterTypes;
-import net.minecraft.server.DynamicOpsNBT;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.Item;
-import net.minecraft.server.MinecraftKey;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.MojangsonParser;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.SharedConstants;
+import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -87,12 +83,12 @@ public final class CraftMagicNumbers implements UnsafeValues {
     private static final Map<Material, Block> MATERIAL_BLOCK = new HashMap<>();
 
     static {
-        for (Block block : IRegistry.BLOCK) {
-            BLOCK_MATERIAL.put(block, Material.getMaterial(IRegistry.BLOCK.getKey(block).getKey().toUpperCase(Locale.ROOT)));
+        for (Block block : Registry.BLOCK) {
+            BLOCK_MATERIAL.put(block, Material.getMaterial(Registry.BLOCK.getId(block).getPath().toUpperCase(Locale.ROOT)));
         }
 
-        for (Item item : IRegistry.ITEM) {
-            ITEM_MATERIAL.put(item, Material.getMaterial(IRegistry.ITEM.getKey(item).getKey().toUpperCase(Locale.ROOT)));
+        for (Item item : Registry.ITEM) {
+            ITEM_MATERIAL.put(item, Material.getMaterial(Registry.ITEM.getId(item).getPath().toUpperCase(Locale.ROOT)));
         }
 
         for (Material material : Material.values()) {
@@ -100,11 +96,11 @@ public final class CraftMagicNumbers implements UnsafeValues {
                 continue;
             }
 
-            MinecraftKey key = key(material);
-            IRegistry.ITEM.getOptional(key).ifPresent((item) -> {
+            Identifier key = key(material);
+            Registry.ITEM.getOrEmpty(key).ifPresent((item) -> {
                 MATERIAL_ITEM.put(material, item);
             });
-            IRegistry.BLOCK.getOptional(key).ifPresent((block) -> {
+            Registry.BLOCK.getOrEmpty(key).ifPresent((block) -> {
                 MATERIAL_BLOCK.put(material, block);
             });
         }
@@ -177,10 +173,10 @@ public final class CraftMagicNumbers implements UnsafeValues {
             return Material.getMaterial(material);
         }
 
-        NBTTagCompound stack = new NBTTagCompound();
-        stack.setString("id", "minecraft:" + material.toLowerCase(Locale.ROOT));
+        CompoundTag stack = new CompoundTag();
+        stack.putString("id", "minecraft:" + material.toLowerCase(Locale.ROOT));
 
-        Dynamic<NBTBase> converted = DataConverterRegistry.a().update(DataConverterTypes.ITEM_STACK, new Dynamic<>(DynamicOpsNBT.a, stack), version, this.getDataVersion());
+        Dynamic<Tag> converted = Schemas.getFixer().update(TypeReferences.ITEM_STACK, new Dynamic<>(NbtOps.INSTANCE, stack), version, this.getDataVersion());
         String newId = converted.get("id").asString("");
 
         return Material.matchMaterial(newId);
@@ -202,7 +198,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
      * @return string
      */
     public String getMappingsVersion() {
-        return "25afc67716a170ea965092c1067ff439";
+        return "yarn-1.16.1";
     }
 
     @Override
@@ -212,10 +208,10 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     @Override
     public ItemStack modifyItemStack(ItemStack stack, String arguments) {
-        net.minecraft.server.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+        net.minecraft.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
 
         try {
-            nmsStack.setTag((NBTTagCompound) MojangsonParser.parse(arguments));
+            nmsStack.setTag(StringNbtReader.parse(arguments));
         } catch (CommandSyntaxException ex) {
             Logger.getLogger(CraftMagicNumbers.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -231,9 +227,9 @@ public final class CraftMagicNumbers implements UnsafeValues {
             throw new IllegalArgumentException("Advancement " + key + " already exists.");
         }
 
-        net.minecraft.server.Advancement.SerializedAdvancement nms = (net.minecraft.server.Advancement.SerializedAdvancement) ChatDeserializer.a(AdvancementDataWorld.DESERIALIZER, advancement, net.minecraft.server.Advancement.SerializedAdvancement.class);
+        net.minecraft.advancement.Advancement.Task nms = (net.minecraft.advancement.Advancement.Task) JsonHelper.deserialize(ServerAdvancementLoader.GSON, advancement, net.minecraft.advancement.Advancement.Task.class);
         if (nms != null) {
-            MinecraftServer.getServer().getAdvancementData().REGISTRY.a(Maps.newHashMap(Collections.singletonMap(CraftNamespacedKey.toMinecraft(key), nms)));
+            MinecraftServer.getServer().getAdvancementLoader().manager.load(Maps.newHashMap(Collections.singletonMap(CraftNamespacedKey.toMinecraft(key), nms)));
             Advancement bukkit = Bukkit.getAdvancement(key);
 
             if (bukkit != null) {
@@ -246,7 +242,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
                     Bukkit.getLogger().log(Level.SEVERE, "Error saving advancement " + key, ex);
                 }
 
-                MinecraftServer.getServer().getPlayerList().reload();
+                MinecraftServer.getServer().getPlayerManager().onDataPacksReloaded();
 
                 return bukkit;
             }

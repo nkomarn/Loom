@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityLlama;
+import net.minecraft.entity.passive.LlamaEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryLlama;
 import org.bukkit.entity.EntityType;
@@ -11,13 +11,13 @@ import org.bukkit.inventory.LlamaInventory;
 
 public class CraftLlama extends CraftChestedHorse implements Llama {
 
-    public CraftLlama(CraftServer server, EntityLlama entity) {
+    public CraftLlama(CraftServer server, LlamaEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityLlama getHandle() {
-        return (EntityLlama) super.getHandle();
+    public LlamaEntity getHandle() {
+        return (LlamaEntity) super.getHandle();
     }
 
     @Override

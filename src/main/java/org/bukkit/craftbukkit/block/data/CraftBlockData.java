@@ -273,7 +273,7 @@ public class CraftBlockData implements BlockData {
 
         if (!states.isEmpty()) {
             stateString.append('[');
-            stateString.append(states.entrySet().stream().map(State.STATE_TO_VALUE).collect(Collectors.joining(",")));
+            stateString.append(states.entrySet().stream().map(State.PROPERTY_MAP_PRINTER).collect(Collectors.joining(",")));
             stateString.append(']');
         }
 
@@ -285,7 +285,7 @@ public class CraftBlockData implements BlockData {
 
         for (Map.Entry<Property<?>, Comparable<?>> entry : state.getEntries().entrySet()) {
             Property<?> iblockstate = entry.getKey();
-            compound.putString(iblockstate.getName(), iblockstate.a(entry.getValue()));
+            compound.putString(iblockstate.getName(), iblockstate.name(entry.getValue()));
         }
 
         return compound;
@@ -539,7 +539,7 @@ public class CraftBlockData implements BlockData {
                 }
 
                 StringReader reader = new StringReader(data);
-                BlockArgumentParser arg = new BlockArgumentParser(reader, false).a(false);
+                BlockArgumentParser arg = new BlockArgumentParser(reader, false).parse(false);
                 Preconditions.checkArgument(!reader.canRead(), "Spurious trailing data: " + data);
 
                 blockData = arg.getBlockState();

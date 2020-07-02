@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 import java.util.Set;
 
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
@@ -24,7 +25,7 @@ public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderD
     public Set<ComplexEntityPart> getParts() {
         Builder<ComplexEntityPart> builder = ImmutableSet.builder();
 
-        for (EntityComplexPart part : getHandle().children) {
+        for (EnderDragonPart part : getHandle().children) {
             builder.add((ComplexEntityPart) part.getBukkitEntity());
         }
 

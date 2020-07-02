@@ -9,37 +9,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.server.DamageSource;
-import net.minecraft.server.EntityArmorStand;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityDragonFireball;
-import net.minecraft.server.EntityEgg;
-import net.minecraft.server.EntityEnderPearl;
-import net.minecraft.server.EntityFireball;
-import net.minecraft.server.EntityFireworks;
-import net.minecraft.server.EntityFishingHook;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityInsentient;
-import net.minecraft.server.EntityLargeFireball;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityLlamaSpit;
-import net.minecraft.server.EntityPotion;
-import net.minecraft.server.EntityProjectile;
-import net.minecraft.server.EntityShulkerBullet;
-import net.minecraft.server.EntitySmallFireball;
-import net.minecraft.server.EntitySnowball;
-import net.minecraft.server.EntitySpectralArrow;
-import net.minecraft.server.EntityThrownExpBottle;
-import net.minecraft.server.EntityThrownTrident;
-import net.minecraft.server.EntityTippedArrow;
-import net.minecraft.server.EntityTypes;
-import net.minecraft.server.EntityWither;
-import net.minecraft.server.EntityWitherSkull;
-import net.minecraft.server.EnumHand;
-import net.minecraft.server.GenericAttributes;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MobEffectList;
 import net.minecraft.world.World;
 import org.apache.commons.lang.Validate;
 import org.bukkit.FluidCollisionMode;
@@ -95,10 +68,10 @@ import org.bukkit.util.Vector;
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     private CraftEntityEquipment equipment;
 
-    public CraftLivingEntity(final CraftServer server, final LivingEntity entity) {
+    public CraftLivingEntity(final CraftServer server, final net.minecraft.entity.LivingEntity entity) {
         super(server, entity);
 
-        if (entity instanceof EntityInsentient || entity instanceof EntityArmorStand) {
+        if (entity instanceof MobEntity || entity instanceof ArmorStandEntity) {
             equipment = new CraftEntityEquipment(this);
         }
     }
@@ -124,14 +97,14 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public double getAbsorptionAmount() {
-        return getHandle().getAbsorptionHearts();
+        return getHandle().getAbsorptionAmount();
     }
 
     @Override
     public void setAbsorptionAmount(double amount) {
         Preconditions.checkArgument(amount >= 0 && Double.isFinite(amount), "amount < 0 or non-finite");
 
-        getHandle().setAbsorptionHearts((float) amount);
+        getHandle().setAbsorptionAmount((float) amount);
     }
 
     @Override
@@ -143,7 +116,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public void setMaxHealth(double amount) {
         Validate.isTrue(amount > 0, "Max health must be greater than 0");
 
-        getHandle().getAttributeInstance(GenericAttributes.MAX_HEALTH).setValue(amount);
+        getHandle().getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setValue(amount);
 
         if (getHealth() > amount) {
             setHealth(amount);
@@ -152,7 +125,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public void resetMaxHealth() {
-        setMaxHealth(getHandle().getAttributeInstance(GenericAttributes.MAX_HEALTH).getAttribute().getDefault());
+        setMaxHealth(getHandle().getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).getAttribute().getDefaultValue());
     }
 
     @Override
@@ -304,10 +277,10 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public net.minecraft.entity.LivingEntity getHandle() {
-        return (EntityLiving) entity;
+        return (net.minecraft.entity.LivingEntity) entity;
     }
 
-    public void setHandle(final EntityLiving entity) {
+    public void setHandle(final net.minecraft.entity.LivingEntity entity) {
         super.setHandle(entity);
     }
 

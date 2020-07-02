@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.IntProperty;
 import org.bukkit.block.data.type.Sapling;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftSapling extends CraftBlockData implements Sapling {
 
-    private static final net.minecraft.server.BlockStateInteger STAGE = getInteger("stage");
+    private static final IntProperty STAGE = getInteger("stage");
 
     @Override
     public int getStage() {

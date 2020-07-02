@@ -1,12 +1,14 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.IntProperty;
 import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftNoteBlock extends CraftBlockData implements NoteBlock {
 
-    private static final net.minecraft.server.BlockStateEnum<?> INSTRUMENT = getEnum("instrument");
-    private static final net.minecraft.server.BlockStateInteger NOTE = getInteger("note");
+    private static final EnumProperty<?> INSTRUMENT = getEnum("instrument");
+    private static final IntProperty NOTE = getInteger("note");
 
     @Override
     public org.bukkit.Instrument getInstrument() {

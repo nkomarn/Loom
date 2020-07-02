@@ -3,9 +3,8 @@ package org.bukkit.craftbukkit.potion;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MobEffectList;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -100,22 +99,22 @@ public class CraftPotionUtil {
         return new PotionData(PotionType.UNCRAFTABLE, false, false);
     }
 
-    public static MobEffect fromBukkit(PotionEffect effect) {
-        MobEffectList type = MobEffectList.fromId(effect.getType().getId());
-        return new MobEffect(type, effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
+    public static StatusEffectInstance fromBukkit(PotionEffect effect) {
+        StatusEffect type = StatusEffect.byRawId(effect.getType().getId());
+        return new StatusEffectInstance(type, effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
     }
 
     public static PotionEffect toBukkit(StatusEffectInstance effect) {
-        PotionEffectType type = PotionEffectType.getById(MobEffectList.getId(effect.getMobEffect()));
+        PotionEffectType type = PotionEffectType.getById(StatusEffect.getRawId(effect.getEffectType()));
         int amp = effect.getAmplifier();
         int duration = effect.getDuration();
         boolean ambient = effect.isAmbient();
-        boolean particles = effect.isShowParticles();
+        boolean particles = effect.shouldShowParticles();
         return new PotionEffect(type, duration, amp, ambient, particles);
     }
 
-    public static boolean equals(MobEffectList mobEffect, PotionEffectType type) {
-        PotionEffectType typeV = PotionEffectType.getById(MobEffectList.getId(mobEffect));
+    public static boolean equals(StatusEffect mobEffect, PotionEffectType type) {
+        PotionEffectType typeV = PotionEffectType.getById(StatusEffect.getRawId(mobEffect));
         return typeV.equals(type);
     }
 }

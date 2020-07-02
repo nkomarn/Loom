@@ -2,12 +2,8 @@ package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
 import java.util.Locale;
-import net.minecraft.server.BlockBed;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityVillager;
-import net.minecraft.server.IBlockData;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.VillagerProfession;
+
+import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.village.VillagerProfession;
 import org.apache.commons.lang.Validate;
@@ -19,13 +15,13 @@ import org.bukkit.entity.Villager;
 
 public class CraftVillager extends CraftAbstractVillager implements Villager {
 
-    public CraftVillager(CraftServer server, EntityVillager entity) {
+    public CraftVillager(CraftServer server, VillagerEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityVillager getHandle() {
-        return (EntityVillager) entity;
+    public VillagerEntity getHandle() {
+        return (VillagerEntity) entity;
     }
 
     @Override
@@ -51,13 +47,13 @@ public class CraftVillager extends CraftAbstractVillager implements Villager {
 
     @Override
     public Type getVillagerType() {
-        return Type.valueOf(IRegistry.VILLAGER_TYPE.getKey(getHandle().getVillagerData().getType()).getKey().toUpperCase(Locale.ROOT));
+        return Type.valueOf(Registry.VILLAGER_TYPE.getKey(getHandle().getVillagerData().getType()).getKey().toUpperCase(Locale.ROOT));
     }
 
     @Override
     public void setVillagerType(Type type) {
         Validate.notNull(type);
-        getHandle().setVillagerData(getHandle().getVillagerData().withType(IRegistry.VILLAGER_TYPE.get(CraftNamespacedKey.toMinecraft(type.getKey()))));
+        getHandle().setVillagerData(getHandle().getVillagerData().withType(Registry.VILLAGER_TYPE.get(CraftNamespacedKey.toMinecraft(type.getKey()))));
     }
 
     @Override

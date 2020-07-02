@@ -1,18 +1,18 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityPolarBear;
+import net.minecraft.entity.passive.PolarBearEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.PolarBear;
 
 public class CraftPolarBear extends CraftAnimals implements PolarBear {
 
-    public CraftPolarBear(CraftServer server, EntityPolarBear entity) {
+    public CraftPolarBear(CraftServer server, PolarBearEntity entity) {
         super(server, entity);
     }
     @Override
-    public EntityPolarBear getHandle() {
-        return (EntityPolarBear) entity;
+    public PolarBearEntity getHandle() {
+        return (PolarBearEntity) entity;
     }
 
     @Override

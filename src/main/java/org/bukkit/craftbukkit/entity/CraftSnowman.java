@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySnowman;
+import net.minecraft.entity.passive.SnowGolemEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Snowman;
 
 public class CraftSnowman extends CraftGolem implements Snowman {
-    public CraftSnowman(CraftServer server, EntitySnowman entity) {
+    public CraftSnowman(CraftServer server, SnowGolemEntity entity) {
         super(server, entity);
     }
 
@@ -21,8 +21,8 @@ public class CraftSnowman extends CraftGolem implements Snowman {
     }
 
     @Override
-    public EntitySnowman getHandle() {
-        return (EntitySnowman) entity;
+    public SnowGolemEntity getHandle() {
+        return (SnowGolemEntity) entity;
     }
 
     @Override

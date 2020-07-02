@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.inventory;
 
 import net.minecraft.recipe.SpecialCraftingRecipe;
-import net.minecraft.server.IRecipeComplex;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.util.CraftNamespacedKey;

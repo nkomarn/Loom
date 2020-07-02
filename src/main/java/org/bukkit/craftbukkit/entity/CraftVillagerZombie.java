@@ -3,10 +3,10 @@ package org.bukkit.craftbukkit.entity;
 import com.google.common.base.Preconditions;
 import java.util.Locale;
 import java.util.UUID;
-import net.minecraft.server.EntityZombieVillager;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.MobEffects;
+
+import net.minecraft.entity.mob.ZombieVillagerEntity;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -18,13 +18,13 @@ import org.bukkit.entity.ZombieVillager;
 
 public class CraftVillagerZombie extends CraftZombie implements ZombieVillager {
 
-    public CraftVillagerZombie(CraftServer server, EntityZombieVillager entity) {
+    public CraftVillagerZombie(CraftServer server, ZombieVillagerEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityZombieVillager getHandle() {
-        return (EntityZombieVillager) super.getHandle();
+    public ZombieVillagerEntity getHandle() {
+        return (ZombieVillagerEntity) super.getHandle();
     }
 
     @Override
@@ -39,24 +39,24 @@ public class CraftVillagerZombie extends CraftZombie implements ZombieVillager {
 
     @Override
     public Villager.Profession getVillagerProfession() {
-        return Villager.Profession.valueOf(IRegistry.VILLAGER_PROFESSION.getKey(getHandle().getVillagerData().getProfession()).getKey().toUpperCase(Locale.ROOT));
+        return Villager.Profession.valueOf(Registry.VILLAGER_PROFESSION.getKey(getHandle().getVillagerData().getProfession()).getKey().toUpperCase(Locale.ROOT));
     }
 
     @Override
     public void setVillagerProfession(Villager.Profession profession) {
         Validate.notNull(profession);
-        getHandle().setVillagerData(getHandle().getVillagerData().withProfession(IRegistry.VILLAGER_PROFESSION.get(new MinecraftKey(profession.name().toLowerCase(Locale.ROOT)))));
+        getHandle().setVillagerData(getHandle().getVillagerData().withProfession(Registry.VILLAGER_PROFESSION.get(new Identifier(profession.name().toLowerCase(Locale.ROOT)))));
     }
 
     @Override
     public Villager.Type getVillagerType() {
-        return Villager.Type.valueOf(IRegistry.VILLAGER_TYPE.getKey(getHandle().getVillagerData().getType()).getKey().toUpperCase(Locale.ROOT));
+        return Villager.Type.valueOf(Registry.VILLAGER_TYPE.getKey(getHandle().getVillagerData().getType()).getKey().toUpperCase(Locale.ROOT));
     }
 
     @Override
     public void setVillagerType(Villager.Type type) {
         Validate.notNull(type);
-        getHandle().setVillagerData(getHandle().getVillagerData().withType(IRegistry.VILLAGER_TYPE.get(CraftNamespacedKey.toMinecraft(type.getKey()))));
+        getHandle().setVillagerData(getHandle().getVillagerData().withType(Registry.VILLAGER_TYPE.get(CraftNamespacedKey.toMinecraft(type.getKey()))));
     }
 
     @Override

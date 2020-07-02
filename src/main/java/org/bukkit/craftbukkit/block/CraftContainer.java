@@ -1,13 +1,12 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.ChestLock;
-import net.minecraft.server.TileEntityContainer;
+import net.minecraft.block.entity.LockableContainerBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 
-public abstract class CraftContainer<T extends TileEntityContainer> extends CraftBlockEntityState<T> implements Container {
+public abstract class CraftContainer<T extends LockableContainerBlockEntity> extends CraftBlockEntityState<T> implements Container {
 
     public CraftContainer(Block block, Class<T> tileEntityClass) {
         super(block, tileEntityClass);
@@ -35,7 +34,7 @@ public abstract class CraftContainer<T extends TileEntityContainer> extends Craf
     @Override
     public String getCustomName() {
         T container = this.getSnapshot();
-        return container.customName != null ? CraftChatMessage.fromComponent(container.getCustomName()) : null;
+        return container.getCustomName() != null ? CraftChatMessage.fromComponent(container.getCustomName()) : null;
     }
 
     @Override
@@ -47,7 +46,7 @@ public abstract class CraftContainer<T extends TileEntityContainer> extends Craf
     public void applyTo(T container) {
         super.applyTo(container);
 
-        if (this.getSnapshot().customName == null) {
+        if (this.getSnapshot().getCustomName() == null) {
             container.setCustomName(null);
         }
     }

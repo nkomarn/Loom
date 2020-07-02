@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.map;
 
-import net.minecraft.server.MapIcon;
-import net.minecraft.server.WorldMap;
+import net.minecraft.item.map.MapIcon;
+import net.minecraft.item.map.MapState;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.entity.Player;
@@ -12,9 +12,9 @@ import org.bukkit.map.MapView;
 
 public class CraftMapRenderer extends MapRenderer {
 
-    private final WorldMap worldMap;
+    private final MapState worldMap;
 
-    public CraftMapRenderer(CraftMapView mapView, WorldMap worldMap) {
+    public CraftMapRenderer(CraftMapView mapView, MapState worldMap) {
         super(false);
         this.worldMap = worldMap;
     }
@@ -34,15 +34,16 @@ public class CraftMapRenderer extends MapRenderer {
             cursors.removeCursor(cursors.getCursor(0));
         }
 
-        for (Object key : worldMap.decorations.keySet()) {
+        for (Object key : worldMap.icons.keySet()) {
             // If this cursor is for a player check visibility with vanish system
             Player other = Bukkit.getPlayerExact((String) key);
             if (other != null && !player.canSee(other)) {
                 continue;
             }
 
-            MapIcon decoration = (MapIcon) worldMap.decorations.get(key);
-            cursors.addCursor(decoration.getX(), decoration.getY(), (byte) (decoration.getRotation() & 15), decoration.getType().a(), true, CraftChatMessage.fromComponent(decoration.getName()));
+            MapIcon decoration = worldMap.icons.get(key);
+            cursors.addCursor(decoration.getX(), decoration.getZ(), (byte) (decoration.getRotation() & 15),
+                    decoration.getType().getId(), true, CraftChatMessage.fromComponent(decoration.getText()));
         }
     }
 

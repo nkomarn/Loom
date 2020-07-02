@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Blocks;
-import net.minecraft.server.EntityMinecartAbstract;
-import net.minecraft.server.IBlockData;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
@@ -12,18 +12,18 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 
 public abstract class CraftMinecart extends CraftVehicle implements Minecart {
-    public CraftMinecart(CraftServer server, EntityMinecartAbstract entity) {
+    public CraftMinecart(CraftServer server, AbstractMinecartEntity entity) {
         super(server, entity);
     }
 
     @Override
     public void setDamage(double damage) {
-        getHandle().setDamage((float) damage);
+        getHandle().setDamageWobbleStrength((float) damage);
     }
 
     @Override
     public double getDamage() {
-        return getHandle().getDamage();
+        return getHandle().getDamageWobbleStrength();
     }
 
     @Override
@@ -69,53 +69,53 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
     }
 
     @Override
-    public EntityMinecartAbstract getHandle() {
-        return (EntityMinecartAbstract) entity;
+    public AbstractMinecartEntity getHandle() {
+        return (AbstractMinecartEntity) entity;
     }
 
     @Override
     public void setDisplayBlock(MaterialData material) {
         if (material != null) {
-            IBlockData block = CraftMagicNumbers.getBlock(material);
-            this.getHandle().setDisplayBlock(block);
+            BlockState block = CraftMagicNumbers.getBlock(material);
+            this.getHandle().setCustomBlock(block);
         } else {
             // Set block to air (default) and set the flag to not have a display block.
-            this.getHandle().setDisplayBlock(Blocks.AIR.getBlockData());
-            this.getHandle().a(false);
+            this.getHandle().setCustomBlock(Blocks.AIR.getDefaultState());
+            this.getHandle().setCustomBlockPresent(false);
         }
     }
 
     @Override
     public void setDisplayBlockData(BlockData blockData) {
         if (blockData != null) {
-            IBlockData block = ((CraftBlockData) blockData).getState();
-            this.getHandle().setDisplayBlock(block);
+            BlockState block = ((CraftBlockData) blockData).getState();
+            this.getHandle().setCustomBlock(block);
         } else {
             // Set block to air (default) and set the flag to not have a display block.
-            this.getHandle().setDisplayBlock(Blocks.AIR.getBlockData());
-            this.getHandle().a(false);
+            this.getHandle().setCustomBlock(Blocks.AIR.getDefaultState());
+            this.getHandle().setCustomBlockPresent(false);
         }
     }
 
     @Override
     public MaterialData getDisplayBlock() {
-        IBlockData blockData = getHandle().getDisplayBlock();
+        BlockState blockData = getHandle().getContainedBlock();
         return CraftMagicNumbers.getMaterial(blockData);
     }
 
     @Override
     public BlockData getDisplayBlockData() {
-        IBlockData blockData = getHandle().getDisplayBlock();
+        BlockState blockData = getHandle().getContainedBlock();
         return CraftBlockData.fromData(blockData);
     }
 
     @Override
     public void setDisplayBlockOffset(int offset) {
-        getHandle().setDisplayBlockOffset(offset);
+        getHandle().setCustomBlockOffset(offset);
     }
 
     @Override
     public int getDisplayBlockOffset() {
-        return getHandle().getDisplayBlockOffset();
+        return getHandle().getBlockOffset();
     }
 }

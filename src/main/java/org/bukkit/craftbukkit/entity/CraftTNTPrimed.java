@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityTNTPrimed;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.TntEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -9,7 +9,7 @@ import org.bukkit.entity.TNTPrimed;
 
 public class CraftTNTPrimed extends CraftEntity implements TNTPrimed {
 
-    public CraftTNTPrimed(CraftServer server, EntityTNTPrimed entity) {
+    public CraftTNTPrimed(CraftServer server, TntEntity entity) {
         super(server, entity);
     }
 
@@ -35,17 +35,17 @@ public class CraftTNTPrimed extends CraftEntity implements TNTPrimed {
 
     @Override
     public int getFuseTicks() {
-        return getHandle().getFuseTicks();
+        return getHandle().getFuse(); // TODO fuse or fuseTimer?
     }
 
     @Override
     public void setFuseTicks(int fuseTicks) {
-        getHandle().setFuseTicks(fuseTicks);
+        getHandle().setFuse(fuseTicks);
     }
 
     @Override
-    public EntityTNTPrimed getHandle() {
-        return (EntityTNTPrimed) entity;
+    public TntEntity getHandle() {
+        return (TntEntity) entity;
     }
 
     @Override
@@ -60,8 +60,13 @@ public class CraftTNTPrimed extends CraftEntity implements TNTPrimed {
 
     @Override
     public Entity getSource() {
-        EntityLiving source = getHandle().getSource();
+        LivingEntity source = getHandle().getCausingEntity();
 
         return (source != null) ? source.getBukkitEntity() : null;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

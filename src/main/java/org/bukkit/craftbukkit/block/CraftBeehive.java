@@ -3,10 +3,10 @@ package org.bukkit.craftbukkit.block;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.Entity;
-import net.minecraft.server.TileEntityBeehive;
-import net.minecraft.server.TileEntityBeehive.ReleaseStatus;
+
+import net.minecraft.block.entity.BeehiveBlockEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Beehive;
@@ -14,36 +14,36 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftBee;
 import org.bukkit.entity.Bee;
 
-public class CraftBeehive extends CraftBlockEntityState<TileEntityBeehive> implements Beehive {
+public class CraftBeehive extends CraftBlockEntityState<BeehiveBlockEntity> implements Beehive {
 
     public CraftBeehive(final Block block) {
-        super(block, TileEntityBeehive.class);
+        super(block, BeehiveBlockEntity.class);
     }
 
-    public CraftBeehive(final Material material, final TileEntityBeehive te) {
+    public CraftBeehive(final Material material, final BeehiveBlockEntity te) {
         super(material, te);
     }
 
     @Override
     public Location getFlower() {
-        BlockPosition flower = getSnapshot().flowerPos;
+        BlockPos flower = getSnapshot().flowerPos;
         return (flower == null) ? null : new Location(getWorld(), flower.getX(), flower.getY(), flower.getZ());
     }
 
     @Override
     public void setFlower(Location location) {
         Preconditions.checkArgument(location == null || this.getWorld().equals(location.getWorld()), "Flower must be in same world");
-        getSnapshot().flowerPos = (location == null) ? null : new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        getSnapshot().flowerPos = (location == null) ? null : new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
     @Override
     public boolean isFull() {
-        return getSnapshot().isFull();
+        return getSnapshot().isFullOfBees();
     }
 
     @Override
     public boolean isSedated() {
-        return isPlaced() && getTileEntity().isSedated();
+        return isPlaced() && getTileEntity().isSmoked();
     }
 
     @Override
@@ -68,8 +68,8 @@ public class CraftBeehive extends CraftBlockEntityState<TileEntityBeehive> imple
         List<Bee> bees = new ArrayList<>();
 
         if (isPlaced()) {
-            TileEntityBeehive beehive = ((TileEntityBeehive) this.getTileEntityFromWorld());
-            for (Entity bee : beehive.releaseBees(this.getHandle(), ReleaseStatus.BEE_RELEASED, true)) {
+            BeehiveBlockEntity beehive = ((BeehiveBlockEntity) this.getTileEntityFromWorld());
+            for (Entity bee : beehive.tryReleaseBee(this.getHandle(), BeehiveBlockEntity.BeeState.BEE_RELEASED, true)) {
                 bees.add((Bee) bee.getBukkitEntity());
             }
         }
@@ -81,6 +81,6 @@ public class CraftBeehive extends CraftBlockEntityState<TileEntityBeehive> imple
     public void addEntity(Bee entity) {
         Preconditions.checkArgument(entity != null, "Entity must not be null");
 
-        getSnapshot().addBee(((CraftBee) entity).getHandle(), false);
+        getSnapshot().tryEnterHive(((CraftBee) entity).getHandle(), false);
     }
 }

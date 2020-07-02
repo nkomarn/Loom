@@ -1,35 +1,35 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.ChatComponentText;
-import net.minecraft.server.EnumColor;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.TileEntitySign;
+import net.minecraft.block.SignBlock;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 
-public class CraftSign extends CraftBlockEntityState<TileEntitySign> implements Sign {
+public class CraftSign extends CraftBlockEntityState<SignBlockEntity> implements Sign {
 
     private String[] lines;
     private boolean editable;
 
     public CraftSign(final Block block) {
-        super(block, TileEntitySign.class);
+        super(block, SignBlockEntity.class);
     }
 
-    public CraftSign(final Material material, final TileEntitySign te) {
+    public CraftSign(final Material material, final SignBlockEntity te) {
         super(material, te);
     }
 
     @Override
-    public void load(TileEntitySign sign) {
+    public void load(SignBlockEntity sign) {
         super.load(sign);
 
-        lines = new String[sign.lines.length];
-        System.arraycopy(revertComponents(sign.lines), 0, lines, 0, lines.length);
-        editable = sign.isEditable;
+        lines = new String[sign.text.length];
+        System.arraycopy(revertComponents(sign.text), 0, lines, 0, lines.length);
+        editable = sign.editable;
     }
 
     @Override
@@ -59,38 +59,38 @@ public class CraftSign extends CraftBlockEntityState<TileEntitySign> implements 
 
     @Override
     public DyeColor getColor() {
-        return DyeColor.getByWoolData((byte) getSnapshot().getColor().getColorIndex());
+        return DyeColor.getByWoolData((byte) getSnapshot().getTextColor().getId());
     }
 
     @Override
     public void setColor(DyeColor color) {
-        getSnapshot().setColor(EnumColor.fromColorIndex(color.getWoolData()));
+        getSnapshot().setTextColor(net.minecraft.util.DyeColor.byId(color.getWoolData()));
     }
 
     @Override
-    public void applyTo(TileEntitySign sign) {
+    public void applyTo(SignBlockEntity sign) {
         super.applyTo(sign);
 
-        IChatBaseComponent[] newLines = sanitizeLines(lines);
-        System.arraycopy(newLines, 0, sign.lines, 0, 4);
-        sign.isEditable = editable;
+        Text[] newLines = sanitizeLines(lines);
+        System.arraycopy(newLines, 0, sign.text, 0, 4);
+        sign.editable = editable;
     }
 
-    public static IChatBaseComponent[] sanitizeLines(String[] lines) {
-        IChatBaseComponent[] components = new IChatBaseComponent[4];
+    public static Text[] sanitizeLines(String[] lines) {
+        Text[] components = new Text[4];
 
         for (int i = 0; i < 4; i++) {
             if (i < lines.length && lines[i] != null) {
                 components[i] = CraftChatMessage.fromString(lines[i])[0];
             } else {
-                components[i] = new ChatComponentText("");
+                components[i] = new LiteralText("");
             }
         }
 
         return components;
     }
 
-    public static String[] revertComponents(IChatBaseComponent[] components) {
+    public static String[] revertComponents(Text[] components) {
         String[] lines = new String[components.length];
         for (int i = 0; i < lines.length; i++) {
             lines[i] = revertComponent(components[i]);
@@ -98,7 +98,7 @@ public class CraftSign extends CraftBlockEntityState<TileEntitySign> implements 
         return lines;
     }
 
-    private static String revertComponent(IChatBaseComponent component) {
+    private static String revertComponent(Text component) {
         return CraftChatMessage.fromComponent(component);
     }
 }

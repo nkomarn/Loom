@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecartMobSpawner;
+import net.minecraft.entity.vehicle.SpawnerMinecartEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.SpawnerMinecart;
 
 final class CraftMinecartMobSpawner extends CraftMinecart implements SpawnerMinecart {
-    CraftMinecartMobSpawner(CraftServer server, EntityMinecartMobSpawner entity) {
+    CraftMinecartMobSpawner(CraftServer server, SpawnerMinecartEntity entity) {
         super(server, entity);
     }
 
@@ -18,5 +18,10 @@ final class CraftMinecartMobSpawner extends CraftMinecart implements SpawnerMine
     @Override
     public EntityType getType() {
         return EntityType.MINECART_MOB_SPAWNER;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

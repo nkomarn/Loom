@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
 import com.google.common.base.Preconditions;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.BlockPosition;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.TileEntity;
@@ -10,7 +12,7 @@ import org.bukkit.block.TileState;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.persistence.PersistentDataContainer;
 
-public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState implements TileState {
+public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockState implements TileState {
 
     private final Class<T> tileEntityClass;
     private final T tileEntity;
@@ -23,7 +25,7 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
 
         // get tile entity from block:
         CraftWorld world = (CraftWorld) this.getWorld();
-        this.tileEntity = tileEntityClass.cast(world.getHandle().getTileEntity(this.getPosition()));
+        this.tileEntity = tileEntityClass.cast(world.getHandle().getBlockEntity(this.getPosition()));
         Preconditions.checkState(this.tileEntity != null, "Tile is null, asynchronous access? " + block);
 
         // copy tile entity data:
@@ -47,8 +49,8 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
             return null;
         }
 
-        NBTTagCompound nbtTagCompound = tileEntity.save(new NBTTagCompound());
-        T snapshot = (T) TileEntity.create(getHandle(), nbtTagCompound);
+        CompoundTag nbtTagCompound = tileEntity.save(new CompoundTag());
+        T snapshot = (T) BlockEntity.create(getHandle(), nbtTagCompound);
 
         return snapshot;
     }
@@ -74,10 +76,10 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
     }
 
     // gets the current TileEntity from the world at this position
-    protected TileEntity getTileEntityFromWorld() {
+    protected BlockEntity getTileEntityFromWorld() {
         requirePlaced();
 
-        return ((CraftWorld) this.getWorld()).getHandle().getTileEntity(this.getPosition());
+        return ((CraftWorld) this.getWorld()).getHandle().getBlockEntity(this.getPosition());
     }
 
     // gets the NBT data of the TileEntity represented by this block state

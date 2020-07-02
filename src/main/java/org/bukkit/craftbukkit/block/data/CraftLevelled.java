@@ -1,10 +1,11 @@
 package org.bukkit.craftbukkit.block.data;
 
+import net.minecraft.state.property.IntProperty;
 import org.bukkit.block.data.Levelled;
 
 public abstract class CraftLevelled extends CraftBlockData implements Levelled {
 
-    private static final net.minecraft.server.BlockStateInteger LEVEL = getInteger("level");
+    private static final IntProperty LEVEL = getInteger("level");
 
     @Override
     public int getLevel() {

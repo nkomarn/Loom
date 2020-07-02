@@ -25,7 +25,7 @@ public class CraftEquipmentSlot {
         return enums[nms.ordinal()];
     }
 
-    public static EquipmentSlot getNMS(EquipmentSlot slot) {
+    public static EquipmentSlot getNMS(org.bukkit.inventory.EquipmentSlot slot) {
         return slots[slot.ordinal()];
     }
 }

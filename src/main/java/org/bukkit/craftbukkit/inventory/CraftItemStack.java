@@ -4,11 +4,10 @@ import static org.bukkit.craftbukkit.inventory.CraftMetaItem.*;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.EnchantmentManager;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
+import net.minecraft.nbt.ListTag;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -73,7 +72,7 @@ public final class CraftItemStack extends ItemStack {
     public static CraftItemStack asCraftCopy(ItemStack original) {
         if (original instanceof CraftItemStack) {
             CraftItemStack stack = (CraftItemStack) original;
-            return new CraftItemStack(stack.handle == null ? null : stack.handle.cloneItemStack());
+            return new CraftItemStack(stack.handle == null ? null : stack.handle.copy());
         }
         return new CraftItemStack(original);
     }
@@ -125,7 +124,7 @@ public final class CraftItemStack extends ItemStack {
         } else if (CraftMagicNumbers.getItem(type) == null) { // :(
             handle = null;
         } else if (handle == null) {
-            handle = new net.minecraft.server.ItemStack(CraftMagicNumbers.getItem(type), 1);
+            handle = new net.minecraft.item.ItemStack(CraftMagicNumbers.getItem(type), 1);
         } else {
             handle.setItem(CraftMagicNumbers.getItem(type));
             if (hasItemMeta()) {
@@ -182,34 +181,34 @@ public final class CraftItemStack extends ItemStack {
         if (!makeTag(handle)) {
             return;
         }
-        NBTTagList list = getEnchantmentList(handle);
+        ListTag list = getEnchantmentList(handle);
         if (list == null) {
-            list = new NBTTagList();
+            list = new ListTag();
             handle.getTag().set(ENCHANTMENTS.NBT, list);
         }
         int size = list.size();
 
         for (int i = 0; i < size; i++) {
-            NBTTagCompound tag = (NBTTagCompound) list.get(i);
+            CompoundTag tag = (CompoundTag) list.get(i);
             String id = tag.getString(ENCHANTMENTS_ID.NBT);
             if (id.equals(ench.getKey().toString())) {
-                tag.setShort(ENCHANTMENTS_LVL.NBT, (short) level);
+                tag.putShort(ENCHANTMENTS_LVL.NBT, (short) level);
                 return;
             }
         }
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setString(ENCHANTMENTS_ID.NBT, ench.getKey().toString());
-        tag.setShort(ENCHANTMENTS_LVL.NBT, (short) level);
+        CompoundTag tag = new CompoundTag();
+        tag.putString(ENCHANTMENTS_ID.NBT, ench.getKey().toString());
+        tag.putShort(ENCHANTMENTS_LVL.NBT, (short) level);
         list.add(tag);
     }
 
-    static boolean makeTag(net.minecraft.server.ItemStack item) {
+    static boolean makeTag(net.minecraft.item.ItemStack item) {
         if (item == null) {
             return false;
         }
 
         if (item.getTag() == null) {
-            item.setTag(new NBTTagCompound());
+            item.setTag(new CompoundTag());
         }
 
         return true;
@@ -226,14 +225,14 @@ public final class CraftItemStack extends ItemStack {
         if (handle == null) {
             return 0;
         }
-        return EnchantmentManager.getEnchantmentLevel(CraftEnchantment.getRaw(ench), handle);
+        return EnchantmentHelper.getLevel(CraftEnchantment.getRaw(ench), handle);
     }
 
     @Override
     public int removeEnchantment(Enchantment ench) {
         Validate.notNull(ench, "Cannot remove null enchantment");
 
-        NBTTagList list = getEnchantmentList(handle), listCopy;
+        ListTag list = getEnchantmentList(handle), listCopy;
         if (list == null) {
             return 0;
         }
@@ -242,7 +241,7 @@ public final class CraftItemStack extends ItemStack {
         int size = list.size();
 
         for (int i = 0; i < size; i++) {
-            NBTTagCompound enchantment = (NBTTagCompound) list.get(i);
+            CompoundTag enchantment = (CompoundTag) list.get(i);
             String id = enchantment.getString(ENCHANTMENTS_ID.NBT);
             if (id.equals(ench.getKey().toString())) {
                 index = i;
@@ -263,7 +262,7 @@ public final class CraftItemStack extends ItemStack {
         }
 
         // This is workaround for not having an index removal
-        listCopy = new NBTTagList();
+        listCopy = new ListTag();
         for (int i = 0; i < size; i++) {
             if (i != index) {
                 listCopy.add(list.get(i));
@@ -279,8 +278,8 @@ public final class CraftItemStack extends ItemStack {
         return getEnchantments(handle);
     }
 
-    static Map<Enchantment, Integer> getEnchantments(net.minecraft.server.ItemStack item) {
-        NBTTagList list = (item != null && item.hasEnchantments()) ? item.getEnchantments() : null;
+    static Map<Enchantment, Integer> getEnchantments(net.minecraft.item.ItemStack item) {
+        ListTag list = (item != null && item.hasEnchantments()) ? item.getEnchantments() : null;
 
         if (list == null || list.size() == 0) {
             return ImmutableMap.of();
@@ -289,8 +288,8 @@ public final class CraftItemStack extends ItemStack {
         ImmutableMap.Builder<Enchantment, Integer> result = ImmutableMap.builder();
 
         for (int i = 0; i < list.size(); i++) {
-            String id = ((NBTTagCompound) list.get(i)).getString(ENCHANTMENTS_ID.NBT);
-            int level = 0xffff & ((NBTTagCompound) list.get(i)).getShort(ENCHANTMENTS_LVL.NBT);
+            String id = ((CompoundTag) list.get(i)).getString(ENCHANTMENTS_ID.NBT);
+            int level = 0xffff & ((CompoundTag) list.get(i)).getShort(ENCHANTMENTS_LVL.NBT);
 
             Enchantment enchant = Enchantment.getByKey(CraftNamespacedKey.fromStringOrNull(id));
             if (enchant != null) {
@@ -301,7 +300,7 @@ public final class CraftItemStack extends ItemStack {
         return result.build();
     }
 
-    static NBTTagList getEnchantmentList(net.minecraft.server.ItemStack item) {
+    static ListTag getEnchantmentList(net.minecraft.item.ItemStack item) {
         return (item != null && item.hasEnchantments()) ? item.getEnchantments() : null;
     }
 
@@ -309,7 +308,7 @@ public final class CraftItemStack extends ItemStack {
     public CraftItemStack clone() {
         CraftItemStack itemStack = (CraftItemStack) super.clone();
         if (this.handle != null) {
-            itemStack.handle = this.handle.cloneItemStack();
+            itemStack.handle = this.handle.copy();
         }
         return itemStack;
     }
@@ -530,7 +529,7 @@ public final class CraftItemStack extends ItemStack {
         }
     }
 
-    static Material getType(net.minecraft.server.ItemStack item) {
+    static Material getType(net.minecraft.item.ItemStack item) {
         return item == null ? Material.AIR : CraftMagicNumbers.getMaterial(item.getItem());
     }
 
@@ -566,7 +565,7 @@ public final class CraftItemStack extends ItemStack {
         ((CraftMetaItem) itemMeta).applyToItem(tag);
         item.convertStack(((CraftMetaItem) itemMeta).getVersion());
         // SpigotCraft#463 this is required now by the Vanilla client, so mimic ItemStack constructor in ensuring it
-        if (item.getItem() != null && item.getItem().usesDurability()) {
+        if (item.getItem() != null && item.getItem().isDamageable()) {
             item.setDamage(item.getDamage());
         }
 

@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityArrow;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang.Validate;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftServer;
@@ -13,19 +13,19 @@ import org.bukkit.projectiles.ProjectileSource;
 
 public class CraftArrow extends AbstractProjectile implements AbstractArrow {
 
-    public CraftArrow(CraftServer server, EntityArrow entity) {
+    public CraftArrow(CraftServer server, PersistentProjectileEntity entity) {
         super(server, entity);
     }
 
     @Override
     public void setKnockbackStrength(int knockbackStrength) {
         Validate.isTrue(knockbackStrength >= 0, "Knockback cannot be negative");
-        getHandle().setKnockbackStrength(knockbackStrength);
+        getHandle().setPunch(knockbackStrength);
     }
 
     @Override
     public int getKnockbackStrength() {
-        return getHandle().knockbackStrength;
+        return getHandle().punch;
     }
 
     @Override
@@ -69,9 +69,9 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
     @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof Entity) {
-            getHandle().setShooter(((CraftEntity) shooter).getHandle());
+            getHandle().setOwner(((CraftEntity) shooter).getHandle());
         } else {
-            getHandle().setShooter(null);
+            getHandle().setOwner(null);
         }
         getHandle().projectileSource = shooter;
     }
@@ -87,19 +87,19 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
             return null;
         }
 
-        BlockPosition pos = getHandle().getChunkCoordinates();
+        BlockPos pos = getHandle().getBlockPos();
         return getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
     public PickupStatus getPickupStatus() {
-        return PickupStatus.values()[getHandle().fromPlayer.ordinal()];
+        return PickupStatus.values()[getHandle().pickupType.ordinal()];
     }
 
     @Override
     public void setPickupStatus(PickupStatus status) {
         Preconditions.checkNotNull(status, "status");
-        getHandle().fromPlayer = EntityArrow.PickupStatus.a(status.ordinal());
+        getHandle().pickupType = PersistentProjectileEntity.PickupPermission.fromOrdinal(status.ordinal());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
         super.setTicksLived(value);
 
         // Second field for EntityArrow
-        getHandle().despawnCounter = value;
+        getHandle().life = value;
     }
 
     @Override
@@ -121,8 +121,8 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
     }
 
     @Override
-    public EntityArrow getHandle() {
-        return (EntityArrow) entity;
+    public PersistentProjectileEntity getHandle() {
+        return (PersistentProjectileEntity) entity;
     }
 
     @Override
@@ -133,5 +133,10 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
     @Override
     public EntityType getType() {
         return EntityType.UNKNOWN;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

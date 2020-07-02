@@ -160,11 +160,11 @@ public class CraftEnchantment extends Enchantment {
         case 37:
             return "VANISHING_CURSE";
         default:
-            return "UNKNOWN_ENCHANT_" + IRegistry.ENCHANTMENT.a(target);
+            return "UNKNOWN_ENCHANT_" + net.minecraft.util.registry.Registry.ENCHANTMENT.a(target);
         }
     }
 
-    public static net.minecraft.server.Enchantment getRaw(Enchantment enchantment) {
+    public static net.minecraft.enchantment.Enchantment getRaw(Enchantment enchantment) {
         if (enchantment instanceof EnchantmentWrapper) {
             enchantment = ((EnchantmentWrapper) enchantment).getEnchantment();
         }

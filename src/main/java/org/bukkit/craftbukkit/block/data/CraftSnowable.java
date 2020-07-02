@@ -1,10 +1,11 @@
 package org.bukkit.craftbukkit.block.data;
 
+import net.minecraft.state.property.BooleanProperty;
 import org.bukkit.block.data.Snowable;
 
 public abstract class CraftSnowable extends CraftBlockData implements Snowable {
 
-    private static final net.minecraft.server.BlockStateBoolean SNOWY = getBoolean("snowy");
+    private static final BooleanProperty SNOWY = getBoolean("snowy");
 
     @Override
     public boolean isSnowy() {

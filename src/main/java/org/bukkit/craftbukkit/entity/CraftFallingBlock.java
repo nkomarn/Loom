@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFallingBlock;
+import net.minecraft.entity.FallingBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftServer;
@@ -10,13 +10,13 @@ import org.bukkit.entity.FallingBlock;
 
 public class CraftFallingBlock extends CraftEntity implements FallingBlock {
 
-    public CraftFallingBlock(CraftServer server, EntityFallingBlock entity) {
+    public CraftFallingBlock(CraftServer server, FallingBlockEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityFallingBlock getHandle() {
-        return (EntityFallingBlock) entity;
+    public FallingBlockEntity getHandle() {
+        return (FallingBlockEntity) entity;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class CraftFallingBlock extends CraftEntity implements FallingBlock {
 
     @Override
     public BlockData getBlockData() {
-        return CraftBlockData.fromData(getHandle().getBlock());
+        return CraftBlockData.fromData(getHandle().getBlockState());
     }
 
     @Override
@@ -64,6 +64,11 @@ public class CraftFallingBlock extends CraftEntity implements FallingBlock {
         super.setTicksLived(value);
 
         // Second field for EntityFallingBlock
-        getHandle().ticksLived = value;
+        getHandle().timeFalling = value;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

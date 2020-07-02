@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.entity;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.server.EntityTippedArrow;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.MobEffectList;
@@ -17,13 +19,13 @@ import org.bukkit.potion.PotionEffectType;
 
 public class CraftTippedArrow extends CraftArrow implements Arrow {
 
-    public CraftTippedArrow(CraftServer server, EntityTippedArrow entity) {
+    public CraftTippedArrow(CraftServer server, ArrowEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityTippedArrow getHandle() {
-        return (EntityTippedArrow) entity;
+    public ArrowEntity getHandle() {
+        return (ArrowEntity) entity;
     }
 
     @Override

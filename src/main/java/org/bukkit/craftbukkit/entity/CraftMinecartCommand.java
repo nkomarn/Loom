@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import java.util.Set;
-import net.minecraft.server.EntityMinecartCommandBlock;
+
+import net.minecraft.entity.vehicle.CommandBlockMinecartEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.CraftServer;
@@ -17,29 +18,29 @@ import org.bukkit.plugin.Plugin;
 public class CraftMinecartCommand extends CraftMinecart implements CommandMinecart {
     private final PermissibleBase perm = new PermissibleBase(this);
 
-    public CraftMinecartCommand(CraftServer server, EntityMinecartCommandBlock entity) {
+    public CraftMinecartCommand(CraftServer server, CommandBlockMinecartEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityMinecartCommandBlock getHandle() {
-        return (EntityMinecartCommandBlock) entity;
+    public CommandBlockMinecartEntity getHandle() {
+        return (CommandBlockMinecartEntity) entity;
     }
 
     @Override
     public String getCommand() {
-        return getHandle().getCommandBlock().getCommand();
+        return getHandle().getCommandExecutor().getCommand();
     }
 
     @Override
     public void setCommand(String command) {
-        getHandle().getCommandBlock().setCommand(command != null ? command : "");
-        getHandle().getDataWatcher().set(EntityMinecartCommandBlock.COMMAND, getHandle().getCommandBlock().getCommand());
+        getHandle().getCommandExecutor().setCommand(command != null ? command : "");
+        getHandle().getDataTracker().set(CommandBlockMinecartEntity.COMMAND, getHandle().getCommandExecutor().getCommand());
     }
 
     @Override
     public void setName(String name) {
-        getHandle().getCommandBlock().setName(CraftChatMessage.fromStringOrNull(name));
+        getHandle().getCommandExecutor().setCustomName(CraftChatMessage.fromStringOrNull(name));
     }
 
     @Override
@@ -62,7 +63,7 @@ public class CraftMinecartCommand extends CraftMinecart implements CommandMineca
 
     @Override
     public String getName() {
-        return CraftChatMessage.fromComponent(getHandle().getCommandBlock().getName());
+        return CraftChatMessage.fromComponent(getHandle().getCommandExecutor().getCustomName());
     }
 
     @Override
@@ -133,5 +134,10 @@ public class CraftMinecartCommand extends CraftMinecart implements CommandMineca
     @Override
     public Server getServer() {
         return Bukkit.getServer();
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

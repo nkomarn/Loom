@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecartAbstract;
+import net.minecraft.entity.vehicle.MinecartEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.RideableMinecart;
 
 public class CraftMinecartRideable extends CraftMinecart implements RideableMinecart {
-    public CraftMinecartRideable(CraftServer server, EntityMinecartAbstract entity) {
+    public CraftMinecartRideable(CraftServer server, MinecartEntity entity) {
         super(server, entity);
     }
 
@@ -18,5 +18,10 @@ public class CraftMinecartRideable extends CraftMinecart implements RideableMine
     @Override
     public EntityType getType() {
         return EntityType.MINECART;
+    }
+
+    @Override
+    public Spigot spigot() {
+        return null;
     }
 }

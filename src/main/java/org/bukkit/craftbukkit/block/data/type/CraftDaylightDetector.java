@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.BooleanProperty;
 import org.bukkit.block.data.type.DaylightDetector;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftDaylightDetector extends CraftBlockData implements DaylightDetector {
 
-    private static final net.minecraft.server.BlockStateBoolean INVERTED = getBoolean("inverted");
+    private static final BooleanProperty INVERTED = getBoolean("inverted");
 
     @Override
     public boolean isInverted() {

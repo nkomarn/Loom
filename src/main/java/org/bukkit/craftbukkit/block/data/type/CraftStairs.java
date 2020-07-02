@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.EnumProperty;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftStairs extends CraftBlockData implements Stairs {
 
-    private static final net.minecraft.server.BlockStateEnum<?> SHAPE = getEnum("shape");
+    private static final EnumProperty<?> SHAPE = getEnum("shape");
 
     @Override
     public Shape getShape() {

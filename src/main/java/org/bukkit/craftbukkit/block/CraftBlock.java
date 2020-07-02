@@ -477,7 +477,7 @@ public class CraftBlock implements Block {
         return Biome.valueOf(Registry.BIOME.getKey(base).getKey().toUpperCase(java.util.Locale.ENGLISH));
     }
 
-    public static Biome biomeToBiomeBase(Biome bio) {
+    public static net.minecraft.world.biome.Biome biomeToBiomeBase(Biome bio) {
         if (bio == null) {
             return null;
         }

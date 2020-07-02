@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.BooleanProperty;
 import org.bukkit.block.data.type.Tripwire;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public abstract class CraftTripwire extends CraftBlockData implements Tripwire {
 
-    private static final net.minecraft.server.BlockStateBoolean DISARMED = getBoolean("disarmed");
+    private static final BooleanProperty DISARMED = getBoolean("disarmed");
 
     @Override
     public boolean isDisarmed() {

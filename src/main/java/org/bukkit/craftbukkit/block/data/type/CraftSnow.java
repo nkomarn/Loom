@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.block.data.type;
 
+import net.minecraft.state.property.IntProperty;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public class CraftSnow extends CraftBlockData implements Snow {
 
-    private static final net.minecraft.server.BlockStateInteger LAYERS = getInteger("layers");
+    private static final IntProperty LAYERS = getInteger("layers");
 
     @Override
     public int getLayers() {
