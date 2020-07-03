@@ -3,9 +3,8 @@ package org.bukkit;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import com.google.common.collect.HashMultiset;
-import net.minecraft.server.EntityTypes;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.StatisticWrapper;
+import net.minecraft.stat.StatType;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.entity.EntityType;
 import org.bukkit.support.AbstractTestingBase;
@@ -31,18 +30,18 @@ public class StatisticsAndAchievementsTest extends AbstractTestingBase {
     @SuppressWarnings("unchecked")
     public void verifyStatisticMapping() throws Throwable {
         HashMultiset<Statistic> statistics = HashMultiset.create();
-        for (StatisticWrapper wrapper : IRegistry.STATS) {
+        for (StatType wrapper : Registry.STAT_TYPE) {
             for (Object child : wrapper.getRegistry()) {
-                net.minecraft.server.Statistic<?> statistic = wrapper.b(child);
+                net.minecraft.stat.Stat<?> statistic = wrapper.getOrCreateStat(child);
                 String message = String.format("org.bukkit.Statistic is missing: '%s'", statistic);
 
                 Statistic subject = CraftStatistic.getBukkitStatistic(statistic);
                 assertThat(message, subject, is(not(nullValue())));
 
-                if (wrapper.getRegistry() == IRegistry.BLOCK || wrapper.getRegistry() == IRegistry.ITEM) {
+                if (wrapper.getRegistry() == Registry.BLOCK || wrapper.getRegistry() == Registry.ITEM) {
                     assertNotNull("Material type map missing for " + wrapper.getRegistry().getKey(child), CraftStatistic.getMaterialFromStatistic(statistic));
-                } else if (wrapper.getRegistry() == IRegistry.ENTITY_TYPE) {
-                    assertNotNull("Entity type map missing for " + EntityTypes.getName((EntityTypes<?>) child), CraftStatistic.getEntityTypeFromStatistic((net.minecraft.server.Statistic<EntityTypes<?>>) statistic));
+                } else if (wrapper.getRegistry() == Registry.ENTITY_TYPE) {
+                    assertNotNull("Entity type map missing for " + net.minecraft.entity.EntityType.getId((net.minecraft.entity.EntityType<?>) child), CraftStatistic.getEntityTypeFromStatistic((net.minecraft.stat.Stat<net.minecraft.entity.EntityType<?>>) statistic));
                 }
 
                 statistics.add(subject);

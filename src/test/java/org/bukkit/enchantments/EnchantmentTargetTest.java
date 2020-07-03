@@ -1,8 +1,7 @@
 package org.bukkit.enchantments;
 
-import net.minecraft.server.EnchantmentSlotType;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.Item;
+import net.minecraft.item.Item;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.junit.Assert;
@@ -12,7 +11,7 @@ public class EnchantmentTargetTest {
 
     @Test
     public void test() {
-        for (EnchantmentSlotType nmsSlot : EnchantmentSlotType.values()) {
+        for (net.minecraft.enchantment.EnchantmentTarget nmsSlot : net.minecraft.enchantment.EnchantmentTarget.values()) {
             EnchantmentTarget bukkitTarget;
             switch (nmsSlot) {
                 case ARMOR_CHEST:
@@ -28,10 +27,10 @@ public class EnchantmentTargetTest {
 
             Assert.assertNotNull("No bukkit target for slot " + nmsSlot, bukkitTarget);
 
-            for (Item item : IRegistry.ITEM) {
+            for (Item item : Registry.ITEM) {
                 Material material = CraftMagicNumbers.getMaterial(item);
 
-                boolean nms = nmsSlot.canEnchant(item);
+                boolean nms = nmsSlot.isAcceptableItem(item);
                 boolean bukkit = bukkitTarget.includes(material);
 
                 Assert.assertEquals("Slot mismatch for " + bukkitTarget + " and " + material, nms, bukkit);

@@ -1,7 +1,6 @@
 package org.bukkit;
 
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.IRegistry;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.support.AbstractTestingBase;
@@ -19,8 +18,8 @@ public class BiomeTest extends AbstractTestingBase {
 
     @Test
     public void testMinecraftToBukkit() {
-        for (Object biome : IRegistry.BIOME) {
-            Assert.assertNotNull("No Bukkit mapping for " + biome, CraftBlock.biomeBaseToBiome((BiomeBase) biome));
+        for (net.minecraft.world.biome.Biome biome : Registry.BIOME) {
+            Assert.assertNotNull("No Bukkit mapping for " + biome, CraftBlock.biomeBaseToBiome(biome));
         }
     }
 }

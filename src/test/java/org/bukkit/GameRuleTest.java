@@ -1,7 +1,7 @@
 package org.bukkit;
 
 import java.util.Map;
-import net.minecraft.server.GameRules;
+import net.minecraft.world.GameRules;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,9 +21,9 @@ public class GameRuleTest {
 
     @Test
     public void testMinecraftRules() {
-        Map<String, GameRules.GameRuleKey<?>> minecraftRules = CraftWorld.getGameRulesNMS();
+        Map<String, GameRules.Key<?>> minecraftRules = CraftWorld.getGameRulesNMS();
 
-        for (Map.Entry<String, GameRules.GameRuleKey<?>> entry : minecraftRules.entrySet()) {
+        for (Map.Entry<String, GameRules.Key<?>> entry : minecraftRules.entrySet()) {
             GameRule<?> bukkitRule = GameRule.getByName(entry.getKey());
 
             Assert.assertNotNull("Missing " + entry.getKey(), bukkitRule);

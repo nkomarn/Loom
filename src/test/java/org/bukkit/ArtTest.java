@@ -8,9 +8,10 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.Paintings;
+
+import net.minecraft.entity.decoration.painting.PaintingMotive;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.craftbukkit.CraftArt;
 import org.bukkit.support.AbstractTestingBase;
 import org.junit.Test;
@@ -22,9 +23,9 @@ public class ArtTest extends AbstractTestingBase {
     public void verifyMapping() {
         List<Art> arts = Lists.newArrayList(Art.values());
 
-        for (MinecraftKey key : IRegistry.MOTIVE.keySet()) {
-            Paintings enumArt = IRegistry.MOTIVE.get(key);
-            String name = key.getKey();
+        for (Identifier key : Registry.PAINTING_MOTIVE.getIds()) {
+            PaintingMotive enumArt = Registry.PAINTING_MOTIVE.get(key);
+            String name = key.getPath();
             int width = enumArt.getWidth() / UNIT_MULTIPLIER;
             int height = enumArt.getHeight() / UNIT_MULTIPLIER;
 
@@ -45,9 +46,9 @@ public class ArtTest extends AbstractTestingBase {
 
     @Test
     public void testCraftArtToNotch() {
-        Map<Paintings, Art> cache = new HashMap<>();
+        Map<PaintingMotive, Art> cache = new HashMap<>();
         for (Art art : Art.values()) {
-            Paintings enumArt = CraftArt.BukkitToNotch(art);
+            PaintingMotive enumArt = CraftArt.BukkitToNotch(art);
             assertNotNull(art.name(), enumArt);
             assertThat(art.name(), cache.put(enumArt, art), is(nullValue()));
         }
@@ -55,8 +56,8 @@ public class ArtTest extends AbstractTestingBase {
 
     @Test
     public void testCraftArtToBukkit() {
-        Map<Art, Paintings> cache = new EnumMap(Art.class);
-        for (Paintings enumArt : IRegistry.MOTIVE) {
+        Map<Art, PaintingMotive> cache = new EnumMap(Art.class);
+        for (PaintingMotive enumArt : Registry.PAINTING_MOTIVE) {
             Art art = CraftArt.NotchToBukkit(enumArt);
             assertNotNull("Could not CraftArt.NotchToBukkit " + enumArt, art);
             assertThat("Duplicate artwork " + enumArt, cache.put(art, enumArt), is(nullValue()));

@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.attribute;
 
-import net.minecraft.server.AttributeBase;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.support.AbstractTestingBase;
 import org.junit.Assert;
@@ -12,7 +12,7 @@ public class AttributeTest extends AbstractTestingBase {
 
     @Test
     public void testToBukkit() {
-        for (MinecraftKey nms : IRegistry.ATTRIBUTE.keySet()) {
+        for (Identifier nms : Registry.ATTRIBUTE.getIds()) {
             Attribute bukkit = CraftAttributeMap.fromMinecraft(nms.toString());
 
             Assert.assertNotNull(nms.toString(), bukkit);
@@ -22,7 +22,7 @@ public class AttributeTest extends AbstractTestingBase {
     @Test
     public void testToNMS() {
         for (Attribute attribute : Attribute.values()) {
-            AttributeBase nms = CraftAttributeMap.toMinecraft(attribute);
+            EntityAttribute nms = CraftAttributeMap.toMinecraft(attribute);
 
             Assert.assertNotNull(attribute.name(), nms);
         }

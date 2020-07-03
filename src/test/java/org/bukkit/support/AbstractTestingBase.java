@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.Bootstrap;
 import net.minecraft.loot.LootManager;
 import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.resource.DefaultResourcePack;
@@ -43,7 +42,7 @@ public abstract class AbstractTestingBase {
         // Register vanilla pack
         resourceManager.a(MoreExecutors.directExecutor(), MoreExecutors.directExecutor(), Collections.singletonList(new DefaultResourcePack("minecraft")), CompletableFuture.completedFuture(Unit.INSTANCE)).join();
         // Bind tags
-        TAG_REGISTRY.bind();
+        TAG_REGISTRY.apply();
 
         DummyServer.setup();
         DummyEnchantments.setup();

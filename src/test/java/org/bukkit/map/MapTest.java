@@ -4,7 +4,8 @@ package org.bukkit.map;
 import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.MaterialMapColor;
+
+import net.minecraft.block.MaterialColor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class MapTest {
 
     @Test
     public void testColors() {
-        MaterialMapColor[] nmsColors = MaterialMapColor.a;
+        MaterialColor[] nmsColors = MaterialColor.COLORS;
         Color[] bukkitColors = MapPalette.colors;
 
         boolean fail = false;
@@ -24,7 +25,7 @@ public class MapTest {
             if (nmsColors[i] == null) {
                 break;
             }
-            int rgb = nmsColors[i].rgb;
+            int rgb = nmsColors[i].color;
 
             int r = (rgb >> 16) & 0xFF;
             int g = (rgb >> 8) & 0xFF;

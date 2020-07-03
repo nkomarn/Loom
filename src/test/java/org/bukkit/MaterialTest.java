@@ -6,9 +6,10 @@ import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.Item;
-import net.minecraft.server.MinecraftKey;
+
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.support.AbstractTestingBase;
 import org.junit.Test;
@@ -17,7 +18,7 @@ public class MaterialTest extends AbstractTestingBase {
 
     @Test
     public void verifyMapping() {
-        Map<MinecraftKey, Material> materials = Maps.newHashMap();
+        Map<Identifier, Material> materials = Maps.newHashMap();
         for (Material material : Material.values()) {
             if (INVALIDATED_MATERIALS.contains(material)) {
                 continue;
@@ -26,14 +27,14 @@ public class MaterialTest extends AbstractTestingBase {
             materials.put(CraftMagicNumbers.key(material), material);
         }
 
-        Iterator<Item> items = IRegistry.ITEM.iterator();
+        Iterator<Item> items = Registry.ITEM.iterator();
 
         while (items.hasNext()) {
             Item item = items.next();
             if (item == null) continue;
 
-            MinecraftKey id = IRegistry.ITEM.getKey(item);
-            String name = item.getName();
+            Identifier id = Registry.ITEM.getId(item);
+            String name = item.getTranslationKey();
 
             Material material = materials.remove(id);
 

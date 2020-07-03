@@ -23,8 +23,8 @@ public class StructureTypeTest extends AbstractTestingBase {
 
     @Test
     public void testMinecraftToBukkit() {
-        for (Identifier key : Registry.STRUCTURE_FEATURE.keySet()) {
-            Assert.assertNotNull(key.getKey(), structures.get(key.getKey()));
+        for (Identifier key : Registry.STRUCTURE_FEATURE.getIds()) {
+            Assert.assertNotNull(key.getPath(), structures.get(key.getPath()));
         }
     }
 
