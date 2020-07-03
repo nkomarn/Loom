@@ -46,7 +46,7 @@ public class CraftBlockState implements org.bukkit.block.BlockState {
         world = null;
         data = CraftMagicNumbers.getBlock(material).getDefaultState();
         chunk = null;
-        position = BlockPos.ZERO;
+        position = BlockPos.ORIGIN;
     }
 
     public static CraftBlockState getBlockState(WorldAccess world, BlockPos pos) {
@@ -54,7 +54,7 @@ public class CraftBlockState implements org.bukkit.block.BlockState {
     }
 
     public static CraftBlockState getBlockState(net.minecraft.world.World world, BlockPos pos, int flag) {
-        return new CraftBlockState(world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), flag);
+        return new CraftBlockState(world.getCraftWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), flag);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class CraftBlockState implements org.bukkit.block.BlockState {
         Preconditions.checkArgument(type.isBlock(), "Material must be a block!");
 
         if (this.getType() != type) {
-            this.data = CraftMagicNumbers.getBlock(type).getBlockData();
+            this.data = CraftMagicNumbers.getBlock(type).getDefaultState();
         }
     }
 
@@ -187,7 +187,7 @@ public class CraftBlockState implements org.bukkit.block.BlockState {
 
         BlockState newBlock = this.data;
         block.setTypeAndData(newBlock, applyPhysics);
-        world.getHandle().notify(
+        world.getHandle().updateListeners(
                 position,
                 block.getNMS(),
                 newBlock,
@@ -196,7 +196,7 @@ public class CraftBlockState implements org.bukkit.block.BlockState {
 
         // Update levers etc
         if (false && applyPhysics && getData() instanceof Attachable) { // Call does not map to new API
-            world.getHandle().applyPhysics(position.shift(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());
+            //world.getHandle().applyPhysics(position.shift(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());
         }
 
         return true;

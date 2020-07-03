@@ -41,7 +41,7 @@ public class CraftFurnace<T extends FurnaceBlockEntity> extends CraftContainer<T
     public void setBurnTime(short burnTime) {
         this.getSnapshot().burnTime = burnTime;
         // SPIGOT-844: Allow lighting and relighting using this API
-        this.data = this.data.put(FurnaceBlock.LIT, burnTime > 0);
+        this.data = this.data.with(FurnaceBlock.LIT, burnTime > 0);
     }
 
     @Override

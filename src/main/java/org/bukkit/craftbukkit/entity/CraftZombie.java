@@ -68,16 +68,16 @@ public class CraftZombie extends CraftMonster implements Zombie {
     public int getConversionTime() {
         Preconditions.checkState(isConverting(), "Entity not converting");
 
-        return getHandle().drownedConversionTime;
+        return getHandle().ticksUntilWaterConversion; // TODO make sure this is the correct variable for time
     }
 
     @Override
     public void setConversionTime(int time) {
         if (time < 0) {
-            getHandle().drownedConversionTime = -1;
-            getHandle().getDataWatcher().set(EntityZombie.DROWN_CONVERTING, false);
+            getHandle().ticksUntilWaterConversion = -1;
+            getHandle().getDataTracker().set(ZombieEntity.CONVERTING_IN_WATER, false);
         } else {
-            getHandle().startDrownedConversion(time);
+            getHandle().setTicksUntilWaterConversion(time);
         }
     }
 }

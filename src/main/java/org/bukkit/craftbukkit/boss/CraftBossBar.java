@@ -121,7 +121,7 @@ public class CraftBossBar implements org.bukkit.boss.BossBar {
 
     @Override
     public void setStyle(BarStyle style) {
-        handle.setOverlay(convertStyle(style);)
+        handle.setOverlay(convertStyle(style));
     }
 
     @Override

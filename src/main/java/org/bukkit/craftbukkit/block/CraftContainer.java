@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
 import net.minecraft.block.entity.LockableContainerBlockEntity;
+import net.minecraft.inventory.ContainerLock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -18,17 +19,17 @@ public abstract class CraftContainer<T extends LockableContainerBlockEntity> ext
 
     @Override
     public boolean isLocked() {
-        return !this.getSnapshot().chestLock.key.isEmpty();
+        return !this.getSnapshot().lock.key.isEmpty();
     }
 
     @Override
     public String getLock() {
-        return this.getSnapshot().chestLock.key;
+        return this.getSnapshot().lock.key;
     }
 
     @Override
     public void setLock(String key) {
-        this.getSnapshot().chestLock = (key == null) ? ChestLock.a : new ChestLock(key);
+        this.getSnapshot().lock = (key == null) ? ContainerLock.EMPTY : new ContainerLock(key);
     }
 
     @Override

@@ -1,19 +1,19 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityBrewingStand;
+import net.minecraft.block.entity.BrewingStandBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.craftbukkit.inventory.CraftInventoryBrewer;
 import org.bukkit.inventory.BrewerInventory;
 
-public class CraftBrewingStand extends CraftContainer<TileEntityBrewingStand> implements BrewingStand {
+public class CraftBrewingStand extends CraftContainer<BrewingStandBlockEntity> implements BrewingStand {
 
     public CraftBrewingStand(Block block) {
-        super(block, TileEntityBrewingStand.class);
+        super(block, BrewingStandBlockEntity.class);
     }
 
-    public CraftBrewingStand(final Material material, final TileEntityBrewingStand te) {
+    public CraftBrewingStand(final Material material, final BrewingStandBlockEntity te) {
         super(material, te);
     }
 
@@ -43,11 +43,11 @@ public class CraftBrewingStand extends CraftContainer<TileEntityBrewingStand> im
 
     @Override
     public int getFuelLevel() {
-        return this.getSnapshot().fuelLevel;
+        return this.getSnapshot().fuel;
     }
 
     @Override
     public void setFuelLevel(int level) {
-        this.getSnapshot().fuelLevel = level;
+        this.getSnapshot().fuel = level;
     }
 }

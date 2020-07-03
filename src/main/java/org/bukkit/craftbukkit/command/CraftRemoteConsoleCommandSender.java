@@ -39,4 +39,9 @@ public class CraftRemoteConsoleCommandSender extends ServerCommandSender impleme
     public void setOp(boolean value) {
         throw new UnsupportedOperationException("Cannot change operator status of remote controller.");
     }
+
+    @Override
+    public Spigot spigot() {
+        return null;
+    }
 }

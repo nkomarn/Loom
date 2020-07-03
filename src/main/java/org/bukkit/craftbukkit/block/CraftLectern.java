@@ -1,31 +1,31 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockLectern;
-import net.minecraft.server.TileEntityLectern;
+import net.minecraft.block.LecternBlock;
+import net.minecraft.block.entity.LecternBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.craftbukkit.inventory.CraftInventoryLectern;
 import org.bukkit.inventory.Inventory;
 
-public class CraftLectern extends CraftBlockEntityState<TileEntityLectern> implements Lectern {
+public class CraftLectern extends CraftBlockEntityState<LecternBlockEntity> implements Lectern {
 
     public CraftLectern(Block block) {
-        super(block, TileEntityLectern.class);
+        super(block, LecternBlockEntity.class);
     }
 
-    public CraftLectern(Material material, TileEntityLectern te) {
+    public CraftLectern(Material material, LecternBlockEntity te) {
         super(material, te);
     }
 
     @Override
     public int getPage() {
-        return getSnapshot().getPage();
+        return getSnapshot().getCurrentPage();
     }
 
     @Override
     public void setPage(int page) {
-        getSnapshot().setPage(page);
+        getSnapshot().setCurrentPage(page);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CraftLectern extends CraftBlockEntityState<TileEntityLectern> imple
         boolean result = super.update(force, applyPhysics);
 
         if (result && this.isPlaced() && this.getType() == Material.LECTERN) {
-            BlockLectern.a(this.world.getHandle(), this.getPosition(), this.getHandle());
+            LecternBlock.setPowered(this.world.getHandle(), this.getPosition(), this.getHandle());
         }
 
         return result;

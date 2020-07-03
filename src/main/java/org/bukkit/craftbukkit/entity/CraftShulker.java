@@ -29,11 +29,11 @@ public class CraftShulker extends CraftGolem implements Shulker {
 
     @Override
     public DyeColor getColor() {
-        return DyeColor.getByWoolData(getHandle().getDataWatcher().get(EntityShulker.COLOR));
+        return DyeColor.getByWoolData(getHandle().getDataTracker().get(ShulkerEntity.COLOR));
     }
 
     @Override
     public void setColor(DyeColor color) {
-        getHandle().getDataWatcher().set(EntityShulker.COLOR, (color == null) ? 16 : color.getWoolData());
+        getHandle().getDataTracker().set(ShulkerEntity.COLOR, (color == null) ? 16 : color.getWoolData());
     }
 }

@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Item;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.Effect;
@@ -25,7 +25,7 @@ public class CraftEffect {
             break;
         case RECORD_PLAY:
             Validate.isTrue(data == Material.AIR || ((Material) data).isRecord(), "Invalid record type!");
-            datavalue = Item.getId(CraftMagicNumbers.getItem((Material) data));
+            datavalue = Item.getRawId(CraftMagicNumbers.getItem((Material) data));
             break;
         case SMOKE:
             switch ((BlockFace) data) { // TODO: Verify (Where did these values come from...?)
@@ -63,7 +63,7 @@ public class CraftEffect {
             break;
         case STEP_SOUND:
             Validate.isTrue(((Material) data).isBlock(), "Material is not a block!");
-            datavalue = Block.getCombinedId(CraftMagicNumbers.getBlock((Material) data).getBlockData());
+            datavalue = Block.getRawIdFromState(CraftMagicNumbers.getBlock((Material) data).getDefaultState());
             break;
         default:
             datavalue = 0;

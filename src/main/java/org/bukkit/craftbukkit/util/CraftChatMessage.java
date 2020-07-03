@@ -30,7 +30,7 @@ public final class CraftChatMessage {
     }
 
     public static ChatColor getColor(Formatting format) {
-        return ChatColor.getByChar(format.character);
+        return ChatColor.getByChar(format.code);
     }
 
     private static final class StringMessage {
@@ -82,7 +82,7 @@ public final class CraftChatMessage {
                         hex.append(c);
 
                         if (hex.length() == 7) {
-                            modifier = modifier.withColor(ChatHexColor.a(hex.toString()));
+                            modifier = modifier.withColor(TextColor.parse(hex.toString()));
                             hex = null;
                         }
                     } else if (format.isModifier() && format != Formatting.RESET) {
@@ -185,14 +185,14 @@ public final class CraftChatMessage {
         boolean hadFormat = false;
         for (Text c : component) {
             Style modi = c.getStyle();
-            ChatHexColor color = modi.getColor();
-            if (!c.getText().isEmpty() || color != null) {
+            TextColor color = modi.getColor();
+            if (!c.getSiblings().isEmpty() || color != null) {
                 if (color != null) {
-                    if (color.format != null) {
-                        out.append(color.format);
+                    if (color.formatting != null) {
+                        out.append(color.formatting);
                     } else {
                         out.append(ChatColor.COLOR_CHAR).append("x");
-                        for (char magic : color.b().substring(1).toCharArray()) {
+                        for (char magic : color.getName().substring(1).toCharArray()) {
                             out.append(ChatColor.COLOR_CHAR).append(magic);
                         }
                     }
@@ -218,11 +218,11 @@ public final class CraftChatMessage {
                 out.append(Formatting.STRIKETHROUGH);
                 hadFormat = true;
             }
-            if (modi.isRandom()) {
+            if (modi.isObfuscated()) {
                 out.append(Formatting.OBFUSCATED);
                 hadFormat = true;
             }
-            c.b((x) -> {
+            c.visitSelf((x) -> {
                 out.append(x);
                 return Optional.empty();
             });
@@ -273,7 +273,7 @@ public final class CraftChatMessage {
                 extras.addAll(extrasOld);
 
                 for (Text c : extras) {
-                    text.addSibling(c);
+                    text.append(c);
                 }
             }
         }

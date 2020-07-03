@@ -3,7 +3,10 @@ package org.bukkit.craftbukkit.entity;
 import com.google.common.base.Preconditions;
 import java.util.Locale;
 
+import net.minecraft.block.BedBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.village.VillagerProfession;
 import org.apache.commons.lang.Validate;
@@ -86,13 +89,13 @@ public class CraftVillager extends CraftAbstractVillager implements Villager {
         Preconditions.checkArgument(location.getWorld() != null, "Location needs to be in a world");
         Preconditions.checkArgument(location.getWorld().equals(getWorld()), "Cannot sleep across worlds");
 
-        BlockPosition position = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        IBlockData iblockdata = getHandle().world.getType(position);
-        if (!(iblockdata.getBlock() instanceof BlockBed)) {
+        BlockPos position = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        BlockState iblockdata = getHandle().world.getBlockState(position);
+        if (!(iblockdata.getBlock() instanceof BedBlock)) {
             return false;
         }
 
-        getHandle().entitySleep(position);
+        getHandle().sleep(position);
         return true;
     }
 
@@ -100,14 +103,14 @@ public class CraftVillager extends CraftAbstractVillager implements Villager {
     public void wakeup() {
         Preconditions.checkState(isSleeping(), "Cannot wakeup if not sleeping");
 
-        getHandle().entityWakeup();
+        getHandle().wakeUp();
     }
 
     public static Profession nmsToBukkitProfession(VillagerProfession nms) {
-        return Profession.valueOf(Registry.VILLAGER_PROFESSION.getKey(nms).getKey().toUpperCase(Locale.ROOT));
+        return Profession.valueOf(Registry.VILLAGER_PROFESSION.getId(nms).getPath().toUpperCase(Locale.ROOT));
     }
 
     public static VillagerProfession bukkitToNmsProfession(Profession bukkit) {
-        return IRegistry.VILLAGER_PROFESSION.get(CraftNamespacedKey.toMinecraft(bukkit.getKey()));
+        return Registry.VILLAGER_PROFESSION.get(CraftNamespacedKey.toMinecraft(bukkit.getKey()));
     }
 }

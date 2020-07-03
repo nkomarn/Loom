@@ -1,17 +1,21 @@
 package org.bukkit.craftbukkit.generator;
 
 import com.google.common.base.Preconditions;
+
+import java.util.List;
 import java.util.Random;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.ChunkRegion;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeArray;
@@ -65,7 +69,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     public CustomChunkGenerator(ServerWorld world, net.minecraft.world.gen.chunk.ChunkGenerator delegate, ChunkGenerator generator) {
-        super(delegate.getBiomeSource(), delegate.getSettings());
+        super(delegate.getBiomeSource(), delegate.getConfig());
 
         this.world = world;
         this.delegate = delegate;
@@ -93,7 +97,12 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public void buildBase(ChunkRegion chunkregion, Chunk chunk) {
+    public int getHeight(int i, int j, Heightmap.Type arg) {
+        return getHeight(i, j, arg);
+    }
+
+    @Override
+    public void buildSurface(ChunkRegion chunkregion, Chunk chunk) {
         // Call the bukkit ChunkGenerator before structure generation so correct biome information is available.
         int x = chunk.getPos().x;
         int z = chunk.getPos().z;
@@ -129,7 +138,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
         }
 
         // Set biome grid
-        ((ProtoChunk) chunk).a(biomegrid.biome);
+        ((ProtoChunk) chunk).setBiomes(biomegrid.biome);
 
         if (craftData.getTiles() != null) {
             for (BlockPos pos : craftData.getTiles()) {
@@ -163,31 +172,31 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public void buildNoise(WorldAccess worldaccess, StructureManager structuremanager, Chunk chunk) {
+    public void populateNoise(WorldAccess arg, StructureAccessor arg2, Chunk arg3) {
         // Disable vanilla generation
     }
 
     @Override
-    public int getBaseHeight(int i, int j, HeightMap.Type heightmap_type) {
-        return delegate.getBaseHeight(i, j, heightmap_type);
+    public int getHeightOnGround(int i, int j, Heightmap.Type heightmap_type) {
+        return delegate.getHeightOnGround(i, j, heightmap_type);
     }
 
     @Override
-    public List<BiomeBase.BiomeMeta> getMobsFor(BiomeBase biomebase, StructureManager structuremanager, EnumCreatureType enumcreaturetype, BlockPosition blockposition) {
-        return delegate.getMobsFor(biomebase, structuremanager, enumcreaturetype, blockposition);
+    public List<net.minecraft.world.biome.Biome.SpawnEntry> getEntitySpawnList(net.minecraft.world.biome.Biome biomebase, StructureAccessor structuremanager, SpawnGroup enumcreaturetype, BlockPos blockposition) {
+        return delegate.getEntitySpawnList(biomebase, structuremanager, enumcreaturetype, blockposition);
     }
 
     @Override
-    public void addDecorations(RegionLimitedWorldAccess regionlimitedworldaccess, StructureManager structuremanager) {
+    public void generateFeatures(ChunkRegion regionlimitedworldaccess, StructureAccessor structuremanager) {
         if (generator.shouldGenerateDecorations()) {
-            delegate.addDecorations(regionlimitedworldaccess, structuremanager);
+            delegate.generateFeatures(regionlimitedworldaccess, structuremanager);
         }
     }
 
     @Override
-    public void addMobs(RegionLimitedWorldAccess regionlimitedworldaccess) {
+    public void populateEntities(ChunkRegion regionlimitedworldaccess) {
         if (generator.shouldGenerateMobs()) {
-            delegate.addMobs(regionlimitedworldaccess);
+            delegate.populateEntities(regionlimitedworldaccess);
         }
     }
 
@@ -197,8 +206,8 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public int getGenerationDepth() {
-        return delegate.getGenerationDepth();
+    public int getMaxY() {
+        return delegate.getMaxY(); // TODO this is likely wrong
     }
 
     @Override

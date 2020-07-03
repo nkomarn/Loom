@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.server.EntityFox;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.EntityType;
@@ -41,7 +40,7 @@ public class CraftFox extends CraftAnimals implements Fox {
     public void setFoxType(Type type) {
         Preconditions.checkArgument(type != null, "type");
 
-        getHandle().setFoxType(FoxEntity.Type.values()[type.ordinal()]);
+        getHandle().setType(FoxEntity.Type.values()[type.ordinal()]);
     }
 
     @Override
@@ -71,7 +70,7 @@ public class CraftFox extends CraftAnimals implements Fox {
 
     @Override
     public AnimalTamer getFirstTrustedPlayer() {
-        UUID uuid = getHandle().getDataTracker().get(FoxEntity.FIRST_TRUSTED_PLAYER).orElse(null);
+        UUID uuid = getHandle().getDataTracker().get(FoxEntity.OWNER).orElse(null);
         if (uuid == null) {
             return null;
         }
@@ -86,16 +85,16 @@ public class CraftFox extends CraftAnimals implements Fox {
 
     @Override
     public void setFirstTrustedPlayer(AnimalTamer player) {
-        if (player == null && getHandle().getDataTracker().get(FoxEntity.SECOND_TRUSTED_PLAYER).isPresent()) {
+        if (player == null && getHandle().getDataTracker().get(FoxEntity.OTHER_TRUSTED).isPresent()) {
             throw new IllegalStateException("Must remove second trusted player first");
         }
 
-        getHandle().getDataTracker().set(FoxEntity.FIRST_TRUSTED_PLAYER, player == null ? Optional.empty() : Optional.of(player.getUniqueId()));
+        getHandle().getDataTracker().set(FoxEntity.OWNER, player == null ? Optional.empty() : Optional.of(player.getUniqueId()));
     }
 
     @Override
     public AnimalTamer getSecondTrustedPlayer() {
-        UUID uuid = getHandle().getDataTracker().get(FoxEntity.SECOND_TRUSTED_PLAYER).orElse(null);
+        UUID uuid = getHandle().getDataTracker().get(FoxEntity.OTHER_TRUSTED).orElse(null);
         if (uuid == null) {
             return null;
         }
@@ -110,10 +109,10 @@ public class CraftFox extends CraftAnimals implements Fox {
 
     @Override
     public void setSecondTrustedPlayer(AnimalTamer player) {
-        if (player != null && !getHandle().getDataTracker().get(FoxEntity.FIRST_TRUSTED_PLAYER).isPresent()) {
+        if (player != null && !getHandle().getDataTracker().get(FoxEntity.OWNER).isPresent()) {
             throw new IllegalStateException("Must add first trusted player first");
         }
 
-        getHandle().getDataTracker().set(FoxEntity.SECOND_TRUSTED_PLAYER, player == null ? Optional.empty() : Optional.of(player.getUniqueId()));
+        getHandle().getDataTracker().set(FoxEntity.OTHER_TRUSTED, player == null ? Optional.empty() : Optional.of(player.getUniqueId()));
     }
 }

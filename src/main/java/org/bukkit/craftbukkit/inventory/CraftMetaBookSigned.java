@@ -2,11 +2,11 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-import net.minecraft.server.NBTTagString;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.text.Text;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
@@ -20,22 +20,22 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
         super(meta);
     }
 
-    CraftMetaBookSigned(NBTTagCompound tag) {
+    CraftMetaBookSigned(CompoundTag tag) {
         super(tag, false);
 
         boolean resolved = true;
-        if (tag.hasKey(RESOLVED.NBT)) {
+        if (tag.contains(RESOLVED.NBT)) {
             resolved = tag.getBoolean(RESOLVED.NBT);
         }
 
-        if (tag.hasKey(BOOK_PAGES.NBT)) {
-            NBTTagList pages = tag.getList(BOOK_PAGES.NBT, CraftMagicNumbers.NBT.TAG_STRING);
+        if (tag.contains(BOOK_PAGES.NBT)) {
+            ListTag pages = tag.getList(BOOK_PAGES.NBT, CraftMagicNumbers.NBT.TAG_STRING);
 
             for (int i = 0; i < Math.min(pages.size(), MAX_PAGES); i++) {
                 String page = pages.getString(i);
                 if (resolved) {
                     try {
-                        this.pages.add(ChatSerializer.a(page));
+                        this.pages.add(Text.Serializer.fromJson(page));
                         continue;
                     } catch (Exception e) {
                         // Ignore and treat as an old book
@@ -51,30 +51,30 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
     }
 
     @Override
-    void applyToItem(NBTTagCompound itemData) {
+    void applyToItem(CompoundTag itemData) {
         super.applyToItem(itemData, false);
 
         if (hasTitle()) {
-            itemData.setString(BOOK_TITLE.NBT, this.title);
+            itemData.putString(BOOK_TITLE.NBT, this.title);
         }
 
         if (hasAuthor()) {
-            itemData.setString(BOOK_AUTHOR.NBT, this.author);
+            itemData.putString(BOOK_AUTHOR.NBT, this.author);
         }
 
         if (hasPages()) {
-            NBTTagList list = new NBTTagList();
-            for (IChatBaseComponent page : pages) {
-                list.add(NBTTagString.a(
-                    ChatSerializer.a(page)
+            ListTag list = new ListTag();
+            for (Text page : pages) {
+                list.add(StringTag.of(
+                    Text.Serializer.toJson(page)
                 ));
             }
-            itemData.set(BOOK_PAGES.NBT, list);
+            itemData.put(BOOK_PAGES.NBT, list);
         }
-        itemData.setBoolean(RESOLVED.NBT, true);
+        itemData.putBoolean(RESOLVED.NBT, true);
 
         if (generation != null) {
-            itemData.setInt(GENERATION.NBT, generation);
+            itemData.putInt(GENERATION.NBT, generation);
         }
     }
 

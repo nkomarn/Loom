@@ -1,17 +1,17 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityComparator;
+import net.minecraft.block.entity.ComparatorBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Comparator;
 
-public class CraftComparator extends CraftBlockEntityState<TileEntityComparator> implements Comparator {
+public class CraftComparator extends CraftBlockEntityState<ComparatorBlockEntity> implements Comparator {
 
     public CraftComparator(final Block block) {
-        super(block, TileEntityComparator.class);
+        super(block, ComparatorBlockEntity.class);
     }
 
-    public CraftComparator(final Material material, final TileEntityComparator te) {
+    public CraftComparator(final Material material, final ComparatorBlockEntity te) {
         super(material, te);
     }
 }

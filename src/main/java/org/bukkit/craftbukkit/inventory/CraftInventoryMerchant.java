@@ -18,7 +18,7 @@ public class CraftInventoryMerchant extends CraftInventory implements MerchantIn
 
     @Override
     public int getSelectedRecipeIndex() {
-        return getInventory().selectedIndex;
+        return getInventory().recipeIndex;
     }
 
     @Override

@@ -7,11 +7,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Predicate;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.Heightmap;
+import net.minecraft.world.LightType;
 import net.minecraft.world.biome.source.BiomeArray;
+import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.PalettedContainer;
@@ -250,20 +256,20 @@ public class CraftChunk implements Chunk {
                 CompoundTag data = new CompoundTag();
                 cs[i].getContainer().write(data, "Palette", "BlockStates");
 
-                PalettedContainer blockids = new DataPaletteBlock<>(ChunkSection.GLOBAL_PALETTE, net.minecraft.server.Block.REGISTRY_ID, GameProfileSerializer::c, GameProfileSerializer::a, Blocks.AIR.getBlockData()); // TODO: snapshot whole ChunkSection
-                blockids.a(data.getList("Palette", CraftMagicNumbers.NBT.TAG_COMPOUND), data.getLongArray("BlockStates"));
+                PalettedContainer blockids = new PalettedContainer<>(ChunkSection.palette, net.minecraft.block.Block.STATE_IDS, NbtHelper::toBlockState, NbtHelper::fromBlockState, Blocks.AIR.getDefaultState()); // TODO: snapshot whole ChunkSection
+                blockids.read(data.getList("Palette", CraftMagicNumbers.NBT.TAG_COMPOUND), data.getLongArray("BlockStates"));
 
                 sectionBlockIDs[i] = blockids;
 
                 LightingProvider lightengine = chunk.getWorld().getChunkManager().getLightingProvider();
-                ChunkNibbleArray skyLightArray = lightengine.a(EnumSkyBlock.SKY).a(SectionPosition.a(x, i, z));
+                ChunkNibbleArray skyLightArray = lightengine.get(LightType.SKY).getLightArray(ChunkSectionPos.from(x, i, z));
                 if (skyLightArray == null) {
                     sectionSkyLights[i] = emptyLight;
                 } else {
                     sectionSkyLights[i] = new byte[2048];
-                    System.arraycopy(skyLightArray.asBytes(), 0, sectionSkyLights[i], 0, 2048);
+                    System.arraycopy(skyLightArray.asByteArray(), 0, sectionSkyLights[i], 0, 2048);
                 }
-                ChunkNibbleArray emitLightArray = lightengine.a(EnumSkyBlock.BLOCK).a(SectionPosition.a(x, i, z));
+                ChunkNibbleArray emitLightArray = lightengine.get(LightType.BLOCK).getLightArray(ChunkSectionPos.from(x, i, z));
                 if (emitLightArray == null) {
                     sectionEmitLights[i] = emptyLight;
                 } else {
@@ -277,7 +283,7 @@ public class CraftChunk implements Chunk {
 
         if (includeMaxBlockY) {
             hmap = new Heightmap(null, Heightmap.Type.MOTION_BLOCKING);
-            hmap.a(chunk.heightMap.get(Heightmap.Type.MOTION_BLOCKING).a());
+            hmap.setTo(chunk.heightmaps.get(Heightmap.Type.MOTION_BLOCKING).asLongArray());
         }
 
         BiomeArray biome = null;
@@ -291,16 +297,16 @@ public class CraftChunk implements Chunk {
     }
 
     public static ChunkSnapshot getEmptyChunkSnapshot(int x, int z, CraftWorld world, boolean includeBiome, boolean includeBiomeTempRain) {
-        BiomeStorage biome = null;
+        BiomeArray biome = null;
 
         if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager wcm = world.getHandle().getChunkProvider().getChunkGenerator().getWorldChunkManager();
-            biome = new BiomeStorage(new ChunkCoordIntPair(x, z), wcm);
+            BiomeSource wcm = world.getHandle().getChunkManager().getChunkGenerator().getBiomeSource();
+            biome = new BiomeArray(new ChunkPos(x, z), wcm);
         }
 
         /* Fill with empty data */
         int hSection = world.getMaxHeight() >> 4;
-        DataPaletteBlock[] blockIDs = new DataPaletteBlock[hSection];
+        PalettedContainer[] blockIDs = new PalettedContainer[hSection];
         byte[][] skyLight = new byte[hSection][];
         byte[][] emitLight = new byte[hSection][];
         boolean[] empty = new boolean[hSection];
@@ -312,7 +318,7 @@ public class CraftChunk implements Chunk {
             empty[i] = true;
         }
 
-        return new CraftChunkSnapshot(x, z, world.getName(), world.getFullTime(), blockIDs, skyLight, emitLight, empty, new HeightMap(null, HeightMap.Type.MOTION_BLOCKING), biome);
+        return new CraftChunkSnapshot(x, z, world.getName(), world.getFullTime(), blockIDs, skyLight, emitLight, empty, new Heightmap(null, Heightmap.Type.MOTION_BLOCKING), biome);
     }
 
     static void validateChunkCoordinates(int x, int y, int z) {

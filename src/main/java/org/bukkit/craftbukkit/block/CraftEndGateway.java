@@ -1,37 +1,38 @@
 package org.bukkit.craftbukkit.block;
 
 import java.util.Objects;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.TileEntityEndGateway;
+
+import net.minecraft.block.entity.EndGatewayBlockEntity;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.EndGateway;
 
-public class CraftEndGateway extends CraftBlockEntityState<TileEntityEndGateway> implements EndGateway {
+public class CraftEndGateway extends CraftBlockEntityState<EndGatewayBlockEntity> implements EndGateway {
 
     public CraftEndGateway(Block block) {
-        super(block, TileEntityEndGateway.class);
+        super(block, EndGatewayBlockEntity.class);
     }
 
-    public CraftEndGateway(final Material material, TileEntityEndGateway te) {
+    public CraftEndGateway(final Material material, EndGatewayBlockEntity te) {
         super(material, te);
     }
 
     @Override
     public Location getExitLocation() {
-        BlockPosition pos = this.getSnapshot().exitPortal;
+        BlockPos pos = this.getSnapshot().exitPortalPos;
         return pos == null ? null : new Location(this.isPlaced() ? this.getWorld() : null, pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
     public void setExitLocation(Location location) {
         if (location == null) {
-            this.getSnapshot().exitPortal = null;
+            this.getSnapshot().exitPortalPos = null;
         } else if (!Objects.equals(location.getWorld(), this.isPlaced() ? this.getWorld() : null)) {
             throw new IllegalArgumentException("Cannot set exit location to different world");
         } else {
-            this.getSnapshot().exitPortal = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            this.getSnapshot().exitPortalPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         }
     }
 
@@ -56,11 +57,11 @@ public class CraftEndGateway extends CraftBlockEntityState<TileEntityEndGateway>
     }
 
     @Override
-    public void applyTo(TileEntityEndGateway endGateway) {
+    public void applyTo(EndGatewayBlockEntity endGateway) {
         super.applyTo(endGateway);
 
-        if (this.getSnapshot().exitPortal == null) {
-            endGateway.exitPortal = null;
+        if (this.getSnapshot().exitPortalPos == null) {
+            endGateway.exitPortalPos = null;
         }
     }
 }

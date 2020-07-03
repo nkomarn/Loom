@@ -74,4 +74,9 @@ public class CraftConsoleCommandSender extends ServerCommandSender implements Co
     public boolean isConversing() {
         return conversationTracker.isConversing();
     }
+    @Override
+    public Spigot spigot() {
+        return null;
+    }
+
 }

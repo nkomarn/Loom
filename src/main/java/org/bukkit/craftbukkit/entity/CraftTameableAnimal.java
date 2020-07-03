@@ -1,32 +1,33 @@
 package org.bukkit.craftbukkit.entity;
 
 import java.util.UUID;
-import net.minecraft.server.EntityTameableAnimal;
+
+import net.minecraft.entity.passive.TameableEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Tameable;
 
 public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creature {
-    public CraftTameableAnimal(CraftServer server, EntityTameableAnimal entity) {
+    public CraftTameableAnimal(CraftServer server, TameableEntity entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityTameableAnimal getHandle() {
-        return (EntityTameableAnimal) super.getHandle();
+    public TameableEntity getHandle() {
+        return (TameableEntity) super.getHandle();
     }
 
     public UUID getOwnerUUID() {
         try {
-            return getHandle().getOwnerUUID();
+            return getHandle().getOwnerUuid();
         } catch (IllegalArgumentException ex) {
             return null;
         }
     }
 
     public void setOwnerUUID(UUID uuid) {
-        getHandle().setOwnerUUID(uuid);
+        getHandle().setOwnerUuid(uuid);
     }
 
     @Override
@@ -52,7 +53,7 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
     public void setOwner(AnimalTamer tamer) {
         if (tamer != null) {
             setTamed(true);
-            getHandle().setGoalTarget(null, null, false);
+            getHandle().setTarget(null, null, false);
             setOwnerUUID(tamer.getUniqueId());
         } else {
             setTamed(false);
@@ -74,7 +75,7 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
 
     public void setSitting(boolean sitting) {
         getHandle().setSitting(sitting);
-        getHandle().setWillSit(sitting);
+        getHandle().setInSittingPose(sitting); // TODO ???
     }
 
     @Override

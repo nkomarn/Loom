@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.SoundEffect;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Sound;
 
@@ -1006,8 +1006,8 @@ public enum CraftSound {
         return CraftSound.valueOf(sound.name()).minecraftKey;
     }
 
-    public static SoundEffect getSoundEffect(String s) {
-        SoundEffect effect = IRegistry.SOUND_EVENT.get(new MinecraftKey(s));
+    public static SoundEvent getSoundEffect(String s) {
+        SoundEvent effect = Registry.SOUND_EVENT.get(new Identifier(s));
         Preconditions.checkArgument(effect != null, "Sound effect %s does not exist", s);
 
         return effect;

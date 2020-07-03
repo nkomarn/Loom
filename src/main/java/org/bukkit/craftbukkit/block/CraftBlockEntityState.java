@@ -3,9 +3,7 @@ package org.bukkit.craftbukkit.block;
 import com.google.common.base.Preconditions;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.TileState;
@@ -49,20 +47,20 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
             return null;
         }
 
-        CompoundTag nbtTagCompound = tileEntity.save(new CompoundTag());
-        T snapshot = (T) BlockEntity.create(getHandle(), nbtTagCompound);
+        CompoundTag nbtTagCompound = tileEntity.toTag(new CompoundTag());
+        T snapshot = (T) BlockEntity.createFromTag(getHandle(), nbtTagCompound);
 
         return snapshot;
     }
 
     // copies the TileEntity-specific data, retains the position
     private void copyData(T from, T to) {
-        BlockPosition pos = to.getPosition();
-        NBTTagCompound nbtTagCompound = from.save(new NBTTagCompound());
+        BlockPos pos = to.getPos();
+        CompoundTag nbtTagCompound = from.toTag(new CompoundTag());
         to.load(getHandle(), nbtTagCompound);
 
         // reset the original position:
-        to.setPosition(pos);
+        to.setPos(pos);
     }
 
     // gets the wrapped TileEntity
@@ -83,11 +81,11 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
     }
 
     // gets the NBT data of the TileEntity represented by this block state
-    public NBTTagCompound getSnapshotNBT() {
+    public CompoundTag getSnapshotNBT() {
         // update snapshot
         applyTo(snapshot);
 
-        return snapshot.save(new NBTTagCompound());
+        return snapshot.toTag(new CompoundTag());
     }
 
     // copies the data of the given tile entity to this block state
@@ -104,7 +102,7 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
         }
     }
 
-    protected boolean isApplicable(TileEntity tileEntity) {
+    protected boolean isApplicable(BlockEntity tileEntity) {
         return tileEntityClass.isInstance(tileEntity);
     }
 
@@ -113,7 +111,7 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
         boolean result = super.update(force, applyPhysics);
 
         if (result && this.isPlaced()) {
-            TileEntity tile = getTileEntityFromWorld();
+            BlockEntity tile = getTileEntityFromWorld();
 
             if (isApplicable(tile)) {
                 applyTo(tileEntityClass.cast(tile));

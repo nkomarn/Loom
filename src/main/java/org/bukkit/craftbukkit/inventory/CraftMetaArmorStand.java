@@ -2,8 +2,9 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 
@@ -11,16 +12,16 @@ import org.bukkit.configuration.serialization.DelegateDeserialization;
 public class CraftMetaArmorStand extends CraftMetaItem {
 
     static final ItemMetaKey ENTITY_TAG = new ItemMetaKey("EntityTag", "entity-tag");
-    NBTTagCompound entityTag;
+    CompoundTag entityTag;
 
     CraftMetaArmorStand(CraftMetaItem meta) {
         super(meta);
     }
 
-    CraftMetaArmorStand(NBTTagCompound tag) {
+    CraftMetaArmorStand(CompoundTag tag) {
         super(tag);
 
-        if (tag.hasKey(ENTITY_TAG.NBT)) {
+        if (tag.contains(ENTITY_TAG.NBT)) {
             entityTag = tag.getCompound(ENTITY_TAG.NBT);
         }
     }
@@ -30,27 +31,27 @@ public class CraftMetaArmorStand extends CraftMetaItem {
     }
 
     @Override
-    void deserializeInternal(NBTTagCompound tag, Object context) {
+    void deserializeInternal(CompoundTag tag, Object context) {
         super.deserializeInternal(tag, context);
 
-        if (tag.hasKey(ENTITY_TAG.NBT)) {
+        if (tag.contains(ENTITY_TAG.NBT)) {
             entityTag = tag.getCompound(ENTITY_TAG.NBT);
         }
     }
 
     @Override
-    void serializeInternal(Map<String, NBTBase> internalTags) {
+    void serializeInternal(Map<String, Tag> internalTags) {
         if (entityTag != null && !entityTag.isEmpty()) {
             internalTags.put(ENTITY_TAG.NBT, entityTag);
         }
     }
 
     @Override
-    void applyToItem(NBTTagCompound tag) {
+    void applyToItem(CompoundTag tag) {
         super.applyToItem(tag);
 
         if (entityTag != null) {
-            tag.set(ENTITY_TAG.NBT, entityTag);
+            tag.put(ENTITY_TAG.NBT, entityTag);
         }
     }
 
@@ -115,7 +116,7 @@ public class CraftMetaArmorStand extends CraftMetaItem {
         CraftMetaArmorStand clone = (CraftMetaArmorStand) super.clone();
 
         if (entityTag != null) {
-            clone.entityTag = entityTag.clone();
+            clone.entityTag = entityTag.copy();
         }
 
         return clone;

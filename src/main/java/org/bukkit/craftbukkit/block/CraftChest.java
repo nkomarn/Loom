@@ -47,7 +47,7 @@ public class CraftChest extends CraftLootable<ChestBlockEntity> implements Chest
         CraftWorld world = (CraftWorld) this.getWorld();
 
         ChestBlock blockChest = (ChestBlock) (this.getType() == Material.CHEST ? Blocks.CHEST : Blocks.TRAPPED_CHEST);
-        NamedScreenHandlerFactory nms = blockChest.getInventory(data, world.getHandle(), this.getPosition());
+        NamedScreenHandlerFactory nms = blockChest.createScreenHandlerFactory(data, world.getHandle(), this.getPosition());
 
         if (nms instanceof ChestBlock.ChestDoubleInventory) {
             inventory = new CraftInventoryDoubleChest((ChestBlock.ChestDoubleInventory) nms);

@@ -2,9 +2,10 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.Identifier;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.craftbukkit.util.CraftLegacy;
@@ -20,7 +21,7 @@ public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
     static final ItemMetaKey ENTITY_ID = new ItemMetaKey("id");
 
     private EntityType spawnedType;
-    private NBTTagCompound entityTag;
+    private CompoundTag entityTag;
 
     CraftMetaSpawnEgg(CraftMetaItem meta) {
         super(meta);
@@ -35,10 +36,10 @@ public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
         updateMaterial(null); // Trigger type population
     }
 
-    CraftMetaSpawnEgg(NBTTagCompound tag) {
+    CraftMetaSpawnEgg(CompoundTag tag) {
         super(tag);
 
-        if (tag.hasKey(ENTITY_TAG.NBT)) {
+        if (tag.contains(ENTITY_TAG.NBT)) {
             entityTag = tag.getCompound(ENTITY_TAG.NBT);
         }
     }
@@ -53,10 +54,10 @@ public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
     }
 
     @Override
-    void deserializeInternal(NBTTagCompound tag, Object context) {
+    void deserializeInternal(CompoundTag tag, Object context) {
         super.deserializeInternal(tag, context);
 
-        if (tag.hasKey(ENTITY_TAG.NBT)) {
+        if (tag.contains(ENTITY_TAG.NBT)) {
             entityTag = tag.getCompound(ENTITY_TAG.NBT);
 
             if (context instanceof Map) {
@@ -81,29 +82,29 @@ public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
             }
 
             // See if we can read a converted ID tag
-            if (entityTag.hasKey(ENTITY_ID.NBT)) {
-                this.spawnedType = EntityType.fromName(new MinecraftKey(entityTag.getString(ENTITY_ID.NBT)).getKey());
+            if (entityTag.contains(ENTITY_ID.NBT)) {
+                this.spawnedType = EntityType.fromName(new Identifier(entityTag.getString(ENTITY_ID.NBT)).getPath());
             }
         }
     }
 
     @Override
-    void serializeInternal(Map<String, NBTBase> internalTags) {
+    void serializeInternal(Map<String, Tag> internalTags) {
         if (entityTag != null && !entityTag.isEmpty()) {
             internalTags.put(ENTITY_TAG.NBT, entityTag);
         }
     }
 
     @Override
-    void applyToItem(NBTTagCompound tag) {
+    void applyToItem(CompoundTag tag) {
         super.applyToItem(tag);
 
         if (!isSpawnEggEmpty() && entityTag == null) {
-            entityTag = new NBTTagCompound();
+            entityTag = new CompoundTag();
         }
 
         if (entityTag != null) {
-            tag.set(ENTITY_TAG.NBT, entityTag);
+            tag.put(ENTITY_TAG.NBT, entityTag);
         }
     }
 
@@ -249,7 +250,7 @@ public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
 
         clone.spawnedType = spawnedType;
         if (entityTag != null) {
-            clone.entityTag = entityTag.clone();
+            clone.entityTag = entityTag.copy();
         }
 
         return clone;

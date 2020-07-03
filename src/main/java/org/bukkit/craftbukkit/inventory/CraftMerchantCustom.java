@@ -1,15 +1,15 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.ChatComponentText;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.IMerchant;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MerchantRecipe;
-import net.minecraft.server.MerchantRecipeList;
-import net.minecraft.server.SoundEffect;
-import net.minecraft.server.SoundEffects;
-import net.minecraft.server.World;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.village.TradeOffer;
+import net.minecraft.village.Trader;
+import net.minecraft.village.TraderOfferList;
+import net.minecraft.world.World;
 import org.apache.commons.lang.Validate;
 
 public class CraftMerchantCustom extends CraftMerchant {
@@ -29,17 +29,17 @@ public class CraftMerchantCustom extends CraftMerchant {
         return (MinecraftMerchant) super.getMerchant();
     }
 
-    public static class MinecraftMerchant implements IMerchant {
+    public static class MinecraftMerchant implements Trader {
 
-        private final IChatBaseComponent title;
-        private final MerchantRecipeList trades = new MerchantRecipeList();
-        private EntityHuman tradingPlayer;
+        private final Text title;
+        private final TraderOfferList trades = new TraderOfferList();
+        private PlayerEntity tradingPlayer;
         private World tradingWorld;
         protected CraftMerchant craftMerchant;
 
         public MinecraftMerchant(String title) {
             Validate.notNull(title, "Title cannot be null");
-            this.title = new ChatComponentText(title);
+            this.title = new LiteralText(title);
         }
 
         @Override
@@ -48,7 +48,7 @@ public class CraftMerchantCustom extends CraftMerchant {
         }
 
         @Override
-        public void setTradingPlayer(EntityHuman entityhuman) {
+        public void setCurrentCustomer(PlayerEntity entityhuman) {
             this.tradingPlayer = entityhuman;
             if (entityhuman != null) {
                 this.tradingWorld = entityhuman.world;
@@ -56,31 +56,31 @@ public class CraftMerchantCustom extends CraftMerchant {
         }
 
         @Override
-        public EntityHuman getTrader() {
+        public PlayerEntity getCurrentCustomer() {
             return this.tradingPlayer;
         }
 
         @Override
-        public MerchantRecipeList getOffers() {
+        public TraderOfferList getOffers() {
             return this.trades;
         }
 
         @Override
-        public void a(MerchantRecipe merchantrecipe) {
+        public void trade(TradeOffer merchantrecipe) {
             // increase recipe's uses
-            merchantrecipe.increaseUses();
+            merchantrecipe.clearUses(); // TODO is this correct?
         }
 
         @Override
-        public void k(ItemStack itemstack) {
+        public void onSellingItem(ItemStack itemstack) {
         }
 
-        public IChatBaseComponent getScoreboardDisplayName() {
+        public Text getScoreboardDisplayName() {
             return title;
         }
 
         @Override
-        public World getWorld() {
+        public World getTraderWorld() {
             return this.tradingWorld;
         }
 
@@ -90,17 +90,17 @@ public class CraftMerchantCustom extends CraftMerchant {
         }
 
         @Override
-        public void setForcedExperience(int i) {
+        public void setExperienceFromServer(int i) {
         }
 
         @Override
-        public boolean isRegularVillager() {
+        public boolean isLeveledTrader() {
             return false; // is-regular-villager flag (hides some gui elements: xp bar, name suffix)
         }
 
         @Override
-        public SoundEffect getTradeSound() {
-            return SoundEffects.ENTITY_VILLAGER_YES;
+        public SoundEvent getYesSound() {
+            return SoundEvents.ENTITY_VILLAGER_YES;
         }
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import java.util.Locale;
 import java.util.UUID;
 
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.ZombieVillagerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -39,7 +40,7 @@ public class CraftVillagerZombie extends CraftZombie implements ZombieVillager {
 
     @Override
     public Villager.Profession getVillagerProfession() {
-        return Villager.Profession.valueOf(Registry.VILLAGER_PROFESSION.getKey(getHandle().getVillagerData().getProfession()).getKey().toUpperCase(Locale.ROOT));
+        return Villager.Profession.valueOf(Registry.VILLAGER_PROFESSION.getId(getHandle().getVillagerData().getProfession()).getPath().toUpperCase(Locale.ROOT));
     }
 
     @Override
@@ -50,7 +51,7 @@ public class CraftVillagerZombie extends CraftZombie implements ZombieVillager {
 
     @Override
     public Villager.Type getVillagerType() {
-        return Villager.Type.valueOf(Registry.VILLAGER_TYPE.getKey(getHandle().getVillagerData().getType()).getKey().toUpperCase(Locale.ROOT));
+        return Villager.Type.valueOf(Registry.VILLAGER_TYPE.getId(getHandle().getVillagerData().getType()).getPath().toUpperCase(Locale.ROOT));
     }
 
     @Override
@@ -68,30 +69,30 @@ public class CraftVillagerZombie extends CraftZombie implements ZombieVillager {
     public int getConversionTime() {
         Preconditions.checkState(isConverting(), "Entity not converting");
 
-        return getHandle().conversionTime;
+        return getHandle().conversionTimer;
     }
 
     @Override
     public void setConversionTime(int time) {
         if (time < 0) {
-            getHandle().conversionTime = -1;
-            getHandle().getDataWatcher().set(EntityZombieVillager.CONVERTING, false);
+            getHandle().conversionTimer = -1;
+            getHandle().getDataTracker().set(ZombieVillagerEntity.CONVERTING, false);
             getHandle().persistent = false; // CraftBukkit - SPIGOT-4684 update persistence
-            getHandle().conversionPlayer = null;
-            getHandle().removeEffect(MobEffects.INCREASE_DAMAGE, org.bukkit.event.entity.EntityPotionEffectEvent.Cause.CONVERSION);
+            getHandle().converter = null;
+            getHandle().removeStatusEffect(StatusEffects.STRENGTH, org.bukkit.event.entity.EntityPotionEffectEvent.Cause.CONVERSION);
         } else {
-            getHandle().startConversion((UUID) null, time);
+            getHandle().setConverting((UUID) null, time);
         }
     }
 
     @Override
     public OfflinePlayer getConversionPlayer() {
-        return (getHandle().conversionPlayer == null) ? null : Bukkit.getOfflinePlayer(getHandle().conversionPlayer);
+        return (getHandle().converter == null) ? null : Bukkit.getOfflinePlayer(getHandle().converter);
     }
 
     @Override
     public void setConversionPlayer(OfflinePlayer conversionPlayer) {
         if (!this.isConverting()) return;
-        getHandle().conversionPlayer = (conversionPlayer == null) ? null : conversionPlayer.getUniqueId();
+        getHandle().converter = (conversionPlayer == null) ? null : conversionPlayer.getUniqueId();
     }
 }

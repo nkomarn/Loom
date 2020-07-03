@@ -5,8 +5,8 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import net.minecraft.server.CrashReportCallable;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.crash.CrashCallable;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -14,13 +14,13 @@ import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 
-public class CraftCrashReport implements CrashReportCallable<Object> {
+public class CraftCrashReport implements CrashCallable<Object> {
 
     @Override
     public Object call() throws Exception {
         StringWriter value = new StringWriter();
         try {
-            value.append("\n   Running: ").append(Bukkit.getName()).append(" version ").append(Bukkit.getVersion()).append(" (Implementing API version ").append(Bukkit.getBukkitVersion()).append(") ").append(String.valueOf(MinecraftServer.getServer().getOnlineMode()));
+            value.append("\n   Running: ").append(Bukkit.getName()).append(" version ").append(Bukkit.getVersion()).append(" (Implementing API version ").append(Bukkit.getBukkitVersion()).append(") ").append(String.valueOf(MinecraftServer.getServer().isOnlineMode()));
             value.append("\n   Plugins: {");
             for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
                 PluginDescriptionFile description = plugin.getDescription();

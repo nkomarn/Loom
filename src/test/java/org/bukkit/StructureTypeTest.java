@@ -1,8 +1,8 @@
 package org.bukkit;
 
 import java.util.Map;
-import net.minecraft.server.IRegistry;
-import net.minecraft.server.MinecraftKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.support.AbstractTestingBase;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -23,7 +23,7 @@ public class StructureTypeTest extends AbstractTestingBase {
 
     @Test
     public void testMinecraftToBukkit() {
-        for (MinecraftKey key : IRegistry.STRUCTURE_FEATURE.keySet()) {
+        for (Identifier key : Registry.STRUCTURE_FEATURE.keySet()) {
             Assert.assertNotNull(key.getKey(), structures.get(key.getKey()));
         }
     }
@@ -39,8 +39,8 @@ public class StructureTypeTest extends AbstractTestingBase {
     @Test
     public void testBukkitToMinecraft() {
         for (Map.Entry<String, StructureType> entry : structures.entrySet()) {
-            Assert.assertNotNull(entry.getKey(), IRegistry.STRUCTURE_FEATURE.get(new MinecraftKey(entry.getKey())));
-            Assert.assertNotNull(entry.getValue().getName(), IRegistry.STRUCTURE_FEATURE.get(new MinecraftKey(entry.getValue().getName())));
+            Assert.assertNotNull(entry.getKey(), Registry.STRUCTURE_FEATURE.get(new Identifier(entry.getKey())));
+            Assert.assertNotNull(entry.getValue().getName(), Registry.STRUCTURE_FEATURE.get(new Identifier(entry.getValue().getName())));
         }
     }
 }

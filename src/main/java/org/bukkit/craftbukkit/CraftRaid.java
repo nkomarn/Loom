@@ -6,12 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
-import net.minecraft.entity.raid.RaiderEntity;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityRaider;
-import net.minecraft.server.World;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.bukkit.Location;
@@ -75,22 +70,22 @@ public final class CraftRaid implements Raid {
 
     @Override
     public int getTotalGroups() {
-        return handle.numGroups + (handle.badOmenLevel > 1 ? 1 : 0);
+        return handle.waveCount + (handle.badOmenLevel > 1 ? 1 : 0);
     }
 
     @Override
     public int getTotalWaves() {
-        return handle.numGroups;
+        return handle.waveCount;
     }
 
     @Override
     public float getTotalHealth() {
-        return handle.sumMobHealth();
+        return handle.getCurrentRaiderHealth();
     }
 
     @Override
     public Set<UUID> getHeroes() {
-        return Collections.unmodifiableSet(handle.heroes);
+        return Collections.unmodifiableSet(handle.heroesOfTheVillage);
     }
 
     @Override

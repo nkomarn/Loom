@@ -1,28 +1,27 @@
 package org.bukkit.craftbukkit.block;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityTypes;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.TileEntityMobSpawner;
+import net.minecraft.block.entity.MobSpawnerBlockEntity;
+import net.minecraft.util.Identifier;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 
-public class CraftCreatureSpawner extends CraftBlockEntityState<TileEntityMobSpawner> implements CreatureSpawner {
+public class CraftCreatureSpawner extends CraftBlockEntityState<MobSpawnerBlockEntity> implements CreatureSpawner {
 
     public CraftCreatureSpawner(final Block block) {
-        super(block, TileEntityMobSpawner.class);
+        super(block, MobSpawnerBlockEntity.class);
     }
 
-    public CraftCreatureSpawner(final Material material, TileEntityMobSpawner te) {
+    public CraftCreatureSpawner(final Material material, MobSpawnerBlockEntity te) {
         super(material, te);
     }
 
     @Override
     public EntityType getSpawnedType() {
-        MinecraftKey key = this.getSnapshot().getSpawner().getMobName();
-        return (key == null) ? EntityType.PIG : EntityType.fromName(key.getKey());
+        Identifier key = this.getSnapshot().getLogic().getEntityId();
+        return (key == null) ? EntityType.PIG : EntityType.fromName(key.getPath());
     }
 
     @Override
@@ -31,12 +30,12 @@ public class CraftCreatureSpawner extends CraftBlockEntityState<TileEntityMobSpa
             throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
         }
 
-        this.getSnapshot().getSpawner().setMobName(EntityTypes.a(entityType.getName()).get());
+        this.getSnapshot().getLogic().setEntityId(net.minecraft.entity.EntityType.get(entityType.getName()).get());
     }
 
     @Override
     public String getCreatureTypeName() {
-        return this.getSnapshot().getSpawner().getMobName().getKey();
+        return this.getSnapshot().getLogic().getEntityId().getPath();
     }
 
     @Override
@@ -51,74 +50,74 @@ public class CraftCreatureSpawner extends CraftBlockEntityState<TileEntityMobSpa
 
     @Override
     public int getDelay() {
-        return this.getSnapshot().getSpawner().spawnDelay;
+        return this.getSnapshot().getLogic().spawnDelay;
     }
 
     @Override
     public void setDelay(int delay) {
-        this.getSnapshot().getSpawner().spawnDelay = delay;
+        this.getSnapshot().getLogic().spawnDelay = delay;
     }
 
     @Override
     public int getMinSpawnDelay() {
-        return this.getSnapshot().getSpawner().minSpawnDelay;
+        return this.getSnapshot().getLogic().minSpawnDelay;
     }
 
     @Override
     public void setMinSpawnDelay(int spawnDelay) {
         Preconditions.checkArgument(spawnDelay <= getMaxSpawnDelay(), "Minimum Spawn Delay must be less than or equal to Maximum Spawn Delay");
-        this.getSnapshot().getSpawner().minSpawnDelay = spawnDelay;
+        this.getSnapshot().getLogic().minSpawnDelay = spawnDelay;
     }
 
     @Override
     public int getMaxSpawnDelay() {
-        return this.getSnapshot().getSpawner().maxSpawnDelay;
+        return this.getSnapshot().getLogic().maxSpawnDelay;
     }
 
     @Override
     public void setMaxSpawnDelay(int spawnDelay) {
         Preconditions.checkArgument(spawnDelay > 0, "Maximum Spawn Delay must be greater than 0.");
         Preconditions.checkArgument(spawnDelay >= getMinSpawnDelay(), "Maximum Spawn Delay must be greater than or equal to Minimum Spawn Delay");
-        this.getSnapshot().getSpawner().maxSpawnDelay = spawnDelay;
+        this.getSnapshot().getLogic().maxSpawnDelay = spawnDelay;
     }
 
     @Override
     public int getMaxNearbyEntities() {
-        return this.getSnapshot().getSpawner().maxNearbyEntities;
+        return this.getSnapshot().getLogic().maxNearbyEntities;
     }
 
     @Override
     public void setMaxNearbyEntities(int maxNearbyEntities) {
-        this.getSnapshot().getSpawner().maxNearbyEntities = maxNearbyEntities;
+        this.getSnapshot().getLogic().maxNearbyEntities = maxNearbyEntities;
     }
 
     @Override
     public int getSpawnCount() {
-        return this.getSnapshot().getSpawner().spawnCount;
+        return this.getSnapshot().getLogic().spawnCount;
     }
 
     @Override
     public void setSpawnCount(int count) {
-        this.getSnapshot().getSpawner().spawnCount = count;
+        this.getSnapshot().getLogic().spawnCount = count;
     }
 
     @Override
     public int getRequiredPlayerRange() {
-        return this.getSnapshot().getSpawner().requiredPlayerRange;
+        return this.getSnapshot().getLogic().requiredPlayerRange;
     }
 
     @Override
     public void setRequiredPlayerRange(int requiredPlayerRange) {
-        this.getSnapshot().getSpawner().requiredPlayerRange = requiredPlayerRange;
+        this.getSnapshot().getLogic().requiredPlayerRange = requiredPlayerRange;
     }
 
     @Override
     public int getSpawnRange() {
-        return this.getSnapshot().getSpawner().spawnRange;
+        return this.getSnapshot().getLogic().spawnRange;
     }
 
     @Override
     public void setSpawnRange(int spawnRange) {
-        this.getSnapshot().getSpawner().spawnRange = spawnRange;
+        this.getSnapshot().getLogic().spawnRange = spawnRange;
     }
 }

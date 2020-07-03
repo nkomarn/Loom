@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.enchantments;
 
 import net.minecraft.enchantment.BindingCurseEnchantment;
 import net.minecraft.enchantment.VanishingCurseEnchantment;
-import org.bukkit.Registry;
+import net.minecraft.util.registry.Registry;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -14,7 +14,7 @@ public class CraftEnchantment extends Enchantment {
     private final net.minecraft.enchantment.Enchantment target;
 
     public CraftEnchantment(net.minecraft.enchantment.Enchantment target) {
-        super(CraftNamespacedKey.fromMinecraft(Registry.ENCHANTMENT.getKey(target)));
+        super(CraftNamespacedKey.fromMinecraft(net.minecraft.util.registry.Registry.ENCHANTMENT.getId(target)));
         this.target = target;
     }
 
@@ -30,7 +30,7 @@ public class CraftEnchantment extends Enchantment {
 
     @Override
     public EnchantmentTarget getItemTarget() {
-        switch (target.itemTarget) {
+        switch (target.type) {
         case ARMOR:
             return EnchantmentTarget.ARMOR;
         case ARMOR_FEET:
@@ -82,7 +82,7 @@ public class CraftEnchantment extends Enchantment {
     @Override
     public String getName() {
         // PAIL: migration paths
-        switch (IRegistry.ENCHANTMENT.a(target)) {
+        switch (net.minecraft.util.registry.Registry.ENCHANTMENT.getRawId(target)) {
         case 0:
             return "PROTECTION_ENVIRONMENTAL";
         case 1:
@@ -160,7 +160,7 @@ public class CraftEnchantment extends Enchantment {
         case 37:
             return "VANISHING_CURSE";
         default:
-            return "UNKNOWN_ENCHANT_" + net.minecraft.util.registry.Registry.ENCHANTMENT.a(target);
+            return "UNKNOWN_ENCHANT_" + net.minecraft.util.registry.Registry.ENCHANTMENT.getRawId(target);
         }
     }
 
@@ -185,7 +185,7 @@ public class CraftEnchantment extends Enchantment {
             return false;
         }
         CraftEnchantment ench = (CraftEnchantment) other;
-        return !target.isCompatible(ench.target);
+        return !target.canCombine(ench.target);
     }
 
     public net.minecraft.enchantment.Enchantment getHandle() {

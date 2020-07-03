@@ -1,36 +1,36 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityCampfire;
+import net.minecraft.block.entity.CampfireBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Campfire;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
-public class CraftCampfire extends CraftBlockEntityState<TileEntityCampfire> implements Campfire {
+public class CraftCampfire extends CraftBlockEntityState<CampfireBlockEntity> implements Campfire {
 
     public CraftCampfire(Block block) {
-        super(block, TileEntityCampfire.class);
+        super(block, CampfireBlockEntity.class);
     }
 
-    public CraftCampfire(Material material, TileEntityCampfire te) {
+    public CraftCampfire(Material material, CampfireBlockEntity te) {
         super(material, te);
     }
 
     @Override
     public int getSize() {
-        return getSnapshot().getItems().size();
+        return getSnapshot().getItemsBeingCooked().size();
     }
 
     @Override
     public ItemStack getItem(int index) {
-        net.minecraft.server.ItemStack item = getSnapshot().getItems().get(index);
+        net.minecraft.item.ItemStack item = getSnapshot().getItemsBeingCooked().get(index);
         return item.isEmpty() ? null : CraftItemStack.asCraftMirror(item);
     }
 
     @Override
     public void setItem(int index, ItemStack item) {
-        getSnapshot().getItems().set(index, CraftItemStack.asNMSCopy(item));
+        getSnapshot().getItemsBeingCooked().set(index, CraftItemStack.asNMSCopy(item));
     }
 
     @Override

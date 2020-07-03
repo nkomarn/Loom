@@ -138,7 +138,7 @@ public enum CraftParticle {
         Preconditions.checkArgument(nms != null, "No NMS particle %s", particle);
 
         if (particle.getDataType().equals(Void.class)) {
-            return (ParticleType) nms;
+            return (ParticleEffect) nms;
         }
         Preconditions.checkArgument(obj != null, "Particle %s requires data, null provided", particle);
         if (particle.getDataType().equals(ItemStack.class)) {

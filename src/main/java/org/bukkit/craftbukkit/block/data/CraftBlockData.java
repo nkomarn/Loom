@@ -284,7 +284,7 @@ public class CraftBlockData implements BlockData {
         CompoundTag compound = new CompoundTag();
 
         for (Map.Entry<Property<?>, Comparable<?>> entry : state.getEntries().entrySet()) {
-            Property<?> iblockstate = entry.getKey();
+            Property iblockstate = entry.getKey();
             compound.putString(iblockstate.getName(), iblockstate.name(entry.getValue()));
         }
 
@@ -350,9 +350,9 @@ public class CraftBlockData implements BlockData {
         for (Block instance : Registry.BLOCK) {
             if (instance.getClass() == block) {
                 if (state == null) {
-                    state = instance.getStates().a(name);
+                    state = instance.getStateManager().getProperty(name);
                 } else {
-                    Property<?> newState = instance.getStates().a(name);
+                    Property<?> newState = instance.getStateManager().getProperty(name);
 
                     Preconditions.checkState(state == newState, "State mistmatch %s,%s", state, newState);
                 }

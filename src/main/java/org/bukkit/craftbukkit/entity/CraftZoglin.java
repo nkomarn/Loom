@@ -25,4 +25,14 @@ public class CraftZoglin extends CraftMonster implements Zoglin {
     public EntityType getType() {
         return EntityType.ZOGLIN;
     }
+
+    @Override
+    public boolean isBaby() {
+        getHandle().isBaby();
+    }
+
+    @Override
+    public void setBaby(boolean baby) {
+        getHandle().setBaby(baby);
+    }
 }

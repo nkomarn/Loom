@@ -3,10 +3,9 @@ package org.bukkit.craftbukkit.entity;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.server.EntityTippedArrow;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MobEffectList;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.craftbukkit.CraftServer;
@@ -41,9 +40,9 @@ public class CraftTippedArrow extends CraftArrow implements Arrow {
     @Override
     public boolean addCustomEffect(PotionEffect effect, boolean override) {
         int effectId = effect.getType().getId();
-        MobEffect existing = null;
-        for (MobEffect mobEffect : getHandle().effects) {
-            if (MobEffectList.getId(mobEffect.getMobEffect()) == effectId) {
+        StatusEffectInstance existing = null;
+        for (StatusEffectInstance mobEffect : getHandle().effects) {
+            if (StatusEffect.getRawId(mobEffect.getEffectType()) == effectId) {
                 existing = mobEffect;
             }
         }
@@ -67,7 +66,7 @@ public class CraftTippedArrow extends CraftArrow implements Arrow {
     @Override
     public List<PotionEffect> getCustomEffects() {
         ImmutableList.Builder<PotionEffect> builder = ImmutableList.builder();
-        for (MobEffect effect : getHandle().effects) {
+        for (StatusEffectInstance effect : getHandle().effects) {
             builder.add(CraftPotionUtil.toBukkit(effect));
         }
         return builder.build();
@@ -75,8 +74,8 @@ public class CraftTippedArrow extends CraftArrow implements Arrow {
 
     @Override
     public boolean hasCustomEffect(PotionEffectType type) {
-        for (MobEffect effect : getHandle().effects) {
-            if (CraftPotionUtil.equals(effect.getMobEffect(), type)) {
+        for (StatusEffectInstance effect : getHandle().effects) {
+            if (CraftPotionUtil.equals(effect.getEffectType(), type)) {
                 return true;
             }
         }
@@ -91,9 +90,9 @@ public class CraftTippedArrow extends CraftArrow implements Arrow {
     @Override
     public boolean removeCustomEffect(PotionEffectType effect) {
         int effectId = effect.getId();
-        MobEffect existing = null;
-        for (MobEffect mobEffect : getHandle().effects) {
-            if (MobEffectList.getId(mobEffect.getMobEffect()) == effectId) {
+        StatusEffectInstance existing = null;
+        for (StatusEffectInstance mobEffect : getHandle().effects) {
+            if (StatusEffect.getRawId(mobEffect.getEffectType()) == effectId) {
                 existing = mobEffect;
             }
         }
@@ -108,12 +107,12 @@ public class CraftTippedArrow extends CraftArrow implements Arrow {
     @Override
     public void setBasePotionData(PotionData data) {
         Validate.notNull(data, "PotionData cannot be null");
-        getHandle().setType(CraftPotionUtil.fromBukkit(data));
+        getHandle().setArrowType(CraftPotionUtil.fromBukkit(data));
     }
 
     @Override
     public PotionData getBasePotionData() {
-        return CraftPotionUtil.toBukkit(getHandle().getType());
+        return CraftPotionUtil.toBukkit(getHandle().getArrowType());
     }
 
     @Override

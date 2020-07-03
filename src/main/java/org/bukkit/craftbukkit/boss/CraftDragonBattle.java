@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.boss;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.dragon.EnderDragonFight;
+import net.minecraft.entity.boss.dragon.EnderDragonSpawnState;
 import org.bukkit.Location;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
@@ -18,50 +19,50 @@ public class CraftDragonBattle implements DragonBattle {
 
     @Override
     public EnderDragon getEnderDragon() {
-        Entity entity = handle.world.getEntity(handle.dragonUUID);
+        Entity entity = handle.world.getEntity(handle.dragonUuid);
         return (entity != null) ? (EnderDragon) entity.getBukkitEntity() : null;
     }
 
     @Override
     public BossBar getBossBar() {
-        return new CraftBossBar(handle.bossBattle);
+        return new CraftBossBar(handle.bossBar);
     }
 
     @Override
     public Location getEndPortalLocation() {
-        return new Location(handle.world.getWorld(), handle.exitPortalLocation.getX(), handle.exitPortalLocation.getY(), handle.exitPortalLocation.getZ());
+        return new Location(handle.world.getCraftWorld(), handle.exitPortalLocation.getX(), handle.exitPortalLocation.getY(), handle.exitPortalLocation.getZ());
     }
 
     @Override
     public boolean hasBeenPreviouslyKilled() {
-        return handle.isPreviouslyKilled();
+        return handle.hasPreviouslyKilled();
     }
 
     @Override
     public void initiateRespawn() {
-        this.handle.initiateRespawn();
+        this.handle.respawnDragon();
     }
 
     @Override
     public RespawnPhase getRespawnPhase() {
-        return toBukkitRespawnPhase(handle.respawnPhase);
+        return toBukkitRespawnPhase(handle.dragonSpawnState);
     }
 
     @Override
     public boolean setRespawnPhase(RespawnPhase phase) {
         Preconditions.checkArgument(phase != null && phase != RespawnPhase.NONE, "Invalid respawn phase provided: %s", phase);
 
-        if (handle.respawnPhase == null) {
+        if (handle.dragonSpawnState == null) {
             return false;
         }
 
-        this.handle.setRespawnPhase(toNMSRespawnPhase(phase));
+        this.handle.setSpawnState(toNMSRespawnPhase(phase));
         return true;
     }
 
     @Override
     public void resetCrystals() {
-        this.handle.resetCrystals();
+        this.handle.resetEndCrystals();
     }
 
     @Override
@@ -74,11 +75,11 @@ public class CraftDragonBattle implements DragonBattle {
         return obj instanceof CraftDragonBattle && ((CraftDragonBattle) obj).handle == this.handle;
     }
 
-    private RespawnPhase toBukkitRespawnPhase(EnumDragonRespawn phase) {
+    private RespawnPhase toBukkitRespawnPhase(EnderDragonSpawnState phase) {
         return (phase != null) ? RespawnPhase.values()[phase.ordinal()] : RespawnPhase.NONE;
     }
 
-    private EnumDragonRespawn toNMSRespawnPhase(RespawnPhase phase) {
-        return (phase != RespawnPhase.NONE) ? EnumDragonRespawn.values()[phase.ordinal()] : null;
+    private EnderDragonSpawnState toNMSRespawnPhase(RespawnPhase phase) {
+        return (phase != RespawnPhase.NONE) ? EnderDragonSpawnState.values()[phase.ordinal()] : null;
     }
 }

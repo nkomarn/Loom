@@ -1,8 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
 import net.minecraft.block.entity.LootableContainerBlockEntity;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.TileEntityLootable;
+import net.minecraft.util.Identifier;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
@@ -25,18 +24,18 @@ public abstract class CraftLootable<T extends LootableContainerBlockEntity> exte
     public void applyTo(T lootable) {
         super.applyTo(lootable);
 
-        if (this.getSnapshot().lootTable == null) {
-            lootable.setLootTable((MinecraftKey) null, 0L);
+        if (this.getSnapshot().lootTableId == null) {
+            lootable.setLootTable(null, 0L);
         }
     }
 
     @Override
     public LootTable getLootTable() {
-        if (getSnapshot().lootTable == null) {
+        if (getSnapshot().lootTableId == null) {
             return null;
         }
 
-        MinecraftKey key = getSnapshot().lootTable;
+        Identifier key = getSnapshot().lootTableId;
         return Bukkit.getLootTable(CraftNamespacedKey.fromMinecraft(key));
     }
 
@@ -56,7 +55,7 @@ public abstract class CraftLootable<T extends LootableContainerBlockEntity> exte
     }
 
     private void setLootTable(LootTable table, long seed) {
-        MinecraftKey key = (table == null) ? null : CraftNamespacedKey.toMinecraft(table.getKey());
+        Identifier key = (table == null) ? null : CraftNamespacedKey.toMinecraft(table.getKey());
         getSnapshot().setLootTable(key, seed);
     }
 }

@@ -25,4 +25,14 @@ public class CraftPiglin extends CraftMonster implements Piglin {
     public String toString() {
         return "CraftPiglin";
     }
+
+    @Override
+    public boolean isBaby() {
+        return getHandle().isBaby();
+    }
+
+    @Override
+    public void setBaby(boolean baby) {
+        getHandle().setBaby(baby);
+    }
 }

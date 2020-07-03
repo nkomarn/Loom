@@ -171,7 +171,7 @@ public final class CraftItemStack extends ItemStack {
 
     @Override
     public int getMaxStackSize() {
-        return (handle == null) ? Material.AIR.getMaxStackSize() : handle.getItem().getMaxStackSize();
+        return (handle == null) ? Material.AIR.getMaxStackSize() : handle.getItem().getMaxCount(); // TODO make sure getMaxCount() is correct
     }
 
     @Override
@@ -184,7 +184,7 @@ public final class CraftItemStack extends ItemStack {
         ListTag list = getEnchantmentList(handle);
         if (list == null) {
             list = new ListTag();
-            handle.getTag().set(ENCHANTMENTS.NBT, list);
+            handle.getTag().put(ENCHANTMENTS.NBT, list);
         }
         int size = list.size();
 
@@ -268,7 +268,7 @@ public final class CraftItemStack extends ItemStack {
                 listCopy.add(list.get(i));
             }
         }
-        handle.getTag().set(ENCHANTMENTS.NBT, listCopy);
+        handle.getTag().put(ENCHANTMENTS.NBT, listCopy);
 
         return level;
     }

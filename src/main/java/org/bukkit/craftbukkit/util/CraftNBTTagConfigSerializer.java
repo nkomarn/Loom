@@ -45,7 +45,7 @@ public class CraftNBTTagConfigSerializer {
         if (object instanceof Map) {
             CompoundTag compound = new CompoundTag();
             for (Map.Entry<String, Object> entry : ((Map<String, Object>) object).entrySet()) {
-                compound.set(entry.getKey(), deserialize(entry.getValue()));
+                compound.put(entry.getKey(), deserialize(entry.getValue()));
             }
 
             return compound;
@@ -66,21 +66,21 @@ public class CraftNBTTagConfigSerializer {
 
             if (ARRAY.matcher(string).matches()) {
                 try {
-                    return new StringNbtReader(new StringReader(string)).parseArray();
+                    return new StringNbtReader(new StringReader(string)).parseTag();
                 } catch (CommandSyntaxException e) {
                     throw new RuntimeException("Could not deserialize found list ", e);
                 }
             } else if (INTEGER.matcher(string).matches()) { //Read integers on our own
-                return IntTag.a(Integer.parseInt(string.substring(0, string.length() - 1)));
+                return IntTag.of(Integer.parseInt(string.substring(0, string.length() - 1)));
             } else if (DOUBLE.matcher(string).matches()) {
-                return DoubleTag.a(Double.parseDouble(string.substring(0, string.length() - 1)));
+                return DoubleTag.of(Double.parseDouble(string.substring(0, string.length() - 1)));
             } else {
-                Tag nbtBase = MOJANGSON_PARSER.parseLiteral(string);
+                Tag nbtBase = MOJANGSON_PARSER.parsePrimitive(string);
 
                 if (nbtBase instanceof IntTag) { // If this returns an integer, it did not use our method from above
-                    return StringTag.a(nbtBase.asString()); // It then is a string that was falsely read as an int
+                    return StringTag.of(nbtBase.asString()); // It then is a string that was falsely read as an int
                 } else if (nbtBase instanceof DoubleTag) {
-                    return StringTag.a(String.valueOf(((DoubleTag) nbtBase).asDouble())); // Doubles add "d" at the end
+                    return StringTag.of(String.valueOf(((DoubleTag) nbtBase).getDouble())); // Doubles add "d" at the end
                 } else {
                     return nbtBase;
                 }

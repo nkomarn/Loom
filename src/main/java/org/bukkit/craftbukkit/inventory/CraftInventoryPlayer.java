@@ -2,10 +2,9 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.PacketPlayOutHeldItemSlot;
-import net.minecraft.server.PacketPlayOutSetSlot;
-import net.minecraft.server.PlayerInventory;
+import net.minecraft.network.packet.s2c.play.HeldItemChangeS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -25,12 +24,12 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public ItemStack[] getStorageContents() {
-        return asCraftMirror(getInventory().items);
+        return asCraftMirror(getInventory().main);
     }
 
     @Override
     public ItemStack getItemInMainHand() {
-        return CraftItemStack.asCraftMirror(getInventory().getItemInHand());
+        return CraftItemStack.asCraftMirror(getInventory().getMainHandStack());
     }
 
     @Override
@@ -40,7 +39,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public ItemStack getItemInOffHand() {
-        return CraftItemStack.asCraftMirror(getInventory().extraSlots.get(0));
+        return CraftItemStack.asCraftMirror(getInventory().offHand.get(0));
     }
 
     @Override
@@ -64,8 +63,8 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     public void setItem(int index, ItemStack item) {
         super.setItem(index, item);
         if (this.getHolder() == null) return;
-        EntityPlayer player = ((CraftPlayer) this.getHolder()).getHandle();
-        if (player.playerConnection == null) return;
+        ServerPlayerEntity player = ((CraftPlayer) this.getHolder()).getHandle();
+        if (player.networkHandler == null) return;
         // PacketPlayOutSetSlot places the items differently than setItem()
         //
         // Between, and including, index 9 (the first index outside of the hotbar) and index 35 (the last index before
@@ -101,7 +100,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
         } else if (index > 35) {
             index = 8 - (index - 36);
         }
-        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, index, CraftItemStack.asNMSCopy(item)));
+        player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, index, CraftItemStack.asNMSCopy(item)));
     }
 
     @Override
@@ -156,14 +155,14 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public int getHeldItemSlot() {
-        return getInventory().itemInHandIndex;
+        return getInventory().selectedSlot;
     }
 
     @Override
     public void setHeldItemSlot(int slot) {
         Validate.isTrue(slot >= 0 && slot < PlayerInventory.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
-        this.getInventory().itemInHandIndex = slot;
-        ((CraftPlayer) this.getHolder()).getHandle().playerConnection.sendPacket(new PacketPlayOutHeldItemSlot(slot));
+        this.getInventory().selectedSlot = slot;
+        ((CraftPlayer) this.getHolder()).getHandle().networkHandler.sendPacket(new HeldItemChangeS2CPacket(slot));
     }
 
     @Override
@@ -228,22 +227,22 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public void setStorageContents(ItemStack[] items) throws IllegalArgumentException {
-        setSlots(items, 0, getInventory().items.size());
+        setSlots(items, 0, getInventory().main.size());
     }
 
     @Override
     public void setArmorContents(ItemStack[] items) {
-        setSlots(items, getInventory().items.size(), getInventory().armor.size());
+        setSlots(items, getInventory().main.size(), getInventory().armor.size());
     }
 
     @Override
     public ItemStack[] getExtraContents() {
-        return asCraftMirror(getInventory().extraSlots);
+        return asCraftMirror(getInventory().offHand);
     }
 
     @Override
     public void setExtraContents(ItemStack[] items) {
-        setSlots(items, getInventory().items.size() + getInventory().armor.size(), getInventory().extraSlots.size());
+        setSlots(items, getInventory().main.size() + getInventory().armor.size(), getInventory().offHand.size());
     }
 
     @Override

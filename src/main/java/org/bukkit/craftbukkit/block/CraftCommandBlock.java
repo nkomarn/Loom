@@ -1,30 +1,30 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityCommand;
+import net.minecraft.block.entity.CommandBlockBlockEntity;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 
-public class CraftCommandBlock extends CraftBlockEntityState<TileEntityCommand> implements CommandBlock {
+public class CraftCommandBlock extends CraftBlockEntityState<CommandBlockBlockEntity> implements CommandBlock {
 
     private String command;
     private String name;
 
     public CraftCommandBlock(Block block) {
-        super(block, TileEntityCommand.class);
+        super(block, CommandBlockBlockEntity.class);
     }
 
-    public CraftCommandBlock(final Material material, final TileEntityCommand te) {
+    public CraftCommandBlock(final Material material, final CommandBlockBlockEntity te) {
         super(material, te);
     }
 
     @Override
-    public void load(TileEntityCommand commandBlock) {
+    public void load(CommandBlockBlockEntity commandBlock) {
         super.load(commandBlock);
 
-        command = commandBlock.getCommandBlock().getCommand();
-        name = CraftChatMessage.fromComponent(commandBlock.getCommandBlock().getName());
+        command = commandBlock.getCommandExecutor().getCommand();
+        name = CraftChatMessage.fromComponent(commandBlock.getCommandExecutor().getCustomName());
     }
 
     @Override
@@ -48,10 +48,10 @@ public class CraftCommandBlock extends CraftBlockEntityState<TileEntityCommand> 
     }
 
     @Override
-    public void applyTo(TileEntityCommand commandBlock) {
+    public void applyTo(CommandBlockBlockEntity commandBlock) {
         super.applyTo(commandBlock);
 
-        commandBlock.getCommandBlock().setCommand(command);
-        commandBlock.getCommandBlock().setName(CraftChatMessage.fromStringOrNull(name));
+        commandBlock.getCommandExecutor().setCommand(command);
+        commandBlock.getCommandExecutor().setCustomName(CraftChatMessage.fromStringOrNull(name));
     }
 }

@@ -12,10 +12,10 @@ public class CraftMerchantRecipe extends MerchantRecipe {
     private final TradeOffer handle;
 
     public CraftMerchantRecipe(TradeOffer merchantRecipe) {
-        super(CraftItemStack.asBukkitCopy(merchantRecipe.sellingItem), 0);
+        super(CraftItemStack.asBukkitCopy(merchantRecipe.sellItem), 0);
         this.handle = merchantRecipe;
-        addIngredient(CraftItemStack.asBukkitCopy(merchantRecipe.buyingItem1));
-        addIngredient(CraftItemStack.asBukkitCopy(merchantRecipe.buyingItem2));
+        addIngredient(CraftItemStack.asBukkitCopy(merchantRecipe.firstBuyItem));
+        addIngredient(CraftItemStack.asBukkitCopy(merchantRecipe.secondBuyItem));
     }
 
     public CraftMerchantRecipe(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier) {
@@ -55,22 +55,22 @@ public class CraftMerchantRecipe extends MerchantRecipe {
 
     @Override
     public boolean hasExperienceReward() {
-        return handle.rewardExp;
+        return handle.rewardingPlayerExperience;
     }
 
     @Override
     public void setExperienceReward(boolean flag) {
-        handle.rewardExp = flag;
+        handle.rewardingPlayerExperience = flag;
     }
 
     @Override
     public int getVillagerExperience() {
-        return handle.xp;
+        return handle.traderExperience;
     }
 
     @Override
     public void setVillagerExperience(int villagerExperience) {
-        handle.xp = villagerExperience;
+        handle.traderExperience = villagerExperience;
     }
 
     @Override
@@ -86,9 +86,9 @@ public class CraftMerchantRecipe extends MerchantRecipe {
     public TradeOffer toMinecraft() {
         List<ItemStack> ingredients = getIngredients();
         Preconditions.checkState(!ingredients.isEmpty(), "No offered ingredients");
-        handle.buyingItem1 = CraftItemStack.asNMSCopy(ingredients.get(0));
+        handle.firstBuyItem = CraftItemStack.asNMSCopy(ingredients.get(0));
         if (ingredients.size() > 1) {
-            handle.buyingItem2 = CraftItemStack.asNMSCopy(ingredients.get(1));
+            handle.secondBuyItem = CraftItemStack.asNMSCopy(ingredients.get(1));
         }
         return handle;
     }

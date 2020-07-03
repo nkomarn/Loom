@@ -4,11 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
 import org.apache.commons.lang.Validate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.util.CraftNBTTagConfigSerializer;
@@ -74,6 +73,11 @@ public final class CraftPersistentDataContainer implements PersistentDataContain
     }
 
     @Override
+    public Set<NamespacedKey> getKeys() {
+        return null; // TODO
+    }
+
+    @Override
     public void remove(NamespacedKey key) {
         Validate.notNull(key, "The provided key for the custom value was null");
 
@@ -105,7 +109,7 @@ public final class CraftPersistentDataContainer implements PersistentDataContain
     public CompoundTag toTagCompound() {
         CompoundTag tag = new CompoundTag();
         for (Entry<String, Tag> entry : this.customDataTags.entrySet()) {
-            tag.set(entry.getKey(), entry.getValue());
+            tag.put(entry.getKey(), entry.getValue());
         }
         return tag;
     }

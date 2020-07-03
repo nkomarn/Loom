@@ -211,7 +211,7 @@ public class CraftAreaEffectCloud extends CraftEntity implements AreaEffectCloud
 
     @Override
     public PotionData getBasePotionData() {
-        return CraftPotionUtil.toBukkit(getHandle().getType());
+        return CraftPotionUtil.toBukkit(getHandle().getPotionType());
     }
 
     @Override

@@ -94,7 +94,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     public void getScoreboardScores(ScoreboardCriterion criteria, String name, Consumer<ScoreboardPlayerScore> consumer) {
         for (CraftScoreboard scoreboard : scoreboards) {
             Scoreboard board = scoreboard.board;
-            board.getObjectiveForSlot(criteria, name, (score) -> consumer.accept(score));
+            board.forEachScore(criteria, name, consumer::accept);
         }
     }
 }
