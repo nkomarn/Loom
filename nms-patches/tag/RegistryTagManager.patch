@@ -1,6 +1,6 @@
 --- a/net/minecraft/tag/RegistryTagManager.java
 +++ b/net/minecraft/tag/RegistryTagManager.java
-@@ -79,6 +79,12 @@
+@@ -78,6 +78,12 @@
              this.items.applyReload((Map) completablefuture1.join());
              this.fluids.applyReload((Map) completablefuture2.join());
              this.entityTypes.applyReload((Map) completablefuture3.join());

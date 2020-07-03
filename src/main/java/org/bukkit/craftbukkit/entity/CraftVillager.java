@@ -50,7 +50,7 @@ public class CraftVillager extends CraftAbstractVillager implements Villager {
 
     @Override
     public Type getVillagerType() {
-        return Type.valueOf(Registry.VILLAGER_TYPE.getKey(getHandle().getVillagerData().getType()).getKey().toUpperCase(Locale.ROOT));
+        return Type.valueOf(Registry.VILLAGER_TYPE.getId(getHandle().getVillagerData().getType()).getPath().toUpperCase(Locale.ROOT));
     }
 
     @Override

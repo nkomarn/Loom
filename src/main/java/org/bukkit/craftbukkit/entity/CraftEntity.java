@@ -862,4 +862,9 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         return perm;
     }
+
+    @Override
+    public Spigot spigot() {
+        return null;
+    }
 }

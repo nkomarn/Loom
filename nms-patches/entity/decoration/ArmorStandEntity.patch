@@ -29,6 +29,21 @@
  
  public class ArmorStandEntity extends LivingEntity {
  
+@@ -64,10 +65,10 @@
+     private int disabledSlots;
+     private EulerAngle headRotation;
+     private EulerAngle bodyRotation;
+-    private EulerAngle leftArmRotation;
+-    private EulerAngle rightArmRotation;
+-    private EulerAngle leftLegRotation;
+-    private EulerAngle rightLegRotation;
++    public EulerAngle leftArmRotation;
++    public EulerAngle rightArmRotation;
++    public EulerAngle leftLegRotation;
++    public EulerAngle rightLegRotation;
+ 
+     public ArmorStandEntity(EntityType<? extends ArmorStandEntity> entitytype, World world) {
+         super(entitytype, world);
 @@ -87,6 +88,13 @@
          this.updatePosition(d0, d1, d2);
      }
@@ -162,7 +177,7 @@
      }
  
 +    // CraftBukkit start
-+    @Override
++    // @Override
 +    protected boolean isDropExperience() {
 +        return true; // MC-157395, SPIGOT-5193 even baby (small) armor stands should drop
 +    }
@@ -171,5 +186,41 @@
      public void kill() {
 +        CraftEventFactory.callEntityDeathEvent(this, drops); // CraftBukkit - call event
          this.remove();
+     }
+ 
+@@ -631,7 +671,7 @@
+         return this.isMarker() ? PistonBehavior.IGNORE : super.getPistonBehavior();
+     }
+ 
+-    private void setSmall(boolean flag) {
++    public void setSmall(boolean flag) {
+         this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 1, flag));
+     }
+ 
+@@ -639,7 +679,7 @@
+         return ((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS) & 1) != 0;
+     }
+ 
+-    private void setShowArms(boolean flag) {
++    public void setShowArms(boolean flag) {
+         this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 4, flag));
+     }
+ 
+@@ -647,7 +687,7 @@
+         return ((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS) & 4) != 0;
+     }
+ 
+-    private void setHideBasePlate(boolean flag) {
++    public void setHideBasePlate(boolean flag) {
+         this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 8, flag));
+     }
+ 
+@@ -655,7 +695,7 @@
+         return ((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS) & 8) != 0;
+     }
+ 
+-    private void setMarker(boolean flag) {
++    public void setMarker(boolean flag) {
+         this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 16, flag));
      }
  

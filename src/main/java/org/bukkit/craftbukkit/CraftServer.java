@@ -658,7 +658,7 @@ public final class CraftServer implements Server {
         return this.configuration.getInt("ticks-per.water-spawns");
     }
 
-    @Override
+    //@Override
     public int getTicksPerWaterAmbientSpawns() {
         return this.configuration.getInt("ticks-per.water-ambient-spawns");
     }
@@ -1638,7 +1638,7 @@ public final class CraftServer implements Server {
         return waterAnimalSpawn;
     }
 
-    @Override
+    // @Override
     public int getWaterAmbientSpawnLimit() {
         return 0;
     }

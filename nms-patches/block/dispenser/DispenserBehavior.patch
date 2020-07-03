@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/dispenser/DispenserBehavior.java
 +++ b/net/minecraft/block/dispenser/DispenserBehavior.java
-@@ -70,6 +70,20 @@
+@@ -69,6 +69,20 @@
  import net.minecraft.util.math.Position;
  import net.minecraft.world.World;
  
@@ -21,7 +21,7 @@
  public interface DispenserBehavior {
  
      DispenserBehavior NOOP = (blockpointer, itemstack) -> {
-@@ -176,8 +190,37 @@
+@@ -175,8 +189,37 @@
                  Direction direction = (Direction) blockpointer.getBlockState().get(DispenserBlock.FACING);
                  EntityType<?> entitytype = ((SpawnEggItem) itemstack.getItem()).getEntityType(itemstack.getTag());
  
@@ -60,7 +60,7 @@
                  return itemstack;
              }
          };
-@@ -194,12 +237,42 @@
+@@ -193,12 +236,42 @@
                  Direction direction = (Direction) blockpointer.getBlockState().get(DispenserBlock.FACING);
                  BlockPos blockpos = blockpointer.getBlockPos().offset(direction);
                  World world = blockpointer.getWorld();
@@ -104,7 +104,7 @@
                  return itemstack;
              }
          });
-@@ -296,12 +369,41 @@
+@@ -295,12 +368,41 @@
          DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new ItemDispenserBehavior() {
              public ItemStack dispenseSilently(BlockPointer blockpointer, ItemStack itemstack) {
                  Direction direction = (Direction) blockpointer.getBlockState().get(DispenserBlock.FACING);
@@ -147,7 +147,7 @@
                  return itemstack;
              }
  
-@@ -322,10 +424,39 @@
+@@ -321,10 +423,39 @@
                  double d4 = random.nextGaussian() * 0.05D + (double) direction.getOffsetY();
                  double d5 = random.nextGaussian() * 0.05D + (double) direction.getOffsetZ();
  
@@ -191,7 +191,7 @@
                  return itemstack;
              }
  
-@@ -347,9 +478,54 @@
+@@ -346,9 +477,54 @@
                  BlockPos blockpos = blockpointer.getBlockPos().offset((Direction) blockpointer.getBlockState().get(DispenserBlock.FACING));
                  World world = blockpointer.getWorld();
  
@@ -247,7 +247,7 @@
                  } else {
                      return this.field_13367.dispense(blockpointer, itemstack);
                  }
-@@ -372,13 +548,42 @@
+@@ -371,13 +547,42 @@
                  Block block = blockstate.getBlock();
  
                  if (block instanceof FluidDrainable) {
@@ -291,7 +291,7 @@
                          itemstack.decrement(1);
                          if (itemstack.isEmpty()) {
                              return new ItemStack(item);
-@@ -399,12 +604,42 @@
+@@ -398,12 +603,42 @@
              protected ItemStack dispenseSilently(BlockPointer blockpointer, ItemStack itemstack) {
                  World world = blockpointer.getWorld();
  
@@ -335,7 +335,7 @@
                  } else if (CampfireBlock.method_30035(blockstate)) {
                      world.setBlockState(blockpos, (BlockState) blockstate.with(Properties.LIT, true));
                  } else if (blockstate.getBlock() instanceof TntBlock) {
-@@ -427,12 +662,61 @@
+@@ -426,12 +661,61 @@
                  World world = blockpointer.getWorld();
                  BlockPos blockpos = blockpointer.getBlockPos().offset((Direction) blockpointer.getBlockState().get(DispenserBlock.FACING));
  
@@ -397,7 +397,7 @@
                  return itemstack;
              }
          });
-@@ -440,11 +724,40 @@
+@@ -439,11 +723,40 @@
              protected ItemStack dispenseSilently(BlockPointer blockpointer, ItemStack itemstack) {
                  World world = blockpointer.getWorld();
                  BlockPos blockpos = blockpointer.getBlockPos().offset((Direction) blockpointer.getBlockState().get(DispenserBlock.FACING));
@@ -440,7 +440,7 @@
                  return itemstack;
              }
          });
-@@ -466,6 +779,33 @@
+@@ -465,6 +778,33 @@
                  Direction direction = (Direction) blockpointer.getBlockState().get(DispenserBlock.FACING);
                  BlockPos blockpos = blockpointer.getBlockPos().offset(direction);
  
@@ -474,7 +474,7 @@
                  if (world.isAir(blockpos) && WitherSkullBlock.canDispense(world, blockpos, itemstack)) {
                      world.setBlockState(blockpos, (BlockState) Blocks.WITHER_SKELETON_SKULL.getDefaultState().with(SkullBlock.ROTATION, direction.getAxis() == Direction.Axis.Y ? 0 : direction.getOpposite().getHorizontal() * 4), 3);
                      BlockEntity blockentity = world.getBlockEntity(blockpos);
-@@ -489,6 +829,32 @@
+@@ -488,6 +828,32 @@
                  BlockPos blockpos = blockpointer.getBlockPos().offset((Direction) blockpointer.getBlockState().get(DispenserBlock.FACING));
                  CarvedPumpkinBlock carvedpumpkinblock = (CarvedPumpkinBlock) Blocks.CARVED_PUMPKIN;
  
@@ -507,7 +507,7 @@
                  if (world.isAir(blockpos) && carvedpumpkinblock.canDispense(world, blockpos)) {
                      if (!world.isClient) {
                          world.setBlockState(blockpos, carvedpumpkinblock.getDefaultState(), 3);
-@@ -535,6 +901,32 @@
+@@ -534,6 +900,32 @@
                  BlockPos blockpos = blockpointer.getBlockPos().offset((Direction) blockpointer.getBlockState().get(DispenserBlock.FACING));
                  BlockState blockstate = world.getBlockState(blockpos);
  

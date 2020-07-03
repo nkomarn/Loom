@@ -1,8 +1,8 @@
 --- a/net/minecraft/screen/StonecutterScreenHandler.java
 +++ b/net/minecraft/screen/StonecutterScreenHandler.java
-@@ -17,6 +17,9 @@
+@@ -16,6 +16,9 @@
+ import net.minecraft.sound.SoundCategory;
  import net.minecraft.sound.SoundEvents;
- import net.minecraft.util.math.BlockPos;
  import net.minecraft.world.World;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryStonecutter;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryView;
@@ -10,7 +10,7 @@
  
  public class StonecutterScreenHandler extends ScreenHandler {
  
-@@ -31,6 +34,21 @@
+@@ -30,6 +33,21 @@
      private Runnable contentsChangedListener;
      public final Inventory input;
      private final CraftingResultInventory output;
@@ -32,7 +32,7 @@
  
      public StonecutterScreenHandler(int i, PlayerInventory playerinventory) {
          this(i, playerinventory, ScreenHandlerContext.EMPTY);
-@@ -93,9 +111,11 @@
+@@ -92,9 +110,11 @@
          }
  
          this.addProperty(this.selectedRecipe);

@@ -28,8 +28,12 @@
  
      protected HorseBaseEntity(EntityType<? extends HorseBaseEntity> entitytype, World world) {
          super(entitytype, world);
-@@ -267,7 +272,7 @@
-     protected void onChestedStatusChanged() {
+@@ -264,10 +269,10 @@
+         return 2;
+     }
+ 
+-    protected void onChestedStatusChanged() {
++    public void onChestedStatusChanged() { // CraftBukkit potected -> public
          SimpleInventory simpleinventory = this.items;
  
 -        this.items = new SimpleInventory(this.getInventorySize());

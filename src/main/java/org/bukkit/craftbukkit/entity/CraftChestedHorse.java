@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.server.EntityHorseChestedAbstract;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.ChestedHorse;
 
@@ -25,6 +24,6 @@ public abstract class CraftChestedHorse extends CraftAbstractHorse implements Ch
     public void setCarryingChest(boolean chest) {
         if (chest == isCarryingChest()) return;
         getHandle().setHasChest(chest);
-        getHandle().loadChest();
+        getHandle().onChestedStatusChanged();
     }
 }

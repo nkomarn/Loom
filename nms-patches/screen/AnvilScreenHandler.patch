@@ -1,6 +1,6 @@
 --- a/net/minecraft/screen/AnvilScreenHandler.java
 +++ b/net/minecraft/screen/AnvilScreenHandler.java
-@@ -18,13 +18,21 @@
+@@ -16,13 +16,21 @@
  import org.apache.commons.lang3.StringUtils;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -24,7 +24,7 @@
  
      public AnvilScreenHandler(int i, PlayerInventory playerinventory) {
          this(i, playerinventory, ScreenHandlerContext.EMPTY);
-@@ -94,7 +102,7 @@
+@@ -92,7 +100,7 @@
          byte b1 = 0;
  
          if (itemstack.isEmpty()) {
@@ -33,7 +33,7 @@
              this.levelCost.set(0);
          } else {
              ItemStack itemstack1 = itemstack.copy();
-@@ -112,7 +120,7 @@
+@@ -110,7 +118,7 @@
                  if (itemstack1.isDamageable() && itemstack1.getItem().canRepair(itemstack, itemstack2)) {
                      k = Math.min(itemstack1.getDamage(), itemstack1.getMaxDamage() / 4);
                      if (k <= 0) {
@@ -42,7 +42,7 @@
                          this.levelCost.set(0);
                          return;
                      }
-@@ -127,7 +135,7 @@
+@@ -125,7 +133,7 @@
                      this.repairItemUsage = i1;
                  } else {
                      if (!flag && (itemstack1.getItem() != itemstack2.getItem() || !itemstack1.isDamageable())) {
@@ -51,7 +51,7 @@
                          this.levelCost.set(0);
                          return;
                      }
-@@ -217,7 +225,7 @@
+@@ -215,7 +223,7 @@
                      }
  
                      if (flag2 && !flag1) {
@@ -60,7 +60,7 @@
                          this.levelCost.set(0);
                          return;
                      }
-@@ -241,11 +249,11 @@
+@@ -239,11 +247,11 @@
                  itemstack1 = ItemStack.EMPTY;
              }
  
@@ -75,7 +75,7 @@
                  itemstack1 = ItemStack.EMPTY;
              }
  
-@@ -264,7 +272,7 @@
+@@ -262,7 +270,7 @@
                  EnchantmentHelper.set(map, itemstack1);
              }
  
@@ -84,7 +84,7 @@
              this.sendContentUpdates();
          }
      }
-@@ -287,4 +295,17 @@
+@@ -285,4 +293,17 @@
  
          this.updateResult();
      }

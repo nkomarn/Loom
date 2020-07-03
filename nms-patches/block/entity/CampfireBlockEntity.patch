@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/entity/CampfireBlockEntity.java
 +++ b/net/minecraft/block/entity/CampfireBlockEntity.java
-@@ -22,12 +22,16 @@
+@@ -21,12 +21,16 @@
  import net.minecraft.util.math.Direction;
  import net.minecraft.util.math.MathHelper;
  import net.minecraft.world.World;
@@ -19,7 +19,7 @@
  
      public CampfireBlockEntity() {
          super(BlockEntityType.CAMPFIRE);
-@@ -73,6 +77,21 @@
+@@ -72,6 +76,21 @@
                      }).orElse(itemstack);
                      BlockPos blockpos = this.getPos();
  

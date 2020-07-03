@@ -1,0 +1,22 @@
+--- a/net/minecraft/entity/passive/LlamaEntity.java
++++ b/net/minecraft/entity/passive/LlamaEntity.java
+@@ -65,7 +65,7 @@
+         super(entitytype, world);
+     }
+ 
+-    private void setStrength(int i) {
++    public void setStrength(int i) { // CraftBukkit private -> public
+         this.dataTracker.set(LlamaEntity.ATTR_STRENGTH, Math.max(1, Math.min(5, i)));
+     }
+ 
+@@ -447,9 +447,7 @@
+         this.spitAt(livingentity);
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
+-        return this.createChild(passiveentity);
+-    }
++    // Loom - decompile error
+ 
+     static class ChaseWolvesGoal extends FollowTargetGoal<WolfEntity> {
+ 

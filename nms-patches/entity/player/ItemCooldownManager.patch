@@ -1,0 +1,26 @@
+--- a/net/minecraft/entity/player/ItemCooldownManager.java
++++ b/net/minecraft/entity/player/ItemCooldownManager.java
+@@ -8,8 +8,8 @@
+ 
+ public class ItemCooldownManager {
+ 
+-    private final Map<Item, ItemCooldownManager.Entry> entries = Maps.newHashMap();
+-    private int tick;
++    public final Map<Item, ItemCooldownManager.Entry> entries = Maps.newHashMap(); // CraftBukkit : private -> public
++    public int tick; // CraftBukkit : private -> public
+ 
+     public ItemCooldownManager() {}
+ 
+@@ -56,10 +56,10 @@
+ 
+     protected void onCooldownUpdate(Item item) {}
+ 
+-    class Entry {
++    public class Entry { // CraftBukkit : _ -> public
+ 
+         private final int startTick;
+-        private final int endTick;
++        public final int endTick; // CraftBukkit private -> public
+ 
+         private Entry(int i, int j) {
+             this.startTick = i;

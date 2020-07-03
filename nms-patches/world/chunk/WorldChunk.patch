@@ -1,21 +1,6 @@
 --- a/net/minecraft/world/chunk/WorldChunk.java
 +++ b/net/minecraft/world/chunk/WorldChunk.java
-@@ -6,12 +6,8 @@
- import it.unimi.dsi.fastutil.longs.LongSet;
- import it.unimi.dsi.fastutil.shorts.ShortList;
- import it.unimi.dsi.fastutil.shorts.ShortListIterator;
--import java.util.Collection;
--import java.util.Collections;
--import java.util.Iterator;
--import java.util.List;
--import java.util.Map;
--import java.util.Set;
-+
-+import java.util.*;
- import java.util.Map.Entry;
- import java.util.function.Consumer;
- import java.util.function.Predicate;
-@@ -19,10 +15,8 @@
+@@ -19,10 +19,8 @@
  import java.util.stream.Stream;
  import java.util.stream.StreamSupport;
  import javax.annotation.Nullable;
@@ -28,7 +13,7 @@
  import net.minecraft.block.entity.BlockEntity;
  import net.minecraft.client.world.DummyClientTickScheduler;
  import net.minecraft.entity.Entity;
-@@ -56,6 +50,10 @@
+@@ -56,6 +54,10 @@
  import net.minecraft.world.gen.feature.StructureFeature;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -39,7 +24,7 @@
  
  public class WorldChunk implements Chunk {
  
-@@ -66,8 +64,8 @@
+@@ -66,8 +68,8 @@
      private BiomeArray biomeArray;
      private final Map<BlockPos, CompoundTag> pendingBlockEntityTags;
      private boolean loadedToWorld;
@@ -50,7 +35,7 @@
      private final UpgradeData upgradeData;
      private final Map<BlockPos, BlockEntity> blockEntities;
      private final TypeFilterableList<Entity>[] entitySections;
-@@ -100,7 +98,7 @@
+@@ -100,7 +102,7 @@
          this.structureReferences = Maps.newHashMap();
          this.postProcessingLists = new ShortList[16];
          this.entitySections = (TypeFilterableList[]) (new TypeFilterableList[16]);
@@ -59,7 +44,7 @@
          this.pos = chunkpos;
          this.upgradeData = upgradedata;
          Heightmap.Type[] aheightmap_type = Heightmap.Type.values();
-@@ -131,8 +129,19 @@
+@@ -131,8 +133,19 @@
              }
          }
  
@@ -79,7 +64,7 @@
      public WorldChunk(World world, ProtoChunk protochunk) {
          this(world, protochunk.getPos(), protochunk.getBiomeArray(), protochunk.getUpgradeData(), protochunk.getBlockTickScheduler(), protochunk.getFluidTickScheduler(), protochunk.getInhabitedTime(), protochunk.getSectionArray(), (Consumer) null);
          Iterator iterator = protochunk.getEntities().iterator();
-@@ -174,6 +183,7 @@
+@@ -174,6 +187,7 @@
  
          this.setLightOn(protochunk.isLightOn());
          this.shouldSave = true;
@@ -87,7 +72,7 @@
      }
  
      public Heightmap getHeightmap(Heightmap.Type heightmap_type) {
-@@ -259,8 +269,15 @@
+@@ -259,8 +273,15 @@
          }
      }
  
@@ -103,7 +88,7 @@
          int i = blockpos.getX() & 15;
          int j = blockpos.getY();
          int k = blockpos.getZ() & 15;
-@@ -312,7 +329,8 @@
+@@ -312,7 +333,8 @@
                      }
                  }
  
@@ -113,7 +98,7 @@
                      blockstate.onBlockAdded(this.world, blockpos, blockstate1, flag);
                  }
  
-@@ -403,7 +421,12 @@
+@@ -403,7 +425,12 @@
  
      @Nullable
      public BlockEntity getBlockEntity(BlockPos blockpos, WorldChunk.CreationType worldchunk_creationtype) {
@@ -127,7 +112,7 @@
  
          if (blockentity == null) {
              CompoundTag compoundtag = (CompoundTag) this.pendingBlockEntityTags.remove(blockpos);
-@@ -447,7 +470,13 @@
+@@ -447,7 +474,13 @@
              if (blockentity1 != null && blockentity1 != blockentity) {
                  blockentity1.markRemoved();
              }
@@ -142,7 +127,7 @@
          }
      }
  
-@@ -494,6 +523,50 @@
+@@ -494,6 +527,50 @@
  
      }
  
@@ -193,7 +178,7 @@
      public void markDirty() {
          this.shouldSave = true;
      }
-@@ -547,7 +620,7 @@
+@@ -547,7 +624,7 @@
              Iterator iterator = this.entitySections[k].getAllOfType(Entity.class).iterator();
  
              while (iterator.hasNext()) {
@@ -202,7 +187,7 @@
  
                  if ((entitytype == null || entity.getType() == entitytype) && entity.getBoundingBox().intersects(box) && predicate.test(entity)) {
                      list.add(entity);
-@@ -568,7 +641,7 @@
+@@ -568,7 +645,7 @@
              Iterator iterator = this.entitySections[k].getAllOfType(oclass).iterator();
  
              while (iterator.hasNext()) {
@@ -211,7 +196,7 @@
  
                  if (t0.getBoundingBox().intersects(box) && (predicate == null || predicate.test(t0))) {
                      list.add(t0);
-@@ -633,7 +706,7 @@
+@@ -633,7 +710,7 @@
      }
  
      public boolean needsSaving() {
@@ -220,7 +205,7 @@
      }
  
      public void setUnsaved(boolean flag) {
-@@ -762,7 +835,7 @@
+@@ -762,7 +839,7 @@
  
      public void disableTickSchedulers() {
          if (this.blockTickScheduler instanceof ChunkTickScheduler) {
@@ -229,7 +214,7 @@
                  return this.getBlockState(blockpos).getBlock();
              });
              this.blockTickScheduler = DummyClientTickScheduler.get();
-@@ -772,7 +845,7 @@
+@@ -772,7 +849,7 @@
          }
  
          if (this.fluidTickScheduler instanceof ChunkTickScheduler) {
@@ -238,7 +223,7 @@
                  return this.getFluidState(blockpos).getFluid();
              });
              this.fluidTickScheduler = DummyClientTickScheduler.get();
-@@ -784,12 +857,12 @@
+@@ -784,12 +861,12 @@
      }
  
      public void enableTickSchedulers(ServerWorld serverworld) {

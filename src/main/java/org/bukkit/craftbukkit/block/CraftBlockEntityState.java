@@ -57,7 +57,8 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
     private void copyData(T from, T to) {
         BlockPos pos = to.getPos();
         CompoundTag nbtTagCompound = from.toTag(new CompoundTag());
-        to.load(getHandle(), nbtTagCompound);
+        to.fromTag(getHandle(), nbtTagCompound);
+        //to.load(getHandle(), nbtTagCompound);
 
         // reset the original position:
         to.setPos(pos);
@@ -115,7 +116,8 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
 
             if (isApplicable(tile)) {
                 applyTo(tileEntityClass.cast(tile));
-                tile.update();
+                tile.markDirty();
+                // tile.update();
             }
         }
 

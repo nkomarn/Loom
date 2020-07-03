@@ -14,7 +14,7 @@
  import javax.annotation.Nullable;
  import net.minecraft.block.Block;
  import net.minecraft.block.entity.BlockEntity;
-@@ -12,22 +12,31 @@
+@@ -12,9 +12,11 @@
  import net.minecraft.entity.player.PlayerInventory;
  import net.minecraft.inventory.Inventory;
  import net.minecraft.item.ItemStack;
@@ -26,8 +26,7 @@
  import net.minecraft.util.collection.DefaultedList;
  import net.minecraft.util.crash.CrashException;
  import net.minecraft.util.crash.CrashReport;
- import net.minecraft.util.crash.CrashReportSection;
--import net.minecraft.util.math.BlockPos;
+@@ -22,6 +24,14 @@
  import net.minecraft.util.math.MathHelper;
  import net.minecraft.util.registry.Registry;
  import net.minecraft.world.World;
@@ -42,14 +41,7 @@
  
  public abstract class ScreenHandler {
  
--    private final DefaultedList<ItemStack> trackedStacks = DefaultedList.of();
--    public final List<Slot> slots = Lists.newArrayList();
-+    public DefaultedList<ItemStack> trackedStacks = DefaultedList.of(); // Loom - public access, non-final
-+    public List<Slot> slots = Lists.newArrayList(); // Loom - non-final
-     private final List<Property> properties = Lists.newArrayList();
-     @Nullable
-     private final ScreenHandlerType<?> type;
-@@ -38,6 +47,29 @@
+@@ -37,6 +47,29 @@
      private final List<ScreenHandlerListener> listeners = Lists.newArrayList();
      private final Set<PlayerEntity> restrictedPlayers = Sets.newHashSet();
  
@@ -79,7 +71,7 @@
      protected ScreenHandler(@Nullable ScreenHandlerType<?> screenhandlertype, int i) {
          this.type = screenhandlertype;
          this.syncId = i;
-@@ -219,6 +251,7 @@
+@@ -218,6 +251,7 @@
                      k = playerinventory.getCursorStack().getCount();
                      Iterator iterator = this.quickCraftSlots.iterator();
  
@@ -87,7 +79,7 @@
                      while (iterator.hasNext()) {
                          Slot slot1 = (Slot) iterator.next();
                          ItemStack itemstack3 = playerinventory.getCursorStack();
-@@ -234,12 +267,53 @@
+@@ -233,12 +267,53 @@
                              }
  
                              k -= itemstack4.getCount() - j1;
@@ -144,7 +136,7 @@
                  }
  
                  this.endQuickCraft();
-@@ -256,8 +330,12 @@
+@@ -255,8 +330,12 @@
                  if (i == -999) {
                      if (!playerinventory.getCursorStack().isEmpty()) {
                          if (j == 0) {
@@ -158,7 +150,7 @@
                          }
  
                          if (j == 1) {
-@@ -345,6 +423,15 @@
+@@ -344,6 +423,15 @@
                          }
  
                          slot2.markDirty();
@@ -174,7 +166,7 @@
                      }
                  }
              } else if (slotactiontype == SlotActionType.SWAP) {
-@@ -447,8 +534,11 @@
+@@ -446,8 +534,11 @@
          PlayerInventory playerinventory = playerentity.inventory;
  
          if (!playerinventory.getCursorStack().isEmpty()) {

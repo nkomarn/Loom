@@ -280,7 +280,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void kickPlayer(String message) {
         if (getHandle().networkHandler == null) return;
 
-        getHandle().networkHandler.disconnect(message == null ? "" : message);
+        getHandle().networkHandler.disconnect(new LiteralText(message == null ? "" : message));
     }
 
     @Override
@@ -682,7 +682,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     @Deprecated
     @Override
     public void updateInventory() {
-        getHandle().updateInventory(getHandle().currentScreenHandler);
+        getHandle().openHandledScreen(getHandle().currentScreenHandler);
     }
 
     @Override
@@ -702,7 +702,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         BlockPos bed = getHandle().getSpawnPointPosition();
 
         if (world != null && bed != null) {
-            Optional<Vec3d> spawnLoc = PlayerEntity.getBed(((CraftWorld) world).getHandle(), bed, getHandle().isSpawnForced(), true);
+            Optional<Vec3d> spawnLoc = PlayerEntity.findRespawnPosition(((CraftWorld) world).getHandle(), bed, getHandle().isSpawnPointSet(), true);
             if (spawnLoc.isPresent()) {
                 Vec3d vec = spawnLoc.get();
                 return new Location(world, vec.x, vec.y, vec.z);
@@ -719,9 +719,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     @Override
     public void setBedSpawnLocation(Location location, boolean override) {
         if (location == null) {
-            getHandle().setRespawnPosition(null, null, override, false);
+            getHandle().setSpawnPoint(null, null, override, false);
         } else {
-            getHandle().setRespawnPosition(((CraftWorld) location.getWorld()).getHandle().getDimensionRegistryKey(), new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()), override, false);
+            getHandle().setSpawnPoint(((CraftWorld) location.getWorld()).getHandle().getRegistryKey(), new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()), override, false);
         }
     }
 
@@ -911,37 +911,37 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public float getExp() {
-        return getHandle().exp;
+        return getHandle().experienceProgress;
     }
 
     @Override
     public void setExp(float exp) {
         Preconditions.checkArgument(exp >= 0.0 && exp <= 1.0, "Experience progress must be between 0.0 and 1.0 (%s)", exp);
-        getHandle().exp = exp;
+        getHandle().experienceProgress = exp;
         getHandle().lastSentExp = -1;
     }
 
     @Override
     public int getLevel() {
-        return getHandle().expLevel;
+        return getHandle().experienceLevel;
     }
 
     @Override
     public void setLevel(int level) {
         Preconditions.checkArgument(level >= 0, "Experience level must not be negative (%s)", level);
-        getHandle().expLevel = level;
+        getHandle().experienceLevel = level;
         getHandle().lastSentExp = -1;
     }
 
     @Override
     public int getTotalExperience() {
-        return getHandle().expTotal;
+        return getHandle().totalExperience;
     }
 
     @Override
     public void setTotalExperience(int exp) {
         Preconditions.checkArgument(exp >= 0, "Total experience points must not be negative (%s)", exp);
-        getHandle().expTotal = exp;
+        getHandle().totalExperience = exp;
     }
 
     @Override
@@ -1030,9 +1030,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         // Remove this player from the hidden player's EntityTrackerEntry
         ThreadedAnvilChunkStorage tracker = ((ServerWorld) entity.world).getChunkManager().threadedAnvilChunkStorage;
         ServerPlayerEntity other = ((CraftPlayer) player).getHandle();
-        ThreadedAnvilChunkStorage.EntityTracker entry = tracker.trackedEntities.get(other.getId());
+        ThreadedAnvilChunkStorage.EntityTracker entry = tracker.entityTrackers.get(other.getEntityId());
         if (entry != null) {
-            entry.clear(getHandle());
+            entry.stopTracking(getHandle());
         }
 
         // Remove the hidden player from this player user list, if they're on it
@@ -1075,9 +1075,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         getHandle().networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, other));
 
-        ThreadedAnvilChunkStorage.EntityTracker entry = tracker.trackedEntities.get(other.getId());
-        if (entry != null && !entry.trackedPlayers.contains(getHandle())) {
-            entry.updatePlayer(getHandle());
+        ThreadedAnvilChunkStorage.EntityTracker entry = tracker.entityTrackers.get(other.getEntityId());
+        if (entry != null && !entry.playersTracking.contains(getHandle())) {
+            entry.updateCameraPosition(getHandle());
         }
     }
 
@@ -1180,7 +1180,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         data.putBoolean("keepLevel", handle.keepLevel);
         data.putLong("firstPlayed", getFirstPlayed());
         data.putLong("lastPlayed", System.currentTimeMillis());
-        data.putString("lastKnownName", handle.getName());
+        data.putString("lastKnownName", handle.getName().asString());
     }
 
     @Override
@@ -1403,13 +1403,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setMaxHealth(double amount) {
         super.setMaxHealth(amount);
         this.health = Math.min(this.health, health);
-        getHandle().triggerHealthUpdate();
+        getHandle().markHealthDirty();
     }
 
     @Override
     public void resetMaxHealth() {
         super.resetMaxHealth();
-        getHandle().triggerHealthUpdate();
+        getHandle().markHealthDirty();
     }
 
     @Override
@@ -1424,7 +1424,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (playerConnection == null) {
             throw new IllegalStateException("Cannot set scoreboard yet");
         }
-        if (playerConnection.isDisconnected()) {
+        if (playerConnection.connection.isOpen()) { // playerConnection.isDisconnected()
             throw new IllegalStateException("Cannot set scoreboard for invalid CraftPlayer");
         }
 
@@ -1475,13 +1475,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void updateScaledHealth(boolean sendHealth) {
         AttributeContainer attributemapserver = getHandle().getAttributes();
-        Collection<EntityAttributeInstance> set = attributemapserver.b(); // PAIL: Rename
+        Collection<EntityAttributeInstance> set = attributemapserver.getAttributesToSend(); // PAIL: Rename
 
         injectScaledMaxHealth(set, true);
 
         // SPIGOT-3813: Attributes before health
         if (getHandle().networkHandler != null) {
-            getHandle().networkHandler.sendPacket(new EntityAttributesS2CPacket(getHandle().getId(), set));
+            getHandle().networkHandler.sendPacket(new EntityAttributesS2CPacket(getHandle().getEntityId(), set));
             if (sendHealth) {
                 sendHealthUpdate();
             }
@@ -1509,14 +1509,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public org.bukkit.entity.Entity getSpectatorTarget() {
-        Entity followed = getHandle().getSpecatorTarget();
+        Entity followed = getHandle().getCameraEntity();
         return followed == getHandle() ? null : followed.getBukkitEntity();
     }
 
     @Override
     public void setSpectatorTarget(org.bukkit.entity.Entity entity) {
         Preconditions.checkArgument(getGameMode() == GameMode.SPECTATOR, "Player must be in spectator mode");
-        getHandle().setSpectatorTarget((entity == null) ? null : ((CraftEntity) entity).getHandle());
+        getHandle().setCameraEntity((entity == null) ? null : ((CraftEntity) entity).getHandle());
     }
 
     @Override
@@ -1636,7 +1636,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void updateCommands() {
         if (getHandle().networkHandler == null) return;
 
-        getHandle().server.getCommandDispatcher().a(getHandle());
+        getHandle().server.getCommandManager().sendCommandTree(getHandle());
     }
 
     @Override

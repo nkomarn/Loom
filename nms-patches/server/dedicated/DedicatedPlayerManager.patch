@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/dedicated/DedicatedPlayerManager.java
++++ b/net/minecraft/server/dedicated/DedicatedPlayerManager.java
+@@ -135,7 +135,5 @@
+         return this.getOpList().isOp(gameprofile);
+     }
+ 
+-    public MinecraftServer getServer() {
+-        return this.getServer();
+-    }
++    // Loom - decompile error
+ }

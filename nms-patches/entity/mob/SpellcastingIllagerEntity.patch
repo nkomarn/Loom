@@ -1,0 +1,11 @@
+--- a/net/minecraft/entity/mob/SpellcastingIllagerEntity.java
++++ b/net/minecraft/entity/mob/SpellcastingIllagerEntity.java
+@@ -49,7 +49,7 @@
+         this.dataTracker.set(SpellcastingIllagerEntity.SPELL, (byte) spellcastingillagerentity_spell.id);
+     }
+ 
+-    protected SpellcastingIllagerEntity.Spell getSpell() {
++    public SpellcastingIllagerEntity.Spell getSpell() { // CraftBukkit - public
+         return !this.world.isClient ? this.spell : SpellcastingIllagerEntity.Spell.byId((Byte) this.dataTracker.get(SpellcastingIllagerEntity.SPELL));
+     }
+ 

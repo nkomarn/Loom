@@ -12,6 +12,17 @@
  
  public class CreeperEntity extends HostileEntity {
  
+@@ -44,8 +49,8 @@
+     private static final TrackedData<Boolean> IGNITED = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+     private int lastFuseTime;
+     private int currentFuseTime;
+-    private int fuseTime = 30;
+-    private int explosionRadius = 3;
++    public int fuseTime = 30;
++    public int explosionRadius = 3;
+     private int headsDropped;
+ 
+     public CreeperEntity(EntityType<? extends CreeperEntity> entitytype, World world) {
 @@ -187,9 +192,19 @@
  
      public void onStruckByLightning(LightningEntity lightningentity) {
@@ -33,7 +44,13 @@
      protected ActionResult interactMob(PlayerEntity playerentity, Hand hand) {
          ItemStack itemstack = playerentity.getStackInHand(hand);
  
-@@ -213,10 +228,19 @@
+@@ -208,15 +223,24 @@
+         }
+     }
+ 
+-    private void explode() {
++    public void explode() {
+         if (!this.world.isClient) {
              Explosion.DestructionType explosion_destructiontype = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE;
              float f = this.T_() ? 2.0F : 1.0F;
  
