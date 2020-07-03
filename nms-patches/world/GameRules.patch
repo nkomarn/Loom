@@ -77,7 +77,15 @@
      }
  
      public abstract static class Rule<T extends GameRules.Rule<T>> {
-@@ -309,7 +297,7 @@
+@@ -302,14 +290,14 @@
+             this.changed(((ServerCommandSource) commandcontext.getSource()).getMinecraftServer());
+         }
+ 
+-        protected void changed(@Nullable MinecraftServer minecraftserver) {
++        public void changed(@Nullable MinecraftServer minecraftserver) { // Loom - public access
+             if (minecraftserver != null) {
+                 this.type.changeCallback.accept(minecraftserver, this.getThis());
+             }
  
          }
  

@@ -1,6 +1,6 @@
 --- a/net/minecraft/inventory/SimpleInventory.java
 +++ b/net/minecraft/inventory/SimpleInventory.java
-@@ -13,13 +13,65 @@
+@@ -13,13 +13,66 @@
  import net.minecraft.recipe.RecipeInputProvider;
  import net.minecraft.util.collection.DefaultedList;
  
@@ -38,12 +38,13 @@
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
++    public int getMaxCountPerStack() {
 +        return maxStack;
 +    }
 +
-+    public void setMaxStackSize(int i) {
-+        maxStack = i;
++    @Override
++    public void setMaxCountPerStack(int size) {
++        maxStack = size;
 +    }
 +
 +    public org.bukkit.inventory.InventoryHolder getOwner() {

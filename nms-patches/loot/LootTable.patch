@@ -36,3 +36,34 @@
          List<Integer> list1 = this.getFreeSlots(inventory, random);
  
          this.shuffle(list, list1.size(), random);
+@@ -240,6 +260,7 @@
+             return jsonobject;
+         }
+ 
++        /*
+         public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
+             return this.serialize((LootTable) object, type, jsonserializationcontext);
+         }
+@@ -247,6 +268,7 @@
+         public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
+             return this.deserialize(jsonelement, type, jsondeserializationcontext);
+         }
++        */ // Loom - decompile error
+     }
+ 
+     public static class Builder implements LootFunctionConsumingBuilder<LootTable.Builder> {
+@@ -282,6 +304,7 @@
+             return new LootTable(this.type, (LootPool[]) this.pools.toArray(new LootPool[0]), (LootFunction[]) this.functions.toArray(new LootFunction[0]));
+         }
+ 
++        /*
+         public Object getThis() {
+             return this.getThis();
+         }
+@@ -289,5 +312,6 @@
+         public Object apply(LootFunction.Builder lootfunction_builder) {
+             return this.apply(lootfunction_builder);
+         }
++        */ // Loom - decompile error
+     }
+ }

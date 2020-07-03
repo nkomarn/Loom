@@ -15,7 +15,19 @@
  
      protected void initGoals() {
          this.goalSelector.add(1, new SwimGoal(this));
-@@ -432,9 +438,19 @@
+@@ -360,9 +366,11 @@
+         return this.moreCarrotTicks == 0;
+     }
+ 
++    /*
+     public PassiveEntity createChild(PassiveEntity passiveentity) {
+         return this.createChild(passiveentity);
+     }
++    */ // Loom - decompile error
+ 
+     static class RabbitAttackGoal extends MeleeAttackGoal {
+ 
+@@ -432,9 +440,19 @@
                      Integer integer = (Integer) blockstate.get(CarrotsBlock.AGE);
  
                      if (integer == 0) {

@@ -26,6 +26,24 @@
  
  public abstract class AbstractDecorationEntity extends Entity {
  
+@@ -29,7 +35,7 @@
+         return entity instanceof AbstractDecorationEntity;
+     };
+     private int obstructionCheckCounter;
+-    protected BlockPos attachmentPos;
++    public BlockPos attachmentPos; // Loom - public access
+     protected Direction facing;
+ 
+     protected AbstractDecorationEntity(EntityType<? extends AbstractDecorationEntity> entitytype, World world) {
+@@ -44,7 +50,7 @@
+ 
+     protected void initDataTracker() {}
+ 
+-    protected void setFacing(Direction direction) {
++    public void setFacing(Direction direction) { // Loom - public access
+         Validate.notNull(direction);
+         Validate.isTrue(direction.getAxis().isHorizontal());
+         this.facing = direction;
 @@ -55,26 +61,39 @@
  
      protected void updateAttachmentPosition() {

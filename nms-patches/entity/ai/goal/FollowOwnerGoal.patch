@@ -21,7 +21,7 @@
 -            this.tameable.refreshPositionAndAngles((double) i + 0.5D, (double) j, (double) k + 0.5D, this.tameable.yaw, this.tameable.pitch);
 +            // CraftBukkit start
 +            CraftEntity entity = this.tameable.getBukkitEntity();
-+            Location to = new Location(entity.getWorld(), (double) i + 0.5D, (double) j, (double) k + 0.5D, this.a.yaw, this.a.pitch);
++            Location to = new Location(entity.getWorld(), (double) i + 0.5D, (double) j, (double) k + 0.5D, this.tameable.yaw, this.tameable.pitch);
 +            EntityTeleportEvent event = new EntityTeleportEvent(entity, entity.getLocation(), to);
 +            Bukkit.getPluginManager().callEvent(event);
 +            if (event.isCancelled()) {

@@ -1,0 +1,36 @@
+--- a/net/minecraft/entity/boss/dragon/EnderDragonFight.java
++++ b/net/minecraft/entity/boss/dragon/EnderDragonFight.java
+@@ -60,8 +60,8 @@
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final Predicate<Entity> VALID_ENTITY = EntityPredicates.VALID_ENTITY.and(EntityPredicates.maxDistance(0.0D, 128.0D, 0.0D, 192.0D));
+-    private final ServerBossBar bossBar;
+-    private final ServerWorld world;
++    public final ServerBossBar bossBar; // Loom - public access
++    public final ServerWorld world; // Loom - public access
+     private final List<Integer> gateways;
+     private final BlockPattern endPortalPattern;
+     private int dragonSeenTimer;
+@@ -70,10 +70,10 @@
+     private int playerUpdateTimer;
+     private boolean dragonKilled;
+     private boolean previouslyKilled;
+-    private UUID dragonUuid;
++    public UUID dragonUuid; // Loom - public access
+     private boolean doLegacyCheck;
+-    private BlockPos exitPortalLocation;
+-    private EnderDragonSpawnState dragonSpawnState;
++    public BlockPos exitPortalLocation; // Loom - public access
++    public EnderDragonSpawnState dragonSpawnState; // Loom - public access
+     private int spawnStateTimer;
+     private List<EndCrystalEntity> crystals;
+ 
+@@ -234,7 +234,7 @@
+ 
+     }
+ 
+-    protected void setSpawnState(EnderDragonSpawnState enderdragonspawnstate) {
++    public void setSpawnState(EnderDragonSpawnState enderdragonspawnstate) { // Loom - public access
+         if (this.dragonSpawnState == null) {
+             throw new IllegalStateException("Dragon respawn isn't in progress, can't skip ahead in the animation.");
+         } else {

@@ -17,6 +17,28 @@
  
  public class AreaEffectCloudEntity extends Entity {
  
+@@ -41,15 +46,15 @@
+     private static final TrackedData<Boolean> WAITING = DataTracker.registerData(AreaEffectCloudEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+     private static final TrackedData<ParticleEffect> PARTICLE_ID = DataTracker.registerData(AreaEffectCloudEntity.class, TrackedDataHandlerRegistry.PARTICLE);
+     private Potion potion;
+-    private final List<StatusEffectInstance> effects;
++    public final List<StatusEffectInstance> effects; // Loom - public access
+     private final Map<Entity, Integer> affectedEntities;
+     private int duration;
+-    private int waitTime;
+-    private int reapplicationDelay;
++    public int waitTime; // Loom - public access
++    public int reapplicationDelay; // Loom - public access
+     private boolean customColor;
+-    private int durationOnUse;
+-    private float radiusOnUse;
+-    private float radiusGrowth;
++    public int durationOnUse; // Loom - public access
++    public float radiusOnUse; // Loom - public access
++    public float radiusGrowth; // Loom - public access
+     private LivingEntity owner;
+     private UUID ownerUuid;
+ 
 @@ -122,6 +127,22 @@
  
      }
@@ -28,7 +50,7 @@
 +        }
 +    }
 +
-+    public String getType() {
++    public String getPotionType() { // Loom - changed from getType() due to name clash
 +        return Registry.POTION.getId(this.potion).toString();
 +    }
 +

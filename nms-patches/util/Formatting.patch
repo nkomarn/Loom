@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/Formatting.java
++++ b/net/minecraft/util/Formatting.java
+@@ -21,7 +21,7 @@
+     }));
+     private static final Pattern FORMATTING_CODE_PATTERN = Pattern.compile("(?i)\u00a7[0-9A-FK-OR]");
+     private final String name;
+-    private final char code;
++    public final char code; // Loom - public access
+     private final boolean modifier;
+     private final String stringValue;
+     private final int colorIndex;

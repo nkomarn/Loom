@@ -49,7 +49,7 @@
                          }
                      } else if (blockstate.getBlock() instanceof FluidBlock) {
 -                        world.setBlockState(blockpos2, Blocks.AIR.getDefaultState(), 3);
-+                        blockList.setTypeAndData(blockpos2, Blocks.AIR.getDefaultState(), 3); // CraftBukkit
++                        blockList.setBlockState(blockpos2, Blocks.AIR.getDefaultState(), 3); // CraftBukkit
                          ++i;
                          if (j < 6) {
                              queue.add(new Pair<>(blockpos2, j + 1));
@@ -62,7 +62,7 @@
 -                        dropStacks(blockstate, world, blockpos2, blockentity);
 -                        world.setBlockState(blockpos2, Blocks.AIR.getDefaultState(), 3);
 +                        //dropStacks(blockstate, world, blockpos2, blockentity);
-+                        blockList.setTypeAndData(blockpos2, Blocks.AIR.getDefaultState(), 3);
++                        blockList.setBlockState(blockpos2, Blocks.AIR.getDefaultState(), 3);
 +                        // CraftBukkit end
                          ++i;
                          if (j < 6) {

@@ -119,7 +119,7 @@
 +                BlockPos blockpos = this.lowerCorner.offset(this.negativeDir, i);
 +
 +                for (int j = 0; j < this.height; ++j) {
-+                    BlockPos pos = BlockPos.up(j);
++                    BlockPos pos = blockpos.up(j); // TODO ???
 +                    CraftBlockState state = CraftBlockState.getBlockState(this.world.getWorld(), pos, 18);
 +                    state.setData(Blocks.NETHER_PORTAL.getDefaultState().with(AXIS, this.axis));
 +                    blocks.add(state);

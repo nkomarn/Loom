@@ -29,7 +29,7 @@
  
 -                            world.setBlockState(cachedblockposition.getBlockPos(), Blocks.AIR.getDefaultState(), 2);
 -                            world.syncWorldEvent(2001, cachedblockposition.getBlockPos(), Block.getRawIdFromState(cachedblockposition.getBlockState()));
-+                            blockList.setTypeAndData(cachedblockposition.getBlockPos(), Blocks.AIR.getDefaultState(), 2); // CraftBukkit
++                            blockList.setBlockState(cachedblockposition.getBlockPos(), Blocks.AIR.getDefaultState(), 2); // CraftBukkit
 +                            // world.syncWorldEvent(2001, cachedblockposition.getBlockPos(), Block.getRawIdFromState(cachedblockposition.getBlockState()));
                          }
                      }

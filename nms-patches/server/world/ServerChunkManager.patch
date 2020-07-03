@@ -1,5 +1,16 @@
 --- a/net/minecraft/server/world/ServerChunkManager.java
 +++ b/net/minecraft/server/world/ServerChunkManager.java
+@@ -57,8 +57,8 @@
+     public final ThreadedAnvilChunkStorage threadedAnvilChunkStorage;
+     private final PersistentStateManager persistentStateManager;
+     private long lastMobSpawningTime;
+-    private boolean spawnMonsters = true;
+-    private boolean spawnAnimals = true;
++    public boolean spawnMonsters = true; // Loom - public access
++    public boolean spawnAnimals = true; // Loom - public access
+     private final long[] chunkPosCache = new long[4];
+     private final ChunkStatus[] chunkStatusCache = new ChunkStatus[4];
+     private final Chunk[] chunkCache = new Chunk[4];
 @@ -168,12 +168,12 @@
              if (chunkholder == null) {
                  return null;
@@ -15,6 +26,15 @@
  
                      if (chunk1 != null) {
                          this.putInCache(k, chunk1, ChunkStatus.FULL);
+@@ -263,7 +263,7 @@
+         return this.mainThreadExecutor.runTask();
+     }
+ 
+-    private boolean tick() {
++    public boolean tick() { // Loom - public access
+         boolean flag = this.ticketManager.tick(this.threadedAnvilChunkStorage);
+         boolean flag1 = this.threadedAnvilChunkStorage.updateHolderMap();
+ 
 @@ -487,13 +487,7 @@
          return this.spawnEntry;
      }

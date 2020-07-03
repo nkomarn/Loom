@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -148,9 +148,28 @@
+@@ -148,26 +148,45 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -29,19 +29,39 @@
 +    public static final Logger LOGGER = LogManager.getLogger(); // Loom - accessed in other classes
      public static final File USER_CACHE_FILE = new File("usercache.json");
      public static final LevelInfo DEMO_LEVEL_INFO = new LevelInfo("Demo World", GameMode.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), DataPackSettings.SAFE_MODE);
-     protected final LevelStorage.Session session;
-@@ -166,7 +185,7 @@
+-    protected final LevelStorage.Session session;
+-    protected final WorldSaveHandler field_24371;
++    public final LevelStorage.Session session; // Loom - public access
++    public final WorldSaveHandler field_24371; // Loom - public access
+     private final Snooper snooper = new Snooper("server", this, Util.getMeasuringTimeMs());
+     private final List<Runnable> serverGuiTickables = Lists.newArrayList();
+     private TickTimeTracker tickTimeTracker;
+     private Profiler profiler;
+     private final ServerNetworkIo networkIo;
+-    private final WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory;
++    public final WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory; // Loom - public access
+     private final ServerMetadata metadata;
+     private final Random random;
      private final DataFixer dataFixer;
      private String serverIp;
      private int serverPort;
 -    protected final RegistryTracker.Modifiable dimensionTracker;
+-    private final Map<RegistryKey<World>, ServerWorld> worlds;
 +    public final RegistryTracker.Modifiable dimensionTracker;
-     private final Map<RegistryKey<World>, ServerWorld> worlds;
++    public final Map<RegistryKey<World>, ServerWorld> worlds; // Loom - public access
      private PlayerManager playerManager;
      private volatile boolean running;
-@@ -215,7 +234,22 @@
+     private boolean stopped;
+@@ -210,12 +229,27 @@
+     private final MetricsData metricsData;
+     private boolean enforceWhitelist;
+     private float tickTime;
+-    private final Executor workerExecutor;
++    public final Executor workerExecutor; // Loom - public access
+     @Nullable
      private String serverId;
-     private ServerResourceManager serverResourceManager;
+-    private ServerResourceManager serverResourceManager;
++    public ServerResourceManager serverResourceManager; // Loom - public access
      private final StructureManager structureManager;
 -    protected final SaveProperties saveProperties;
 +    protected SaveProperties saveProperties;
@@ -132,7 +152,7 @@
              levelstorage_session.convert(new ProgressListener() {
                  private long lastProgressUpdate = Util.getMeasuringTimeMs();
  
-@@ -299,55 +361,193 @@
+@@ -299,55 +361,194 @@
  
      }
  
@@ -332,22 +352,23 @@
 -        } else {
 -            dimensiontype = dimensionoptions.getDimensionType();
 -            object = dimensionoptions.getChunkGenerator();
--        }
--
++    // Loom - public access
++    public void createWorlds(ServerWorld serverworld, ServerWorldProperties serverWorldProperties, SaveProperties saveProperties, GeneratorOptions generatorOptions) {
++        boolean flag = generatorOptions.isDebugWorld();
++
++        // CraftBukkit start
++        if (serverworld.generator != null) {
++            serverworld.getCraftWorld().getPopulators().addAll(serverworld.generator.getDefaultPopulators(serverworld.getCraftWorld()));
+         }
+ 
 -        RegistryKey<DimensionType> registrykey = (RegistryKey) this.dimensionTracker.a().getKey(dimensiontype).orElseThrow(() -> {
 -            return new IllegalStateException("Unregistered dimension type: " + dimensiontype);
 -        });
 -        ServerWorld serverworld = new ServerWorld(this, this.workerExecutor, this.session, serverworldproperties, World.OVERWORLD, registrykey, dimensiontype, worldgenerationprogresslistener, (ChunkGenerator) object, flag, j, list, true);
-+    protected void createWorlds(ServerWorld serverworld, ServerWorldProperties serverWorldProperties, SaveProperties saveProperties, GeneratorOptions generatorOptions) {
-+        boolean flag = generatorOptions.isDebugWorld();
- 
+-
 -        this.worlds.put(World.OVERWORLD, serverworld);
 -        PersistentStateManager persistentstatemanager = serverworld.getPersistentStateManager();
-+        // CraftBukkit start
-+        if (serverworld.generator != null) {
-+            serverworld.getCraftWorld().getPopulators().addAll(serverworld.generator.getDefaultPopulators(serverworld.getCraftWorld()));
-+        }
- 
+-
 -        this.initScoreboard(persistentstatemanager);
 -        this.dataCommandStorage = new DataCommandStorage(persistentstatemanager);
          WorldBorder worldborder = serverworld.getWorldBorder();
@@ -364,7 +385,7 @@
                  if (flag) {
                      this.setToDebugWorldProperties(this.saveProperties);
                  }
-@@ -363,36 +563,10 @@
+@@ -363,36 +564,10 @@
                  throw new CrashException(crashreport);
              }
  
@@ -403,7 +424,7 @@
  
      private static void setupSpawn(ServerWorld serverworld, ServerWorldProperties serverworldproperties, boolean flag, boolean flag1, boolean flag2) {
          ChunkGenerator chunkgenerator = serverworld.getChunkManager().getChunkGenerator();
-@@ -408,6 +582,22 @@
+@@ -408,6 +583,22 @@
              BlockPos blockpos = biomesource.locateBiome(0, serverworld.getSeaLevel(), 0, 256, list, random);
              ChunkPos chunkpos = blockpos == null ? new ChunkPos(0, 0) : new ChunkPos(blockpos);
  
@@ -426,14 +447,14 @@
              if (blockpos == null) {
                  MinecraftServer.LOGGER.warn("Unable to find spawn biome");
              }
-@@ -473,8 +663,15 @@
+@@ -473,8 +664,15 @@
          serverworldproperties.setGameMode(GameMode.SPECTATOR);
      }
  
 -    private void prepareStartRegion(WorldGenerationProgressListener worldgenerationprogresslistener) {
 -        ServerWorld serverworld = this.getOverworld();
-+    // CraftBukkit start
-+    private void prepareStartRegion(WorldGenerationProgressListener worldgenerationprogresslistener, ServerWorld serverworld) {
++    // CraftBukkit start, Loom - public access
++    public void prepareStartRegion(WorldGenerationProgressListener worldgenerationprogresslistener, ServerWorld serverworld) {
 +        if (!serverworld.getCraftWorld().getKeepSpawnInMemory()) {
 +            return;
 +        }
@@ -444,7 +465,7 @@
  
          MinecraftServer.LOGGER.info("Preparing start region for dimension {}", (Object) serverworld.getRegistryKey().getValue());
          BlockPos blockpos = serverworld.getSpawnPos();
-@@ -487,17 +684,23 @@
+@@ -487,17 +685,23 @@
          serverchunkmanager.addTicket(ChunkTicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
  
          while (serverchunkmanager.getTotalChunksLoadedCount() != 441) {
@@ -479,7 +500,7 @@
  
              if (forcedchunkstate != null) {
                  LongIterator longiterator = forcedchunkstate.getChunks().iterator();
-@@ -511,11 +714,16 @@
+@@ -511,11 +715,16 @@
              }
          }
  
@@ -498,7 +519,7 @@
      }
  
      protected void loadWorldResourcePack() {
-@@ -560,12 +768,16 @@
+@@ -560,12 +769,16 @@
              serverworld.save((ProgressListener) null, flag1, serverworld.savingDisabled && !flag2);
          }
  
@@ -516,7 +537,7 @@
          return flag3;
      }
  
-@@ -573,8 +785,32 @@
+@@ -573,8 +786,32 @@
          this.shutdown();
      }
  
@@ -549,7 +570,7 @@
          if (this.getNetworkIo() != null) {
              this.getNetworkIo().stop();
          }
-@@ -583,6 +819,7 @@
+@@ -583,6 +820,7 @@
              MinecraftServer.LOGGER.info("Saving players");
              this.playerManager.saveAllPlayerData();
              this.playerManager.disconnectAllPlayers();
@@ -557,7 +578,7 @@
          }
  
          MinecraftServer.LOGGER.info("Saving worlds");
-@@ -660,14 +897,16 @@
+@@ -660,14 +898,16 @@
                  while (this.running) {
                      long i = Util.getMeasuringTimeMs() - this.timeReference;
  
@@ -575,7 +596,7 @@
                      this.timeReference += 50L;
                      TickDurationMonitor tickdurationmonitor = TickDurationMonitor.create("Server");
  
-@@ -713,6 +952,12 @@
+@@ -713,6 +953,12 @@
              } catch (Throwable throwable1) {
                  MinecraftServer.LOGGER.error("Exception stopping the server", throwable1);
              } finally {
@@ -588,7 +609,7 @@
                  this.exit();
              }
  
-@@ -721,7 +966,12 @@
+@@ -721,7 +967,12 @@
      }
  
      private boolean shouldKeepTicking() {
@@ -602,7 +623,16 @@
      }
  
      protected void method_16208() {
-@@ -826,7 +1076,7 @@
+@@ -731,7 +982,7 @@
+         });
+     }
+ 
+-    protected ServerTask createTask(Runnable runnable) {
++    public ServerTask createTask(Runnable runnable) { // Loom - public access
+         return new ServerTask(this.ticks, runnable);
+     }
+ 
+@@ -826,7 +1077,7 @@
              this.metadata.getPlayers().setSample(agameprofile);
          }
  
@@ -611,7 +641,7 @@
              MinecraftServer.LOGGER.debug("Autosave started");
              this.profiler.push("save");
              this.playerManager.saveAllPlayerData();
-@@ -856,22 +1106,39 @@
+@@ -856,22 +1107,39 @@
      }
  
      protected void tickWorlds(BooleanSupplier booleansupplier) {
@@ -651,7 +681,7 @@
  
              this.profiler.push("tick");
  
-@@ -955,7 +1222,7 @@
+@@ -955,7 +1223,7 @@
      }
  
      public String getServerModName() {
@@ -660,7 +690,7 @@
      }
  
      public CrashReport populateCrashReport(CrashReport crashreport) {
-@@ -1300,11 +1567,11 @@
+@@ -1300,11 +1568,11 @@
  
      public CompletableFuture<Void> reloadResources(Collection<String> collection) {
          CompletableFuture<Void> completablefuture = CompletableFuture.supplyAsync(() -> {
@@ -674,7 +704,7 @@
          }, this).thenCompose((immutablelist) -> {
              return ServerResourceManager.reload(immutablelist, this.isDedicated() ? CommandManager.RegistrationEnvironment.DEDICATED : CommandManager.RegistrationEnvironment.INTEGRATED, this.getFunctionPermissionLevel(), this.workerExecutor, this);
          }).thenAcceptAsync((serverresourcemanager) -> {
-@@ -1720,15 +1987,22 @@
+@@ -1720,15 +1988,22 @@
          return this.saveProperties;
      }
  

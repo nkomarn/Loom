@@ -1,5 +1,14 @@
 --- a/net/minecraft/entity/projectile/TridentEntity.java
 +++ b/net/minecraft/entity/projectile/TridentEntity.java
+@@ -27,7 +27,7 @@
+ 
+     private static final TrackedData<Byte> LOYALTY = DataTracker.registerData(TridentEntity.class, TrackedDataHandlerRegistry.BYTE);
+     private static final TrackedData<Boolean> ENCHANTED = DataTracker.registerData(TridentEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+-    private ItemStack tridentStack;
++    public ItemStack tridentStack; // Loom - public access
+     private boolean dealtDamage;
+     public int returnTimer;
+ 
 @@ -148,7 +148,7 @@
  
                  lightningentity.method_29495(Vec3d.ofBottomCenter(blockpos));

@@ -1,6 +1,6 @@
 --- a/net/minecraft/village/TraderInventory.java
 +++ b/net/minecraft/village/TraderInventory.java
-@@ -8,6 +8,16 @@
+@@ -8,15 +8,66 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.util.collection.DefaultedList;
  
@@ -17,8 +17,11 @@
  public class TraderInventory implements Inventory {
  
      private final Trader trader;
-@@ -17,6 +27,47 @@
-     private int recipeIndex;
+     private final DefaultedList<ItemStack> inventory;
+     @Nullable
+     private TradeOffer traderRecipe;
+-    private int recipeIndex;
++    public int recipeIndex; // Loom - public access
      private int traderRewardedExperience;
  
 +    // CraftBukkit start - add fields and methods

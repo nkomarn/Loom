@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/gen/chunk/ChunkGenerator.java
 +++ b/net/minecraft/world/gen/chunk/ChunkGenerator.java
+@@ -60,7 +60,7 @@
+         this.field_24748 = i;
+     }
+ 
+-    private void method_28509() {
++    public void method_28509() { // Loom - public access
+         if (this.field_24749.isEmpty()) {
+             StrongholdConfig strongholdconfig = this.config.getStronghold();
+ 
 @@ -243,7 +243,15 @@
          while (iterator.hasNext()) {
              ConfiguredStructureFeature<?, ?> configuredstructurefeature = (ConfiguredStructureFeature) iterator.next();

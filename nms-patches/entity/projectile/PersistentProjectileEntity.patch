@@ -25,6 +25,23 @@
  
  public abstract class PersistentProjectileEntity extends ProjectileEntity {
  
+@@ -50,13 +49,13 @@
+     private static final TrackedData<Byte> PIERCE_LEVEL = DataTracker.registerData(PersistentProjectileEntity.class, TrackedDataHandlerRegistry.BYTE);
+     @Nullable
+     private BlockState inBlockState;
+-    protected boolean inGround;
++    public boolean inGround; // Loom - public access
+     protected int inGroundTime;
+     public PersistentProjectileEntity.PickupPermission pickupType;
+     public int shake;
+-    private int life;
++    public int life; // Loom - public access
+     private double damage;
+-    private int punch;
++    public int punch; // Loom - public access
+     private SoundEvent sound;
+     private IntOpenHashSet piercedEntities;
+     private List<Entity> piercingKilledEntities;
 @@ -322,7 +321,13 @@
          int k = entity.getFireTicks();
  

@@ -9,8 +9,10 @@
  
  public abstract class AnimalEntity extends PassiveEntity {
  
-     private int loveTicks;
-     private UUID lovingPlayer;
+-    private int loveTicks;
+-    private UUID lovingPlayer;
++    public int loveTicks; // Loom - public access
++    public UUID lovingPlayer; // Loom - public access
 +    public ItemStack breedItem; // CraftBukkit - Add breedItem variable
  
      protected AnimalEntity(EntityType<? extends AnimalEntity> entitytype, World world) {

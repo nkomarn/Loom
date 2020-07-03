@@ -78,13 +78,13 @@
 +
 +            if (event.isCancelled()) {
 +                for (BlockPos b : broken) {
-+                    world.notify(b, Blocks.AIR.getDefaultState(), world.getBlockState(b), 3);
++                    world.updateListeners(b, Blocks.AIR.getDefaultState(), world.getBlockState(b), 3);
 +                }
 +
 +                for (BlockPos b : moved) {
-+                    world.notify(b, Blocks.AIR.getDefaultState(), world.getBlockState(b), 3);
++                    world.updateListeners(b, Blocks.AIR.getDefaultState(), world.getBlockState(b), 3);
 +                    b = b.offset(direction1);
-+                    world.notify(b, Blocks.AIR.getDefaultState(), world.getBlockState(b), 3);
++                    world.updateListeners(b, Blocks.AIR.getDefaultState(), world.getBlockState(b), 3);
 +                }
 +                return false;
 +            }

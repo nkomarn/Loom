@@ -16,3 +16,13 @@
          if (i < 0) {
              throw new IllegalArgumentException("Min value of " + s + " must be 0 or greater");
          } else if (j <= i) {
+@@ -65,7 +71,7 @@
+         return integer.toString();
+     }
+ 
+-    public String name(Comparable comparable) {
++    /*public String name(Comparable comparable) {
+         return this.name((Integer) comparable);
+-    }
++    }*/ // Loom - decompile error
+ }

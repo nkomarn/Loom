@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/LivingEntity.java
 +++ b/net/minecraft/entity/LivingEntity.java
-@@ -107,6 +107,27 @@
+@@ -107,13 +107,34 @@
  import net.minecraft.world.World;
  import org.apache.logging.log4j.Logger;
  
@@ -28,6 +28,14 @@
  public abstract class LivingEntity extends Entity {
  
      private static final UUID SPRINTING_SPEED_BOOST_ID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
+     private static final UUID SOUL_SPEED_BOOST_ID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
+     private static final EntityAttributeModifier SPRINTING_SPEED_BOOST = new EntityAttributeModifier(LivingEntity.SPRINTING_SPEED_BOOST_ID, "Sprinting speed boost", 0.30000001192092896D, EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
+     protected static final TrackedData<Byte> LIVING_FLAGS = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.BYTE);
+-    private static final TrackedData<Float> HEALTH = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.FLOAT);
++    public static final TrackedData<Float> HEALTH = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.FLOAT); // Loom - public access
+     private static final TrackedData<Integer> POTION_SWIRLS_COLOR = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     private static final TrackedData<Boolean> POTION_SWIRLS_AMBIENT = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+     private static final TrackedData<Integer> STUCK_ARROW_COUNT = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.INTEGER);
 @@ -121,7 +142,7 @@
      private static final TrackedData<Optional<BlockPos>> SLEEPING_POSITION = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
      protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F);
@@ -37,6 +45,33 @@
      private final Map<StatusEffect, StatusEffectInstance> activeStatusEffects = Maps.newHashMap();
      private final DefaultedList<ItemStack> equippedHand;
      private final DefaultedList<ItemStack> equippedArmor;
+@@ -140,7 +161,7 @@
+     public float lastLimbDistance;
+     public float limbDistance;
+     public float limbAngle;
+-    public final int defaultMaxHealth;
++    public int defaultMaxHealth; // Loom - non-final
+     public final float randomLargeSeed;
+     public final float randomSmallSeed;
+     public float bodyYaw;
+@@ -149,7 +170,7 @@
+     public float prevHeadYaw;
+     public float flyingSpeed;
+     @Nullable
+-    protected PlayerEntity attackingPlayer;
++    public PlayerEntity attackingPlayer; // Loom - public access
+     protected int playerHitTimer;
+     protected boolean dead;
+     protected int despawnCounter;
+@@ -159,7 +180,7 @@
+     protected float prevLookDirection;
+     protected float field_6215;
+     protected int scoreAmount;
+-    protected float lastDamageTaken;
++    public float lastDamageTaken; // Loom - public access
+     protected boolean jumping;
+     public float sidewaysSpeed;
+     public float upwardSpeed;
 @@ -172,7 +193,7 @@
      protected double serverPitch;
      protected double serverHeadYaw;

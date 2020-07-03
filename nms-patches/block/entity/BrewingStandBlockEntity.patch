@@ -1,14 +1,15 @@
 --- a/net/minecraft/block/entity/BrewingStandBlockEntity.java
 +++ b/net/minecraft/block/entity/BrewingStandBlockEntity.java
-@@ -17,6 +17,7 @@
+@@ -17,6 +17,8 @@
  import net.minecraft.screen.BrewingStandScreenHandler;
  import net.minecraft.screen.PropertyDelegate;
  import net.minecraft.screen.ScreenHandler;
 +import net.minecraft.server.dedicated.DedicatedServer;
++import net.minecraft.server.dedicated.MinecraftDedicatedServer;
  import net.minecraft.text.Text;
  import net.minecraft.text.TranslatableText;
  import net.minecraft.util.ItemScatterer;
-@@ -24,6 +25,15 @@
+@@ -24,6 +26,15 @@
  import net.minecraft.util.collection.DefaultedList;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.Direction;
@@ -24,7 +25,20 @@
  
  public class BrewingStandBlockEntity extends LockableContainerBlockEntity implements SidedInventory, Tickable {
  
-@@ -97,8 +107,19 @@
+@@ -31,10 +42,10 @@
+     private static final int[] BOTTOM_SLOTS = new int[]{0, 1, 2, 3};
+     private static final int[] SIDE_SLOTS = new int[]{0, 1, 2, 4};
+     private DefaultedList<ItemStack> inventory;
+-    private int brewTime;
++    public int brewTime; // Loom - public access
+     private boolean[] slotsEmptyLastTick;
+     private Item itemBrewing;
+-    private int fuel;
++    public int fuel; // Loom - public access
+     protected final PropertyDelegate propertyDelegate;
+ 
+     public BrewingStandBlockEntity() {
+@@ -97,8 +108,19 @@
          ItemStack itemstack = (ItemStack) this.inventory.get(4);
  
          if (this.fuel <= 0 && itemstack.getItem() == Items.BLAZE_POWDER) {
@@ -46,13 +60,13 @@
              this.markDirty();
          }
  
-@@ -106,9 +127,14 @@
+@@ -106,9 +128,14 @@
          boolean flag1 = this.brewTime > 0;
          ItemStack itemstack1 = (ItemStack) this.inventory.get(3);
  
 +        // CraftBukkit start - Use wall time instead of ticks for brewing
-+        int elapsedTicks = DedicatedServer.currentTick - this.lastTick;
-+        this.lastTick = DedicatedServer.currentTick;
++        int elapsedTicks = MinecraftDedicatedServer.currentTick - this.lastTick;
++        this.lastTick = MinecraftDedicatedServer.currentTick;
 +
          if (flag1) {
 -            --this.brewTime;
@@ -63,7 +77,7 @@
  
              if (flag2 && flag) {
                  this.craft();
-@@ -182,6 +208,16 @@
+@@ -182,6 +209,16 @@
  
      private void craft() {
          ItemStack itemstack = (ItemStack) this.inventory.get(3);
@@ -80,14 +94,14 @@
  
          for (int i = 0; i < 3; ++i) {
              this.inventory.set(i, BrewingRecipeRegistry.craft(itemstack, (ItemStack) this.inventory.get(i)));
-@@ -272,4 +308,35 @@
+@@ -272,4 +309,36 @@
      protected ScreenHandler createScreenHandler(int i, PlayerInventory playerinventory) {
          return new BrewingStandScreenHandler(i, playerinventory, this, this.propertyDelegate);
      }
 +
 +    // CraftBukkit start - add fields and methods
-+    private int lastTick = DedicatedServer.currentTick;
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int lastTick = MinecraftDedicatedServer.currentTick;
++    public List<HumanEntity> transaction = new java.util.ArrayList<>();
 +    private int maxStack = 64;
 +
 +    public void onOpen(CraftHumanEntity who) {
@@ -107,11 +121,12 @@
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
++    public int getMaxCountPerStack() {
 +        return maxStack;
 +    }
 +
-+    public void setMaxStackSize(int size) {
++    @Override
++    public void setMaxCountPerStack(int size) {
 +        maxStack = size;
 +    }
 +    // CraftBukkit end

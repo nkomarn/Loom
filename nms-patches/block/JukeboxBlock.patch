@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/JukeboxBlock.java
 +++ b/net/minecraft/block/JukeboxBlock.java
-@@ -59,7 +59,13 @@
+@@ -59,12 +59,18 @@
          BlockEntity blockentity = worldaccess.getBlockEntity(blockpos);
  
          if (blockentity instanceof JukeboxBlockEntity) {
@@ -15,3 +15,9 @@
              worldaccess.setBlockState(blockpos, (BlockState) blockstate.with(JukeboxBlock.HAS_RECORD, true), 2);
          }
      }
+ 
+-    private void removeRecord(World world, BlockPos blockpos) {
++    public void removeRecord(World world, BlockPos blockpos) { // Loom - public access
+         if (!world.isClient) {
+             BlockEntity blockentity = world.getBlockEntity(blockpos);
+ 

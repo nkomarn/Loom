@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/LevelInfo.java
 +++ b/net/minecraft/world/level/LevelInfo.java
-@@ -8,7 +8,7 @@
+@@ -8,11 +8,11 @@
  
  public final class LevelInfo {
  
@@ -9,3 +9,8 @@
      private final GameMode gameMode;
      private final boolean structures;
      private final Difficulty difficulty;
+-    private final boolean hardcore;
++    public boolean hardcore; // Loom - public access, non-final
+     private final GameRules gameRules;
+     private final DataPackSettings field_25403;
+ 

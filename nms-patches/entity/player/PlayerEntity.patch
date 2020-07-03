@@ -81,6 +81,15 @@
          }
  
      }
+@@ -400,7 +425,7 @@
+         return SoundCategory.PLAYERS;
+     }
+ 
+-    protected int getBurningDuration() {
++    public int getBurningDuration() { // Loom - public access
+         return 20;
+     }
+ 
 @@ -437,7 +462,8 @@
  
          if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {

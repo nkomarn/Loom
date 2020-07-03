@@ -39,15 +39,17 @@
  
  public class WorldChunk implements Chunk {
  
-@@ -66,7 +64,7 @@
+@@ -66,8 +64,8 @@
      private BiomeArray biomeArray;
      private final Map<BlockPos, CompoundTag> pendingBlockEntityTags;
      private boolean loadedToWorld;
 -    private final World world;
+-    private final Map<Heightmap.Type, Heightmap> heightmaps;
 +    private final ServerWorld world; // CraftBukkit - type
-     private final Map<Heightmap.Type, Heightmap> heightmaps;
++    public final Map<Heightmap.Type, Heightmap> heightmaps; // Loom - public access
      private final UpgradeData upgradeData;
      private final Map<BlockPos, BlockEntity> blockEntities;
+     private final TypeFilterableList<Entity>[] entitySections;
 @@ -100,7 +98,7 @@
          this.structureReferences = Maps.newHashMap();
          this.postProcessingLists = new ShortList[16];

@@ -1,0 +1,11 @@
+--- a/net/minecraft/inventory/ContainerLock.java
++++ b/net/minecraft/inventory/ContainerLock.java
+@@ -8,7 +8,7 @@
+ public class ContainerLock {
+ 
+     public static final ContainerLock EMPTY = new ContainerLock("");
+-    private final String key;
++    public final String key; // Loom - public access
+ 
+     public ContainerLock(String s) {
+         this.key = s;

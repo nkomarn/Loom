@@ -41,7 +41,7 @@
              villagerentity.world.sendEntityStatus(villagerentity2, (byte) 12);
              return Optional.of(villagerentity2);
          }
-@@ -124,7 +134,7 @@
+@@ -124,9 +134,10 @@
      private void setChildHome(ServerWorld serverworld, VillagerEntity villagerentity, BlockPos blockpos) {
          GlobalPos globalpos = GlobalPos.create(serverworld.getRegistryKey(), blockpos);
  
@@ -49,4 +49,13 @@
 +        villagerentity.getBrain().remember(MemoryModuleType.HOME, globalpos); // CraftBukkit - decompile error
      }
  
++    /*
      protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
+         return this.shouldRun(serverworld, (VillagerEntity) livingentity);
+     }
+@@ -146,4 +157,5 @@
+     protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
+         this.run(serverworld, (VillagerEntity) livingentity, i);
+     }
++    */ // Loom - decompile error
+ }

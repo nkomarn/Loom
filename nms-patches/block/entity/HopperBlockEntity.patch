@@ -131,11 +131,11 @@
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
++    public int getMaxCountPerStack() {
 +       return maxStack;
 +    }
 +
-+    public void setMaxStackSize(int size) {
++    public void setMaxCountPerStack(int size) {
 +        maxStack = size;
 +    }
 +    // CraftBukkit end

@@ -1,19 +1,28 @@
 --- a/net/minecraft/network/NetworkThreadUtils.java
 +++ b/net/minecraft/network/NetworkThreadUtils.java
-@@ -17,6 +17,7 @@
+@@ -1,6 +1,8 @@
+ package net.minecraft.network;
+ 
+ import net.minecraft.network.listener.PacketListener;
++import net.minecraft.server.dedicated.MinecraftDedicatedServer;
++import net.minecraft.server.network.ServerPlayNetworkHandler;
+ import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.util.thread.ThreadExecutor;
+ import org.apache.logging.log4j.LogManager;
+@@ -17,6 +19,7 @@
      public static <T extends PacketListener> void forceMainThread(Packet<T> packet, T t0, ThreadExecutor<?> threadexecutor) throws OffThreadException {
          if (!threadexecutor.isOnThread()) {
              threadexecutor.execute(() -> {
-+                if (MinecraftServer.getServer().hasStopped() || (t0 instanceof ServerPlayNetworkHandler && ((ServerPlayNetworkHandler) t0).processedDisconnect)) return; // CraftBukkit, MC-142590
++                if (MinecraftDedicatedServer.getServer().hasStopped() || (t0 instanceof ServerPlayNetworkHandler && ((ServerPlayNetworkHandler) t0).processedDisconnect)) return; // CraftBukkit, MC-142590
                  if (t0.getConnection().isOpen()) {
                      packet.apply(t0);
                  } else {
-@@ -26,5 +27,10 @@
+@@ -26,5 +29,10 @@
              });
              throw OffThreadException.INSTANCE;
          }
 +        // CraftBukkit start - SPIGOT-5477, MC-142590
-+        else if (MinecraftServer.getServer().hasStopped() || (t0 instanceof ServerPlayNetworkHandler && ((ServerPlayNetworkHandler) t0).processedDisconnect)) {
++        else if (MinecraftDedicatedServer.getServer().hasStopped() || (t0 instanceof ServerPlayNetworkHandler && ((ServerPlayNetworkHandler) t0).processedDisconnect)) {
 +            throw OffThreadException.INSTANCE;
 +        }
 +        // CraftBukkit end

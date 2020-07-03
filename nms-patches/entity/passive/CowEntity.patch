@@ -41,3 +41,13 @@
  
              playerentity.setStackInHand(hand, itemstack1);
              return ActionResult.success(this.world.isClient);
+@@ -91,7 +102,9 @@
+         return this.isBaby() ? entitydimensions.height * 0.95F : 1.3F;
+     }
+ 
++    /*
+     public PassiveEntity createChild(PassiveEntity passiveentity) {
+         return this.createChild(passiveentity);
+     }
++    */ // Loom - decompile error
+ }

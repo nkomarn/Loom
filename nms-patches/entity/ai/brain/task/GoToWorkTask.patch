@@ -29,7 +29,7 @@
          if (villagerentity.getVillagerData().getProfession() == VillagerProfession.NONE) {
              MinecraftServer minecraftserver = serverworld.getServer();
  
-@@ -42,7 +47,14 @@
+@@ -42,12 +47,20 @@
                      return villagerprofession.getWorkStation() == pointofinteresttype;
                  }).findFirst();
              }).ifPresent((villagerprofession) -> {
@@ -45,3 +45,15 @@
                  villagerentity.reinitializeBrain(serverworld);
              });
          }
+     }
+ 
++    /*
+     protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
+         return this.shouldRun(serverworld, (VillagerEntity) livingentity);
+     }
+@@ -55,4 +68,5 @@
+     protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
+         this.run(serverworld, (VillagerEntity) livingentity, i);
+     }
++    */ // Loom - decompile error
+ }

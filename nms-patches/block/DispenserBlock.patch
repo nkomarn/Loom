@@ -12,6 +12,15 @@
  
      public static void registerBehavior(ItemConvertible itemconvertible, DispenserBehavior dispenserbehavior) {
          DispenserBlock.BEHAVIORS.put(itemconvertible.asItem(), dispenserbehavior);
+@@ -74,7 +75,7 @@
+         }
+     }
+ 
+-    protected void dispense(World world, BlockPos blockpos) {
++    public void dispense(World world, BlockPos blockpos) { // Loom - public access
+         BlockPointerImpl blockpointerimpl = new BlockPointerImpl(world, blockpos);
+         DispenserBlockEntity dispenserblockentity = (DispenserBlockEntity) blockpointerimpl.getBlockEntity();
+         int i = dispenserblockentity.chooseNonEmptySlot();
 @@ -86,6 +87,7 @@
              DispenserBehavior dispenserbehavior = this.getBehaviorForItem(itemstack);
  

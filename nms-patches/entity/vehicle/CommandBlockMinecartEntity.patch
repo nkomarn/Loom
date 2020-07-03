@@ -1,5 +1,14 @@
 --- a/net/minecraft/entity/vehicle/CommandBlockMinecartEntity.java
 +++ b/net/minecraft/entity/vehicle/CommandBlockMinecartEntity.java
+@@ -19,7 +19,7 @@
+ 
+ public class CommandBlockMinecartEntity extends AbstractMinecartEntity {
+ 
+-    private static final TrackedData<String> COMMAND = DataTracker.registerData(CommandBlockMinecartEntity.class, TrackedDataHandlerRegistry.STRING);
++    public static final TrackedData<String> COMMAND = DataTracker.registerData(CommandBlockMinecartEntity.class, TrackedDataHandlerRegistry.STRING); // Loom - public access
+     private static final TrackedData<Text> LAST_OUTPUT = DataTracker.registerData(CommandBlockMinecartEntity.class, TrackedDataHandlerRegistry.TEXT_COMPONENT);
+     private final CommandBlockExecutor commandExecutor = new CommandBlockMinecartEntity.CommandExecutor();
+     private int lastExecuted;
 @@ -108,5 +108,12 @@
          public ServerCommandSource getSource() {
              return new ServerCommandSource(this, CommandBlockMinecartEntity.this.getPos(), CommandBlockMinecartEntity.this.getRotationClient(), this.getWorld(), 2, this.getCustomName().getString(), CommandBlockMinecartEntity.this.getDisplayName(), this.getWorld().getServer(), CommandBlockMinecartEntity.this);

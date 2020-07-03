@@ -23,7 +23,7 @@
 +        Date expires = null;
 +
 +        try {
-+            expires = jsonobject.has("expires") ? a.parse(jsonobject.get("expires").getAsString()) : null;
++            expires = jsonobject.has("expires") ? DATE_FORMAT.parse(jsonobject.get("expires").getAsString()) : null;
 +        } catch (ParseException ex) {
 +            // Guess we don't have a date
 +        }

@@ -61,6 +61,15 @@
      protected static final Logger LOGGER = LogManager.getLogger();
      private static final AtomicInteger MAX_ENTITY_ID = new AtomicInteger();
      private static final List<ItemStack> EMPTY_STACK_LIST = Collections.emptyList();
+@@ -186,7 +238,7 @@
+     private boolean invulnerable;
+     protected UUID uuid;
+     protected String uuidString;
+-    protected boolean glowing;
++    public boolean glowing; // Loom - public access
+     private final Set<String> scoreboardTags;
+     private boolean teleportRequested;
+     private final double[] pistonMovementDelta;
 @@ -194,6 +246,21 @@
      private EntityDimensions dimensions;
      private float standingEyeHeight;
@@ -379,6 +388,15 @@
          } catch (Throwable throwable) {
              CrashReport crashreport = CrashReport.create(throwable, "Loading entity NBT");
              CrashReportSection crashreportsection = crashreport.addElement("Entity being loaded");
+@@ -1497,7 +1736,7 @@
+     }
+ 
+     @Nullable
+-    protected final String getSavedEntityId() {
++    public final String getSavedEntityId() { // Loom - public access
+         EntityType<?> entitytype = this.getType();
+         Identifier identifier = EntityType.getId(entitytype);
+ 
 @@ -1558,9 +1797,22 @@
          } else if (this.world.isClient) {
              return null;
@@ -506,6 +524,20 @@
          this.setFlag(4, flag);
      }
  
+@@ -1883,11 +2185,11 @@
+         this.setFlag(5, flag);
+     }
+ 
+-    protected boolean getFlag(int i) {
++    public boolean getFlag(int i) { // Loom - public access
+         return ((Byte) this.dataTracker.get(Entity.FLAGS) & 1 << i) != 0;
+     }
+ 
+-    protected void setFlag(int i, boolean flag) {
++    public void setFlag(int i, boolean flag) { // Loom - public access
+         byte b0 = (Byte) this.dataTracker.get(Entity.FLAGS);
+ 
+         if (flag) {
 @@ -1907,16 +2209,57 @@
      }
  
@@ -694,3 +726,12 @@
      }
  
      protected float getEyeHeight(EntityPose entitypose, EntityDimensions entitydimensions) {
+@@ -2547,7 +2961,7 @@
+         return SoundCategory.NEUTRAL;
+     }
+ 
+-    protected int getBurningDuration() {
++    public int getBurningDuration() { // Loom - public access
+         return 1;
+     }
+ 

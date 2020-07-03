@@ -1,5 +1,14 @@
 --- a/net/minecraft/entity/projectile/AbstractFireballEntity.java
 +++ b/net/minecraft/entity/projectile/AbstractFireballEntity.java
+@@ -36,7 +36,7 @@
+ 
+     }
+ 
+-    protected ItemStack getItem() {
++    public ItemStack getItem() { // Loom - public access
+         return (ItemStack) this.getDataTracker().get(AbstractFireballEntity.ITEM);
+     }
+ 
 @@ -58,6 +58,6 @@
          super.readCustomDataFromTag(compoundtag);
          ItemStack itemstack = ItemStack.fromTag(compoundtag.getCompound("Item"));

@@ -17,6 +17,15 @@
  public class SlimeEntity extends MobEntity implements Monster {
  
      private static final TrackedData<Integer> SLIME_SIZE = DataTracker.registerData(SlimeEntity.class, TrackedDataHandlerRegistry.INTEGER);
+@@ -71,7 +81,7 @@
+         this.dataTracker.startTracking(SlimeEntity.SLIME_SIZE, 1);
+     }
+ 
+-    protected void setSize(int i, boolean flag) {
++    public void setSize(int i, boolean flag) { // Loom - public access
+         this.dataTracker.set(SlimeEntity.SLIME_SIZE, i);
+         this.refreshPosition();
+         this.calculateDimensions();
 @@ -176,7 +186,7 @@
      }
  

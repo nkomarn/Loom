@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/mob/ZombieVillagerEntity.java
 +++ b/net/minecraft/entity/mob/ZombieVillagerEntity.java
-@@ -45,6 +45,13 @@
+@@ -45,15 +45,23 @@
  import net.minecraft.world.WorldAccess;
  import org.apache.logging.log4j.Logger;
  
@@ -13,8 +13,13 @@
 +
  public class ZombieVillagerEntity extends ZombieEntity implements VillagerDataContainer {
  
-     private static final TrackedData<Boolean> CONVERTING = DataTracker.registerData(ZombieVillagerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-@@ -54,6 +61,7 @@
+-    private static final TrackedData<Boolean> CONVERTING = DataTracker.registerData(ZombieVillagerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
++    public static final TrackedData<Boolean> CONVERTING = DataTracker.registerData(ZombieVillagerEntity.class, TrackedDataHandlerRegistry.BOOLEAN); // Loom - public access
+     private static final TrackedData<VillagerData> VILLAGER_DATA = DataTracker.registerData(ZombieVillagerEntity.class, TrackedDataHandlerRegistry.VILLAGER_DATA);
+-    private int conversionTimer;
+-    private UUID converter;
++    public int conversionTimer; // Loom - public access
++    public UUID converter; // Loom - public access
      private Tag gossipData;
      private CompoundTag offerData;
      private int xp;
@@ -51,7 +56,12 @@
      }
  
      public ActionResult interactMob(PlayerEntity playerentity, Hand hand) {
-@@ -170,8 +184,11 @@
+@@ -166,12 +180,15 @@
+         return (Boolean) this.getDataTracker().get(ZombieVillagerEntity.CONVERTING);
+     }
+ 
+-    private void setConverting(@Nullable UUID uuid, int i) {
++    public void setConverting(@Nullable UUID uuid, int i) { // Loom - public access
          this.converter = uuid;
          this.conversionTimer = i;
          this.getDataTracker().set(ZombieVillagerEntity.CONVERTING, true);

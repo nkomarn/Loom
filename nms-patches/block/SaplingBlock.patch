@@ -35,7 +35,7 @@
 +            // CraftBukkit end
              this.generate(serverworld, blockpos, blockstate, random);
 +            // CraftBukkit start
-+            worldserver.captureTreeGeneration = false;
++            serverworld.captureTreeGeneration = false;
 +            if (serverworld.capturedBlockStates.size() > 0) {
 +                TreeType treeType = SaplingBlock.treeType;
 +                SaplingBlock.treeType = null;

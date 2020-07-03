@@ -1,0 +1,13 @@
+--- a/net/minecraft/block/entity/LootableContainerBlockEntity.java
++++ b/net/minecraft/block/entity/LootableContainerBlockEntity.java
+@@ -23,8 +23,8 @@
+ public abstract class LootableContainerBlockEntity extends LockableContainerBlockEntity {
+ 
+     @Nullable
+-    protected Identifier lootTableId;
+-    protected long lootTableSeed;
++    public Identifier lootTableId; // Loom - public access
++    public long lootTableSeed; // Loom - public access
+ 
+     protected LootableContainerBlockEntity(BlockEntityType<?> blockentitytype) {
+         super(blockentitytype);

@@ -1,6 +1,6 @@
 --- a/net/minecraft/village/TradeOffer.java
 +++ b/net/minecraft/village/TradeOffer.java
-@@ -4,6 +4,7 @@
+@@ -4,19 +4,33 @@
  import net.minecraft.nbt.CompoundTag;
  import net.minecraft.nbt.NbtHelper;
  import net.minecraft.util.math.MathHelper;
@@ -8,10 +8,25 @@
  
  public class TradeOffer {
  
-@@ -18,6 +19,19 @@
-     private float priceMultiplier;
-     private int traderExperience;
- 
+-    private final ItemStack firstBuyItem;
+-    private final ItemStack secondBuyItem;
+-    private final ItemStack sellItem;
+-    private int uses;
+-    private final int maxUses;
+-    private boolean rewardingPlayerExperience;
++    public ItemStack firstBuyItem; // Loom - public access, non-final
++    public ItemStack secondBuyItem; // Loom - public access, non-final
++    public final ItemStack sellItem; // Loom - public access
++    public int uses; // Loom - public access
++    public int maxUses; // Loom - public access, non-final
++    public boolean rewardingPlayerExperience; // Loom - public access
+     private int specialPrice;
+     private int demandBonus;
+-    private float priceMultiplier;
+-    private int traderExperience;
++    public float priceMultiplier; // Loom - public access
++    public int traderExperience; // Loom - public access
++
 +    // CraftBukkit start
 +    private CraftMerchantRecipe bukkitHandle;
 +
@@ -24,10 +39,9 @@
 +        this.bukkitHandle = bukkit;
 +    }
 +    // CraftBukkit end
-+
+ 
      public TradeOffer(CompoundTag compoundtag) {
          this.rewardingPlayerExperience = true;
-         this.traderExperience = 1;
 @@ -78,6 +92,7 @@
  
      public ItemStack getAdjustedFirstBuyItem() {

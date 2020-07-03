@@ -19,6 +19,15 @@
  
  public class DropperBlock extends DispenserBlock {
  
+@@ -30,7 +35,7 @@
+         return new DropperBlockEntity();
+     }
+ 
+-    protected void dispense(World world, BlockPos blockpos) {
++    public void dispense(World world, BlockPos blockpos) { // Loom - public access
+         BlockPointerImpl blockpointerimpl = new BlockPointerImpl(world, blockpos);
+         DispenserBlockEntity dispenserblockentity = (DispenserBlockEntity) blockpointerimpl.getBlockEntity();
+         int i = dispenserblockentity.chooseNonEmptySlot();
 @@ -48,8 +53,26 @@
                  if (inventory == null) {
                      itemstack1 = DropperBlock.BEHAVIOR.dispense(blockpointerimpl, itemstack);

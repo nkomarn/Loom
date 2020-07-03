@@ -9,12 +9,13 @@
  public abstract class AbstractPropertiesHandler<T extends AbstractPropertiesHandler<T>> {
  
      private static final Logger LOGGER = LogManager.getLogger();
-     private final Properties properties;
- 
--    public AbstractPropertiesHandler(Properties properties) {
+-    private final Properties properties;
++    public final Properties properties; // Loom - public access
++
 +    // CraftBukkit start
 +    private OptionSet options = null;
-+
+ 
+-    public AbstractPropertiesHandler(Properties properties) {
 +    public AbstractPropertiesHandler(Properties properties, final OptionSet options) {
          this.properties = properties;
      }

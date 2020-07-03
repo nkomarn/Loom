@@ -22,3 +22,13 @@
              this.eggLayTime = this.random.nextInt(6000) + 6000;
          }
  
+@@ -166,7 +173,9 @@
+         this.jockey = flag;
+     }
+ 
++    /*
+     public PassiveEntity createChild(PassiveEntity passiveentity) {
+         return this.createChild(passiveentity);
+     }
++    */
+ }

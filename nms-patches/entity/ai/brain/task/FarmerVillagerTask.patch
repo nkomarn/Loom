@@ -88,3 +88,17 @@
                      }
                  }
              }
+@@ -157,6 +174,7 @@
+         return this.ticksRan < 200;
+     }
+ 
++    /*
+     protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
+         return this.shouldRun(serverworld, (VillagerEntity) livingentity);
+     }
+@@ -176,4 +194,5 @@
+     protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
+         this.run(serverworld, (VillagerEntity) livingentity, i);
+     }
++    */ // Loom - decompile error
+ }

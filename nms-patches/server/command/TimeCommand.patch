@@ -17,7 +17,7 @@
 +            TimeSkipEvent event = new TimeSkipEvent(serverworld.getCraftWorld(), TimeSkipEvent.SkipReason.COMMAND, i - serverworld.getTimeOfDay());
 +            Bukkit.getPluginManager().callEvent(event);
 +            if (!event.isCancelled()) {
-+                serverworld.setDayTime((long) serverworld.getTimeOfDay() + event.getSkipAmount());
++                serverworld.method_29199((long) serverworld.getTimeOfDay() + event.getSkipAmount());
 +            }
 +            // CraftBukkit end
          }
@@ -31,7 +31,7 @@
 +            TimeSkipEvent event = new TimeSkipEvent(serverworld.getCraftWorld(), TimeSkipEvent.SkipReason.COMMAND, i);
 +            Bukkit.getPluginManager().callEvent(event);
 +            if (!event.isCancelled()) {
-+                serverworld.setDayTime(serverworld.getTimeOfDay() + event.getSkipAmount());
++                serverworld.method_29199(serverworld.getTimeOfDay() + event.getSkipAmount());
 +            }
 +            // CraftBukkit end
          }

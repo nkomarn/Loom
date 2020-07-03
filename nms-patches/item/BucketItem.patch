@@ -56,7 +56,7 @@
  
      public boolean placeFluid(@Nullable PlayerEntity playerentity, World world, BlockPos blockpos, @Nullable BlockHitResult blockhitresult) {
 +        // CraftBukkit begin - split
-+        return this.placeFluid(playerentity, world, blockpos, blockhitresult), null, null, null
++        return this.placeFluid(playerentity, world, blockpos, blockhitresult, null, null, null);
 +    }
 +
 +    public boolean placeFluid(@Nullable PlayerEntity playerentity, World world, BlockPos blockpos, @Nullable BlockHitResult blockhitresult, Direction direction, BlockPos clicked, ItemStack itemstack) {

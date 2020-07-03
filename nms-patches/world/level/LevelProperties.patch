@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/LevelProperties.java
 +++ b/net/minecraft/world/level/LevelProperties.java
-@@ -40,6 +40,15 @@
+@@ -40,10 +40,19 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -16,6 +16,11 @@
  public class LevelProperties implements ServerWorldProperties, SaveProperties {
  
      private static final Logger LOGGER = LogManager.getLogger();
+-    private LevelInfo field_25030;
++    public LevelInfo field_25030; // Loom - public access
+     private final GeneratorOptions field_25425;
+     private final Lifecycle field_25426;
+     private int spawnX;
 @@ -76,6 +85,7 @@
      private final Set<String> serverBrands;
      private boolean modded;

@@ -21,8 +21,19 @@
  public abstract class MobEntity extends LivingEntity {
  
      private static final TrackedData<Byte> MOB_FLAGS = DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.BYTE);
-@@ -94,8 +108,8 @@
-     protected final float[] handDropChances;
+@@ -86,19 +100,19 @@
+     protected JumpControl jumpControl;
+     private final BodyControl bodyControl;
+     protected EntityNavigation navigation;
+-    protected final GoalSelector goalSelector;
+-    protected final GoalSelector targetSelector;
++    public GoalSelector goalSelector; // Loom - public access, non-final
++    public GoalSelector targetSelector; // Loom - public access, non-final
+     private LivingEntity target;
+     private final MobVisibilityCache visibilityCache;
+     private final DefaultedList<ItemStack> handItems;
+-    protected final float[] handDropChances;
++    public final float[] handDropChances; // Loom - public access
      private final DefaultedList<ItemStack> armorItems;
      protected final float[] armorDropChances;
 -    private boolean pickUpLoot;
@@ -30,8 +41,13 @@
 +    // private boolean pickUpLoot; // CraftBukkit - moved up to EntityLiving
 +    public boolean persistent;
      private final Map<PathNodeType, Float> pathfindingPenalties;
-     private Identifier lootTable;
-     private long lootTableSeed;
+-    private Identifier lootTable;
+-    private long lootTableSeed;
++    public Identifier lootTable; // Loom - public access
++    public long lootTableSeed; // Loom - public access
+     @Nullable
+     private Entity holdingEntity;
+     private int holdingEntityId;
 @@ -107,6 +121,8 @@
      private BlockPos positionTarget;
      private float positionTargetRange;

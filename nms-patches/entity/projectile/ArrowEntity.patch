@@ -8,7 +8,16 @@
  import net.minecraft.util.registry.Registry;
  import net.minecraft.world.World;
  
-@@ -136,6 +137,26 @@
+@@ -25,7 +26,7 @@
+ 
+     private static final TrackedData<Integer> COLOR = DataTracker.registerData(ArrowEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     private Potion potion;
+-    private final Set<StatusEffectInstance> effects;
++    public final Set<StatusEffectInstance> effects; // Loom - public access
+     private boolean colorSet;
+ 
+     public ArrowEntity(EntityType<? extends ArrowEntity> entitytype, World world) {
+@@ -136,11 +137,31 @@
          }
      }
  
@@ -34,6 +43,12 @@
 +
      public int getColor() {
          return (Integer) this.dataTracker.get(ArrowEntity.COLOR);
+     }
+ 
+-    private void setColor(int i) {
++    public void setColor(int i) { // Loom - public access
+         this.colorSet = true;
+         this.dataTracker.set(ArrowEntity.COLOR, i);
      }
 @@ -200,7 +221,7 @@
  

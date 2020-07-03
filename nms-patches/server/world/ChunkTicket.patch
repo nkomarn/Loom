@@ -1,0 +1,29 @@
+--- a/net/minecraft/server/world/ChunkTicket.java
++++ b/net/minecraft/server/world/ChunkTicket.java
+@@ -6,7 +6,7 @@
+ 
+     private final ChunkTicketType<T> type;
+     private final int level;
+-    private final T argument;
++    public final T argument; // Loom - public access
+     private long tickCreated;
+ 
+     protected ChunkTicket(ChunkTicketType<T> chunktickettype, int i, T t0) {
+@@ -23,7 +23,7 @@
+         } else {
+             int j = Integer.compare(System.identityHashCode(this.type), System.identityHashCode(chunkticket.type));
+ 
+-            return j != 0 ? j : this.type.getArgumentComparator().compare(this.argument, chunkticket.argument);
++            return j != 0 ? j : this.type.getArgumentComparator().compare(this.argument, (T) chunkticket.argument); // Loom - decompile error
+         }
+     }
+ 
+@@ -64,8 +64,4 @@
+ 
+         return j != 0L && i - this.tickCreated > j;
+     }
+-
+-    public int compareTo(Object object) {
+-        return this.compareTo((ChunkTicket) object);
+-    }
+ }

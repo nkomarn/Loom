@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/mob/ZombieEntity.java
 +++ b/net/minecraft/entity/mob/ZombieEntity.java
-@@ -62,6 +62,17 @@
+@@ -62,20 +62,32 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldAccess;
  
@@ -18,10 +18,19 @@
  public class ZombieEntity extends HostileEntity {
  
      private static final UUID BABY_SPEED_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
-@@ -76,6 +87,7 @@
+     private static final EntityAttributeModifier BABY_SPEED_BONUS = new EntityAttributeModifier(ZombieEntity.BABY_SPEED_ID, "Baby speed boost", 0.5D, EntityAttributeModifier.Operation.MULTIPLY_BASE);
+     private static final TrackedData<Boolean> BABY = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+     private static final TrackedData<Integer> ZOMBIE_TYPE = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.INTEGER);
+-    private static final TrackedData<Boolean> CONVERTING_IN_WATER = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
++    public static final TrackedData<Boolean> CONVERTING_IN_WATER = DataTracker.registerData(ZombieEntity.class, TrackedDataHandlerRegistry.BOOLEAN); // Loom - public access
+     private static final Predicate<Difficulty> DOOR_BREAK_DIFFICULTY_CHECKER = (difficulty) -> {
+         return difficulty == Difficulty.HARD;
+     };
+     private final BreakDoorGoal breakDoorsGoal;
      private boolean canBreakDoors;
      private int inWaterTime;
-     private int ticksUntilWaterConversion;
+-    private int ticksUntilWaterConversion;
++    public int ticksUntilWaterConversion; // Loom - public access
 +    private int lastTick = MinecraftServer.currentTick; // CraftBukkit - add field
  
      public ZombieEntity(EntityType<? extends ZombieEntity> entitytype, World world) {
@@ -46,14 +55,22 @@
      }
  
      public void tickMovement() {
-@@ -233,6 +249,7 @@
+@@ -232,12 +248,13 @@
+         super.tickMovement();
      }
  
-     private void setTicksUntilWaterConversion(int i) {
+-    private void setTicksUntilWaterConversion(int i) {
++    public void setTicksUntilWaterConversion(int i) { // Loom - public access
 +        this.lastTick = MinecraftServer.currentTick; // CraftBukkit
          this.ticksUntilWaterConversion = i;
          this.getDataTracker().set(ZombieEntity.CONVERTING_IN_WATER, true);
      }
+ 
+-    protected void convertInWater() {
++    public void convertInWater() {
+         this.convertTo(EntityType.DROWNED);
+         if (!this.isSilent()) {
+             this.world.syncWorldEvent((PlayerEntity) null, 1040, this.getBlockPos(), 0);
 @@ -252,7 +269,7 @@
              zombieentity.applyAttributeModifiers(zombieentity.world.getLocalDifficulty(zombieentity.getBlockPos()).getClampedLocalDifficulty());
              zombieentity.setCanBreakDoors(zombieentity.shouldBreakDoors() && this.canBreakDoors());

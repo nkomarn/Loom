@@ -14,7 +14,7 @@
  import javax.annotation.Nullable;
  import net.minecraft.block.Block;
  import net.minecraft.block.entity.BlockEntity;
-@@ -12,17 +12,26 @@
+@@ -12,22 +12,31 @@
  import net.minecraft.entity.player.PlayerInventory;
  import net.minecraft.inventory.Inventory;
  import net.minecraft.item.ItemStack;
@@ -42,6 +42,13 @@
  
  public abstract class ScreenHandler {
  
+-    private final DefaultedList<ItemStack> trackedStacks = DefaultedList.of();
+-    public final List<Slot> slots = Lists.newArrayList();
++    public DefaultedList<ItemStack> trackedStacks = DefaultedList.of(); // Loom - public access, non-final
++    public List<Slot> slots = Lists.newArrayList(); // Loom - non-final
+     private final List<Property> properties = Lists.newArrayList();
+     @Nullable
+     private final ScreenHandlerType<?> type;
 @@ -38,6 +47,29 @@
      private final List<ScreenHandlerListener> listeners = Lists.newArrayList();
      private final Set<PlayerEntity> restrictedPlayers = Sets.newHashSet();

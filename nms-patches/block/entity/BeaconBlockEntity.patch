@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/entity/BeaconBlockEntity.java
 +++ b/net/minecraft/block/entity/BeaconBlockEntity.java
-@@ -37,6 +37,11 @@
+@@ -37,23 +37,38 @@
  import net.minecraft.util.math.Box;
  import net.minecraft.world.Heightmap;
  
@@ -12,8 +12,23 @@
  public class BeaconBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, Tickable {
  
      public static final StatusEffect[][] EFFECTS_BY_LEVEL = new StatusEffect[][]{{StatusEffects.SPEED, StatusEffects.HASTE}, {StatusEffects.RESISTANCE, StatusEffects.JUMP_BOOST}, {StatusEffects.STRENGTH}, {StatusEffects.REGENERATION}};
-@@ -54,6 +59,16 @@
-     private ContainerLock lock;
+     private static final Set<StatusEffect> EFFECTS = (Set) Arrays.stream(BeaconBlockEntity.EFFECTS_BY_LEVEL).flatMap(Arrays::stream).collect(Collectors.toSet());
+     private List<BeaconBlockEntity.BeamSegment> beamSegments = Lists.newArrayList();
+     private List<BeaconBlockEntity.BeamSegment> field_19178 = Lists.newArrayList();
+-    private int level;
++    public int level; // Loom - public access
+     private int field_19179 = -1;
+     @Nullable
+-    private StatusEffect primary;
++    public StatusEffect primary; // Loom - public access
+     @Nullable
+-    private StatusEffect secondary;
++    public StatusEffect secondary; // Loom - public access
+     @Nullable
+-    private Text customName;
+-    private ContainerLock lock;
++    public Text customName; // Loom - public access
++    public ContainerLock lock;  // Loom - public access
      private final PropertyDelegate propertyDelegate;
  
 +    // CraftBukkit start - add fields and methods
@@ -77,7 +92,7 @@
 -                    playerentity.addStatusEffect(new StatusEffectInstance(this.secondary, i, 0, true, true));
 -                }
 -            }
-+    private List<PlayerEntity> getHumansInRange() {
++    public List<PlayerEntity> getHumansInRange() { // Loom - public access
 +        double d0 = (double) (this.level * 10 + 10);
 +        Box box = (new Box(this.pos)).expand(d0).stretch(0.0D, (double) this.world.getHeight(), 0.0D);
 +        return this.world.getNonSpectatingEntities(PlayerEntity.class, box);

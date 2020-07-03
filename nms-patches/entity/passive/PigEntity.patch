@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/passive/PigEntity.java
 +++ b/net/minecraft/entity/passive/PigEntity.java
-@@ -46,6 +46,10 @@
+@@ -46,12 +46,16 @@
  import net.minecraft.world.Difficulty;
  import net.minecraft.world.World;
  
@@ -11,6 +11,13 @@
  public class PigEntity extends AnimalEntity implements ItemSteerable, Saddleable {
  
      private static final TrackedData<Boolean> SADDLED = DataTracker.registerData(PigEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+     private static final TrackedData<Integer> BOOST_TIME = DataTracker.registerData(PigEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems(Items.CARROT, Items.POTATO, Items.BEETROOT);
+-    private final SaddledComponent saddledComponent;
++    public final SaddledComponent saddledComponent; // Loom - public access
+ 
+     public PigEntity(EntityType<? extends PigEntity> entitytype, World world) {
+         super(entitytype, world);
 @@ -230,6 +234,13 @@
  
              zombifiedpiglinentity.setPersistent();

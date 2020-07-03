@@ -19,7 +19,7 @@
 +                    Bukkit.getPluginManager().callEvent(event);
 +
 +                    if (event.isCancelled()) {
-+                        leashknotentity.die();
++                        leashknotentity.remove();
 +                        return ActionResult.PASS;
 +                    }
 +                    // CraftBukkit end

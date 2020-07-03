@@ -1,5 +1,14 @@
 --- a/net/minecraft/server/world/ChunkTicketType.java
 +++ b/net/minecraft/server/world/ChunkTicketType.java
+@@ -10,7 +10,7 @@
+ 
+     private final String name;
+     private final Comparator<T> argumentComparator;
+-    private final long expiryTicks;
++    public long expiryTicks; // Loom - public access, non-final
+     public static final ChunkTicketType<Unit> START = create("start", (unit, unit1) -> {
+         return 0;
+     });
 @@ -23,6 +23,8 @@
      public static final ChunkTicketType<BlockPos> PORTAL = create("portal", Vec3i::compareTo, 300);
      public static final ChunkTicketType<Integer> POST_TELEPORT = create("post_teleport", Integer::compareTo, 5);

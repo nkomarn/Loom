@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/passive/FoxEntity.java
 +++ b/net/minecraft/entity/passive/FoxEntity.java
-@@ -75,6 +75,9 @@
+@@ -75,13 +75,16 @@
  import net.minecraft.world.WorldView;
  import net.minecraft.world.biome.Biome;
  import net.minecraft.world.biome.Biomes;
@@ -10,7 +10,24 @@
  
  public class FoxEntity extends AnimalEntity {
  
-@@ -317,8 +320,8 @@
+     private static final TrackedData<Integer> TYPE = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     private static final TrackedData<Byte> FOX_FLAGS = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.BYTE);
+-    private static final TrackedData<Optional<UUID>> OWNER = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+-    private static final TrackedData<Optional<UUID>> OTHER_TRUSTED = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
++    public static final TrackedData<Optional<UUID>> OWNER = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID); // Loom - public access
++    public static final TrackedData<Optional<UUID>> OTHER_TRUSTED = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID); // Loom - public access
+     private static final Predicate<ItemEntity> PICKABLE_DROP_FILTER = (itementity) -> {
+         return !itementity.cannotPickup() && itementity.isAlive();
+     };
+@@ -310,15 +313,15 @@
+         return FoxEntity.Type.fromId((Integer) this.dataTracker.get(FoxEntity.TYPE));
+     }
+ 
+-    private void setType(FoxEntity.Type foxentity_type) {
++    public void setType(FoxEntity.Type foxentity_type) { // Loom - public access
+         this.dataTracker.set(FoxEntity.TYPE, foxentity_type.getId());
+     }
+ 
      private List<UUID> getTrustedUuids() {
          List<UUID> list = Lists.newArrayList();
  
@@ -19,6 +36,15 @@
 +        list.add((this.dataTracker.get(FoxEntity.OWNER)).orElse(null)); // CraftBukkit - decompile error
 +        list.add((this.dataTracker.get(FoxEntity.OTHER_TRUSTED)).orElse(null)); // CraftBukkit - decompile error
          return list;
+     }
+ 
+@@ -398,7 +401,7 @@
+         return this.getFoxFlag(32);
+     }
+ 
+-    private void setSleeping(boolean flag) {
++    public void setSleeping(boolean flag) { // Loom - public access
+         this.setFoxFlag(32, flag);
      }
  
 @@ -448,7 +451,7 @@

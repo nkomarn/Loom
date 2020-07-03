@@ -59,7 +59,12 @@
              return pointofinterest.getPos().getSquaredDistance(blockpos);
          }).thenComparingInt((pointofinterest) -> {
              return pointofinterest.getPos().getY();
-@@ -76,11 +90,19 @@
+@@ -72,15 +86,23 @@
+             BlockPattern.Result blockpattern_result = NetherPortalBlock.findPortal(this.world, blockpos1);
+ 
+             return blockpattern_result.getTeleportTarget(direction, blockpos1, d1, vec3d, d0);
+-        }).orElse((Object) null);
++        }).orElse(null); // Loom - decompile error
      }
  
      public boolean createPortal(Entity entity) {
@@ -127,7 +132,7 @@
  
                          blockpos_mutable.set(j3, l3, i4);
 -                        this.world.setBlockState(blockpos_mutable, flag1 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
-+                        blockList.setTypeAndData(blockpos_mutable, flag1 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState(), 3); // CraftBukkit
++                        blockList.setBlockState(blockpos_mutable, flag1 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState(), 3); // CraftBukkit
                      }
                  }
              }
@@ -136,7 +141,7 @@
                  if (k2 == -1 || k2 == 2 || i3 == -1 || i3 == 3) {
                      blockpos_mutable.set(i5 + k2 * k5, j5 + i3, j2 + k2 * l5);
 -                    this.world.setBlockState(blockpos_mutable, Blocks.OBSIDIAN.getDefaultState(), 3);
-+                    blockList.setTypeAndData(blockpos_mutable, Blocks.OBSIDIAN.getDefaultState(), 3); // CraftBukkit
++                    blockList.setBlockState(blockpos_mutable, Blocks.OBSIDIAN.getDefaultState(), 3); // CraftBukkit
                  }
              }
          }
@@ -145,7 +150,7 @@
              for (l2 = 0; l2 < 3; ++l2) {
                  blockpos_mutable.set(i5 + i3 * k5, j5 + l2, j2 + i3 * l5);
 -                this.world.setBlockState(blockpos_mutable, blockstate, 18);
-+                blockList.setTypeAndData(blockpos_mutable, blockstate, 18); // CraftBukkit
++                blockList.setBlockState(blockpos_mutable, blockstate, 18); // CraftBukkit
              }
          }
  

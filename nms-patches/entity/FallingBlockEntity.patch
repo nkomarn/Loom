@@ -8,6 +8,15 @@
  
  public class FallingBlockEntity extends Entity {
  
+@@ -43,7 +44,7 @@
+     public int timeFalling;
+     public boolean dropItem;
+     private boolean destroyedOnLanding;
+-    private boolean hurtEntities;
++    public boolean hurtEntities; // Loom - public access
+     private int fallHurtMax;
+     private float fallHurtAmount;
+     public CompoundTag blockEntityData;
 @@ -98,7 +99,7 @@
  
              if (this.timeFalling++ == 0) {

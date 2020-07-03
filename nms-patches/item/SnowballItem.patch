@@ -22,7 +22,7 @@
              snowballentity.setProperties(playerentity, playerentity.pitch, playerentity.yaw, 0.0F, 1.5F, 1.0F);
 -            world.spawnEntity(snowballentity);
 +            if (world.spawnEntity(snowballentity)) {
-+                if (!playerentity.abilities.canInstantlyBuild) {
++                if (!playerentity.abilities.creativeMode) {
 +                    itemstack.decrement(1);
 +                }
 +

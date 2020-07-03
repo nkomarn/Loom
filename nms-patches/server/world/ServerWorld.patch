@@ -20,7 +20,7 @@
  import net.minecraft.world.biome.Biome;
  import net.minecraft.world.chunk.Chunk;
  import net.minecraft.world.chunk.ChunkManager;
-@@ -138,6 +127,22 @@
+@@ -138,18 +127,34 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -43,12 +43,17 @@
  public class ServerWorld extends World implements ServerWorldAccess {
  
      public static final BlockPos END_SPAWN_POS = new BlockPos(100, 50, 0);
-@@ -149,7 +154,7 @@
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectLinkedOpenHashMap<>();
++    public final Int2ObjectMap<Entity> entitiesById = new Int2ObjectLinkedOpenHashMap<>(); // Loom - public access
+     private final Map<UUID, Entity> entitiesByUuid = Maps.newHashMap();
+     private final Queue<Entity> entitiesToLoad = Queues.newArrayDeque();
+     private final List<ServerPlayerEntity> players = Lists.newArrayList();
      private final ServerChunkManager serverChunkManager;
      boolean inEntityTick;
      private final MinecraftServer server;
 -    private final ServerWorldProperties field_24456;
-+    private final LevelProperties field_24456; // CraftBukkit - type
++    public final LevelProperties field_24456; // CraftBukkit - type, Loom - public access
      public boolean savingDisabled;
      private boolean allPlayersSleeping;
      private int idleTimeout;

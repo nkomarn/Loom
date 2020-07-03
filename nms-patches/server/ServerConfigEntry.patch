@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/ServerConfigEntry.java
++++ b/net/minecraft/server/ServerConfigEntry.java
+@@ -13,7 +13,7 @@
+     }
+ 
+     @Nullable
+-    T getKey() {
++    public T getKey() { // Loom - public access
+         return this.key;
+     }
+ 

@@ -1,0 +1,17 @@
+--- a/net/minecraft/entity/EyeOfEnderEntity.java
++++ b/net/minecraft/entity/EyeOfEnderEntity.java
+@@ -20,11 +20,9 @@
+ public class EyeOfEnderEntity extends Entity {
+ 
+     private static final TrackedData<ItemStack> ITEM = DataTracker.registerData(EyeOfEnderEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
+-    private double velocityX;
+-    private double velocityY;
+-    private double velocityZ;
+-    private int useCount;
+-    private boolean dropsItem;
++    public double velocityX, velocityY, velocityZ; // Loom - public access
++    public int useCount; // Loom - public access
++    public boolean dropsItem; // Loom - public access
+ 
+     public EyeOfEnderEntity(EntityType<? extends EyeOfEnderEntity> entitytype, World world) {
+         super(entitytype, world);

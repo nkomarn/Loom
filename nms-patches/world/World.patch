@@ -22,7 +22,7 @@
  public abstract class World implements WorldAccess, AutoCloseable {
  
      protected static final Logger LOGGER = LogManager.getLogger();
-@@ -74,7 +89,7 @@
+@@ -74,15 +89,15 @@
      public final List<BlockEntity> tickingBlockEntities = Lists.newArrayList();
      protected final List<BlockEntity> pendingBlockEntities = Lists.newArrayList();
      protected final List<BlockEntity> unloadedBlockEntities = Lists.newArrayList();
@@ -31,6 +31,16 @@
      private final boolean debugWorld;
      private int ambientDarkness;
      protected int lcgBlockSeed = (new Random()).nextInt();
+     protected final int unusedIncrement = 1013904223;
+     protected float rainGradientPrev;
+-    protected float rainGradient;
++    public float rainGradient; // Loom - public access
+     protected float thunderGradientPrev;
+-    protected float thunderGradient;
++    public float thunderGradient; // Loom - public access
+     public final Random random = new Random();
+     private final DimensionType dimension;
+     protected final MutableWorldProperties properties;
 @@ -94,7 +109,39 @@
      private final RegistryKey<World> registryKey;
      private final RegistryKey<DimensionType> dimensionRegistryKey;

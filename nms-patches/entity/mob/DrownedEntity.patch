@@ -1,0 +1,13 @@
+--- a/net/minecraft/entity/mob/DrownedEntity.java
++++ b/net/minecraft/entity/mob/DrownedEntity.java
+@@ -52,8 +52,8 @@
+ public class DrownedEntity extends ZombieEntity implements RangedAttackMob {
+ 
+     private boolean targetingUnderwater;
+-    protected final SwimNavigation waterNavigation;
+-    protected final MobNavigation landNavigation;
++    public final SwimNavigation waterNavigation; // Loom - public access
++    public final MobNavigation landNavigation; // Loom - public access
+ 
+     public DrownedEntity(EntityType<? extends DrownedEntity> entitytype, World world) {
+         super(entitytype, world);

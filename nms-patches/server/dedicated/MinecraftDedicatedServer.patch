@@ -43,7 +43,15 @@
  
  public class MinecraftDedicatedServer extends MinecraftServer implements DedicatedServer {
  
-@@ -68,8 +82,10 @@
+@@ -62,14 +76,16 @@
+     private static final Pattern SHA1_PATTERN = Pattern.compile("^[a-fA-F0-9]{40}$");
+     private final List<PendingServerCommand> commandQueue = Collections.synchronizedList(Lists.newArrayList());
+     private QueryResponseHandler queryResponseHandler;
+-    private final RconCommandOutput rconCommandOutput;
++    public final RconCommandOutput rconCommandOutput; // Loom - public access
+     private RconListener rconServer;
+-    private final ServerPropertiesLoader propertiesLoader;
++    public ServerPropertiesLoader propertiesLoader; // Loom - public access, non-final
      @Nullable
      private DedicatedServerGui gui;
  

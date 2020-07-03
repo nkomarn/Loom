@@ -1,0 +1,36 @@
+--- a/net/minecraft/block/entity/StructureBlockBlockEntity.java
++++ b/net/minecraft/block/entity/StructureBlockBlockEntity.java
+@@ -35,19 +35,21 @@
+ public class StructureBlockBlockEntity extends BlockEntity {
+ 
+     private Identifier structureName;
+-    private String author = "";
+-    private String metadata = "";
+-    private BlockPos offset = new BlockPos(0, 1, 0);
+-    private BlockPos size;
+-    private BlockMirror mirror;
+-    private BlockRotation rotation;
+-    private StructureBlockMode mode;
+-    private boolean ignoreEntities;
++    // Loom start - public access
++    public String author = "";
++    public String metadata = "";
++    public BlockPos offset = new BlockPos(0, 1, 0);
++    public BlockPos size;
++    public BlockMirror mirror;
++    public BlockRotation rotation;
++    public  StructureBlockMode mode;
++    public boolean ignoreEntities;
+     private boolean powered;
+-    private boolean showAir;
+-    private boolean showBoundingBox;
+-    private float integrity;
+-    private long seed;
++    public boolean showAir;
++    public boolean showBoundingBox;
++    public float integrity;
++    public long seed;
++    // Loom end
+ 
+     public StructureBlockBlockEntity() {
+         super(BlockEntityType.STRUCTURE_BLOCK);

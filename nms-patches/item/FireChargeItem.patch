@@ -6,7 +6,7 @@
          if (CampfireBlock.method_30035(blockstate)) {
 +            // CraftBukkit start - fire BlockIgniteEvent
 +            if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, blockpos, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FIREBALL, itemusagecontext.getPlayer()).isCancelled()) {
-+                if (!itemusagecontext.getPlayer().abilities.canInstantlyBuild) {
++                if (!itemusagecontext.getPlayer().abilities.creativeMode) {
 +                    itemusagecontext.getStack().decrement(1);
 +                }
 +                return ActionResult.PASS;
@@ -20,7 +20,7 @@
              if (AbstractFireBlock.method_30032(world, blockpos)) {
 +                // CraftBukkit start - fire BlockIgniteEvent
 +                if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, blockpos, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FIREBALL, itemusagecontext.getPlayer()).isCancelled()) {
-+                    if (!itemusagecontext.getPlayer().abilities.canInstantlyBuild) {
++                    if (!itemusagecontext.getPlayer().abilities.creativeMode) {
 +                        itemusagecontext.getStack().decrement(1);
 +                    }
 +                    return ActionResult.PASS;

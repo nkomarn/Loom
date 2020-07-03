@@ -10,7 +10,8 @@
  
      private final List<BeehiveBlockEntity.Bee> bees = Lists.newArrayList();
      @Nullable
-     private BlockPos flowerPos = null;
+-    private BlockPos flowerPos = null;
++    public BlockPos flowerPos = null; // Loom - public access
 +    public int maxBees = 3; // CraftBukkit - allow setting max amount of bees a hive can hold
  
      public BeehiveBlockEntity() {
@@ -41,7 +42,7 @@
 +        return tryReleaseBee(blockstate, beehiveblockentity_beestate, false);
 +    }
 +
-+    private List<Entity> tryReleaseBee(BlockState blockstate, BeehiveBlockEntity.BeeState beehiveblockentity_beestate,  boolean force) {
++    public List<Entity> tryReleaseBee(BlockState blockstate, BeehiveBlockEntity.BeeState beehiveblockentity_beestate, boolean force) {  // Loom - public access
          List<Entity> list = Lists.newArrayList();
  
          this.bees.removeIf((beehiveblockentity_bee) -> {

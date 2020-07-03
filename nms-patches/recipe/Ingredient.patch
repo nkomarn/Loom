@@ -1,13 +1,26 @@
 --- a/net/minecraft/recipe/Ingredient.java
 +++ b/net/minecraft/recipe/Ingredient.java
-@@ -34,6 +34,7 @@
+@@ -32,16 +32,17 @@
+ 
+     public static final Ingredient EMPTY = new Ingredient(Stream.empty());
      private final Ingredient.Entry[] entries;
-     private ItemStack[] matchingStacks;
+-    private ItemStack[] matchingStacks;
++    public ItemStack[] matchingStacks; // Loom - public access
      private IntList ids;
 +    public boolean exact; // CraftBukkit
  
-     private Ingredient(Stream<? extends Ingredient.Entry> stream) {
+-    private Ingredient(Stream<? extends Ingredient.Entry> stream) {
++    public Ingredient(Stream<? extends Ingredient.Entry> stream) { // Loom - public access
          this.entries = (Ingredient.Entry[]) stream.toArray((i) -> {
+             return new Ingredient.Entry[i];
+         });
+     }
+ 
+-    private void cacheMatchingStacks() {
++    public void cacheMatchingStacks() { // Loom - public access
+         if (this.matchingStacks == null) {
+             this.matchingStacks = (ItemStack[]) Arrays.stream(this.entries).flatMap((ingredient_entry) -> {
+                 return ingredient_entry.getStacks().stream();
 @@ -66,6 +67,16 @@
                  for (int j = 0; j < i; ++j) {
                      ItemStack itemstack1 = aitemstack[j];
@@ -35,4 +48,18 @@
 +    // Loom - decompile error
  
      static class TagEntry implements Ingredient.Entry {
+ 
+@@ -244,11 +253,11 @@
+         }
+     }
+ 
+-    static class StackEntry implements Ingredient.Entry {
++    public static class StackEntry implements Ingredient.Entry { // Loom - public access
+ 
+         private final ItemStack stack;
+ 
+-        private StackEntry(ItemStack itemstack) {
++        public StackEntry(ItemStack itemstack) { // Loom - public access
+             this.stack = itemstack;
+         }
  

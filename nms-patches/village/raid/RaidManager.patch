@@ -1,5 +1,14 @@
 --- a/net/minecraft/village/raid/RaidManager.java
 +++ b/net/minecraft/village/raid/RaidManager.java
+@@ -27,7 +27,7 @@
+ 
+ public class RaidManager extends PersistentState {
+ 
+-    private final Map<Integer, Raid> raids = Maps.newHashMap();
++    public final Map<Integer, Raid> raids = Maps.newHashMap(); // Loom - public access
+     private final ServerWorld world;
+     private int nextAvailableId;
+     private int currentTime;
 @@ -110,19 +110,34 @@
                  boolean flag = false;
  

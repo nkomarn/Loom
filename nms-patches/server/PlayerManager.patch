@@ -189,7 +189,7 @@
 +        serverplayerentity.sentListPacket = true;
 +        // CraftBukkit end
 +
-+        serverplayerentity.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(serverplayerentity.getEntityId(), serverworld1.dataTracker, true)); // CraftBukkit - BungeeCord#2321, send complete data to self on spawn
++        serverplayerentity.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(serverplayerentity.getEntityId(), serverplayerentity.getDataTracker(), true)); // CraftBukkit - BungeeCord#2321, send complete data to self on spawn
 +
 +        // CraftBukkit start - Only add if the player wasn't moved in the event
 +        if (serverplayerentity.world == serverworld1 && !serverworld1.getPlayers().contains(serverplayerentity)) {
@@ -219,7 +219,7 @@
              });
  
              if (entity != null) {
-@@ -264,6 +337,8 @@
+@@ -264,9 +337,11 @@
          }
  
          serverplayerentity.onSpawn();
@@ -227,7 +227,11 @@
 +        PlayerManager.LOGGER.info("{}[{}] logged in with entity id {} at ([{}]{}, {}, {})", serverplayerentity.getDisplayName().getString(), s1, serverplayerentity.getEntityId(), serverworld1.field_24456.getLevelName(), serverplayerentity.getX(), serverplayerentity.getY(), serverplayerentity.getZ());
      }
  
-     protected void sendScoreboard(ServerScoreboard serverscoreboard, ServerPlayerEntity serverplayerentity) {
+-    protected void sendScoreboard(ServerScoreboard serverscoreboard, ServerPlayerEntity serverplayerentity) {
++    public void sendScoreboard(ServerScoreboard serverscoreboard, ServerPlayerEntity serverplayerentity) { // Loom - public access
+         Set<ScoreboardObjective> set = Sets.newHashSet();
+         Iterator iterator = serverscoreboard.getTeams().iterator();
+ 
 @@ -296,25 +371,27 @@
      }
  
@@ -402,7 +406,7 @@
          } else {
 -            return this.players.size() >= this.maxPlayers && !this.canBypassPlayerLimit(gameprofile) ? new TranslatableText("multiplayer.disconnect.server_full") : null;
 +            // return this.players.size() >= this.maxPlayers && !this.canBypassPlayerLimit(gameprofile) ? new TranslatableText("multiplayer.disconnect.server_full") : null;
-+            if (this.players.size() >= this.maxPlayers && !this.f(gameprofile)) {
++            if (this.players.size() >= this.maxPlayers && !this.canBypassPlayerLimit(gameprofile)) {
 +                event.disallow(PlayerLoginEvent.Result.KICK_FULL, "The server is full");
 +            }
 +        }
@@ -493,8 +497,8 @@
 +
 +            if (location == null) {
 +                worldserver1 = this.server.getWorld(World.OVERWORLD);
-+                blockpos = serverplayerentity1.getSpawnPointPosition(worldserver1);
-+                location = new Location(worldserver1.getCraftWorld(), (double) ((float) blockpos.getX() + 0.5F), (double) ((float) blockpos.getY() + 0.1F), (double) ((float) blockpos.getZ() + 0.5F))
++                blockpos = serverplayerentity1.getSpawnPoint(worldserver1);
++                location = new Location(worldserver1.getCraftWorld(), (double) ((float) blockpos.getX() + 0.5F), (double) ((float) blockpos.getY() + 0.1F), (double) ((float) blockpos.getZ() + 0.5F));
 +            }
  
 -            serverplayerentity1.refreshPositionAndAngles(vec3d.x, vec3d.y, vec3d.z, 0.0F, 0.0F);
@@ -553,7 +557,7 @@
          }
  
 +        // Added from changeDimension
-+        updateClient(serverplayerentity); // Update health, etc...
++        sendPlayerStatus(serverplayerentity); // Update health, etc...
 +        serverplayerentity.sendAbilitiesUpdate();
 +        for (Object o1 : serverplayerentity.getStatusEffects()) {
 +            StatusEffectInstance mobEffect = (StatusEffectInstance) o1;
@@ -561,7 +565,7 @@
 +        }
 +
 +        // Fire advancement trigger
-+        serverplayerentity.triggerDimensionAdvancements(((CraftWorld) fromWorld).getHandle());
++        serverplayerentity.dimensionChanged(((CraftWorld) fromWorld).getHandle());
 +
 +        // Don't fire on respawn
 +        if (fromWorld != location.getWorld()) {
@@ -681,7 +685,7 @@
 +            // serverplayerentity.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, serverworld.getRainGradient(1.0F)));
 +            // serverplayerentity.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, serverworld.getThunderGradient(1.0F)));
 +            serverplayerentity.setPlayerWeather(org.bukkit.WeatherType.DOWNFALL, false);
-+            serverplayerentity.updateWeather(-serverworld.rainLevel, serverworld.rainLevel, -serverworld.thunderLevel, serverworld.thunderLevel);
++            serverplayerentity.updateWeather(-serverworld.rainGradient, serverworld.rainGradient, -serverworld.thunderGradient, serverworld.thunderGradient);
 +            // CraftBukkit end
          }
  

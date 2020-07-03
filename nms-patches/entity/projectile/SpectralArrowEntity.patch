@@ -1,5 +1,14 @@
 --- a/net/minecraft/entity/projectile/SpectralArrowEntity.java
 +++ b/net/minecraft/entity/projectile/SpectralArrowEntity.java
+@@ -12,7 +12,7 @@
+ 
+ public class SpectralArrowEntity extends PersistentProjectileEntity {
+ 
+-    private int duration = 200;
++    public int duration = 200; // Loom - public access
+ 
+     public SpectralArrowEntity(EntityType<? extends SpectralArrowEntity> entitytype, World world) {
+         super(entitytype, world);
 @@ -42,7 +42,7 @@
          super.onHit(livingentity);
          StatusEffectInstance statuseffectinstance = new StatusEffectInstance(StatusEffects.GLOWING, this.duration, 0);

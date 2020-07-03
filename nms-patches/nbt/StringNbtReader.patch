@@ -1,0 +1,11 @@
+--- a/net/minecraft/nbt/StringNbtReader.java
++++ b/net/minecraft/nbt/StringNbtReader.java
+@@ -82,7 +82,7 @@
+         }
+     }
+ 
+-    private Tag parsePrimitive(String s) {
++    public Tag parsePrimitive(String s) { // Loom - public access
+         try {
+             if (StringNbtReader.FLOAT_PATTERN.matcher(s).matches()) {
+                 return FloatTag.of(Float.parseFloat(s.substring(0, s.length() - 1)));

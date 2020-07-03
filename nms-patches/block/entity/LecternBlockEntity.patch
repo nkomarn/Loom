@@ -49,11 +49,6 @@
 +        }
 +
 +        @Override
-+        public void setMaxStackSize(int i) {
-+            maxStack = i;
-+        }
-+
-+        @Override
 +        public Location getLocation() {
 +            return new Location(world.getCraftWorld(), pos.getX(), pos.getY(), pos.getZ());
 +        }
@@ -61,6 +56,11 @@
 +        @Override
 +        public InventoryHolder getOwner() {
 +            return (Lectern) LecternBlockEntity.this.getOwner();
++        }
++
++        @Override
++        public void setMaxCountPerStack(int size) {
++            maxStack = size;
 +        }
 +        // CraftBukkit end
  
@@ -98,7 +98,14 @@
      private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
          public int get(int i) {
              return i == 0 ? LecternBlockEntity.this.currentPage : 0;
-@@ -145,7 +210,7 @@
+@@ -139,13 +204,13 @@
+         this.markDirty();
+     }
+ 
+-    private void setCurrentPage(int i) {
++    public void setCurrentPage(int i) { // Loom - public access
+         int j = MathHelper.clamp(i, 0, this.pageCount - 1);
+ 
          if (j != this.currentPage) {
              this.currentPage = j;
              this.markDirty();
@@ -142,3 +149,12 @@
      private ServerCommandSource getCommandSource(@Nullable PlayerEntity playerentity) {
          String s;
          Object object;
+@@ -216,7 +309,7 @@
+     }
+ 
+     public ScreenHandler createMenu(int i, PlayerInventory playerinventory, PlayerEntity playerentity) {
+-        return new LecternScreenHandler(i, this.inventory, this.propertyDelegate);
++        return new LecternScreenHandler(i, this.inventory, this.propertyDelegate, playerinventory);
+     }
+ 
+     public Text getDisplayName() {

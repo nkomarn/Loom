@@ -10,7 +10,7 @@
  
  public class LoseJobOnSiteLossTask extends Task<VillagerEntity> {
  
-@@ -22,7 +25,14 @@
+@@ -22,10 +25,18 @@
      }
  
      protected void run(ServerWorld serverworld, VillagerEntity villagerentity, long i) {
@@ -26,3 +26,13 @@
          villagerentity.reinitializeBrain(serverworld);
      }
  
++    /*
+     protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
+         return this.shouldRun(serverworld, (VillagerEntity) livingentity);
+     }
+@@ -33,4 +44,5 @@
+     protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
+         this.run(serverworld, (VillagerEntity) livingentity, i);
+     }
++    */ // Loom - decompile error
+ }

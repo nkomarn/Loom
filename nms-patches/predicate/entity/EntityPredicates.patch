@@ -9,3 +9,14 @@
                  return false;
              } else if (entity.world.isClient && (!(entity1 instanceof PlayerEntity) || !((PlayerEntity) entity1).isMainPlayer())) {
                  return false;
+@@ -100,8 +100,10 @@
+             }
+         }
+ 
++        /*
+         public boolean test(@Nullable Object object) {
+             return this.test((Entity) object);
+         }
++        */ // Loom - decompile error
+     }
+ }

@@ -34,3 +34,12 @@
          HitResult.Type hitresult_type = hitresult.getType();
  
          if (hitresult_type == HitResult.Type.ENTITY) {
+@@ -145,7 +148,7 @@
+         this.yaw = updateRotation(this.prevYaw, (float) (MathHelper.atan2(vec3d.x, vec3d.z) * 57.2957763671875D));
+     }
+ 
+-    protected static float updateRotation(float f, float f1) {
++    public static float updateRotation(float f, float f1) { // Loom - change access
+         while (f1 - f < -180.0F) {
+             f -= 360.0F;
+         }

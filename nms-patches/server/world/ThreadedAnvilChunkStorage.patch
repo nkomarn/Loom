@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/world/ThreadedAnvilChunkStorage.java
 +++ b/net/minecraft/server/world/ThreadedAnvilChunkStorage.java
-@@ -92,6 +92,11 @@
+@@ -92,11 +92,16 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -12,15 +12,23 @@
  public class ThreadedAnvilChunkStorage extends VersionedChunkStorage implements ChunkHolder.PlayersWatchingChunkProvider {
  
      private static final Logger LOGGER = LogManager.getLogger();
-@@ -111,7 +116,7 @@
+     public static final int MAX_LEVEL = 33 + ChunkStatus.getMaxTargetGenerationRadius();
+-    private final Long2ObjectLinkedOpenHashMap<ChunkHolder> currentChunkHolders = new Long2ObjectLinkedOpenHashMap<>();
++    public final Long2ObjectLinkedOpenHashMap<ChunkHolder> currentChunkHolders = new Long2ObjectLinkedOpenHashMap<>(); // Loom - public access
+     private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> chunkHolders;
+     private final Long2ObjectLinkedOpenHashMap<ChunkHolder> field_18807;
+     private final LongSet loadedChunks;
+@@ -111,8 +116,8 @@
      private final ChunkTaskPrioritySystem chunkTaskPrioritySystem;
      private final MessageListener<ChunkTaskPrioritySystem.Task<Runnable>> worldGenExecutor;
      private final MessageListener<ChunkTaskPrioritySystem.Task<Runnable>> mainExecutor;
 -    private final WorldGenerationProgressListener worldGenerationProgressListener;
+-    private final ThreadedAnvilChunkStorage.TicketManager ticketManager;
 +    public final WorldGenerationProgressListener worldGenerationProgressListener; // Loom - change access
-     private final ThreadedAnvilChunkStorage.TicketManager ticketManager;
++    public final ThreadedAnvilChunkStorage.TicketManager ticketManager; // Loom - change access
      private final AtomicInteger totalChunksLoadedCount;
      private final StructureManager structureManager;
+     private final File saveDir;
 @@ -122,6 +127,31 @@
      private final Queue<Runnable> field_19343;
      private int watchDistance;
@@ -90,8 +98,8 @@
  
 -                            if (!(entity instanceof PlayerEntity) && !this.world.loadEntity(entity)) {
 +                            // CraftBukkit start - these are spawned serialized (DefinedStructure) and we don't call an add event below at the moment due to ordering complexities
-+                            boolean needsRemoval = false;
-+                            if (chunk.needsDecoration && !this.world.getServer().getSpawnNPCs() && entity instanceof Npc) {
++                            boolean needsRemoval = false; // TODO make sure needsDecoration works
++                            if (worldchunk.needsDecoration && !this.world.getServer().shouldSpawnNpcs() && entity instanceof Npc) {
 +                                entity.remove();
 +                                needsRemoval = true;
 +                            }

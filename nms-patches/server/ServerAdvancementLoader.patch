@@ -1,0 +1,23 @@
+--- a/net/minecraft/server/ServerAdvancementLoader.java
++++ b/net/minecraft/server/ServerAdvancementLoader.java
+@@ -26,8 +26,8 @@
+ public class ServerAdvancementLoader extends JsonDataLoader {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private static final Gson GSON = (new GsonBuilder()).create();
+-    private AdvancementManager manager = new AdvancementManager();
++    public static final Gson GSON = (new GsonBuilder()).create(); // Loom - change access
++    public AdvancementManager manager = new AdvancementManager(); // Loom - change access
+     private final LootConditionManager conditionManager;
+ 
+     public ServerAdvancementLoader(LootConditionManager lootconditionmanager) {
+@@ -74,7 +74,9 @@
+         return this.manager.getAdvancements();
+     }
+ 
++    /*
+     protected void apply(Object object, ResourceManager resourcemanager, Profiler profiler) {
+         this.apply((Map) object, resourcemanager, profiler);
+     }
++    */ // Loom - decompile error
+ }

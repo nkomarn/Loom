@@ -1,6 +1,6 @@
 --- a/net/minecraft/block/entity/EndGatewayBlockEntity.java
 +++ b/net/minecraft/block/entity/EndGatewayBlockEntity.java
-@@ -28,6 +28,12 @@
+@@ -28,15 +28,21 @@
  import net.minecraft.world.gen.feature.FeatureConfig;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -13,6 +13,18 @@
  
  public class EndGatewayBlockEntity extends EndPortalBlockEntity implements Tickable {
  
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private long age;
++    public long age; // Loom - public access
+     private int teleportCooldown;
+     @Nullable
+-    private BlockPos exitPortalPos;
+-    private boolean exactTeleport;
++    public BlockPos exitPortalPos; // Loom - public access
++    public boolean exactTeleport; // Loom - public access
+ 
+     public EndGatewayBlockEntity() {
+         super(BlockEntityType.END_GATEWAY);
 @@ -154,6 +160,26 @@
                      entity1 = entity.getRootVehicle();
                  }

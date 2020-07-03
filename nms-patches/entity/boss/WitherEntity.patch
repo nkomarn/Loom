@@ -19,6 +19,15 @@
  public class WitherEntity extends HostileEntity implements RangedAttackMob {
  
      private static final TrackedData<Integer> TRACKED_ENTITY_ID_1 = DataTracker.registerData(WitherEntity.class, TrackedDataHandlerRegistry.INTEGER);
+@@ -63,7 +75,7 @@
+     private final int[] field_7091 = new int[2];
+     private final int[] field_7092 = new int[2];
+     private int field_7082;
+-    private final ServerBossBar bossBar;
++    public final ServerBossBar bossBar; // Loom - public access
+     private static final Predicate<LivingEntity> CAN_ATTACK_PREDICATE = (livingentity) -> {
+         return livingentity.getGroup() != EntityGroup.UNDEAD && livingentity.isMobOrPlayer();
+     };
 @@ -221,16 +233,40 @@
              i = this.getInvulnerableTimer() - 1;
              if (i <= 0) {

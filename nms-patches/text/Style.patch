@@ -22,3 +22,19 @@
      public Style withClickEvent(@Nullable ClickEvent clickevent) {
          return new Style(this.color, this.bold, this.italic, this.underlined, this.strikethrough, this.obfuscated, clickevent, this.hoverEvent, this.insertion, this.font);
      }
+@@ -380,15 +395,5 @@
+                 return jsonobject;
+             }
+         }
+-
+-        @Nullable
+-        public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
+-            return this.serialize((Style) object, type, jsonserializationcontext);
+-        }
+-
+-        @Nullable
+-        public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
+-            return this.deserialize(jsonelement, type, jsondeserializationcontext);
+-        }
+     }
+ }

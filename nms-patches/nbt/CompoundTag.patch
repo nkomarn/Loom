@@ -1,6 +1,6 @@
 --- a/net/minecraft/nbt/CompoundTag.java
 +++ b/net/minecraft/nbt/CompoundTag.java
-@@ -74,9 +74,7 @@
+@@ -74,13 +74,11 @@
              return "TAG_Compound";
          }
  
@@ -11,7 +11,17 @@
      };
      private final Map<String, Tag> tags;
  
-@@ -530,7 +528,5 @@
+-    protected CompoundTag(Map<String, Tag> map) {
++    public CompoundTag(Map<String, Tag> map) { // Loom - public access
+         this.tags = map;
+     }
+ 
+@@ -526,11 +524,9 @@
+         }
+     }
+ 
+-    protected Map<String, Tag> method_29143() {
++    public Map<String, Tag> method_29143() { // Loom - public access
          return Collections.unmodifiableMap(this.tags);
      }
  

@@ -1,5 +1,17 @@
 --- a/net/minecraft/block/entity/BannerBlockEntity.java
 +++ b/net/minecraft/block/entity/BannerBlockEntity.java
+@@ -20,9 +20,9 @@
+     @Nullable
+     private Text customName;
+     @Nullable
+-    private DyeColor baseColor;
++    public DyeColor baseColor; // Loom - change access
+     @Nullable
+-    private ListTag patternListTag;
++    public ListTag patternListTag; // Loom - change access
+     private boolean patternListTagRead;
+     @Nullable
+     private List<Pair<BannerPattern, DyeColor>> patterns;
 @@ -76,6 +76,11 @@
          }
  

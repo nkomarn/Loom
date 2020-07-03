@@ -9,6 +9,15 @@
  import java.util.Set;
  import java.util.concurrent.CompletableFuture;
  import java.util.concurrent.Executor;
+@@ -36,7 +38,7 @@
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final int NEARBY_PLAYER_TICKET_LEVEL = 33 + ChunkStatus.getTargetGenerationRadius(ChunkStatus.FULL) - 2;
+     private final Long2ObjectMap<ObjectSet<ServerPlayerEntity>> playersByChunkPos = new Long2ObjectOpenHashMap<>();
+-    private final Long2ObjectOpenHashMap<SortedArraySet<ChunkTicket<?>>> ticketsByPosition = new Long2ObjectOpenHashMap<>();
++    public final Long2ObjectOpenHashMap<SortedArraySet<ChunkTicket<?>>> ticketsByPosition = new Long2ObjectOpenHashMap<>(); // Loom - public access
+     private final ChunkTicketManager.TicketDistanceLevelPropagator distanceFromTicketTracker = new ChunkTicketManager.TicketDistanceLevelPropagator();
+     private final ChunkTicketManager.DistanceFromNearestPlayerTracker distanceFromNearestPlayerTracker = new ChunkTicketManager.DistanceFromNearestPlayerTracker(8);
+     private final ChunkTicketManager.NearbyChunkTicketUpdater nearbyChunkTicketUpdater = new ChunkTicketManager.NearbyChunkTicketUpdater(33);
 @@ -66,7 +68,7 @@
          while (objectiterator.hasNext()) {
              Long2ObjectMap.Entry<SortedArraySet<ChunkTicket<?>>> long2objectmap_entry = (Long2ObjectMap.Entry) objectiterator.next();
@@ -118,7 +127,7 @@
 +            SortedArraySet<ChunkTicket<?>> tickets = entry.getValue();
 +            if (tickets.remove(target)) {
 +                // copied from removeTicket
-+                this.distanceFromTicketTracker.update(entry.getLongKey(), getLevel(tickets), false);
++                this.distanceFromTicketTracker.updateLevel(entry.getLongKey(), getLevel(tickets), false);
 +
 +                // can't use entry after it's removed
 +                if (tickets.isEmpty()) {

@@ -1,5 +1,14 @@
 --- a/net/minecraft/block/entity/LockableContainerBlockEntity.java
 +++ b/net/minecraft/block/entity/LockableContainerBlockEntity.java
+@@ -17,7 +17,7 @@
+ 
+ public abstract class LockableContainerBlockEntity extends BlockEntity implements Inventory, NamedScreenHandlerFactory, Nameable {
+ 
+-    private ContainerLock lock;
++    public ContainerLock lock; // Loom - public access
+     private Text customName;
+ 
+     protected LockableContainerBlockEntity(BlockEntityType<?> blockentitytype) {
 @@ -83,4 +83,13 @@
      }
  
@@ -10,7 +19,7 @@
 +    @Override
 +    public org.bukkit.Location getLocation() {
 +        if (world == null) return null;
-+        return new org.bukkit.Location(world.getWorld(), pos.getX(), pos.getY(), pos.getZ());
++        return new org.bukkit.Location(world.getCraftWorld(), pos.getX(), pos.getY(), pos.getZ());
 +    }
 +    // CraftBukkit end
  }

@@ -11,6 +11,15 @@
  
  public abstract class HorseBaseEntity extends AnimalEntity implements InventoryChangedListener, JumpingMount, Saddleable {
  
+@@ -80,7 +84,7 @@
+     public int tailWagTicks;
+     public int field_6958;
+     protected boolean inAir;
+-    protected SimpleInventory items;
++    public SimpleInventory items; // Loom - public access
+     protected int temper;
+     protected float jumpStrength;
+     private boolean jumping;
 @@ -92,6 +96,7 @@
      private float lastEatingAnimationProgress;
      protected boolean playExtraHorseSounds = true;

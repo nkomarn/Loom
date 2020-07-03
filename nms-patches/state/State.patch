@@ -1,0 +1,81 @@
+--- a/net/minecraft/state/State.java
++++ b/net/minecraft/state/State.java
+@@ -20,8 +20,8 @@
+ import net.minecraft.state.property.Property;
+ 
+ public abstract class State<O, S> {
+-
+-    private static final Function<Entry<Property<?>, Comparable<?>>, String> PROPERTY_MAP_PRINTER = new Function<Entry<Property<?>, Comparable<?>>, String>() {
++    // Loom - change access
++    public static final Function<Entry<Property<?>, Comparable<?>>, String> PROPERTY_MAP_PRINTER = new Function<Entry<Property<?>, Comparable<?>>, String>() {
+         public String apply(@Nullable Entry<Property<?>, Comparable<?>> entry) {
+             if (entry == null) {
+                 return "<NULL>";
+@@ -33,12 +33,12 @@
+         }
+ 
+         private <T extends Comparable<T>> String nameValue(Property<T> property, Comparable<?> comparable) {
+-            return property.name(comparable);
++            return property.name((T) comparable);
+         }
+ 
+-        public Object apply(@Nullable Object object) {
++        /*public Object apply(@Nullable Object object) {
+             return this.apply((Entry) object);
+-        }
++        }*/ // Loom - decompile error
+     };
+     protected final O owner;
+     private final ImmutableMap<Property<?>, Comparable<?>> entries;
+@@ -52,7 +52,7 @@
+     }
+ 
+     public <T extends Comparable<T>> S cycle(Property<T> property) {
+-        return this.with(property, (Comparable) getNext(property.getValues(), this.get(property)));
++        return this.with(property, getNext(property.getValues(), this.get(property)));
+     }
+ 
+     protected static <T> T getNext(Collection<T> collection, T t0) {
+@@ -60,12 +60,12 @@
+ 
+         do {
+             if (!iterator.hasNext()) {
+-                return iterator.next();
++                return (T) iterator.next(); // Loom - decompile error
+             }
+         } while (!iterator.next().equals(t0));
+ 
+         if (iterator.hasNext()) {
+-            return iterator.next();
++            return (T) iterator.next(); // Loom - decompile error
+         } else {
+             return collection.iterator().next();
+         }
+@@ -98,23 +98,23 @@
+         if (comparable == null) {
+             throw new IllegalArgumentException("Cannot get property " + property + " as it does not exist in " + this.owner);
+         } else {
+-            return (Comparable) property.getType().cast(comparable);
++            return property.getType().cast(comparable);
+         }
+     }
+ 
+     public <T extends Comparable<T>> Optional<T> method_28500(Property<T> property) {
+-        Comparable<?> comparable = (Comparable) this.entries.get(property);
++        Comparable<?> comparable = this.entries.get(property);
+ 
+         return comparable == null ? Optional.empty() : Optional.of(property.getType().cast(comparable));
+     }
+ 
+     public <T extends Comparable<T>, V extends T> S with(Property<T> property, V v0) {
+-        Comparable<?> comparable = (Comparable) this.entries.get(property);
++        Comparable<?> comparable = this.entries.get(property);
+ 
+         if (comparable == null) {
+             throw new IllegalArgumentException("Cannot set property " + property + " as it does not exist in " + this.owner);
+         } else if (comparable == v0) {
+-            return this;
++            return (S) this; // Loom - decompile error
+         } else {
+             S s0 = this.withTable.get(property, v0);
+ 

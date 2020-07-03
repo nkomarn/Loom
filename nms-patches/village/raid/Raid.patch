@@ -1,10 +1,12 @@
 --- a/net/minecraft/village/raid/Raid.java
 +++ b/net/minecraft/village/raid/Raid.java
-@@ -68,13 +68,13 @@
+@@ -67,21 +67,21 @@
+     private static final Text DEFEAT_TITLE = Raid.EVENT_TEXT.shallowCopy().append(" - ").append((Text) Raid.DEFEAT_SUFFIX_TEXT);
      private final Map<Integer, RaiderEntity> waveToCaptain = Maps.newHashMap();
      private final Map<Integer, Set<RaiderEntity>> waveToRaiders = Maps.newHashMap();
-     private final Set<UUID> heroesOfTheVillage = Sets.newHashSet();
+-    private final Set<UUID> heroesOfTheVillage = Sets.newHashSet();
 -    private long ticksActive;
++    public final Set<UUID> heroesOfTheVillage = Sets.newHashSet(); // Loom - change access
 +    public long ticksActive; // Loom - change access
      private BlockPos center;
      private final ServerWorld world;
@@ -16,6 +18,14 @@
      private boolean active;
      private int wavesSpawned;
      private final ServerBossBar bar;
+     private int postRaidTicks;
+     private int preRaidTicks;
+     private final Random random;
+-    private final int waveCount;
++    public final int waveCount; // Loom - public access
+     private Raid.Status status;
+     private int finishCooldown;
+     private Optional<BlockPos> preCalculatedRavagerSpawnLocation;
 @@ -227,6 +227,7 @@
  
                  this.active = this.world.isChunkLoaded(this.center);

@@ -13,7 +13,7 @@
  
  public class DispenserBlockEntity extends LootableContainerBlockEntity {
  
-@@ -89,4 +95,34 @@
+@@ -89,4 +95,39 @@
      protected ScreenHandler createScreenHandler(int i, PlayerInventory playerinventory) {
          return new Generic3x3ContainerScreenHandler(i, playerinventory, this);
      }
@@ -39,7 +39,12 @@
 +    }
 +
 +    @Override
-+    public int getMaxStackSize() {
++    public void setMaxCountPerStack(int size) {
++        maxStack = size;
++    }
++
++    @Override
++    public int getMaxCountPerStack() {
 +        return maxStack;
 +    }
 +

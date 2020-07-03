@@ -79,7 +79,7 @@
 +        }
 +
 +        // Handle vanilla commands;
-+        if (sender.getWorld().getServer().getCommandBlockOverride(args[0])) {
++        if (sender.getWorld().getCraftServer().getCommandBlockOverride(args[0])) {
 +            args[0] = "minecraft:" + args[0];
 +        }
 +
@@ -114,7 +114,7 @@
 +        Map<CommandNode<ServerCommandSource>, CommandNode<CommandSource>> map = Maps.newIdentityHashMap(); // Use identity to prevent aliasing issues
 +        RootCommandNode vanillaRoot = new RootCommandNode();
 +
-+        RootCommandNode<ServerCommandSource> vanilla = serverplayerentity.server.vanillaCommandDispatcher.a().getRoot(); //TODO
++        RootCommandNode<ServerCommandSource> vanilla = serverplayerentity.server.vanillaCommandDispatcher.getDispatcher().getRoot();
 +        map.put(vanilla, vanillaRoot);
 +        this.makeTreeForSource(vanilla, vanillaRoot, serverplayerentity.getCommandSource(), map);
 +

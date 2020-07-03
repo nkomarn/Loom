@@ -1,5 +1,38 @@
 --- a/net/minecraft/world/MobSpawnerLogic.java
 +++ b/net/minecraft/world/MobSpawnerLogic.java
+@@ -27,24 +27,24 @@
+ public abstract class MobSpawnerLogic {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private int spawnDelay = 20;
++    public int spawnDelay = 20; // Loom - public access
+     private final List<MobSpawnerEntry> spawnPotentials = Lists.newArrayList();
+     private MobSpawnerEntry spawnEntry = new MobSpawnerEntry();
+     private double field_9161;
+     private double field_9159;
+-    private int minSpawnDelay = 200;
+-    private int maxSpawnDelay = 800;
+-    private int spawnCount = 4;
++    public int minSpawnDelay = 200; // Loom - public access
++    public int maxSpawnDelay = 800; // Loom - public access
++    public int spawnCount = 4; // Loom - public access
+     @Nullable
+     private Entity renderedEntity;
+-    private int maxNearbyEntities = 6;
+-    private int requiredPlayerRange = 16;
+-    private int spawnRange = 4;
++    public int maxNearbyEntities = 6; // Loom - public access
++    public int requiredPlayerRange = 16; // Loom - public access
++    public int spawnRange = 4; // Loom - public access
+ 
+     public MobSpawnerLogic() {}
+ 
+     @Nullable
+-    private Identifier getEntityId() {
++    public Identifier getEntityId() { // Loom - public access
+         String s = this.spawnEntry.getEntityTag().getString("id");
+ 
+         try {
 @@ -59,6 +59,7 @@
  
      public void setEntityId(EntityType<?> entitytype) {

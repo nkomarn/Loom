@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/projectile/FireworkRocketEntity.java
 +++ b/net/minecraft/entity/projectile/FireworkRocketEntity.java
-@@ -28,6 +28,7 @@
+@@ -28,14 +28,15 @@
  import net.minecraft.util.math.Vec3d;
  import net.minecraft.world.RayTraceContext;
  import net.minecraft.world.World;
@@ -8,6 +8,17 @@
  
  public class FireworkRocketEntity extends ProjectileEntity {
  
+-    private static final TrackedData<ItemStack> ITEM = DataTracker.registerData(FireworkRocketEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
++    public static final TrackedData<ItemStack> ITEM = DataTracker.registerData(FireworkRocketEntity.class, TrackedDataHandlerRegistry.ITEM_STACK); // Loom - public access
+     private static final TrackedData<OptionalInt> SHOOTER_ENTITY_ID = DataTracker.registerData(FireworkRocketEntity.class, TrackedDataHandlerRegistry.FIREWORK_DATA);
+-    private static final TrackedData<Boolean> SHOT_AT_ANGLE = DataTracker.registerData(FireworkRocketEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
++    public static final TrackedData<Boolean> SHOT_AT_ANGLE = DataTracker.registerData(FireworkRocketEntity.class, TrackedDataHandlerRegistry.BOOLEAN); // Loom - public access
+     private int life;
+-    private int lifeTime;
++    public int lifeTime; // Loom - public access
+     private LivingEntity shooter;
+ 
+     public FireworkRocketEntity(EntityType<? extends FireworkRocketEntity> entitytype, World world) {
 @@ -141,7 +142,11 @@
          }
  

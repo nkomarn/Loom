@@ -1,0 +1,11 @@
+--- a/net/minecraft/block/entity/SkullBlockEntity.java
++++ b/net/minecraft/block/entity/SkullBlockEntity.java
+@@ -22,7 +22,7 @@
+     @Nullable
+     private static MinecraftSessionService sessionService;
+     @Nullable
+-    private GameProfile owner;
++    public GameProfile owner; // Loom - public access
+     private int ticksPowered;
+     private boolean powered;
+ 

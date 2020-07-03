@@ -54,7 +54,7 @@
 +                                removed = false;
 +                                continue;
 +                            }
-+                            mobentity.detachLeash(true, !playerentity.abilities.canInstantlyBuild); // false -> survival mode boolean
++                            mobentity.detachLeash(true, !playerentity.abilities.creativeMode); // false -> survival mode boolean
 +                            // CraftBukkit end
                          }
                      }

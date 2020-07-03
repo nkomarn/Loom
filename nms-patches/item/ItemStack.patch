@@ -185,7 +185,7 @@
 +                        this.setCount(newCount);
 +                    }
 +
-+                    for (Map.Entry<BlockPos, BlockEntity> e : world.capturedTileEntities.entrySet()) {
++                    for (Map.Entry<BlockPos, BlockEntity> e : world.capturedBlockEntities.entrySet()) {
 +                        world.setBlockEntity(e.getKey(), e.getValue());
 +                    }
 +
@@ -247,7 +247,7 @@
 +                }
              }
  
-+            world.capturedTileEntities.clear();
++            world.capturedBlockEntities.clear();
 +            world.capturedBlockStates.clear();
 +            // CraftBukkit end
 +

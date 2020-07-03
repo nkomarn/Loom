@@ -20,6 +20,20 @@
  
  public abstract class AbstractFurnaceBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, Tickable {
  
+@@ -47,10 +59,10 @@
+     private static final int[] BOTTOM_SLOTS = new int[]{2, 1};
+     private static final int[] SIDE_SLOTS = new int[]{1};
+     protected DefaultedList<ItemStack> inventory;
+-    private int burnTime;
++    public int burnTime; // Loom - public access
+     private int fuelTime;
+-    private int cookTime;
+-    private int cookTimeTotal;
++    public int cookTime; // Loom - public access
++    public int cookTimeTotal; // Loom - public access
+     protected final PropertyDelegate propertyDelegate;
+     private final Object2IntOpenHashMap<Identifier> recipesUsed;
+     protected final RecipeType<? extends AbstractCookingRecipe> recipeType;
 @@ -248,12 +260,24 @@
                      this.cookTime = MathHelper.clamp(this.cookTime - 2, 0, this.cookTimeTotal);
                  }
@@ -158,7 +172,7 @@
 +
 +    // CraftBukkit start - add fields and methods
 +    private int maxStack = MAX_STACK;
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    public List<HumanEntity> transaction = new java.util.ArrayList<>();
 +
 +    public List<ItemStack> getContents() {
 +        return this.inventory;

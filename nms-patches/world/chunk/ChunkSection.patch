@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/chunk/ChunkSection.java
++++ b/net/minecraft/world/chunk/ChunkSection.java
+@@ -11,7 +11,7 @@
+ 
+ public class ChunkSection {
+ 
+-    private static final Palette<BlockState> palette = new IdListPalette<>(Block.STATE_IDS, Blocks.AIR.getDefaultState());
++    public static final Palette<BlockState> palette = new IdListPalette<>(Block.STATE_IDS, Blocks.AIR.getDefaultState()); // Loom - public access
+     private final int yOffset;
+     private short nonEmptyBlockCount;
+     private short randomTickableBlockCount;

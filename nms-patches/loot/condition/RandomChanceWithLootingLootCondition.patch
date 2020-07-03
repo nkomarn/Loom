@@ -6,7 +6,7 @@
  
 +        // CraftBukkit start - only use lootingModifier if set by Bukkit
 +        if (lootcontext.hasParameter(LootContextParameters.LOOTING_MOD)) {
-+            i = lootcontext.hasParameter(LootContextParameters.LOOTING_MOD);
++            i = lootcontext.get(LootContextParameters.LOOTING_MOD);
 +        }
 +        // CraftBukkit end
 +

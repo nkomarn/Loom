@@ -94,10 +94,15 @@
          }).filter(Objects::nonNull).findFirst();
      }
  
-@@ -139,4 +160,14 @@
+@@ -136,7 +157,19 @@
+         })).read(identifier, jsonobject);
+     }
+ 
++    /*
      protected void apply(Object object, ResourceManager resourcemanager, Profiler profiler) {
          this.apply((Map) object, resourcemanager, profiler);
      }
++    */ // Loom - decompile error
 +
 +    // CraftBukkit start
 +    public void clearRecipes() {

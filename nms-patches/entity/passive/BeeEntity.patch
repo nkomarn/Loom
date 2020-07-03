@@ -36,7 +36,16 @@
          }
      }
  
-@@ -583,7 +588,7 @@
+@@ -576,14 +581,16 @@
+         return blockpos.isWithinDistance((Vec3i) this.getBlockPos(), (double) i);
+     }
+ 
++    /*
+     public PassiveEntity createChild(PassiveEntity passiveentity) {
+         return this.createChild(passiveentity);
+     }
++    */ // Loom - decompile error
+ 
      class EnterHiveGoal extends BeeEntity.NotAngryGoal {
  
          private EnterHiveGoal() {
@@ -45,7 +54,7 @@
          }
  
          public boolean canBeeStart() {
-@@ -642,7 +647,7 @@
+@@ -642,7 +649,7 @@
      class GrowCropsGoal extends BeeEntity.NotAngryGoal {
  
          private GrowCropsGoal() {
@@ -54,7 +63,7 @@
          }
  
          public boolean canBeeStart() {
-@@ -688,7 +693,7 @@
+@@ -688,7 +695,7 @@
                              }
                          }
  
@@ -63,7 +72,7 @@
                              BeeEntity.this.world.syncWorldEvent(2005, blockpos, 0);
                              BeeEntity.this.world.setBlockState(blockpos, (BlockState) blockstate.with(intproperty, (Integer) blockstate.get(intproperty) + 1));
                              BeeEntity.this.addCropCounter();
-@@ -707,7 +712,7 @@
+@@ -707,7 +714,7 @@
      class FindHiveGoal extends BeeEntity.NotAngryGoal {
  
          private FindHiveGoal() {
@@ -72,7 +81,7 @@
          }
  
          public boolean canBeeStart() {
-@@ -772,7 +777,7 @@
+@@ -772,7 +779,7 @@
          private int ticks = 0;
  
          PollinateGoal() {
@@ -81,7 +90,7 @@
              this.setControls(EnumSet.of(Goal.Control.MOVE));
          }
  
-@@ -949,7 +954,7 @@
+@@ -949,7 +956,7 @@
          private int ticks;
  
          MoveToFlowerGoal() {
@@ -90,7 +99,7 @@
              this.ticks = BeeEntity.this.world.random.nextInt(10);
              this.setControls(EnumSet.of(Goal.Control.MOVE));
          }
-@@ -1228,7 +1233,7 @@
+@@ -1228,7 +1235,7 @@
  
          protected void setMobEntityTarget(MobEntity mobentity, LivingEntity livingentity) {
              if (mobentity instanceof BeeEntity && this.mob.canSee(livingentity)) {
