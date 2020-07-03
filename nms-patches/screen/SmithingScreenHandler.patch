@@ -1,8 +1,8 @@
 --- a/net/minecraft/screen/SmithingScreenHandler.java
 +++ b/net/minecraft/screen/SmithingScreenHandler.java
-@@ -10,6 +10,9 @@
- import net.minecraft.recipe.RecipeType;
+@@ -11,6 +11,9 @@
  import net.minecraft.recipe.SmithingRecipe;
+ import net.minecraft.util.math.BlockPos;
  import net.minecraft.world.World;
 +import org.bukkit.craftbukkit.inventory.CraftInventory;
 +import org.bukkit.craftbukkit.inventory.CraftInventorySmithing;
@@ -10,7 +10,7 @@
  
  public class SmithingScreenHandler extends ForgingScreenHandler {
  
-@@ -17,6 +20,20 @@
+@@ -18,6 +21,20 @@
      @Nullable
      private SmithingRecipe field_25386;
      private final List<SmithingRecipe> field_25668;

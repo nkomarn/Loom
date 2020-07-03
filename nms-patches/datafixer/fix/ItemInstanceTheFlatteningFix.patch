@@ -1,6 +1,6 @@
 --- a/net/minecraft/datafixer/fix/ItemInstanceTheFlatteningFix.java
 +++ b/net/minecraft/datafixer/fix/ItemInstanceTheFlatteningFix.java
-@@ -347,7 +347,7 @@
+@@ -348,7 +348,7 @@
      private static final Set<String> ORIGINAL_ITEM_NAMES = (Set) ItemInstanceTheFlatteningFix.FLATTENING_MAP.keySet().stream().map((s) -> {
          return s.substring(0, s.indexOf(46));
      }).collect(Collectors.toSet());
@@ -9,7 +9,7 @@
  
      public ItemInstanceTheFlatteningFix(Schema schema, boolean flag) {
          super(schema, flag);
-@@ -370,18 +370,18 @@
+@@ -371,18 +371,18 @@
                  String s = getItem((String) ((Pair) optional.get()).getSecond(), i);
  
                  if (s != null) {

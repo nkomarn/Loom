@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import net.minecraft.Bootstrap;
 import net.minecraft.loot.LootManager;
 import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.resource.DefaultResourcePack;

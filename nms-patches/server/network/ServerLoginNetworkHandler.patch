@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/network/ServerLoginNetworkHandler.java
 +++ b/net/minecraft/server/network/ServerLoginNetworkHandler.java
-@@ -32,6 +32,14 @@
+@@ -33,6 +33,14 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -15,7 +15,7 @@
  public class ServerLoginNetworkHandler implements ServerLoginPacketListener {
  
      private static final AtomicInteger authenticatorThreadId = new AtomicInteger(0);
-@@ -46,6 +54,7 @@
+@@ -47,6 +55,7 @@
      private final String serverId;
      private SecretKey secretKey;
      private ServerPlayerEntity player;
@@ -23,7 +23,7 @@
  
      public ServerLoginNetworkHandler(MinecraftServer minecraftserver, ClientConnection clientconnection) {
          this.state = ServerLoginNetworkHandler.State.HELLO;
-@@ -78,6 +87,20 @@
+@@ -79,6 +88,20 @@
          return this.connection;
      }
  
@@ -44,7 +44,7 @@
      public void disconnect(Text text) {
          try {
              ServerLoginNetworkHandler.LOGGER.info("Disconnecting {}: {}", (Object) this.getConnectionInfo(), (Object) text.getString());
-@@ -94,10 +117,12 @@
+@@ -95,10 +118,12 @@
              this.profile = this.toOfflineProfile(this.profile);
          }
  
@@ -60,7 +60,7 @@
          } else {
              this.state = ServerLoginNetworkHandler.State.ACCEPTED;
              if (this.server.getNetworkCompressionThreshold() >= 0 && !this.connection.isLocal()) {
-@@ -111,9 +136,9 @@
+@@ -112,9 +137,9 @@
  
              if (serverplayerentity != null) {
                  this.state = ServerLoginNetworkHandler.State.DELAY_ACCEPT;
@@ -72,7 +72,7 @@
              }
          }
  
-@@ -158,8 +183,12 @@
+@@ -159,8 +184,12 @@
  
                          ServerLoginNetworkHandler.this.profile = ServerLoginNetworkHandler.this.server.getSessionService().hasJoinedServer(new GameProfile((UUID) null, gameprofile.getName()), s, this.getClientAddress());
                          if (ServerLoginNetworkHandler.this.profile != null) {
@@ -87,7 +87,7 @@
                          } else if (ServerLoginNetworkHandler.this.server.isSinglePlayer()) {
                              ServerLoginNetworkHandler.LOGGER.warn("Failed to verify username but will let them in anyway!");
                              ServerLoginNetworkHandler.this.profile = ServerLoginNetworkHandler.this.toOfflineProfile(gameprofile);
-@@ -177,8 +206,11 @@
+@@ -178,8 +207,11 @@
                              ServerLoginNetworkHandler.this.disconnect(new TranslatableText("multiplayer.disconnect.authservers_down"));
                              ServerLoginNetworkHandler.LOGGER.error("Couldn't verify username because servers are unavailable");
                          }
@@ -100,7 +100,7 @@
                  }
  
                  @Nullable
-@@ -210,4 +242,44 @@
+@@ -211,4 +243,44 @@
  
          private State() {}
      }

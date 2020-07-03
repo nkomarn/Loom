@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/gen/chunk/SurfaceChunkGenerator.java
 +++ b/net/minecraft/world/gen/chunk/SurfaceChunkGenerator.java
-@@ -222,6 +222,12 @@
+@@ -223,6 +223,12 @@
                          f7 = f5;
                      }
  

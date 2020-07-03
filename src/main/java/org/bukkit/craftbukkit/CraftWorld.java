@@ -334,9 +334,9 @@ public class CraftWorld implements World {
     }
 
     @Override
-    public Chunk[] getLoadedChunks() {
+    public Chunk[] getLoadedChunks() { // TODO make sure getWorldChunk is correct and not getFullChunk
         Long2ObjectLinkedOpenHashMap<ChunkHolder> chunks = world.getChunkManager().threadedAnvilChunkStorage.currentChunkHolders;
-        return chunks.values().stream().map(ChunkHolder::getFullChunk).filter(Objects::nonNull).map(WorldChunk::getBukkitChunk).toArray(Chunk[]::new);
+        return chunks.values().stream().map(ChunkHolder::getWorldChunk).filter(Objects::nonNull).map(WorldChunk::getBukkitChunk).toArray(org.bukkit.Chunk[]::new);
     }
 
     @Override
@@ -708,7 +708,7 @@ public class CraftWorld implements World {
             conf = DefaultBiomeFeatures.BIRCH_TREE_WITH_BEEHIVES_CONFIG; // TODO which beehive tall birch type ???
             break;
         case CHORUS_PLANT:
-            ((ChorusFlowerBlock) Blocks.CHORUS_FLOWER).a(world, pos, rand, 8);
+            ((ChorusFlowerBlock) Blocks.CHORUS_FLOWER).generate(world, pos, rand, 8);
             return true;
         case TREE:
         default:

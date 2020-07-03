@@ -37,10 +37,10 @@
 -    private EulerAngle rightArmRotation;
 -    private EulerAngle leftLegRotation;
 -    private EulerAngle rightLegRotation;
-+    public EulerAngle leftArmRotation;
-+    public EulerAngle rightArmRotation;
-+    public EulerAngle leftLegRotation;
-+    public EulerAngle rightLegRotation;
++    public EulerAngle leftArmRotation; // Loom - public access
++    public EulerAngle rightArmRotation; // Loom - public access
++    public EulerAngle leftLegRotation; // Loom - public access
++    public EulerAngle rightLegRotation; // Loom - public access
  
      public ArmorStandEntity(EntityType<? extends ArmorStandEntity> entitytype, World world) {
          super(entitytype, world);
@@ -177,10 +177,10 @@
      }
  
 +    // CraftBukkit start
-+    // @Override
++    /*@Override
 +    protected boolean isDropExperience() {
 +        return true; // MC-157395, SPIGOT-5193 even baby (small) armor stands should drop
-+    }
++    }*/ // TODO, without this baby armor stands don't drop anything
 +    // CraftBukkit end
 +
      public void kill() {
@@ -193,7 +193,7 @@
      }
  
 -    private void setSmall(boolean flag) {
-+    public void setSmall(boolean flag) {
++    public void setSmall(boolean flag) { // Loom - public access
          this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 1, flag));
      }
  
@@ -202,7 +202,7 @@
      }
  
 -    private void setShowArms(boolean flag) {
-+    public void setShowArms(boolean flag) {
++    public void setShowArms(boolean flag) { // Loom - public access
          this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 4, flag));
      }
  
@@ -211,7 +211,7 @@
      }
  
 -    private void setHideBasePlate(boolean flag) {
-+    public void setHideBasePlate(boolean flag) {
++    public void setHideBasePlate(boolean flag) { // Loom - public access
          this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 8, flag));
      }
  
@@ -220,7 +220,7 @@
      }
  
 -    private void setMarker(boolean flag) {
-+    public void setMarker(boolean flag) {
++    public void setMarker(boolean flag) { // Loom - public access
          this.dataTracker.set(ArmorStandEntity.ARMOR_STAND_FLAGS, this.setBitField((Byte) this.dataTracker.get(ArmorStandEntity.ARMOR_STAND_FLAGS), 16, flag));
      }
  

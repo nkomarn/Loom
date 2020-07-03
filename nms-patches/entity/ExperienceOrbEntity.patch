@@ -16,7 +16,7 @@
      public int pickupDelay;
      private int health;
 -    private int amount;
-+    public int amount; // CraftBukkit private -> public
++    public int amount; // Loom - public access
      private PlayerEntity target;
      private int lastTargetUpdateTick;
  

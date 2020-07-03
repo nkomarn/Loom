@@ -33,7 +33,7 @@
      }
  
 -    protected void onChestedStatusChanged() {
-+    public void onChestedStatusChanged() { // CraftBukkit potected -> public
++    public void onChestedStatusChanged() { // Loom - public access
          SimpleInventory simpleinventory = this.items;
  
 -        this.items = new SimpleInventory(this.getInventorySize());

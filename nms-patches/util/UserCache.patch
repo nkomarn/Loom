@@ -9,10 +9,13 @@
      private final GameProfileRepository profileRepository;
      protected final Gson gson;
      private final File cacheFile;
-@@ -322,13 +322,5 @@
-         public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
-             return this.serialize((UserCache.Entry) object, type, jsonserializationcontext);
+@@ -319,16 +319,6 @@
+             }
          }
+ 
+-        public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
+-            return this.serialize((UserCache.Entry) object, type, jsonserializationcontext);
+-        }
 -
 -        public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
 -            return this.deserialize(jsonelement, type, jsondeserializationcontext);
@@ -21,5 +24,6 @@
 -        JsonConverter(Object object) {
 -            this();
 -        }
++        // Loom - decompile error
      }
  }

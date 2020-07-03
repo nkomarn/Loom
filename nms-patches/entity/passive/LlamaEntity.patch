@@ -5,8 +5,26 @@
      }
  
 -    private void setStrength(int i) {
-+    public void setStrength(int i) { // CraftBukkit private -> public
++    public void setStrength(int i) { // Loom - public access
          this.dataTracker.set(LlamaEntity.ATTR_STRENGTH, Math.max(1, Math.min(5, i)));
+     }
+ 
+@@ -339,7 +339,7 @@
+     }
+ 
+     public LlamaEntity createChild(PassiveEntity passiveentity) {
+-        LlamaEntity llamaentity = this.createChild();
++        LlamaEntity llamaentity = this.createLlamaChild();
+ 
+         this.setChildAttributes(passiveentity, llamaentity);
+         LlamaEntity llamaentity1 = (LlamaEntity) passiveentity;
+@@ -354,7 +354,7 @@
+         return llamaentity;
+     }
+ 
+-    protected LlamaEntity createChild() {
++    protected LlamaEntity createLlamaChild() {
+         return (LlamaEntity) EntityType.LLAMA.create(this.world);
      }
  
 @@ -447,9 +447,7 @@

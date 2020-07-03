@@ -33,6 +33,15 @@
  
  public class EnderDragonEntity extends MobEntity implements Monster {
  
+@@ -57,7 +66,7 @@
+     private static final TargetPredicate CLOSE_PLAYER_PREDICATE = (new TargetPredicate()).setBaseMaxDistance(64.0D);
+     public final double[][] segmentCircularBuffer = new double[64][3];
+     public int latestSegment = -1;
+-    private final EnderDragonPart[] parts;
++    public final EnderDragonPart[] parts; // Loom - public access
+     public final EnderDragonPart partHead = new EnderDragonPart(this, "head", 1.0F, 1.0F);
+     private final EnderDragonPart partNeck = new EnderDragonPart(this, "neck", 3.0F, 3.0F);
+     private final EnderDragonPart partBody = new EnderDragonPart(this, "body", 5.0F, 3.0F);
 @@ -81,6 +90,7 @@
      private final PathNode[] pathNodes = new PathNode[24];
      private final int[] pathNodeConnections = new int[24];

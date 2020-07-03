@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/LivingEntity.java
 +++ b/net/minecraft/entity/LivingEntity.java
-@@ -106,13 +106,34 @@
+@@ -107,13 +107,34 @@
  import net.minecraft.world.World;
  import org.apache.logging.log4j.Logger;
  
@@ -36,7 +36,7 @@
      private static final TrackedData<Integer> POTION_SWIRLS_COLOR = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.INTEGER);
      private static final TrackedData<Boolean> POTION_SWIRLS_AMBIENT = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
      private static final TrackedData<Integer> STUCK_ARROW_COUNT = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.INTEGER);
-@@ -120,7 +141,7 @@
+@@ -121,7 +142,7 @@
      private static final TrackedData<Optional<BlockPos>> SLEEPING_POSITION = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
      protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F);
      private final AttributeContainer attributes;
@@ -45,7 +45,7 @@
      private final Map<StatusEffect, StatusEffectInstance> activeStatusEffects = Maps.newHashMap();
      private final DefaultedList<ItemStack> equippedHand;
      private final DefaultedList<ItemStack> equippedArmor;
-@@ -139,7 +160,7 @@
+@@ -140,7 +161,7 @@
      public float lastLimbDistance;
      public float limbDistance;
      public float limbAngle;
@@ -54,7 +54,7 @@
      public final float randomLargeSeed;
      public final float randomSmallSeed;
      public float bodyYaw;
-@@ -148,7 +169,7 @@
+@@ -149,7 +170,7 @@
      public float prevHeadYaw;
      public float flyingSpeed;
      @Nullable
@@ -63,7 +63,7 @@
      protected int playerHitTimer;
      protected boolean dead;
      protected int despawnCounter;
-@@ -158,7 +179,7 @@
+@@ -159,7 +180,7 @@
      protected float prevLookDirection;
      protected float field_6215;
      protected int scoreAmount;
@@ -72,7 +72,7 @@
      protected boolean jumping;
      public float sidewaysSpeed;
      public float upwardSpeed;
-@@ -171,7 +192,7 @@
+@@ -172,7 +193,7 @@
      protected double serverPitch;
      protected double serverHeadYaw;
      protected int headTrackingIncrements;
@@ -81,7 +81,7 @@
      @Nullable
      private LivingEntity attacker;
      private int lastAttackedTime;
-@@ -191,6 +212,21 @@
+@@ -192,6 +213,21 @@
      private float leaningPitch;
      private float lastLeaningPitch;
      protected Brain<?> brain;
@@ -103,7 +103,7 @@
  
      protected LivingEntity(EntityType<? extends LivingEntity> entitytype, World world) {
          super(entitytype, world);
-@@ -202,7 +238,9 @@
+@@ -203,7 +239,9 @@
          this.activeItemStack = ItemStack.EMPTY;
          this.climbingPos = Optional.empty();
          this.attributes = new AttributeContainer(DefaultAttributeRegistry.get(entitytype));
@@ -114,7 +114,7 @@
          this.inanimate = true;
          this.randomSmallSeed = (float) ((Math.random() + 1.0D) * 0.009999999776482582D);
          this.refreshPosition();
-@@ -266,7 +304,13 @@
+@@ -267,7 +305,13 @@
                  double d1 = Math.min((double) (0.2F + f / 15.0F), 2.5D);
                  int i = (int) (150.0D * d1);
  
@@ -129,7 +129,7 @@
              }
          }
  
-@@ -485,7 +529,7 @@
+@@ -486,7 +530,7 @@
  
      protected void updatePostDeath() {
          ++this.deathTime;
@@ -138,7 +138,7 @@
              this.remove();
  
              for (int i = 0; i < 20; ++i) {
-@@ -644,6 +688,17 @@
+@@ -645,6 +689,17 @@
              }
          }
  
@@ -156,7 +156,7 @@
          if (compoundtag.contains("Health", 99)) {
              this.setHealth(compoundtag.getFloat("Health"));
          }
-@@ -681,9 +736,32 @@
+@@ -682,9 +737,32 @@
  
      }
  
@@ -189,7 +189,7 @@
          try {
              while (iterator.hasNext()) {
                  StatusEffect statuseffect = (StatusEffect) iterator.next();
-@@ -693,6 +771,12 @@
+@@ -694,6 +772,12 @@
                      this.onStatusEffectUpgraded(statuseffectinstance, true);
                  })) {
                      if (!this.world.isClient) {
@@ -202,7 +202,7 @@
                          iterator.remove();
                          this.onStatusEffectRemoved(statuseffectinstance);
                      }
-@@ -704,6 +788,18 @@
+@@ -705,6 +789,18 @@
              ;
          }
  
@@ -221,7 +221,7 @@
          if (this.effectsChanged) {
              if (!this.world.isClient) {
                  this.updatePotionVisibility();
-@@ -813,6 +909,12 @@
+@@ -814,6 +910,12 @@
      }
  
      public boolean clearStatusEffects() {
@@ -234,7 +234,7 @@
          if (this.world.isClient) {
              return false;
          } else {
-@@ -821,7 +923,14 @@
+@@ -822,7 +924,14 @@
              boolean flag;
  
              for (flag = false; iterator.hasNext(); flag = true) {
@@ -250,7 +250,7 @@
                  iterator.remove();
              }
  
-@@ -847,17 +956,43 @@
+@@ -848,17 +957,43 @@
      }
  
      public boolean addStatusEffect(StatusEffectInstance statuseffectinstance) {
@@ -295,7 +295,7 @@
                  return true;
              } else {
                  return false;
-@@ -883,11 +1018,39 @@
+@@ -884,11 +1019,39 @@
  
      @Nullable
      public StatusEffectInstance removeStatusEffectInternal(@Nullable StatusEffect statuseffect) {
@@ -336,7 +336,7 @@
  
          if (statuseffectinstance != null) {
              this.onStatusEffectRemoved(statuseffectinstance);
-@@ -925,19 +1088,54 @@
+@@ -926,19 +1089,54 @@
      }
  
      public void heal(float f) {
@@ -392,7 +392,7 @@
          this.dataTracker.set(LivingEntity.HEALTH, MathHelper.clamp(f, 0.0F, this.getMaxHealth()));
      }
  
-@@ -950,7 +1148,7 @@
+@@ -951,7 +1149,7 @@
              return false;
          } else if (this.world.isClient) {
              return false;
@@ -401,7 +401,7 @@
              return false;
          } else if (damagesource.isFire() && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
              return false;
-@@ -962,17 +1160,19 @@
+@@ -963,17 +1161,19 @@
              this.despawnCounter = 0;
              float f1 = f;
  
@@ -424,7 +424,7 @@
                  this.damageShield(f);
                  f2 = f;
                  f = 0.0F;
-@@ -992,20 +1192,39 @@
+@@ -993,20 +1193,39 @@
  
              if ((float) this.timeUntilRegen > 10.0F) {
                  if (f <= this.lastDamageTaken) {
@@ -466,7 +466,7 @@
              this.knockbackVelocity = 0.0F;
              Entity entity1 = damagesource.getAttacker();
  
-@@ -1126,19 +1345,29 @@
+@@ -1127,19 +1346,29 @@
              Hand[] ahand = Hand.values();
              int i = ahand.length;
  
@@ -500,7 +500,7 @@
                      ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this;
  
                      serverplayerentity.incrementStat(Stats.USED.getOrCreateStat(Items.TOTEM_OF_UNDYING));
-@@ -1146,13 +1375,15 @@
+@@ -1147,13 +1376,15 @@
                  }
  
                  this.setHealth(1.0F);
@@ -520,7 +520,7 @@
          }
      }
  
-@@ -1269,20 +1500,38 @@
+@@ -1270,20 +1501,38 @@
  
          boolean flag = this.playerHitTimer > 0;
  
@@ -561,7 +561,7 @@
  
              while (i > 0) {
                  int j = ExperienceOrbEntity.roundToOrbSize(i);
-@@ -1290,7 +1539,9 @@
+@@ -1291,7 +1540,9 @@
                  i -= j;
                  this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.getX(), this.getY(), this.getZ(), j));
              }
@@ -571,7 +571,7 @@
  
      }
  
-@@ -1408,9 +1659,14 @@
+@@ -1409,9 +1660,14 @@
          int i = this.computeFallDamage(f, f1);
  
          if (i > 0) {
@@ -587,7 +587,7 @@
              return true;
          } else {
              return flag;
-@@ -1450,7 +1706,7 @@
+@@ -1451,7 +1707,7 @@
  
      protected float applyArmorToDamage(DamageSource damagesource, float f) {
          if (!damagesource.bypassesArmor()) {
@@ -596,7 +596,7 @@
              f = DamageUtil.getDamageLeft(f, (float) this.getArmor(), (float) this.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
          }
  
-@@ -1463,7 +1719,8 @@
+@@ -1464,7 +1720,8 @@
          } else {
              int i;
  
@@ -606,7 +606,7 @@
                  i = (this.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1) * 5;
                  int j = 25 - i;
                  float f1 = f * (float) j;
-@@ -1494,28 +1751,174 @@
+@@ -1495,28 +1752,174 @@
          }
      }
  
@@ -790,7 +790,7 @@
      }
  
      public DamageTracker getDamageTracker() {
-@@ -2886,7 +3289,7 @@
+@@ -2887,7 +3290,7 @@
      }
  
      public void wakeUp() {

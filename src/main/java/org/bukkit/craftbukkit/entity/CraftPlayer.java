@@ -644,7 +644,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (fromWorld == toWorld) {
             entity.networkHandler.teleport(to);
         } else {
-            server.getHandle().moveToWorld(entity, toWorld, true, to, true);
+            server.getHandle().respawnPlayer(entity, toWorld, true, to, true);
         }
         return true;
     }
@@ -671,12 +671,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void loadData() {
-        server.getHandle().playerFileData.load(getHandle());
+        server.getHandle().saveHandler.loadPlayerData(getHandle());
     }
 
     @Override
     public void saveData() {
-        server.getHandle().playerFileData.save(getHandle());
+        server.getHandle().saveHandler.savePlayerData(getHandle());
     }
 
     @Deprecated
@@ -918,7 +918,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setExp(float exp) {
         Preconditions.checkArgument(exp >= 0.0 && exp <= 1.0, "Experience progress must be between 0.0 and 1.0 (%s)", exp);
         getHandle().experienceProgress = exp;
-        getHandle().lastSentExp = -1;
+        getHandle().syncedExperience = -1;
     }
 
     @Override
@@ -930,7 +930,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setLevel(int level) {
         Preconditions.checkArgument(level >= 0, "Experience level must not be negative (%s)", level);
         getHandle().experienceLevel = level;
-        getHandle().lastSentExp = -1;
+        getHandle().syncedExperience = -1;
     }
 
     @Override
@@ -1092,7 +1092,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> result = new LinkedHashMap<>();
 
         result.put("name", getName());
 
@@ -1229,7 +1229,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setResourcePack(String url) {
         Validate.notNull(url, "Resource pack URL cannot be null");
 
-        getHandle().setResourcePack(url, "null");
+        getHandle().sendResourcePackUrl(url, "null");
     }
 
     @Override
@@ -1238,7 +1238,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(hash, "Resource pack hash cannot be null");
         Validate.isTrue(hash.length == 20, "Resource pack hash should be 20 bytes long but was " + hash.length);
 
-        getHandle().setResourcePack(url, BaseEncoding.base16().lowerCase().encode(hash));
+        getHandle().sendResourcePackUrl(url, BaseEncoding.base16().lowerCase().encode(hash));
     }
 
     public void addChannel(String channel) {
@@ -1312,7 +1312,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (container.getBukkitView().getType() != prop.getType()) {
             return false;
         }
-        getHandle().setContainerData(container, prop.getId(), value);
+        getHandle().onPropertyUpdate(container, prop.getId(), value);
         return true;
     }
 
@@ -1353,10 +1353,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public int getNoDamageTicks() {
-        if (getHandle().invulnerableTicks > 0) {
-            return Math.max(getHandle().invulnerableTicks, getHandle().noDamageTicks);
+        if (getHandle().joinInvulnerabilityTicks > 0) {
+            return Math.max(getHandle().joinInvulnerabilityTicks, getHandle().timeUntilRegen);
         } else {
-            return getHandle().noDamageTicks;
+            return getHandle().timeUntilRegen;
         }
     }
 

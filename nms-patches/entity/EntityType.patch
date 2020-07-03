@@ -14,15 +14,17 @@
      public static final EntityType<ArmorStandEntity> ARMOR_STAND = register("armor_stand", EntityType.Builder.create(ArmorStandEntity::new, SpawnGroup.MISC).setDimensions(0.5F, 1.975F).maxTrackingRange(10));
      public static final EntityType<ArrowEntity> ARROW = register("arrow", EntityType.Builder.create(ArrowEntity::new, SpawnGroup.MISC).setDimensions(0.5F, 0.5F).maxTrackingRange(4).trackingTickInterval(20));
      public static final EntityType<BatEntity> BAT = register("bat", EntityType.Builder.create(BatEntity::new, SpawnGroup.AMBIENT).setDimensions(0.5F, 0.9F).maxTrackingRange(5));
-@@ -261,7 +262,7 @@
+@@ -261,8 +262,8 @@
      private Identifier lootTableId;
      private final EntityDimensions dimensions;
  
 -    private static <T extends Entity> EntityType<T> register(String s, EntityType.Builder<T> entitytype_builder) {
+-        return (EntityType) Registry.register(Registry.ENTITY_TYPE, s, entitytype_builder.build(s));
 +    private static <T extends Entity> EntityType<T> register(String s, EntityType.Builder entitytype_builder) { // CraftBukkit - decompile error
-         return (EntityType) Registry.register(Registry.ENTITY_TYPE, s, entitytype_builder.build(s));
++        return (EntityType) Registry.register((Registry<? super EntityType>) Registry.ENTITY_TYPE, s, entitytype_builder.build(s));
      }
  
+     public static Identifier getId(EntityType<?> entitytype) {
 @@ -293,10 +294,14 @@
  
      @Nullable

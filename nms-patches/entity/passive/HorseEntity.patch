@@ -5,7 +5,7 @@
      }
  
 -    private void setVariant(HorseColor horsecolor, HorseMarking horsemarking) {
-+    public void setVariant(HorseColor horsecolor, HorseMarking horsemarking) { // CraftBukkit : private -> public
++    public void setVariant(HorseColor horsecolor, HorseMarking horsemarking) { // Loom - public access
          this.setVariant(horsecolor.getIndex() & 255 | horsemarking.getIndex() << 8 & '\uff00');
      }
  

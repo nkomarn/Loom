@@ -5,7 +5,7 @@
  
      private static final TrackedData<Boolean> CHARGING = DataTracker.registerData(PillagerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 -    private final SimpleInventory inventory = new SimpleInventory(5);
-+    public final SimpleInventory inventory = new SimpleInventory(5); // CraftBukkit : private -> public
++    public final SimpleInventory inventory = new SimpleInventory(5); // Loom - public access
  
      public PillagerEntity(EntityType<? extends PillagerEntity> entitytype, World world) {
          super(entitytype, world);

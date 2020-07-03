@@ -1,6 +1,15 @@
 --- a/net/minecraft/block/FireBlock.java
 +++ b/net/minecraft/block/FireBlock.java
-@@ -21,6 +21,11 @@
+@@ -4,7 +4,7 @@
+ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+ import java.util.Map;
+ import java.util.Random;
+-import java.util.Map.Entry;
++
+ import net.minecraft.item.ItemPlacementContext;
+ import net.minecraft.server.world.ServerWorld;
+ import net.minecraft.state.StateManager;
+@@ -22,6 +22,11 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldAccess;
  import net.minecraft.world.WorldView;
@@ -12,7 +21,7 @@
  
  public class FireBlock extends AbstractFireBlock {
  
-@@ -42,7 +47,18 @@
+@@ -43,7 +48,18 @@
      }
  
      public BlockState getStateForNeighborUpdate(BlockState blockstate, Direction direction, BlockState blockstate1, WorldAccess worldaccess, BlockPos blockpos, BlockPos blockpos1) {
@@ -32,7 +41,7 @@
      }
  
      public VoxelShape getOutlineShape(BlockState blockstate, BlockView blockview, BlockPos blockpos, ShapeContext shapecontext) {
-@@ -109,7 +125,7 @@
+@@ -110,7 +126,7 @@
          serverworld.getBlockTickScheduler().schedule(blockpos, this, method_26155(serverworld.random));
          if (serverworld.getGameRules().getBoolean(GameRules.DO_FIRE_TICK)) {
              if (!blockstate.canPlaceAt(serverworld, blockpos)) {
@@ -41,7 +50,7 @@
              }
  
              BlockState blockstate1 = serverworld.getBlockState(blockpos.down());
-@@ -117,7 +133,7 @@
+@@ -118,7 +134,7 @@
              int i = (Integer) blockstate.get(FireBlock.AGE);
  
              if (!flag && serverworld.isRaining() && this.isRainingAround(serverworld, blockpos) && random.nextFloat() < 0.2F + (float) i * 0.03F) {
@@ -50,7 +59,7 @@
              } else {
                  int j = Math.min(15, i + random.nextInt(3) / 2);
  
-@@ -131,14 +147,14 @@
+@@ -132,14 +148,14 @@
                          BlockPos blockpos1 = blockpos.down();
  
                          if (!serverworld.getBlockState(blockpos1).isSideSolidFullSquare(serverworld, blockpos1, Direction.UP) || i > 3) {
@@ -67,7 +76,7 @@
                          return;
                      }
                  }
-@@ -146,12 +162,14 @@
+@@ -147,12 +163,14 @@
                  boolean flag1 = serverworld.hasHighHumidity(blockpos);
                  int k = flag1 ? -50 : 0;
  
@@ -88,7 +97,7 @@
                  BlockPos.Mutable blockpos_mutable = new BlockPos.Mutable();
  
                  for (int l = -1; l <= 1; ++l) {
-@@ -177,7 +195,15 @@
+@@ -178,7 +196,15 @@
                                      if (i2 > 0 && random.nextInt(k1) <= i2 && (!serverworld.isRaining() || !this.isRainingAround(serverworld, blockpos_mutable))) {
                                          int j2 = Math.min(15, i + random.nextInt(5) / 4);
  
@@ -105,7 +114,7 @@
                                      }
                                  }
                              }
-@@ -201,12 +227,24 @@
+@@ -202,12 +228,24 @@
          return blockstate.contains(Properties.WATERLOGGED) && (Boolean) blockstate.get(Properties.WATERLOGGED) ? 0 : this.burnChances.getInt(blockstate.getBlock());
      }
  

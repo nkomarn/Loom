@@ -57,3 +57,14 @@
          return this.inventory.canPlayerUse(playerentity);
      }
  
+@@ -141,8 +161,8 @@
+         return itemstack;
+     }
+ 
+-    protected boolean isSmeltable(ItemStack itemstack) {
+-        return this.world.getRecipeManager().getFirstMatch(this.recipeType, new SimpleInventory(new ItemStack[]{itemstack}), this.world).isPresent();
++    protected boolean isSmeltable(ItemStack itemstack) { // TODO look over this
++        return this.world.getRecipeManager().getFirstMatch((RecipeType<Recipe>) this.recipeType, new SimpleInventory(new ItemStack[]{itemstack}), this.world).isPresent();
+     }
+ 
+     protected boolean isFuel(ItemStack itemstack) {

@@ -79,3 +79,15 @@
          } else {
              S s0 = this.withTable.get(property, v0);
  
+@@ -166,9 +166,9 @@
+         return codec.dispatch("Name", (state) -> {
+             return state.owner;
+         }, (object) -> {
+-            S s0 = (State) function.apply(object);
++            S s0 = function.apply(object);
+ 
+-            return s0.getEntries().isEmpty() ? Codec.unit((Object) s0) : s0.field_24740.fieldOf("Properties").codec();
++            return s0.getEntries().isEmpty() ? Codec.unit(s0) : s0.field_24740.fieldOf("Properties").codec();
+         });
+     }
+ }

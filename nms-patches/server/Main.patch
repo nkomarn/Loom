@@ -81,7 +81,7 @@
 +             */
              final MinecraftDedicatedServer minecraftdedicatedserver = (MinecraftDedicatedServer) MinecraftServer.startServer((thread) -> {
 -                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, object, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
-+                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(optionset, datapacksettings1, thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, object, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
++                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(optionset, datapacksettings1, thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, null, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
  
 +                /*
                  minecraftdedicatedserver1.setServerName((String) optionset.valueOf(optionspec8));

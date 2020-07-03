@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -147,26 +147,45 @@
+@@ -148,26 +148,45 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -52,7 +52,7 @@
      private PlayerManager playerManager;
      private volatile boolean running;
      private boolean stopped;
-@@ -209,12 +228,27 @@
+@@ -210,12 +229,27 @@
      private final MetricsData metricsData;
      private boolean enforceWhitelist;
      private float tickTime;
@@ -83,7 +83,7 @@
  
      public static <S extends MinecraftServer> S startServer(Function<Thread, S> function) {
          AtomicReference<S> atomicreference = new AtomicReference();
-@@ -225,21 +259,21 @@
+@@ -226,21 +260,21 @@
          thread.setUncaughtExceptionHandler((thread1, throwable) -> {
              MinecraftServer.LOGGER.error((Object) throwable);
          });
@@ -108,7 +108,7 @@
          this.running = true;
          this.lastTickLengths = new long[100];
          this.resourcePackUrl = "";
-@@ -265,6 +299,34 @@
+@@ -266,6 +300,34 @@
          this.structureManager = new StructureManager(serverresourcemanager.getResourceManager(), levelstorage_session, datafixer);
          this.serverThread = thread;
          this.workerExecutor = Util.getServerWorkerExecutor();
@@ -143,7 +143,7 @@
      }
  
      private void initScoreboard(PersistentStateManager persistentstatemanager) {
-@@ -278,7 +340,7 @@
+@@ -279,7 +341,7 @@
  
      public static void convertLevel(LevelStorage.Session levelstorage_session) {
          if (levelstorage_session.needsConversion()) {
@@ -152,7 +152,7 @@
              levelstorage_session.convert(new ProgressListener() {
                  private long lastProgressUpdate = Util.getMeasuringTimeMs();
  
-@@ -298,55 +360,194 @@
+@@ -299,55 +361,194 @@
  
      }
  
@@ -385,7 +385,7 @@
                  if (flag) {
                      this.setToDebugWorldProperties(this.saveProperties);
                  }
-@@ -362,36 +563,10 @@
+@@ -363,36 +564,10 @@
                  throw new CrashException(crashreport);
              }
  
@@ -424,7 +424,7 @@
  
      private static void setupSpawn(ServerWorld serverworld, ServerWorldProperties serverworldproperties, boolean flag, boolean flag1, boolean flag2) {
          ChunkGenerator chunkgenerator = serverworld.getChunkManager().getChunkGenerator();
-@@ -407,6 +582,22 @@
+@@ -408,6 +583,22 @@
              BlockPos blockpos = biomesource.locateBiome(0, serverworld.getSeaLevel(), 0, 256, list, random);
              ChunkPos chunkpos = blockpos == null ? new ChunkPos(0, 0) : new ChunkPos(blockpos);
  
@@ -447,7 +447,7 @@
              if (blockpos == null) {
                  MinecraftServer.LOGGER.warn("Unable to find spawn biome");
              }
-@@ -472,8 +663,15 @@
+@@ -473,8 +664,15 @@
          serverworldproperties.setGameMode(GameMode.SPECTATOR);
      }
  
@@ -465,7 +465,7 @@
  
          MinecraftServer.LOGGER.info("Preparing start region for dimension {}", (Object) serverworld.getRegistryKey().getValue());
          BlockPos blockpos = serverworld.getSpawnPos();
-@@ -486,17 +684,23 @@
+@@ -487,17 +685,23 @@
          serverchunkmanager.addTicket(ChunkTicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
  
          while (serverchunkmanager.getTotalChunksLoadedCount() != 441) {
@@ -500,7 +500,7 @@
  
              if (forcedchunkstate != null) {
                  LongIterator longiterator = forcedchunkstate.getChunks().iterator();
-@@ -510,11 +714,16 @@
+@@ -511,11 +715,16 @@
              }
          }
  
@@ -519,7 +519,7 @@
      }
  
      protected void loadWorldResourcePack() {
-@@ -559,12 +768,16 @@
+@@ -560,12 +769,16 @@
              serverworld.save((ProgressListener) null, flag1, serverworld.savingDisabled && !flag2);
          }
  
@@ -537,7 +537,7 @@
          return flag3;
      }
  
-@@ -572,8 +785,32 @@
+@@ -573,8 +786,32 @@
          this.shutdown();
      }
  
@@ -570,7 +570,7 @@
          if (this.getNetworkIo() != null) {
              this.getNetworkIo().stop();
          }
-@@ -582,6 +819,7 @@
+@@ -583,6 +820,7 @@
              MinecraftServer.LOGGER.info("Saving players");
              this.playerManager.saveAllPlayerData();
              this.playerManager.disconnectAllPlayers();
@@ -578,7 +578,7 @@
          }
  
          MinecraftServer.LOGGER.info("Saving worlds");
-@@ -659,14 +897,16 @@
+@@ -660,14 +898,16 @@
                  while (this.running) {
                      long i = Util.getMeasuringTimeMs() - this.timeReference;
  
@@ -596,7 +596,7 @@
                      this.timeReference += 50L;
                      TickDurationMonitor tickdurationmonitor = TickDurationMonitor.create("Server");
  
-@@ -712,6 +952,12 @@
+@@ -713,6 +953,12 @@
              } catch (Throwable throwable1) {
                  MinecraftServer.LOGGER.error("Exception stopping the server", throwable1);
              } finally {
@@ -609,7 +609,7 @@
                  this.exit();
              }
  
-@@ -720,7 +966,12 @@
+@@ -721,7 +967,12 @@
      }
  
      private boolean shouldKeepTicking() {
@@ -623,7 +623,7 @@
      }
  
      protected void method_16208() {
-@@ -730,7 +981,7 @@
+@@ -731,7 +982,7 @@
          });
      }
  
@@ -632,7 +632,7 @@
          return new ServerTask(this.ticks, runnable);
      }
  
-@@ -825,7 +1076,7 @@
+@@ -826,7 +1077,7 @@
              this.metadata.getPlayers().setSample(agameprofile);
          }
  
@@ -641,7 +641,7 @@
              MinecraftServer.LOGGER.debug("Autosave started");
              this.profiler.push("save");
              this.playerManager.saveAllPlayerData();
-@@ -855,22 +1106,39 @@
+@@ -856,22 +1107,39 @@
      }
  
      protected void tickWorlds(BooleanSupplier booleansupplier) {
@@ -681,7 +681,7 @@
  
              this.profiler.push("tick");
  
-@@ -954,7 +1222,7 @@
+@@ -955,7 +1223,7 @@
      }
  
      public String getServerModName() {
@@ -690,7 +690,7 @@
      }
  
      public CrashReport populateCrashReport(CrashReport crashreport) {
-@@ -1299,11 +1567,11 @@
+@@ -1300,11 +1568,11 @@
  
      public CompletableFuture<Void> reloadResources(Collection<String> collection) {
          CompletableFuture<Void> completablefuture = CompletableFuture.supplyAsync(() -> {
@@ -704,7 +704,7 @@
          }, this).thenCompose((immutablelist) -> {
              return ServerResourceManager.reload(immutablelist, this.isDedicated() ? CommandManager.RegistrationEnvironment.DEDICATED : CommandManager.RegistrationEnvironment.INTEGRATED, this.getFunctionPermissionLevel(), this.workerExecutor, this);
          }).thenAcceptAsync((serverresourcemanager) -> {
-@@ -1719,15 +1987,22 @@
+@@ -1720,15 +1988,22 @@
          return this.saveProperties;
      }
  

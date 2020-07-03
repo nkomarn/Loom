@@ -165,7 +165,7 @@
          while (j > 0) {
              int k = ExperienceOrbEntity.roundToOrbSize(j);
  
-@@ -506,4 +571,36 @@
+@@ -506,4 +571,33 @@
          }
  
      }
@@ -190,14 +190,11 @@
 +        return transaction;
 +    }
 +
-+
-+    @Override
-+    public int getMaxCountPerStack() {
++    public int getMaxStackSize() {
 +        return maxStack;
 +    }
 +
-+    @Override
-+    public void setMaxCountPerStack(int size) {
++    public void setMaxStackSize(int size) {
 +        maxStack = size;
 +    }
 +    // CraftBukkit end

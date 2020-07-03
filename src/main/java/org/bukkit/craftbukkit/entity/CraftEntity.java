@@ -208,7 +208,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         else if (entity instanceof EnderDragonPart) {
             EnderDragonPart part = (EnderDragonPart) entity;
-            if (part.owner instanceof EnderDragonEntity) { return new CraftEnderDragonPart(server, (EnderDragonEntity) entity); }
+            if (part.owner instanceof EnderDragonEntity) { return new CraftEnderDragonPart(server, (EnderDragonPart) entity); }
             else { return new CraftComplexPart(server, (EnderDragonPart) entity); }
         }
         else if (entity instanceof ExperienceOrbEntity) { return new CraftExperienceOrb(server, (ExperienceOrbEntity) entity); }

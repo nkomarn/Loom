@@ -28,15 +28,7 @@
  import net.minecraft.scoreboard.AbstractTeam;
  import net.minecraft.scoreboard.ScoreboardObjective;
  import net.minecraft.scoreboard.ServerScoreboard;
-@@ -64,6 +45,7 @@
- import net.minecraft.sound.SoundEvents;
- import net.minecraft.stat.ServerStatHandler;
- import net.minecraft.stat.Stats;
-+import net.minecraft.text.LiteralText;
- import net.minecraft.text.Text;
- import net.minecraft.text.TranslatableText;
- import net.minecraft.util.Formatting;
-@@ -86,6 +68,30 @@
+@@ -86,6 +67,30 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -67,7 +59,7 @@
  public abstract class PlayerManager {
  
      public static final File BANNED_PLAYERS_FILE = new File("banned-players.json");
-@@ -95,14 +101,16 @@
+@@ -95,15 +100,17 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
      private final MinecraftServer server;
@@ -80,14 +72,16 @@
      private final Whitelist whitelist;
 -    private final Map<UUID, ServerStatHandler> statisticsMap;
 -    private final Map<UUID, PlayerAdvancementTracker> advancementTrackers;
+-    private final WorldSaveHandler saveHandler;
 +    // CraftBukkit start
 +    // private final Map<UUID, ServerStatHandler> statisticsMap;
 +    // private final Map<UUID, PlayerAdvancementTracker> advancementTrackers;
 +    // CraftBukkit end
-     private final WorldSaveHandler saveHandler;
++    public final WorldSaveHandler saveHandler; // Loom - public access
      private boolean whitelistEnabled;
      private final RegistryTracker.Modifiable field_24626;
-@@ -112,13 +120,23 @@
+     protected final int maxPlayers;
+@@ -112,13 +119,23 @@
      private boolean cheatsAllowed;
      private int latencyUpdateTimer;
  
@@ -113,7 +107,7 @@
          this.server = minecraftserver;
          this.field_24626 = registrytracker_modifiable;
          this.maxPlayers = i;
-@@ -135,6 +153,13 @@
+@@ -135,6 +152,13 @@
          CompoundTag compoundtag = this.loadPlayerData(serverplayerentity);
          RegistryKey registrykey;
  
@@ -127,7 +121,7 @@
          if (compoundtag != null) {
              DataResult dataresult = DimensionType.method_28521(new Dynamic<>(NbtOps.INSTANCE, compoundtag.get("Dimension")));
              Logger logger = PlayerManager.LOGGER;
-@@ -164,7 +189,8 @@
+@@ -164,7 +188,8 @@
              s1 = clientconnection.getAddress().toString();
          }
  
@@ -137,7 +131,7 @@
          WorldProperties worldproperties = serverworld1.getLevelProperties();
  
          this.setGameMode(serverplayerentity, (ServerPlayerEntity) null, serverworld1);
-@@ -174,6 +200,7 @@
+@@ -174,6 +199,7 @@
          boolean flag1 = gamerules.getBoolean(GameRules.REDUCED_DEBUG_INFO);
  
          serverplaynetworkhandler.sendPacket(new GameJoinS2CPacket(serverplayerentity.getEntityId(), serverplayerentity.interactionManager.getGameMode(), serverplayerentity.interactionManager.method_30119(), BiomeAccess.hashSeed(serverworld1.getSeed()), worldproperties.isHardcore(), this.server.getWorldRegistryKeys(), this.field_24626, serverworld1.getDimensionRegistryKey(), serverworld1.getRegistryKey(), this.getMaxPlayerCount(), this.viewDistance, flag1, !flag, serverworld1.isDebugWorld(), serverworld1.isFlat()));
@@ -145,7 +139,7 @@
          serverplaynetworkhandler.sendPacket(new CustomPayloadS2CPacket(CustomPayloadS2CPacket.BRAND, (new PacketByteBuf(Unpooled.buffer())).writeString(this.getServer().getServerModName())));
          serverplaynetworkhandler.sendPacket(new DifficultyS2CPacket(worldproperties.getDifficulty(), worldproperties.isDifficultyLocked()));
          serverplaynetworkhandler.sendPacket(new PlayerAbilitiesS2CPacket(serverplayerentity.abilities));
-@@ -192,19 +219,63 @@
+@@ -192,19 +218,63 @@
          } else {
              translatabletext = new TranslatableText("multiplayer.player.joined.renamed", new Object[]{serverplayerentity.getDisplayName(), s});
          }
@@ -213,7 +207,7 @@
          this.sendWorldInfo(serverplayerentity, serverworld1);
          if (!this.server.getResourcePackUrl().isEmpty()) {
              serverplayerentity.sendResourcePackUrl(this.server.getResourcePackUrl(), this.server.getResourcePackHash());
-@@ -220,8 +291,11 @@
+@@ -220,8 +290,11 @@
  
          if (compoundtag != null && compoundtag.contains("RootVehicle", 10)) {
              CompoundTag compoundtag1 = compoundtag.getCompound("RootVehicle");
@@ -227,7 +221,7 @@
              });
  
              if (entity != null) {
-@@ -264,9 +338,11 @@
+@@ -264,9 +337,11 @@
          }
  
          serverplayerentity.onSpawn();
@@ -240,7 +234,7 @@
          Set<ScoreboardObjective> set = Sets.newHashSet();
          Iterator iterator = serverscoreboard.getTeams().iterator();
  
-@@ -296,25 +372,27 @@
+@@ -296,25 +371,27 @@
      }
  
      public void setMainWorld(ServerWorld serverworld) {
@@ -273,7 +267,7 @@
              }
  
              public void onDamagePerBlockChanged(WorldBorder worldborder, double d0) {}
-@@ -340,14 +418,16 @@
+@@ -340,14 +417,16 @@
      }
  
      protected void savePlayerData(ServerPlayerEntity serverplayerentity) {
@@ -292,7 +286,7 @@
  
          if (playeradvancementtracker != null) {
              playeradvancementtracker.save();
-@@ -355,10 +435,21 @@
+@@ -355,10 +434,21 @@
  
      }
  
@@ -315,7 +309,7 @@
          this.savePlayerData(serverplayerentity);
          if (serverplayerentity.hasVehicle()) {
              Entity entity = serverplayerentity.getRootVehicle();
-@@ -390,18 +481,66 @@
+@@ -390,18 +480,66 @@
  
          if (serverplayerentity1 == serverplayerentity) {
              this.playerMap.remove(uuid);
@@ -388,7 +382,7 @@
              BannedPlayerEntry bannedplayerentry = (BannedPlayerEntry) this.bannedProfiles.get(gameprofile);
  
              translatabletext = new TranslatableText("multiplayer.disconnect.banned.reason", new Object[]{bannedplayerentry.getReason()});
-@@ -409,10 +548,12 @@
+@@ -409,10 +547,12 @@
                  translatabletext.append((Text) (new TranslatableText("multiplayer.disconnect.banned.expiration", new Object[]{PlayerManager.DATE_FORMATTER.format(bannedplayerentry.getExpiryDate())})));
              }
  
@@ -404,7 +398,7 @@
              BannedIpEntry bannedipentry = this.bannedIps.get(socketaddress);
  
              translatabletext = new TranslatableText("multiplayer.disconnect.banned_ip.reason", new Object[]{bannedipentry.getReason()});
-@@ -420,13 +561,25 @@
+@@ -420,13 +560,25 @@
                  translatabletext.append((Text) (new TranslatableText("multiplayer.disconnect.banned_ip.expiration", new Object[]{PlayerManager.DATE_FORMATTER.format(bannedipentry.getExpiryDate())})));
              }
  
@@ -433,7 +427,7 @@
          UUID uuid = PlayerEntity.getUuidFromProfile(gameprofile);
          List<ServerPlayerEntity> list = Lists.newArrayList();
  
-@@ -462,13 +615,22 @@
+@@ -462,13 +614,22 @@
          }
  
          return new ServerPlayerEntity(this.server, serverworld, gameprofile, (ServerPlayerInteractionManager) object);
@@ -456,7 +450,7 @@
          ServerWorld serverworld = this.server.getWorld(serverplayerentity.getSpawnPointDimension());
          Optional optional;
  
-@@ -488,6 +650,11 @@
+@@ -488,6 +649,11 @@
          }
  
          ServerPlayerEntity serverplayerentity1 = new ServerPlayerEntity(this.server, serverworld1, serverplayerentity.getGameProfile(), (ServerPlayerInteractionManager) object);
@@ -468,7 +462,7 @@
  
          serverplayerentity1.networkHandler = serverplayerentity.networkHandler;
          serverplayerentity1.copyFrom(serverplayerentity, flag);
-@@ -501,44 +668,114 @@
+@@ -501,44 +667,114 @@
              serverplayerentity1.addScoreboardTag(s);
          }
  
@@ -599,7 +593,7 @@
      public void sendCommandTree(ServerPlayerEntity serverplayerentity) {
          GameProfile gameprofile = serverplayerentity.getGameProfile();
          int i = this.server.getPermissionLevel(gameprofile);
-@@ -548,7 +785,15 @@
+@@ -548,7 +784,15 @@
  
      public void updatePlayerLatency() {
          if (++this.latencyUpdateTimer > 600) {
@@ -616,7 +610,7 @@
              this.latencyUpdateTimer = 0;
          }
  
-@@ -561,6 +806,25 @@
+@@ -561,6 +805,25 @@
  
      }
  
@@ -642,7 +636,7 @@
      public void sendToDimension(Packet<?> packet, RegistryKey<World> registrykey) {
          for (int i = 0; i < this.players.size(); ++i) {
              ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this.players.get(i);
-@@ -637,7 +901,7 @@
+@@ -637,7 +900,7 @@
      }
  
      public void removeFromOperators(GameProfile gameprofile) {
@@ -651,7 +645,7 @@
          ServerPlayerEntity serverplayerentity = this.getPlayer(gameprofile.getId());
  
          if (serverplayerentity != null) {
-@@ -660,7 +924,7 @@
+@@ -660,7 +923,7 @@
  
              serverplayerentity.networkHandler.sendPacket(new EntityStatusS2CPacket(serverplayerentity, b0));
          }
@@ -660,7 +654,7 @@
          this.server.getCommandManager().sendCommandTree(serverplayerentity);
      }
  
-@@ -693,6 +957,12 @@
+@@ -693,6 +956,12 @@
          for (int i = 0; i < this.players.size(); ++i) {
              ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this.players.get(i);
  
@@ -673,7 +667,7 @@
              if (serverplayerentity != playerentity && serverplayerentity.world.getRegistryKey() == registrykey) {
                  double d4 = d0 - serverplayerentity.getX();
                  double d5 = d1 - serverplayerentity.getY();
-@@ -732,23 +1002,36 @@
+@@ -732,23 +1001,36 @@
      public void reloadWhitelist() {}
  
      public void sendWorldInfo(ServerPlayerEntity serverplayerentity, ServerWorld serverworld) {
@@ -715,7 +709,7 @@
      }
  
      public int getCurrentPlayerCount() {
-@@ -805,27 +1088,49 @@
+@@ -805,27 +1087,49 @@
      }
  
      public void disconnectAllPlayers() {
@@ -723,7 +717,7 @@
 -            ((ServerPlayerEntity) this.players.get(i)).networkHandler.disconnect(new TranslatableText("multiplayer.disconnect.server_shutdown"));
 +        // CraftBukkit start - disconnect safely
 +        for (ServerPlayerEntity player : this.players) {
-+            player.networkHandler.disconnect(new LiteralText(this.cserver.getShutdownMessage())); // CraftBukkit - add custom shutdown message
++            player.networkHandler.disconnect(this.cserver.getShutdownMessage()); // CraftBukkit - add custom shutdown message
 +        }
 +        // CraftBukkit end
 +    }
@@ -772,7 +766,7 @@
  
                  if (file2.exists() && file2.isFile()) {
                      file2.renameTo(file1);
-@@ -833,7 +1138,7 @@
+@@ -833,7 +1137,7 @@
              }
  
              serverstathandler = new ServerStatHandler(this.server, file1);
@@ -781,7 +775,7 @@
          }
  
          return serverstathandler;
-@@ -841,14 +1146,14 @@
+@@ -841,14 +1145,14 @@
  
      public PlayerAdvancementTracker getAdvancementTracker(ServerPlayerEntity serverplayerentity) {
          UUID uuid = serverplayerentity.getUuid();
@@ -798,7 +792,7 @@
          }
  
          playeradvancementtracker.setOwner(serverplayerentity);
-@@ -884,13 +1189,21 @@
+@@ -884,13 +1188,21 @@
      }
  
      public void onDataPacksReloaded() {

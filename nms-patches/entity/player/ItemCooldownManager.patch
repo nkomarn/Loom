@@ -6,8 +6,8 @@
  
 -    private final Map<Item, ItemCooldownManager.Entry> entries = Maps.newHashMap();
 -    private int tick;
-+    public final Map<Item, ItemCooldownManager.Entry> entries = Maps.newHashMap(); // CraftBukkit : private -> public
-+    public int tick; // CraftBukkit : private -> public
++    public final Map<Item, ItemCooldownManager.Entry> entries = Maps.newHashMap(); // Loom - public access
++    public int tick; // Loom - public access
  
      public ItemCooldownManager() {}
  
@@ -16,11 +16,11 @@
      protected void onCooldownUpdate(Item item) {}
  
 -    class Entry {
-+    public class Entry { // CraftBukkit : _ -> public
++    public class Entry { // Loom - public access
  
          private final int startTick;
 -        private final int endTick;
-+        public final int endTick; // CraftBukkit private -> public
++        public final int endTick; // Loom - public access
  
          private Entry(int i, int j) {
              this.startTick = i;

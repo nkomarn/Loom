@@ -18,8 +18,8 @@
      private int currentFuseTime;
 -    private int fuseTime = 30;
 -    private int explosionRadius = 3;
-+    public int fuseTime = 30;
-+    public int explosionRadius = 3;
++    public int fuseTime = 30; // Loom - public access
++    public int explosionRadius = 3; // Loom - public access
      private int headsDropped;
  
      public CreeperEntity(EntityType<? extends CreeperEntity> entitytype, World world) {
@@ -49,7 +49,7 @@
      }
  
 -    private void explode() {
-+    public void explode() {
++    public void explode() { // Loom - public access
          if (!this.world.isClient) {
              Explosion.DestructionType explosion_destructiontype = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE;
              float f = this.T_() ? 2.0F : 1.0F;

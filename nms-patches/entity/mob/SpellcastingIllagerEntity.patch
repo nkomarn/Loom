@@ -5,7 +5,7 @@
      }
  
 -    protected SpellcastingIllagerEntity.Spell getSpell() {
-+    public SpellcastingIllagerEntity.Spell getSpell() { // CraftBukkit - public
++    public SpellcastingIllagerEntity.Spell getSpell() { // Loom - public access
          return !this.world.isClient ? this.spell : SpellcastingIllagerEntity.Spell.byId((Byte) this.dataTracker.get(SpellcastingIllagerEntity.SPELL));
      }
  

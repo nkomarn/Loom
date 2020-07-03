@@ -1,6 +1,18 @@
 --- a/net/minecraft/world/explosion/Explosion.java
 +++ b/net/minecraft/world/explosion/Explosion.java
-@@ -43,6 +43,14 @@
+@@ -20,10 +20,7 @@
+ import net.minecraft.block.Blocks;
+ import net.minecraft.block.entity.BlockEntity;
+ import net.minecraft.enchantment.ProtectionEnchantment;
+-import net.minecraft.entity.Entity;
+-import net.minecraft.entity.ItemEntity;
+-import net.minecraft.entity.LivingEntity;
+-import net.minecraft.entity.TntEntity;
++import net.minecraft.entity.*;
+ import net.minecraft.entity.damage.DamageSource;
+ import net.minecraft.entity.player.PlayerEntity;
+ import net.minecraft.entity.projectile.ProjectileEntity;
+@@ -43,6 +40,14 @@
  import net.minecraft.world.RayTraceContext;
  import net.minecraft.world.World;
  
@@ -15,7 +27,7 @@
  public class Explosion {
  
      private final boolean createFire;
-@@ -59,11 +67,12 @@
+@@ -59,11 +64,12 @@
      private final ExplosionBehavior behavior;
      private final List<BlockPos> affectedBlocks = Lists.newArrayList();
      private final Map<PlayerEntity, Vec3d> affectedPlayers = Maps.newHashMap();
@@ -29,7 +41,7 @@
          this.x = d0;
          this.y = d1;
          this.z = d2;
-@@ -113,6 +122,11 @@
+@@ -113,6 +119,11 @@
      }
  
      public void collectBlocksAndDamageEntities() {
@@ -41,7 +53,7 @@
          Set<BlockPos> set = Sets.newHashSet();
          boolean flag = true;
  
-@@ -146,7 +160,7 @@
+@@ -146,7 +157,7 @@
                                  f -= ((Float) optional.get() + 0.3F) * 0.3F;
                              }
  
@@ -50,7 +62,7 @@
                                  set.add(blockpos);
                              }
  
-@@ -190,7 +204,16 @@
+@@ -190,7 +201,16 @@
                          double d12 = (double) getExposure(vec3d, entity);
                          double d13 = (1.0D - d7) * d12;
  
@@ -68,7 +80,7 @@
                          double d14 = d13;
  
                          if (entity instanceof LivingEntity) {
-@@ -233,6 +256,52 @@
+@@ -233,6 +253,52 @@
              Collections.shuffle(this.affectedBlocks, this.world.random);
              Iterator iterator = this.affectedBlocks.iterator();
  
@@ -121,7 +133,7 @@
              while (iterator.hasNext()) {
                  BlockPos blockpos = (BlockPos) iterator.next();
                  BlockState blockstate = this.world.getBlockState(blockpos);
-@@ -246,8 +315,8 @@
+@@ -246,8 +312,8 @@
                          BlockEntity blockentity = block.hasBlockEntity() ? this.world.getBlockEntity(blockpos) : null;
                          LootContext.Builder lootcontext_builder = (new LootContext.Builder((ServerWorld) this.world)).random(this.world.random).parameter(LootContextParameters.POSITION, blockpos).parameter(LootContextParameters.TOOL, ItemStack.EMPTY).optionalParameter(LootContextParameters.BLOCK_ENTITY, blockentity).optionalParameter(LootContextParameters.THIS_ENTITY, this.entity);
  
@@ -132,7 +144,7 @@
                          }
  
                          blockstate.getDroppedStacks(lootcontext_builder).forEach((itemstack) -> {
-@@ -277,7 +346,11 @@
+@@ -277,7 +343,11 @@
                  BlockPos blockpos2 = (BlockPos) iterator1.next();
  
                  if (this.random.nextInt(3) == 0 && this.world.getBlockState(blockpos2).isAir() && this.world.getBlockState(blockpos2.down()).isOpaqueFullCube(this.world, blockpos2.down())) {
@@ -145,7 +157,7 @@
                  }
              }
          }
-@@ -285,6 +358,7 @@
+@@ -285,6 +355,7 @@
      }
  
      private static void method_24023(ObjectArrayList<Pair<ItemStack, BlockPos>> objectarraylist, ItemStack itemstack, BlockPos blockpos) {

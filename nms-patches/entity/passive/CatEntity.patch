@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/passive/CatEntity.java
 +++ b/net/minecraft/entity/passive/CatEntity.java
-@@ -66,6 +66,7 @@
+@@ -68,6 +68,7 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldAccess;
  import net.minecraft.world.gen.feature.StructureFeature;
@@ -8,7 +8,7 @@
  
  public class CatEntity extends TameableEntity {
  
-@@ -383,7 +384,7 @@
+@@ -385,7 +386,7 @@
                  }
              } else if (this.isBreedingItem(itemstack)) {
                  this.eat(playerentity, itemstack);
@@ -17,7 +17,7 @@
                      this.setOwner(playerentity);
                      this.setSitting(true);
                      this.world.sendEntityStatus(this, (byte) 7);
-@@ -428,9 +429,9 @@
+@@ -430,9 +431,9 @@
  
      }
  
@@ -29,7 +29,7 @@
  
      static class SleepWithOwnerGoal extends Goal {
  
-@@ -566,7 +567,7 @@
+@@ -568,7 +569,7 @@
      static class TemptGoal extends net.minecraft.entity.ai.goal.TemptGoal {
  
          @Nullable
@@ -38,7 +38,7 @@
          private final CatEntity cat;
  
          public TemptGoal(CatEntity catentity, double d0, Ingredient ingredient, boolean flag) {
-@@ -598,9 +599,9 @@
+@@ -600,9 +601,9 @@
          private final CatEntity cat;
  
          public CatFleeGoal(CatEntity catentity, Class<T> oclass, float f, double d0, double d1) {

@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/ChunkRegion.java
 +++ b/net/minecraft/world/ChunkRegion.java
-@@ -247,6 +247,12 @@
+@@ -35,6 +35,7 @@
+ import net.minecraft.world.dimension.DimensionType;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.CraftWorld;
+ 
+ public class ChunkRegion implements ServerWorldAccess {
+ 
+@@ -247,6 +248,12 @@
      }
  
      public boolean spawnEntity(Entity entity) {
@@ -13,3 +21,13 @@
          int i = MathHelper.floor(entity.getX() / 16.0D);
          int j = MathHelper.floor(entity.getZ() / 16.0D);
  
+@@ -338,7 +345,7 @@
+     }
+ 
+     @Deprecated
+-    public World getWorld() {
+-        return this.getWorld();
++    public CraftWorld getCraftWorld() {
++        return world.getCraftWorld();
+     }
+ }

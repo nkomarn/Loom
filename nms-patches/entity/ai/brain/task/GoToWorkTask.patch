@@ -10,7 +10,17 @@
  import net.minecraft.entity.LivingEntity;
  import net.minecraft.entity.ai.brain.MemoryModuleState;
  import net.minecraft.entity.ai.brain.MemoryModuleType;
-@@ -30,7 +32,7 @@
+@@ -14,6 +16,9 @@
+ import net.minecraft.util.registry.Registry;
+ import net.minecraft.village.VillagerProfession;
+ import net.minecraft.world.poi.PointOfInterestType;
++import org.bukkit.craftbukkit.entity.CraftVillager;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.VillagerCareerChangeEvent;
+ 
+ public class GoToWorkTask extends Task<VillagerEntity> {
+ 
+@@ -31,7 +36,7 @@
          GlobalPos globalpos = (GlobalPos) villagerentity.getBrain().getOptionalMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
  
          villagerentity.getBrain().forget(MemoryModuleType.POTENTIAL_JOB_SITE);
@@ -19,7 +29,7 @@
          if (villagerentity.getVillagerData().getProfession() == VillagerProfession.NONE) {
              MinecraftServer minecraftserver = serverworld.getServer();
  
-@@ -41,12 +43,20 @@
+@@ -42,12 +47,20 @@
                      return villagerprofession.getWorkStation() == pointofinteresttype;
                  }).findFirst();
              }).ifPresent((villagerprofession) -> {
@@ -41,7 +51,7 @@
      protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
          return this.shouldRun(serverworld, (VillagerEntity) livingentity);
      }
-@@ -54,4 +64,5 @@
+@@ -55,4 +68,5 @@
      protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
          this.run(serverworld, (VillagerEntity) livingentity, i);
      }
