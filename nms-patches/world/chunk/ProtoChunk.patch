@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/chunk/ProtoChunk.java
++++ b/net/minecraft/world/chunk/ProtoChunk.java
+@@ -471,11 +471,5 @@
+         this.setShouldSave(true);
+     }
+ 
+-    public TickScheduler getFluidTickScheduler() {
+-        return this.getFluidTickScheduler();
+-    }
+-
+-    public TickScheduler getBlockTickScheduler() {
+-        return this.getBlockTickScheduler();
+-    }
++    // Loom - decompile errors
+ }
