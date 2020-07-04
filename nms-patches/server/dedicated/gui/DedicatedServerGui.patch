@@ -4,7 +4,7 @@
          this.stopTasks.forEach(Runnable::run);
      }
  
-+    private static final java.util.regex.Pattern ANSI = java.util.regex.Pattern.compile("\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?[m|K]"); // CraftBukkit
++    private static final java.util.regex.Pattern ANSI = java.util.regex.Pattern.compile("\\x1B\\[([0-9]{1,2}(;[0-9]{1,2})*)?[m|K]"); // CraftBukkit
      public void appendToConsole(JTextArea jtextarea, JScrollPane jscrollpane, String s) {
          if (!SwingUtilities.isEventDispatchThread()) {
              SwingUtilities.invokeLater(() -> {
