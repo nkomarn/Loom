@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/command/SpreadPlayersCommand.java
 +++ b/net/minecraft/server/command/SpreadPlayersCommand.java
-@@ -76,7 +76,7 @@
+@@ -75,7 +75,7 @@
              if (entity instanceof PlayerEntity) {
                  set.add(entity.getScoreboardTeam());
              } else {
@@ -9,7 +9,7 @@
              }
          }
  
-@@ -285,7 +285,7 @@
+@@ -284,7 +284,7 @@
  
              for (boolean flag2 = blockview.getBlockState(blockpos_mutable).isAir(); blockpos_mutable.getY() > 0; flag2 = flag1) {
                  blockpos_mutable.move(Direction.DOWN);
@@ -18,7 +18,7 @@
                  if (!flag1 && flag2 && flag) {
                      return blockpos_mutable.getY() + 1;
                  }
-@@ -298,7 +298,7 @@
+@@ -297,7 +297,7 @@
  
          public boolean isSafe(BlockView blockview, int i) {
              BlockPos blockpos = new BlockPos(this.x, (double) (this.getY(blockview, i) - 1), this.z);
@@ -27,7 +27,7 @@
              Material material = blockstate.getMaterial();
  
              return blockpos.getY() < i && !material.isLiquid() && material != Material.FIRE;
-@@ -308,5 +308,12 @@
+@@ -307,5 +307,12 @@
              this.x = MathHelper.nextDouble(random, d0, d2);
              this.z = MathHelper.nextDouble(random, d1, d3);
          }

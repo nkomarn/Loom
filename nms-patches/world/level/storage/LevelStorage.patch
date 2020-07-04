@@ -24,7 +24,7 @@
 @@ -205,8 +208,12 @@
          private final Path directory;
          private final String directoryName;
-         private final Map<WorldSavePath, Path> field_24190 = Maps.newHashMap();
+         private final Map<WorldSavePath, Path> paths = Maps.newHashMap();
 +        // CraftBukkit start
 +        private final RegistryKey<DimensionOptions> dimensionType;
  
@@ -35,7 +35,7 @@
              this.directoryName = s;
              this.directory = LevelStorage.this.savesDirectory.resolve(s);
              this.lock = SessionLock.create(this.directory);
-@@ -216,6 +223,12 @@
+@@ -216,6 +223,16 @@
              return this.directoryName;
          }
  
@@ -45,13 +45,17 @@
 +        }
 +        // Loom end
 +
++        public Path getWorldFolder(final WorldSavePath savedfile) {
++            return this.paths.computeIfAbsent(savedfile, savedfile1 -> this.directory.resolve(savedfile1.getRelativePath()));
++        }
++
          public Path getDirectory(WorldSavePath worldsavepath) {
-             return (Path) this.field_24190.computeIfAbsent(worldsavepath, (worldsavepath1) -> {
+             return (Path) this.paths.computeIfAbsent(worldsavepath, (worldsavepath1) -> {
                  return this.directory.resolve(worldsavepath1.getRelativePath());
-@@ -223,8 +236,22 @@
+@@ -223,8 +240,22 @@
          }
  
-         public File method_27424(RegistryKey<World> registrykey) {
+         public File getWorldDirectory(RegistryKey<World> registrykey) {
 -            return DimensionType.getSaveDirectory(registrykey, this.directory.toFile());
 +            // CraftBukkit start
 +            return this.getFolder(this.directory.toFile());

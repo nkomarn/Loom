@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/chunk/WorldChunk.java
 +++ b/net/minecraft/world/chunk/WorldChunk.java
-@@ -6,12 +6,8 @@
+@@ -6,23 +6,17 @@
  import it.unimi.dsi.fastutil.longs.LongSet;
  import it.unimi.dsi.fastutil.shorts.ShortList;
  import it.unimi.dsi.fastutil.shorts.ShortListIterator;
@@ -9,13 +9,13 @@
 -import java.util.Iterator;
 -import java.util.List;
 -import java.util.Map;
--import java.util.Set;
 +
 +import java.util.*;
  import java.util.Map.Entry;
+-import java.util.Set;
  import java.util.function.Consumer;
  import java.util.function.Predicate;
-@@ -19,10 +15,8 @@
+ import java.util.function.Supplier;
  import java.util.stream.Stream;
  import java.util.stream.StreamSupport;
  import javax.annotation.Nullable;

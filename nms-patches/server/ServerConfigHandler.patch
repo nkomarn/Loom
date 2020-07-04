@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/ServerConfigHandler.java
 +++ b/net/minecraft/server/ServerConfigHandler.java
-@@ -28,6 +28,11 @@
+@@ -26,6 +26,11 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -12,7 +12,7 @@
  public class ServerConfigHandler {
  
      private static final Logger LOGGER = LogManager.getLogger();
-@@ -86,7 +91,7 @@
+@@ -84,7 +89,7 @@
                  try {
                      bannedplayerlist.load();
                  } catch (IOException ioexception) {
@@ -21,7 +21,7 @@
                  }
              }
  
-@@ -144,7 +149,7 @@
+@@ -142,7 +147,7 @@
                  try {
                      bannediplist.load();
                  } catch (IOException ioexception) {
@@ -30,7 +30,7 @@
                  }
              }
  
-@@ -185,7 +190,7 @@
+@@ -183,7 +188,7 @@
                  try {
                      operatorlist.load();
                  } catch (IOException ioexception) {
@@ -39,7 +39,7 @@
                  }
              }
  
-@@ -229,7 +234,7 @@
+@@ -227,7 +232,7 @@
                  try {
                      whitelist.load();
                  } catch (IOException ioexception) {
@@ -48,7 +48,7 @@
                  }
              }
  
-@@ -285,7 +290,7 @@
+@@ -283,7 +288,7 @@
                      }
                  };
  
@@ -57,7 +57,7 @@
                  return !list.isEmpty() && ((GameProfile) list.get(0)).getId() != null ? ((GameProfile) list.get(0)).getId() : null;
              } else {
                  return PlayerEntity.getUuidFromProfile(new GameProfile((UUID) null, s));
-@@ -352,6 +357,30 @@
+@@ -350,6 +355,30 @@
                          File file5 = new File(file, s2 + ".dat");
                          File file6 = new File(file4, s3 + ".dat");
  
@@ -88,7 +88,7 @@
                          ServerConfigHandler.createDirectory(file4);
                          if (!file5.renameTo(file6)) {
                              throw new ServerConfigHandler.ServerConfigException("Could not convert file for " + s2);
-@@ -380,7 +409,7 @@
+@@ -378,7 +407,7 @@
                      }
                  };
  

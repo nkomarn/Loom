@@ -8,7 +8,7 @@
 +
  public class EscapeDangerGoal extends Goal {
  
-     protected final MobEntityWithAi mob;
+     protected final PathAwareEntity mob;
 @@ -71,6 +73,12 @@
      }
  

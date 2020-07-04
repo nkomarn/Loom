@@ -87,9 +87,9 @@
 +        // ChunkLoadEvent: Called after the chunk is loaded: isChunkLoaded returns true and chunk is ready to be modified by plugins.
 +        if (!chunkholder_leveltype.isAfter(ChunkHolder.LevelType.BORDER) && chunkholder_leveltype1.isAfter(ChunkHolder.LevelType.BORDER)) {
 +            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
-+                WorldChunk chunk = (WorldChunk) either.left().orElse(null);
-+                if (chunk != null) {
-+                    threadedanvilchunkstorage.callbackExecutor.execute(chunk::loadCallback);
++                WorldChunk worldChunk = (WorldChunk) either.left().orElse(null);
++                if (worldChunk != null) {
++                    threadedanvilchunkstorage.callbackExecutor.execute(() -> worldChunk.loadCallback());
 +                }
 +            }).exceptionally((throwable) -> {
 +                // ensure exceptions are printed, by default this is not the case

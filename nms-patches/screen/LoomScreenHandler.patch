@@ -1,9 +1,9 @@
 --- a/net/minecraft/screen/LoomScreenHandler.java
 +++ b/net/minecraft/screen/LoomScreenHandler.java
-@@ -18,9 +18,28 @@
+@@ -16,9 +16,28 @@
+ import net.minecraft.sound.SoundCategory;
+ import net.minecraft.sound.SoundEvents;
  import net.minecraft.util.DyeColor;
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.world.World;
 +import org.bukkit.Location;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryLoom;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryView;
@@ -29,7 +29,7 @@
      private final ScreenHandlerContext context;
      private final Property selectedPattern;
      private Runnable inventoryChangeListener;
-@@ -47,12 +66,26 @@
+@@ -45,12 +64,26 @@
                  LoomScreenHandler.this.onContentChanged(this);
                  LoomScreenHandler.this.inventoryChangeListener.run();
              }
@@ -56,7 +56,7 @@
          };
          this.context = screenhandlercontext;
          this.bannerSlot = this.addSlot(new Slot(this.input, 0, 13, 26) {
-@@ -108,9 +141,11 @@
+@@ -106,9 +139,11 @@
          }
  
          this.addProperty(this.selectedPattern);
@@ -68,7 +68,7 @@
          return canUse(this.context, playerentity, Blocks.LOOM);
      }
  
-@@ -225,6 +260,11 @@
+@@ -223,6 +258,11 @@
  
                  if (compoundtag.contains("Patterns", 9)) {
                      listtag = compoundtag.getList("Patterns", 10);

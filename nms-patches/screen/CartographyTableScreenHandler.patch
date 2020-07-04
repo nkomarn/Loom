@@ -1,9 +1,9 @@
 --- a/net/minecraft/screen/CartographyTableScreenHandler.java
 +++ b/net/minecraft/screen/CartographyTableScreenHandler.java
-@@ -16,9 +16,28 @@
+@@ -14,9 +14,28 @@
+ import net.minecraft.screen.slot.Slot;
+ import net.minecraft.sound.SoundCategory;
  import net.minecraft.sound.SoundEvents;
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.world.World;
 +import org.bukkit.Location;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryCartography;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryView;
@@ -23,13 +23,13 @@
 +
 +        CraftInventoryCartography inventory = new CraftInventoryCartography(this.inventory, this.resultSlot);
 +        bukkitEntity = new CraftInventoryView(this.player, inventory, this);
-+        return bukkitEntity;
++            return bukkitEntity;
 +    }
 +    // CraftBukkit end
      private final ScreenHandlerContext context;
      private boolean currentlyTakingItem;
      private long lastTakeResultTime;
-@@ -42,6 +61,13 @@
+@@ -40,6 +59,13 @@
                  CartographyTableScreenHandler.this.onContentChanged(this);
                  super.markDirty();
              }
@@ -43,7 +43,7 @@
          };
          this.context = screenhandlercontext;
          this.addSlot(new Slot(this.inventory, 0, 15, 15) {
-@@ -113,9 +139,11 @@
+@@ -111,9 +137,11 @@
              this.addSlot(new Slot(playerinventory, j, 8 + j * 18, 142));
          }
  

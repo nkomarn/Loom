@@ -5,6 +5,7 @@ package org.bukkit.craftbukkit.block.impl;
 
 import net.minecraft.block.BellBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
 
 public final class CraftBell extends org.bukkit.craftbukkit.block.data.CraftBlockData implements org.bukkit.block.data.type.Bell, org.bukkit.block.data.Directional {
@@ -48,5 +49,19 @@ public final class CraftBell extends org.bukkit.craftbukkit.block.data.CraftBloc
     @Override
     public java.util.Set<org.bukkit.block.BlockFace> getFaces() {
         return getValues(FACING, org.bukkit.block.BlockFace.class);
+    }
+
+    // org.bukkit.craftbukkit.block.data.CraftPowerable
+
+    private static final BooleanProperty POWERED = getBoolean(BellBlock.class, "powered");
+
+    @Override
+    public boolean isPowered() {
+        return get(POWERED);
+    }
+
+    @Override
+    public void setPowered(boolean powered) {
+        set(POWERED, powered);
     }
 }

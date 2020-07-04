@@ -34,3 +34,21 @@
          if (this.dragonSpawnState == null) {
              throw new IllegalStateException("Dragon respawn isn't in progress, can't skip ahead in the animation.");
          } else {
+@@ -285,7 +285,7 @@
+     }
+ 
+     @Nullable
+-    private BlockPattern.Result findEndPortal() {
++    public BlockPattern.Result findEndPortal() { // Loom - public access
+         int i;
+         int j;
+ 
+@@ -419,7 +419,7 @@
+         Feature.END_GATEWAY.configure(EndGatewayFeatureConfig.createConfig()).generate(this.world, this.world.getStructureAccessor(), this.world.getChunkManager().getChunkGenerator(), new Random(), blockpos);
+     }
+ 
+-    private void generateEndPortal(boolean flag) {
++    public void generateEndPortal(boolean flag) { // Loom - public access
+         EndPortalFeature endportalfeature = new EndPortalFeature(flag);
+ 
+         if (this.exitPortalLocation == null) {

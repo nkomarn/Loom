@@ -1,0 +1,18 @@
+--- a/net/minecraft/entity/SaddledComponent.java
++++ b/net/minecraft/entity/SaddledComponent.java
+@@ -38,6 +38,15 @@
+         }
+     }
+ 
++    // CraftBukkit add setBoostTicks(int)
++    public void setBoostTicks(int ticks) {
++        this.boosted = true; // PAIL rename boosting
++        this.field_23216 = 0; // PAIL rename currentBoostTicks
++        this.currentBoostTime = ticks; // PAIL rename boostTicks
++        this.dataTracker.set(this.boostTime, this.currentBoostTime); // PAIL rename dataWatcher, dataWatcherBoostTicks
++    }
++    // CraftBukkit end
++
+     public void toTag(CompoundTag compoundtag) {
+         compoundtag.putBoolean("Saddle", this.isSaddled());
+     }

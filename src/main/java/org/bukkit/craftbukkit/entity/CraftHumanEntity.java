@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
@@ -500,6 +501,16 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     @Override
     public int undiscoverRecipes(Collection<NamespacedKey> recipes) {
         return getHandle().lockRecipes(bukkitKeysToMinecraftRecipes(recipes));
+    }
+
+    @Override
+    public boolean hasDiscoveredRecipe(NamespacedKey namespacedKey) {
+        return false; // TODO
+    }
+
+    @Override
+    public Set<NamespacedKey> getDiscoveredRecipes() {
+        return ImmutableSet.of(); // TODO
     }
 
     private Collection<Recipe<?>> bukkitKeysToMinecraftRecipes(Collection<NamespacedKey> recipeKeys) {

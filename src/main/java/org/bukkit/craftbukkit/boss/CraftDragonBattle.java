@@ -34,6 +34,15 @@ public class CraftDragonBattle implements DragonBattle {
     }
 
     @Override
+    public boolean generateEndPortal(boolean withPortals) {
+        if (this.handle.exitPortalLocation != null || this.handle.findEndPortal() != null) {
+            return false;
+        }
+        this.handle.generateEndPortal(withPortals);
+        return true;
+    }
+
+    @Override
     public boolean hasBeenPreviouslyKilled() {
         return handle.hasPreviouslyKilled();
     }

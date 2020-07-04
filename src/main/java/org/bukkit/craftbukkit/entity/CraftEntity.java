@@ -90,7 +90,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                 else if (entity instanceof DolphinEntity) { return new CraftDolphin(server, (DolphinEntity) entity); }
                 else { return new CraftWaterMob(server, (WaterCreatureEntity) entity); }
             }
-            else if (entity instanceof MobEntityWithAi) {
+            else if (entity instanceof PathAwareEntity) {
                 // Animals
                 if (entity instanceof AnimalEntity) {
                     if (entity instanceof ChickenEntity) { return new CraftChicken(server, (ChickenEntity) entity); }
@@ -182,7 +182,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     else if (entity instanceof WanderingTraderEntity) { return new CraftWanderingTrader(server, (WanderingTraderEntity) entity); }
                     else { return new CraftAbstractVillager(server, (AbstractTraderEntity) entity); }
                 }
-                else { return new CraftCreature(server, (MobEntityWithAi) entity); }
+                else { return new CraftCreature(server, (PathAwareEntity) entity); }
             }
             // Slimes are a special (and broken) case
             else if (entity instanceof SlimeEntity) {

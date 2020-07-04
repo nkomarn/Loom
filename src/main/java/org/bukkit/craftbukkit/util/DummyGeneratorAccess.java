@@ -138,7 +138,7 @@ public class DummyGeneratorAccess implements WorldAccess {
     }
 
     @Override
-    public boolean method_30093(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
+    public boolean breakBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

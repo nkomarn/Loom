@@ -272,10 +272,13 @@
          });
          return this.rconCommandOutput.asString();
      }
-@@ -535,4 +653,15 @@
-     public PlayerManager getPlayerManager() {
-         return this.getPlayerManager();
+@@ -533,6 +651,17 @@
      }
+ 
+     public PlayerManager getPlayerManager() {
+-        return this.getPlayerManager();
++        return super.getPlayerManager();
++    }
 +
 +    // CraftBukkit start
 +    public boolean isDebugging() {
@@ -285,6 +288,6 @@
 +    @Override
 +    public CommandSender getBukkitSender(ServerCommandSource wrapper) {
 +        return console;
-+    }
+     }
 +    // CraftBukkit end
  }

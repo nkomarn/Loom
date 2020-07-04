@@ -1,16 +1,17 @@
 --- a/net/minecraft/entity/ai/goal/FleeEntityGoal.java
 +++ b/net/minecraft/entity/ai/goal/FleeEntityGoal.java
-@@ -27,12 +27,7 @@
+@@ -27,12 +27,9 @@
      private final TargetPredicate withinRangePredicate;
  
-     public FleeEntityGoal(MobEntityWithAi mobentitywithai, Class<T> oclass, float f, double d0, double d1) {
+     public FleeEntityGoal(PathAwareEntity pathawareentity, Class<T> oclass, float f, double d0, double d1) {
 -        Predicate predicate = (livingentity) -> {
--            return true;
++        this(pathawareentity, oclass, (livingentity) -> {
+             return true;
 -        };
 -        Predicate predicate1 = EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR;
 -
--        this(mobentitywithai, oclass, predicate, f, d0, d1, predicate1::test);
-+        this(mobentitywithai, oclass, (ent) -> true, f, d0, d1, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR::test); // Loom - decompile errors
+-        this(pathawareentity, oclass, predicate, f, d0, d1, predicate1::test);
++        }, f, d0, d1, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR::test); // Loom - decompile error
      }
  
-     public FleeEntityGoal(MobEntityWithAi mobentitywithai, Class<T> oclass, Predicate<LivingEntity> predicate, float f, double d0, double d1, Predicate<LivingEntity> predicate1) {
+     public FleeEntityGoal(PathAwareEntity pathawareentity, Class<T> oclass, Predicate<LivingEntity> predicate, float f, double d0, double d1, Predicate<LivingEntity> predicate1) {

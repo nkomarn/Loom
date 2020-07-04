@@ -20,10 +20,21 @@ public final class CraftCobbleWall extends org.bukkit.craftbukkit.block.data.Cra
 
     // org.bukkit.craftbukkit.block.data.type.CraftWall
 
+    private static final BooleanProperty UP = getBoolean(WallBlock.class, "up");
     private static final EnumProperty<?>[] HEIGHTS = new EnumProperty[]{
         getEnum(WallBlock.class, "north"), getEnum(WallBlock.class, "east"), getEnum(WallBlock.class, "south"),
             getEnum(WallBlock.class, "west")
     };
+
+    @Override
+    public boolean isUp() {
+        return get(UP);
+    }
+
+    @Override
+    public void setUp(boolean up) {
+        set(UP, up);
+    }
 
     @Override
     public Height getHeight(org.bukkit.block.BlockFace face) {

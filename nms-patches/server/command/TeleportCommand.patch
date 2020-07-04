@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/command/TeleportCommand.java
 +++ b/net/minecraft/server/command/TeleportCommand.java
-@@ -33,6 +33,11 @@
+@@ -32,6 +32,11 @@
  import net.minecraft.util.math.Vec2f;
  import net.minecraft.util.math.Vec3d;
  import net.minecraft.world.World;
@@ -12,7 +12,7 @@
  
  public class TeleportCommand {
  
-@@ -149,9 +154,9 @@
+@@ -148,9 +153,9 @@
                  }
  
                  if (serverworld == entity.world) {
@@ -24,7 +24,7 @@
                  }
  
                  entity.setHeadYaw(f);
-@@ -160,6 +165,22 @@
+@@ -159,6 +164,22 @@
                  float f3 = MathHelper.wrapDegrees(f1);
  
                  f3 = MathHelper.clamp(f3, -90.0F, 90.0F);

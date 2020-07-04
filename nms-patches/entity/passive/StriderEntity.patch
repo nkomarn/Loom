@@ -1,0 +1,23 @@
+--- a/net/minecraft/entity/passive/StriderEntity.java
++++ b/net/minecraft/entity/passive/StriderEntity.java
+@@ -71,7 +71,7 @@
+     private static final TrackedData<Integer> BOOST_TIME = DataTracker.registerData(StriderEntity.class, TrackedDataHandlerRegistry.INTEGER);
+     private static final TrackedData<Boolean> COLD = DataTracker.registerData(StriderEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+     private static final TrackedData<Boolean> SADDLED = DataTracker.registerData(StriderEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+-    private final SaddledComponent saddledComponent;
++    public final SaddledComponent saddledComponent; // Loom - public access
+     private TemptGoal temptGoal;
+     private EscapeDangerGoal escapeDangerGoal;
+ 
+@@ -457,9 +457,9 @@
+         return super.initialize(worldaccess, localdifficulty, spawnreason, (EntityData) entitydata, compoundtag);
+     }
+ 
+-    public PassiveEntity createChild(PassiveEntity passiveentity) {
++    /*public PassiveEntity createChild(PassiveEntity passiveentity) {
+         return this.createChild(passiveentity);
+-    }
++    }*/ // Loom - decompile error
+ 
+     static class Navigation extends MobNavigation {
+ 

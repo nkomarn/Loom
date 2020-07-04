@@ -1,6 +1,6 @@
 --- a/net/minecraft/village/Trader.java
 +++ b/net/minecraft/village/Trader.java
-@@ -52,4 +52,6 @@
+@@ -51,4 +51,6 @@
          }
  
      }

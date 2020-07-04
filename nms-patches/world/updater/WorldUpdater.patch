@@ -1,6 +1,38 @@
 --- a/net/minecraft/world/updater/WorldUpdater.java
 +++ b/net/minecraft/world/updater/WorldUpdater.java
-@@ -132,9 +132,7 @@
+@@ -27,6 +27,7 @@
+ import net.minecraft.util.registry.RegistryKey;
+ import net.minecraft.world.PersistentStateManager;
+ import net.minecraft.world.World;
++import net.minecraft.world.dimension.DimensionType;
+ import net.minecraft.world.level.storage.LevelStorage;
+ import net.minecraft.world.storage.RegionFile;
+ import net.minecraft.world.storage.VersionedChunkStorage;
+@@ -37,7 +38,7 @@
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final ThreadFactory UPDATE_THREAD_FACTORY = (new ThreadFactoryBuilder()).setDaemon(true).build();
+-    private final ImmutableSet<RegistryKey<World>> worlds;
++    private final ImmutableSet<RegistryKey<DimensionType>> worlds;
+     private final boolean eraseCache;
+     private final LevelStorage.Session session;
+     private final Thread updateThread;
+@@ -48,12 +49,12 @@
+     private volatile int totalChunkCount;
+     private volatile int upgradedChunkCount;
+     private volatile int skippedChunkCount;
+-    private final Object2FloatMap<RegistryKey<World>> dimensionProgress = Object2FloatMaps.synchronize(new Object2FloatOpenCustomHashMap<>(Util.identityHashStrategy()));
++    private final Object2FloatMap<RegistryKey<World>> dimensionProgress = Object2FloatMaps.synchronize(new Object2FloatOpenCustomHashMap<>(Util.identityHashStrategy())); // CraftBukkit
+     private volatile Text status = new TranslatableText("optimizeWorld.stage.counting");
+     private static final Pattern REGION_FILE_PATTERN = Pattern.compile("^r\.(-?[0-9]+)\.(-?[0-9]+)\.mca$");
+     private final PersistentStateManager persistentStateManager;
+ 
+-    public WorldUpdater(LevelStorage.Session levelstorage_session, DataFixer datafixer, ImmutableSet<RegistryKey<World>> immutableset, boolean flag) {
++    public WorldUpdater(LevelStorage.Session levelstorage_session, DataFixer datafixer, ImmutableSet<RegistryKey<DimensionType>> immutableset, boolean flag) { // CraftBukkit
+         this.worlds = immutableset;
+         this.eraseCache = flag;
+         this.dataFixer = datafixer;
+@@ -132,9 +133,7 @@
  
                              if (compoundtag != null) {
                                  int j = VersionedChunkStorage.getDataVersion(compoundtag);

@@ -1,6 +1,13 @@
 --- a/net/minecraft/screen/ScreenHandlerType.java
 +++ b/net/minecraft/screen/ScreenHandlerType.java
-@@ -22,7 +22,7 @@
+@@ -1,5 +1,6 @@
+ package net.minecraft.screen;
+ 
++import net.minecraft.entity.player.PlayerInventory;
+ import net.minecraft.util.registry.Registry;
+ 
+ public class ScreenHandlerType<T extends ScreenHandler> {
+@@ -21,7 +22,7 @@
      public static final ScreenHandlerType<GrindstoneScreenHandler> GRINDSTONE = register("grindstone", GrindstoneScreenHandler::new);
      public static final ScreenHandlerType<HopperScreenHandler> HOPPER = register("hopper", HopperScreenHandler::new);
      public static final ScreenHandlerType<LecternScreenHandler> LECTERN = register("lectern", (i, playerinventory) -> {
@@ -9,7 +16,7 @@
      });
      public static final ScreenHandlerType<LoomScreenHandler> LOOM = register("loom", LoomScreenHandler::new);
      public static final ScreenHandlerType<MerchantScreenHandler> MERCHANT = register("merchant", MerchantScreenHandler::new);
-@@ -34,12 +34,16 @@
+@@ -33,12 +34,16 @@
      private final ScreenHandlerType.Factory<T> factory;
  
      private static <T extends ScreenHandler> ScreenHandlerType<T> register(String s, ScreenHandlerType.Factory<T> screenhandlertype_factory) {

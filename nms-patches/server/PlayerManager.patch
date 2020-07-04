@@ -79,7 +79,7 @@
 +    // CraftBukkit end
 +    public final WorldSaveHandler saveHandler; // Loom - public access
      private boolean whitelistEnabled;
-     private final RegistryTracker.Modifiable field_24626;
+     private final RegistryTracker.Modifiable registryTracker;
      protected final int maxPlayers;
 @@ -112,13 +119,23 @@
      private boolean cheatsAllowed;
@@ -105,7 +105,7 @@
 +        // this.advancementTrackers = Maps.newHashMap();
 +        // CraftBukkit end
          this.server = minecraftserver;
-         this.field_24626 = registrytracker_modifiable;
+         this.registryTracker = registrytracker_modifiable;
          this.maxPlayers = i;
 @@ -135,6 +152,13 @@
          CompoundTag compoundtag = this.loadPlayerData(serverplayerentity);
@@ -131,15 +131,7 @@
          WorldProperties worldproperties = serverworld1.getLevelProperties();
  
          this.setGameMode(serverplayerentity, (ServerPlayerEntity) null, serverworld1);
-@@ -174,6 +199,7 @@
-         boolean flag1 = gamerules.getBoolean(GameRules.REDUCED_DEBUG_INFO);
- 
-         serverplaynetworkhandler.sendPacket(new GameJoinS2CPacket(serverplayerentity.getEntityId(), serverplayerentity.interactionManager.getGameMode(), serverplayerentity.interactionManager.method_30119(), BiomeAccess.hashSeed(serverworld1.getSeed()), worldproperties.isHardcore(), this.server.getWorldRegistryKeys(), this.field_24626, serverworld1.getDimensionRegistryKey(), serverworld1.getRegistryKey(), this.getMaxPlayerCount(), this.viewDistance, flag1, !flag, serverworld1.isDebugWorld(), serverworld1.isFlat()));
-+        serverplayerentity.getBukkitEntity().sendSupportedChannels(); // CraftBukkit
-         serverplaynetworkhandler.sendPacket(new CustomPayloadS2CPacket(CustomPayloadS2CPacket.BRAND, (new PacketByteBuf(Unpooled.buffer())).writeString(this.getServer().getServerModName())));
-         serverplaynetworkhandler.sendPacket(new DifficultyS2CPacket(worldproperties.getDifficulty(), worldproperties.isDifficultyLocked()));
-         serverplaynetworkhandler.sendPacket(new PlayerAbilitiesS2CPacket(serverplayerentity.abilities));
-@@ -192,19 +218,63 @@
+@@ -192,19 +217,63 @@
          } else {
              translatabletext = new TranslatableText("multiplayer.player.joined.renamed", new Object[]{serverplayerentity.getDisplayName(), s});
          }
@@ -207,7 +199,7 @@
          this.sendWorldInfo(serverplayerentity, serverworld1);
          if (!this.server.getResourcePackUrl().isEmpty()) {
              serverplayerentity.sendResourcePackUrl(this.server.getResourcePackUrl(), this.server.getResourcePackHash());
-@@ -220,8 +290,11 @@
+@@ -220,8 +289,11 @@
  
          if (compoundtag != null && compoundtag.contains("RootVehicle", 10)) {
              CompoundTag compoundtag1 = compoundtag.getCompound("RootVehicle");
@@ -221,7 +213,7 @@
              });
  
              if (entity != null) {
-@@ -264,9 +337,11 @@
+@@ -264,9 +336,11 @@
          }
  
          serverplayerentity.onSpawn();
@@ -234,7 +226,7 @@
          Set<ScoreboardObjective> set = Sets.newHashSet();
          Iterator iterator = serverscoreboard.getTeams().iterator();
  
-@@ -296,25 +371,27 @@
+@@ -296,25 +370,27 @@
      }
  
      public void setMainWorld(ServerWorld serverworld) {
@@ -267,7 +259,7 @@
              }
  
              public void onDamagePerBlockChanged(WorldBorder worldborder, double d0) {}
-@@ -340,14 +417,16 @@
+@@ -340,14 +416,16 @@
      }
  
      protected void savePlayerData(ServerPlayerEntity serverplayerentity) {
@@ -286,7 +278,7 @@
  
          if (playeradvancementtracker != null) {
              playeradvancementtracker.save();
-@@ -355,10 +434,21 @@
+@@ -355,10 +433,21 @@
  
      }
  
@@ -309,7 +301,7 @@
          this.savePlayerData(serverplayerentity);
          if (serverplayerentity.hasVehicle()) {
              Entity entity = serverplayerentity.getRootVehicle();
-@@ -390,18 +480,66 @@
+@@ -390,18 +479,66 @@
  
          if (serverplayerentity1 == serverplayerentity) {
              this.playerMap.remove(uuid);
@@ -382,7 +374,7 @@
              BannedPlayerEntry bannedplayerentry = (BannedPlayerEntry) this.bannedProfiles.get(gameprofile);
  
              translatabletext = new TranslatableText("multiplayer.disconnect.banned.reason", new Object[]{bannedplayerentry.getReason()});
-@@ -409,10 +547,12 @@
+@@ -409,10 +546,12 @@
                  translatabletext.append((Text) (new TranslatableText("multiplayer.disconnect.banned.expiration", new Object[]{PlayerManager.DATE_FORMATTER.format(bannedplayerentry.getExpiryDate())})));
              }
  
@@ -398,7 +390,7 @@
              BannedIpEntry bannedipentry = this.bannedIps.get(socketaddress);
  
              translatabletext = new TranslatableText("multiplayer.disconnect.banned_ip.reason", new Object[]{bannedipentry.getReason()});
-@@ -420,13 +560,25 @@
+@@ -420,13 +559,25 @@
                  translatabletext.append((Text) (new TranslatableText("multiplayer.disconnect.banned_ip.expiration", new Object[]{PlayerManager.DATE_FORMATTER.format(bannedipentry.getExpiryDate())})));
              }
  
@@ -427,7 +419,7 @@
          UUID uuid = PlayerEntity.getUuidFromProfile(gameprofile);
          List<ServerPlayerEntity> list = Lists.newArrayList();
  
-@@ -462,13 +614,22 @@
+@@ -462,13 +613,22 @@
          }
  
          return new ServerPlayerEntity(this.server, serverworld, gameprofile, (ServerPlayerInteractionManager) object);
@@ -450,7 +442,7 @@
          ServerWorld serverworld = this.server.getWorld(serverplayerentity.getSpawnPointDimension());
          Optional optional;
  
-@@ -488,6 +649,11 @@
+@@ -488,6 +648,11 @@
          }
  
          ServerPlayerEntity serverplayerentity1 = new ServerPlayerEntity(this.server, serverworld1, serverplayerentity.getGameProfile(), (ServerPlayerInteractionManager) object);
@@ -462,7 +454,7 @@
  
          serverplayerentity1.networkHandler = serverplayerentity.networkHandler;
          serverplayerentity1.copyFrom(serverplayerentity, flag);
-@@ -501,44 +667,114 @@
+@@ -501,44 +666,114 @@
              serverplayerentity1.addScoreboardTag(s);
          }
  
@@ -593,7 +585,7 @@
      public void sendCommandTree(ServerPlayerEntity serverplayerentity) {
          GameProfile gameprofile = serverplayerentity.getGameProfile();
          int i = this.server.getPermissionLevel(gameprofile);
-@@ -548,7 +784,15 @@
+@@ -548,7 +783,15 @@
  
      public void updatePlayerLatency() {
          if (++this.latencyUpdateTimer > 600) {
@@ -610,7 +602,7 @@
              this.latencyUpdateTimer = 0;
          }
  
-@@ -561,6 +805,25 @@
+@@ -561,6 +804,25 @@
  
      }
  
@@ -636,7 +628,7 @@
      public void sendToDimension(Packet<?> packet, RegistryKey<World> registrykey) {
          for (int i = 0; i < this.players.size(); ++i) {
              ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this.players.get(i);
-@@ -637,7 +900,7 @@
+@@ -637,7 +899,7 @@
      }
  
      public void removeFromOperators(GameProfile gameprofile) {
@@ -645,7 +637,7 @@
          ServerPlayerEntity serverplayerentity = this.getPlayer(gameprofile.getId());
  
          if (serverplayerentity != null) {
-@@ -660,7 +923,7 @@
+@@ -660,7 +922,7 @@
  
              serverplayerentity.networkHandler.sendPacket(new EntityStatusS2CPacket(serverplayerentity, b0));
          }
@@ -654,7 +646,7 @@
          this.server.getCommandManager().sendCommandTree(serverplayerentity);
      }
  
-@@ -693,6 +956,12 @@
+@@ -693,6 +955,12 @@
          for (int i = 0; i < this.players.size(); ++i) {
              ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) this.players.get(i);
  
@@ -667,7 +659,7 @@
              if (serverplayerentity != playerentity && serverplayerentity.world.getRegistryKey() == registrykey) {
                  double d4 = d0 - serverplayerentity.getX();
                  double d5 = d1 - serverplayerentity.getY();
-@@ -732,23 +1001,36 @@
+@@ -732,23 +1000,36 @@
      public void reloadWhitelist() {}
  
      public void sendWorldInfo(ServerPlayerEntity serverplayerentity, ServerWorld serverworld) {
@@ -709,7 +701,7 @@
      }
  
      public int getCurrentPlayerCount() {
-@@ -805,27 +1087,49 @@
+@@ -805,27 +1086,49 @@
      }
  
      public void disconnectAllPlayers() {
@@ -766,7 +758,7 @@
  
                  if (file2.exists() && file2.isFile()) {
                      file2.renameTo(file1);
-@@ -833,7 +1137,7 @@
+@@ -833,7 +1136,7 @@
              }
  
              serverstathandler = new ServerStatHandler(this.server, file1);
@@ -775,7 +767,7 @@
          }
  
          return serverstathandler;
-@@ -841,14 +1145,14 @@
+@@ -841,14 +1144,14 @@
  
      public PlayerAdvancementTracker getAdvancementTracker(ServerPlayerEntity serverplayerentity) {
          UUID uuid = serverplayerentity.getUuid();
@@ -792,7 +784,7 @@
          }
  
          playeradvancementtracker.setOwner(serverplayerentity);
-@@ -884,13 +1188,21 @@
+@@ -884,13 +1187,21 @@
      }
  
      public void onDataPacksReloaded() {

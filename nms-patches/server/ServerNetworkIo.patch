@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/ServerNetworkIo.java
 +++ b/net/minecraft/server/ServerNetworkIo.java
-@@ -92,10 +92,20 @@
+@@ -90,10 +90,20 @@
                      channel.pipeline().addLast("packet_handler", (ChannelHandler) clientconnection);
                      clientconnection.setPacketListener(new ServerHandshakeNetworkHandler(ServerNetworkIo.this.server, clientconnection));
                  }

@@ -1,7 +1,7 @@
 --- a/net/minecraft/world/storage/RegionBasedStorage.java
 +++ b/net/minecraft/world/storage/RegionBasedStorage.java
 @@ -23,7 +23,7 @@
-         this.desync = flag;
+         this.dsync = flag;
      }
  
 -    private RegionFile getRegionFile(ChunkPos chunkpos) throws IOException {
@@ -9,15 +9,7 @@
          long i = ChunkPos.toLong(chunkpos.getRegionX(), chunkpos.getRegionZ());
          RegionFile regionfile = (RegionFile) this.cachedRegionFiles.getAndMoveToFirst(i);
  
-@@ -39,6 +39,7 @@
-             }
- 
-             File file = new File(this.directory, "r." + chunkpos.getRegionX() + "." + chunkpos.getRegionZ() + ".mca");
-+            if (existingOnly && !file.exists()) return null; // CraftBukkit
-             RegionFile regionfile1 = new RegionFile(file, this.directory, this.desync);
- 
-             this.cachedRegionFiles.putAndMoveToFirst(i, regionfile1);
-@@ -48,7 +49,12 @@
+@@ -48,7 +48,12 @@
  
      @Nullable
      public CompoundTag getTagAt(ChunkPos chunkpos) throws IOException {
@@ -31,7 +23,7 @@
          DataInputStream datainputstream = regionfile.getChunkInputStream(chunkpos);
          Throwable throwable = null;
  
-@@ -83,7 +89,7 @@
+@@ -83,7 +88,7 @@
      }
  
      protected void write(ChunkPos chunkpos, CompoundTag compoundtag) throws IOException {

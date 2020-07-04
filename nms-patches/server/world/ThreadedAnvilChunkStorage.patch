@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/world/ThreadedAnvilChunkStorage.java
 +++ b/net/minecraft/server/world/ThreadedAnvilChunkStorage.java
-@@ -92,11 +92,16 @@
+@@ -91,11 +91,16 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -18,7 +18,7 @@
      private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> chunkHolders;
      private final Long2ObjectLinkedOpenHashMap<ChunkHolder> field_18807;
      private final LongSet loadedChunks;
-@@ -111,17 +116,42 @@
+@@ -110,17 +115,41 @@
      private final ChunkTaskPrioritySystem chunkTaskPrioritySystem;
      private final MessageListener<ChunkTaskPrioritySystem.Task<Runnable>> worldGenExecutor;
      private final MessageListener<ChunkTaskPrioritySystem.Task<Runnable>> mainExecutor;
@@ -38,22 +38,21 @@
  
 +    // CraftBukkit start - recursion-safe executor for Chunk loadCallback() and unloadCallback()
 +    public final CallbackExecutor callbackExecutor = new CallbackExecutor();
-+    public static final class CallbackExecutor implements java.util.concurrent.Executor, Runnable {
-+
++    public static final class CallbackExecutor implements Executor, Runnable {
 +        private Runnable queued;
 +
 +        @Override
 +        public void execute(Runnable runnable) {
-+            if (queued != null) {
++            if (this.queued != null) {
 +                throw new IllegalStateException("Already queued");
 +            }
-+            queued = runnable;
++            this.queued = runnable;
 +        }
 +
 +        @Override
 +        public void run() {
-+            Runnable task = queued;
-+            queued = null;
++            Runnable task = this.queued;
++            this.queued = null;
 +            if (task != null) {
 +                task.run();
 +            }
@@ -62,9 +61,9 @@
 +    // CraftBukkit end
 +
      public ThreadedAnvilChunkStorage(ServerWorld serverworld, LevelStorage.Session levelstorage_session, DataFixer datafixer, StructureManager structuremanager, Executor executor, ThreadExecutor<Runnable> threadexecutor, ChunkProvider chunkprovider, ChunkGenerator chunkgenerator, WorldGenerationProgressListener worldgenerationprogresslistener, Supplier<PersistentStateManager> supplier, int i, boolean flag) {
-         super(new File(levelstorage_session.method_27424(serverworld.getRegistryKey()), "region"), datafixer, flag);
+         super(new File(levelstorage_session.getWorldDirectory(serverworld.getRegistryKey()), "region"), datafixer, flag);
          this.chunkHolders = this.currentChunkHolders.clone();
-@@ -242,9 +272,10 @@
+@@ -241,9 +270,10 @@
  
          return completablefuture1.thenApply((list1) -> {
              List<Chunk> list2 = Lists.newArrayList();
@@ -77,7 +76,7 @@
                  final Either<Chunk, ChunkHolder.Unloaded> either = (Either) iterator.next();
                  Optional<Chunk> optional = either.left();
  
-@@ -346,7 +377,7 @@
+@@ -345,7 +375,7 @@
              ThreadedAnvilChunkStorage.LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", (Object) this.saveDir.getName());
          } else {
              this.chunkHolders.values().stream().filter(ChunkHolder::isTicking).forEach((chunkholder) -> {
@@ -86,7 +85,7 @@
  
                  if (chunk instanceof ReadOnlyChunk || chunk instanceof WorldChunk) {
                      this.save(chunk);
-@@ -396,7 +427,7 @@
+@@ -395,7 +425,7 @@
  
      private void tryUnloadChunk(long i, ChunkHolder chunkholder) {
          CompletableFuture<Chunk> completablefuture = chunkholder.getFuture();
@@ -95,7 +94,7 @@
              CompletableFuture<Chunk> completablefuture1 = chunkholder.getFuture();
  
              if (completablefuture1 != completablefuture) {
-@@ -619,9 +650,17 @@
+@@ -618,9 +648,17 @@
                          while (iterator.hasNext()) {
                              Entity entity = (Entity) iterator.next();
  
@@ -115,7 +114,7 @@
                                  } else {
                                      list.add(entity);
                                  }
-@@ -830,7 +869,7 @@
+@@ -829,7 +867,7 @@
                  return chunk instanceof WorldChunk ? Optional.of((WorldChunk) chunk) : Optional.empty();
              });
  
@@ -124,7 +123,7 @@
                  return Stream.of(worldchunk.getEntitySectionArray()).mapToInt(TypeFilterableList::size).sum();
              }).orElse(0), optional1.map((worldchunk) -> {
                  return worldchunk.getBlockEntities().size();
-@@ -841,7 +880,7 @@
+@@ -840,7 +878,7 @@
  
      private static String getFutureStatus(CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>> completablefuture) {
          try {
@@ -133,7 +132,7 @@
  
              return either != null ? (String) either.map((worldchunk) -> {
                  return "done";
-@@ -859,7 +898,7 @@
+@@ -858,7 +896,7 @@
      private CompoundTag getUpdatedChunkTag(ChunkPos chunkpos) throws IOException {
          CompoundTag compoundtag = this.getNbt(chunkpos);
  
@@ -142,7 +141,7 @@
      }
  
      boolean isTooFarFromPlayersToSpawnMobs(ChunkPos chunkpos) {
-@@ -1181,16 +1220,16 @@
+@@ -1180,16 +1218,16 @@
          });
      }
  
@@ -162,7 +161,7 @@
              this.entity = entity;
              this.maxDistance = i;
              this.lastCameraPosition = ChunkSectionPos.from(entity);
-@@ -1243,7 +1282,7 @@
+@@ -1242,7 +1280,7 @@
  
          public void updateCameraPosition(ServerPlayerEntity serverplayerentity) {
              if (serverplayerentity != this.entity) {
@@ -171,7 +170,7 @@
                  int i = Math.min(this.getMaxTrackDistance(), (ThreadedAnvilChunkStorage.this.watchDistance - 1) * 16);
                  boolean flag = vec3d.x >= (double) (-i) && vec3d.x <= (double) i && vec3d.z >= (double) (-i) && vec3d.z <= (double) i && this.entity.canBeSpectated(serverplayerentity);
  
-@@ -1259,6 +1298,17 @@
+@@ -1258,6 +1296,17 @@
                          }
                      }
  

@@ -75,7 +75,7 @@
  
      public Collection<String> getTeamNames() {
 @@ -252,4 +270,10 @@
-     public Set<RegistryKey<World>> method_29310() {
+     public Set<RegistryKey<World>> getWorldKeys() {
          return this.server.getWorldRegistryKeys();
      }
 +

@@ -3,10 +3,7 @@ package org.bukkit.craftbukkit;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
+import com.google.common.collect.*;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -983,9 +980,11 @@ public final class CraftServer implements Server {
         worlddata.addServerBrand(console.getServerModName(), console.getModdedStatusMessage().isPresent());
 
         if (console.options.has("forceUpgrade")) {
-            net.minecraft.server.Main.method_29173(worldSession, Schemas.getFixer(), console.options.has("eraseCache"), () -> {
+            net.minecraft.server.Main.forceUpgradeWorld(worldSession, Schemas.getFixer(), console.options.has("eraseCache"), () -> {
                 return true;
-            }, worlddata.getGeneratorOptions().method_29575());
+            },  worlddata.getGeneratorOptions().getDimensionMap().getEntries().stream().map((entry) -> {
+                return RegistryKey.of(Registry.DIMENSION_TYPE_KEY, ((RegistryKey) entry.getKey()).getValue());
+            }).collect(ImmutableSet.toImmutableSet()));
         }
 
         long j = BiomeAccess.hashSeed(creator.seed());
@@ -1538,7 +1537,7 @@ public final class CraftServer implements Server {
 
     @Override
     public File getWorldContainer() {
-        return this.getServer().session.method_27424(net.minecraft.world.World.OVERWORLD).getParentFile();
+        return this.getServer().session.getWorldDirectory(net.minecraft.world.World.OVERWORLD).getParentFile();
     }
 
     @Override

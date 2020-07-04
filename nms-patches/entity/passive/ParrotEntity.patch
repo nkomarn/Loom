@@ -1,6 +1,6 @@
 --- a/net/minecraft/entity/passive/ParrotEntity.java
 +++ b/net/minecraft/entity/passive/ParrotEntity.java
-@@ -64,11 +64,10 @@
+@@ -63,11 +63,10 @@
  public class ParrotEntity extends TameableShoulderEntity implements Flutterer {
  
      private static final TrackedData<Integer> ATTR_VARIANT = DataTracker.registerData(ParrotEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -14,7 +14,7 @@
      private static final Map<EntityType<?>, SoundEvent> MOB_SOUNDS = (Map) Util.make(Maps.newHashMap(), (hashmap) -> {
          hashmap.put(EntityType.BLAZE, SoundEvents.ENTITY_PARROT_IMITATE_BLAZE);
          hashmap.put(EntityType.CAVE_SPIDER, SoundEvents.ENTITY_PARROT_IMITATE_SPIDER);
-@@ -229,7 +228,7 @@
+@@ -228,7 +227,7 @@
              }
  
              if (!this.world.isClient) {
@@ -23,7 +23,7 @@
                      this.setOwner(playerentity);
                      this.world.sendEntityStatus(this, (byte) 7);
                  } else {
-@@ -243,7 +242,7 @@
+@@ -242,7 +241,7 @@
                  itemstack.decrement(1);
              }
  
@@ -32,7 +32,7 @@
              if (playerentity.isCreative() || !this.isInvulnerable()) {
                  this.damage(DamageSource.player(playerentity), Float.MAX_VALUE);
              }
-@@ -342,7 +341,7 @@
+@@ -341,7 +340,7 @@
      }
  
      public boolean isPushable() {
@@ -41,7 +41,7 @@
      }
  
      protected void pushAway(Entity entity) {
-@@ -355,7 +354,7 @@
+@@ -354,7 +353,7 @@
          if (this.isInvulnerableTo(damagesource)) {
              return false;
          } else {

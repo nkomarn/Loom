@@ -1,14 +1,23 @@
 --- a/net/minecraft/server/Main.java
 +++ b/net/minecraft/server/Main.java
-@@ -50,6 +50,7 @@
+@@ -21,6 +21,7 @@
+ import joptsimple.OptionSet;
+ import joptsimple.OptionSpec;
+ import net.minecraft.Bootstrap;
++import net.minecraft.SharedConstants;
+ import net.minecraft.datafixer.NbtOps;
+ import net.minecraft.datafixer.Schemas;
+ import net.minecraft.nbt.Tag;
+@@ -50,6 +51,8 @@
  import net.minecraft.world.GameRules;
  import net.minecraft.world.SaveProperties;
  import net.minecraft.world.World;
 +import net.minecraft.world.dimension.DimensionOptions;
++import net.minecraft.world.dimension.DimensionType;
  import net.minecraft.world.gen.GeneratorOptions;
  import net.minecraft.world.level.LevelInfo;
  import net.minecraft.world.level.LevelProperties;
-@@ -64,7 +65,8 @@
+@@ -64,7 +67,8 @@
  
      public Main() {}
  
@@ -18,12 +27,12 @@
          OptionParser optionparser = new OptionParser();
          OptionSpec<Void> optionspec = optionparser.accepts("nogui");
          OptionSpec<Void> optionspec1 = optionparser.accepts("initSettings", "Initializes 'server.properties' and 'eula.txt', then quits");
-@@ -88,19 +90,20 @@
+@@ -88,19 +92,21 @@
                  optionparser.printHelpOn((OutputStream) System.err);
                  return;
              }
--
 +            */ // CraftBukkit end
+ 
 +        try {
              CrashReport.initCrashReport();
              Bootstrap.initialize();
@@ -42,7 +51,7 @@
                  Main.LOGGER.info("Initialized '{}' and '{}'", (Object) path.toAbsolutePath(), (Object) path1.toAbsolutePath());
                  return;
              }
-@@ -110,18 +113,19 @@
+@@ -110,24 +116,42 @@
                  return;
              }
  
@@ -66,7 +75,36 @@
  
              if (flag) {
                  Main.LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
-@@ -143,6 +147,7 @@
+             }
+ 
+             ResourcePackManager<ResourcePackProfile> resourcepackmanager = new ResourcePackManager<>(ResourcePackProfile::new, new ResourcePackProvider[]{new VanillaDataPackProvider(), new FileResourcePackProvider(levelstorage_session.getDirectory(WorldSavePath.DATAPACKS).toFile(), ResourcePackSource.PACK_SOURCE_WORLD)});
++            // CraftBukkit start
++            File bukkitDataPackFolder = new File(levelstorage_session.getWorldFolder(WorldSavePath.DATAPACKS).toFile(), "bukkit");
++            if (!bukkitDataPackFolder.exists()) {
++                bukkitDataPackFolder.mkdirs();
++            }
++            File mcMeta = new File(bukkitDataPackFolder, "pack.mcmeta");
++            try {
++                com.google.common.io.Files.write("{
+"
++                        + "    \"pack\": {
+"
++                        + "        \"description\": \"Data pack for resources provided by Bukkit plugins\",
+"
++                        + "        \"pack_format\": " + SharedConstants.getGameVersion().getPackVersion() + "
+"
++                        + "    }
+"
++                        + "}
+", mcMeta, com.google.common.base.Charsets.UTF_8);
++            } catch (java.io.IOException ex) {
++                throw new RuntimeException("Could not initialize Bukkit datapack", ex);
++            }
++            // CraftBukkit end
+             DataPackSettings datapacksettings1 = MinecraftServer.loadDataPacks(resourcepackmanager, datapacksettings == null ? DataPackSettings.SAFE_MODE : datapacksettings, flag);
+             CompletableFuture completablefuture = ServerResourceManager.reload(resourcepackmanager.createResourcePacks(), CommandManager.RegistrationEnvironment.DEDICATED, serverpropertiesloader.getPropertiesHandler().functionPermissionLevel, Util.getServerWorkerExecutor(), Runnable::run);
+ 
+@@ -143,6 +167,7 @@
  
              serverresourcemanager.loadRegistryTags();
              RegistryTracker.Modifiable registrytracker_modifiable = RegistryTracker.create();
@@ -74,11 +112,11 @@
              RegistryOps<Tag> registryops = RegistryOps.of(NbtOps.INSTANCE, serverresourcemanager.getResourceManager(), registrytracker_modifiable);
              Object object = levelstorage_session.readLevelProperties(registryops, datapacksettings1);
  
-@@ -170,21 +175,33 @@
+@@ -170,21 +195,32 @@
              }
  
              levelstorage_session.method_27425(registrytracker_modifiable, (SaveProperties) object);
-+             */
++            */
              final MinecraftDedicatedServer minecraftdedicatedserver = (MinecraftDedicatedServer) MinecraftServer.startServer((thread) -> {
 -                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, object, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
 +                MinecraftDedicatedServer minecraftdedicatedserver1 = new MinecraftDedicatedServer(optionset, datapacksettings1, thread, registrytracker_modifiable, levelstorage_session, resourcepackmanager, serverresourcemanager, null, serverpropertiesloader, Schemas.getFixer(), minecraftsessionservice, gameprofilerepository, usercache, WorldGenerationProgressLogger::new);
@@ -88,7 +126,7 @@
                  minecraftdedicatedserver1.setServerPort((Integer) optionset.valueOf(optionspec11));
                  minecraftdedicatedserver1.setDemo(optionset.has(optionspec2));
                  minecraftdedicatedserver1.setServerId((String) optionset.valueOf(optionspec12));
-                 boolean flag1 = !optionset.has(optionspec) && !optionset.valuesOf(nonoptionargumentspec).contains("nogui");
+-                boolean flag1 = !optionset.has(optionspec) && !optionset.valuesOf(nonoptionargumentspec).contains("nogui");
 +                */
 +                boolean flag1 = !optionset.has("nogui") && !optionset.nonOptionArguments().contains("nogui");
  
@@ -109,21 +147,27 @@
              Thread thread = new Thread("Server Shutdown Thread") {
                  public void run() {
                      minecraftdedicatedserver.stop(true);
-@@ -193,14 +210,15 @@
+@@ -193,13 +229,15 @@
  
              thread.setUncaughtExceptionHandler(new UncaughtExceptionLogger(Main.LOGGER));
              Runtime.getRuntime().addShutdownHook(thread);
-+             */ // CraftBukkit end
++            */ // CraftBukkit end
          } catch (Exception exception1) {
              Main.LOGGER.fatal("Failed to start the minecraft server", (Throwable) exception1);
          }
  
      }
  
--    private static void method_29173(LevelStorage.Session levelstorage_session, DataFixer datafixer, boolean flag, BooleanSupplier booleansupplier, ImmutableSet<RegistryKey<World>> immutableset) {
--        Main.LOGGER.info("Forcing world upgrade!");
-+    public static void method_29173(LevelStorage.Session levelstorage_session, DataFixer datafixer, boolean flag, BooleanSupplier booleansupplier, ImmutableSet<RegistryKey<World>> immutableset) {
-+        Main.LOGGER.info("Forcing world upgrade! {}", levelstorage_session.getDirectoryName()); // CraftBukkit
+-    private static void forceUpgradeWorld(LevelStorage.Session levelstorage_session, DataFixer datafixer, boolean flag, BooleanSupplier booleansupplier, ImmutableSet<RegistryKey<World>> immutableset) {
++    // Loom - public access
++    public static void forceUpgradeWorld(LevelStorage.Session levelstorage_session, DataFixer datafixer, boolean flag, BooleanSupplier booleansupplier, ImmutableSet<RegistryKey<DimensionType>> immutableset) { // CraftBukkit
+         Main.LOGGER.info("Forcing world upgrade!");
          WorldUpdater worldupdater = new WorldUpdater(levelstorage_session, datafixer, immutableset, flag);
          Text text = null;
+@@ -232,4 +270,4 @@
+         }
  
+     }
+-}
++}
+\ No newline at end of file

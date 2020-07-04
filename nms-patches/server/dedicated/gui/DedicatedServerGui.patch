@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/dedicated/gui/DedicatedServerGui.java
 +++ b/net/minecraft/server/dedicated/gui/DedicatedServerGui.java
-@@ -161,6 +161,7 @@
+@@ -160,6 +160,7 @@
          this.stopTasks.forEach(Runnable::run);
      }
  
@@ -8,7 +8,7 @@
      public void appendToConsole(JTextArea jtextarea, JScrollPane jscrollpane, String s) {
          if (!SwingUtilities.isEventDispatchThread()) {
              SwingUtilities.invokeLater(() -> {
-@@ -176,7 +177,7 @@
+@@ -175,7 +176,7 @@
              }
  
              try {

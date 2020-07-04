@@ -34,13 +34,14 @@
      protected final PropertyDelegate propertyDelegate;
      private final Object2IntOpenHashMap<Identifier> recipesUsed;
      protected final RecipeType<? extends AbstractCookingRecipe> recipeType;
-@@ -248,12 +260,24 @@
+@@ -248,12 +260,25 @@
                      this.cookTime = MathHelper.clamp(this.cookTime - 2, 0, this.cookTimeTotal);
                  }
              } else {
 -                Recipe<?> recipe = (Recipe) this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).orElse((Object) null);
++                Recipe<?> recipe = null; // TODO
 +                // Recipe<?> recipe = (Recipe) this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).orElse((Object) null);
-+                Recipe<?> recipe = this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).orElse(null); // CraftBukkit decompile error
++                //Recipe<?> recipe = this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).orElse(null); // CraftBukkit decompile error
  
                  if (!this.isBurning() && this.canAcceptRecipeOutput(recipe)) {
 -                    this.burnTime = this.getFuelTime(itemstack);
@@ -62,7 +63,7 @@
                          flag1 = true;
                          if (!itemstack.isEmpty()) {
                              Item item = itemstack.getItem();
-@@ -315,11 +339,38 @@
+@@ -315,11 +340,38 @@
              ItemStack itemstack1 = recipe.getOutput();
              ItemStack itemstack2 = (ItemStack) this.inventory.get(2);
  
@@ -101,16 +102,17 @@
  
              if (!this.world.isClient) {
                  this.setLastRecipe(recipe);
-@@ -344,7 +395,7 @@
+@@ -344,7 +396,8 @@
      }
  
      protected int getCookTime() {
 -        return (Integer) this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).map(AbstractCookingRecipe::getCookTime).orElse(200);
-+        return this.hasWorld() ? (Integer) this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).map(AbstractCookingRecipe::getCookTime).orElse(200) : 200; // CraftBukkit - SPIGOT-4302 // Eclipse fail
++        return 200; // TODO FIXME
++        //return this.hasWorld() ? (Integer) this.world.getRecipeManager().getFirstMatch(this.recipeType, this, this.world).map(AbstractCookingRecipe::getCookTime).orElse(200) : 200; // CraftBukkit - SPIGOT-4302 // Eclipse fail
      }
  
      public static boolean canUseAsFuel(ItemStack itemstack) {
-@@ -456,14 +507,20 @@
+@@ -456,14 +509,20 @@
  
      public void unlockLastRecipe(PlayerEntity playerentity) {}
  
@@ -133,7 +135,7 @@
          List<Recipe<?>> list = Lists.newArrayList();
          ObjectIterator objectiterator = this.recipesUsed.object2IntEntrySet().iterator();
  
-@@ -472,14 +529,14 @@
+@@ -472,14 +531,14 @@
  
              world.getRecipeManager().get((Identifier) object2intmap_entry.getKey()).ifPresent((recipe) -> {
                  list.add(recipe);
@@ -150,7 +152,7 @@
          int j = MathHelper.floor((float) i * f);
          float f1 = MathHelper.fractionalPart((float) i * f);
  
-@@ -487,6 +544,14 @@
+@@ -487,6 +546,14 @@
              ++j;
          }
  
@@ -165,7 +167,7 @@
          while (j > 0) {
              int k = ExperienceOrbEntity.roundToOrbSize(j);
  
-@@ -506,4 +571,33 @@
+@@ -506,4 +573,33 @@
          }
  
      }
