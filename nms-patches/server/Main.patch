@@ -85,12 +85,18 @@
 +            }
 +            File mcMeta = new File(bukkitDataPackFolder, "pack.mcmeta");
 +            try {
-+                com.google.common.io.Files.write("{"
-+                        + "    \"pack\": {"
-+                        + "        \"description\": \"Data pack for resources provided by Bukkit plugins\","
-+                        + "        \"pack_format\": " + SharedConstants.getGameVersion().getPackVersion() + ""
-+                        + "    }"
-+                        + "}", mcMeta, com.google.common.base.Charsets.UTF_8);
++                com.google.common.io.Files.write("{
+"
++                        + "    \"pack\": {
+"
++                        + "        \"description\": \"Data pack for resources provided by Bukkit plugins\",
+"
++                        + "        \"pack_format\": " + SharedConstants.getGameVersion().getPackVersion() + "
+"
++                        + "    }
+"
++                        + "}
+", mcMeta, com.google.common.base.Charsets.UTF_8);
 +            } catch (java.io.IOException ex) {
 +                throw new RuntimeException("Could not initialize Bukkit datapack", ex);
 +            }

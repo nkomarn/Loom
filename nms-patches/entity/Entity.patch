@@ -420,16 +420,18 @@
              this.world.spawnEntity(itementity);
              return itementity;
          }
-@@ -1640,7 +1892,7 @@
+@@ -1640,7 +1892,9 @@
  
              this.setPose(EntityPose.STANDING);
              this.vehicle = entity;
 -            this.vehicle.addPassenger(this);
-+            if (!this.vehicle.removePassenger(this)) this.vehicle.addPassenger(this);
++            if (!this.vehicle.addPassenger(this)) { // Loom - mappings error TODO triple check this
++                this.vehicle = null;
++            }
              return true;
          }
      }
-@@ -1674,10 +1926,31 @@
+@@ -1674,10 +1928,31 @@
          this.method_29239();
      }
  
@@ -462,7 +464,7 @@
              if (!this.world.isClient && entity instanceof PlayerEntity && !(this.getPrimaryPassenger() instanceof PlayerEntity)) {
                  this.passengerList.add(0, entity);
              } else {
-@@ -1685,15 +1958,30 @@
+@@ -1685,15 +1960,30 @@
              }
  
          }
@@ -494,7 +496,7 @@
      }
  
      protected boolean canAddPassenger(Entity entity) {
-@@ -1746,7 +2034,14 @@
+@@ -1746,7 +2036,14 @@
                      this.world.getProfiler().push("portal");
                      this.netherPortalTime = i;
                      this.netherPortalCooldown = this.getDefaultNetherPortalCooldown();
@@ -510,7 +512,7 @@
                      this.world.getProfiler().pop();
                  }
  
-@@ -1846,6 +2141,13 @@
+@@ -1846,6 +2143,13 @@
      }
  
      public void setSwimming(boolean flag) {
@@ -524,7 +526,7 @@
          this.setFlag(4, flag);
      }
  
-@@ -1882,11 +2184,11 @@
+@@ -1882,11 +2186,11 @@
          this.setFlag(5, flag);
      }
  
@@ -538,7 +540,7 @@
          byte b0 = (Byte) this.dataTracker.get(Entity.FLAGS);
  
          if (flag) {
-@@ -1906,16 +2208,57 @@
+@@ -1906,16 +2210,57 @@
      }
  
      public void setAir(int i) {
@@ -598,7 +600,7 @@
      }
  
      public void onBubbleColumnSurfaceCollision(boolean flag) {
-@@ -2066,18 +2409,46 @@
+@@ -2066,18 +2411,46 @@
  
      @Nullable
      public Entity changeDimension(ServerWorld serverworld) {
@@ -648,7 +650,7 @@
              } else {
                  double d0 = this.getX();
                  double d1 = this.getZ();
-@@ -2103,7 +2474,17 @@
+@@ -2103,7 +2476,17 @@
                  Vec3d vec3d1 = this.getLastNetherPortalDirectionVector();
  
                  blockpos = new BlockPos(d0, this.getY(), d1);
@@ -667,7 +669,7 @@
  
                  if (blockpattern_teleporttarget == null) {
                      return null;
-@@ -2114,6 +2495,12 @@
+@@ -2114,6 +2497,12 @@
                  f = (float) blockpattern_teleporttarget.yaw;
              }
  
@@ -680,7 +682,7 @@
              this.world.getProfiler().swap("reloading");
              Entity entity = this.getType().create(serverworld);
  
-@@ -2123,8 +2510,16 @@
+@@ -2123,8 +2512,16 @@
                  entity.setVelocity(vec3d);
                  serverworld.onDimensionChanged(entity);
                  if (serverworld.getRegistryKey() == World.END) {
@@ -698,7 +700,7 @@
              }
  
              this.method_30076();
-@@ -2330,7 +2725,26 @@
+@@ -2330,7 +2727,26 @@
      }
  
      public void setBoundingBox(Box box) {
@@ -726,7 +728,7 @@
      }
  
      protected float getEyeHeight(EntityPose entitypose, EntityDimensions entitydimensions) {
-@@ -2546,7 +2960,7 @@
+@@ -2546,7 +2962,7 @@
          return SoundCategory.NEUTRAL;
      }
  

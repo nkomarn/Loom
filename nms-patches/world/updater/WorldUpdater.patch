@@ -18,11 +18,11 @@
      private final LevelStorage.Session session;
      private final Thread updateThread;
 @@ -53,7 +54,7 @@
-     private static final Pattern REGION_FILE_PATTERN = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
+     private static final Pattern REGION_FILE_PATTERN = Pattern.compile("^r\.(-?[0-9]+)\.(-?[0-9]+)\.mca$");
      private final PersistentStateManager persistentStateManager;
  
 -    public WorldUpdater(LevelStorage.Session levelstorage_session, DataFixer datafixer, ImmutableSet<RegistryKey<World>> immutableset, boolean flag) {
-+    public WorldUpdater(LevelStorage.Session levelstorage_session, DataFixer datafixer, ImmutableSet<RegistryKey<DimensionType>> immutableset, boolean flag) {
++    public WorldUpdater(LevelStorage.Session levelstorage_session, DataFixer datafixer, ImmutableSet<RegistryKey<DimensionType>> immutableset, boolean flag) { // CraftBukkit
          this.worlds = immutableset;
          this.eraseCache = flag;
          this.dataFixer = datafixer;
