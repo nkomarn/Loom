@@ -1972,6 +1972,24 @@ public final class CraftServer implements Server {
         return CraftMagicNumbers.INSTANCE;
     }
 
+    // Loom - Add methods to view server TPS and tick rates
+    public double[] getTps() {
+        return new double[] {
+                MinecraftServer.getServer().tps1.getAverage(),
+                MinecraftServer.getServer().tps5.getAverage(),
+                MinecraftServer.getServer().tps15.getAverage()
+        };
+    }
+
+    public long[] getTickTimes() {
+        return getServer().tickTimes5s.getTimes();
+    }
+
+    public double getAverageTickTime() {
+        return getServer().tickTimes5s.getAverage();
+    }
+    // Loom end
+
     @Override
     public Spigot spigot() {
         return null;
