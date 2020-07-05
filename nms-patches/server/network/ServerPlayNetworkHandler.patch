@@ -1062,7 +1062,7 @@
      private void executeCommand(String s) {
 -        this.server.getCommandManager().execute(this.player.getCommandSource(), s);
 +        // CraftBukkit start - whole method
-+        this.LOGGER.info(this.player.getName() + " issued server command: " + s);
++        this.LOGGER.info(this.player.getName().asString() + " issued server command: " + s);
 +
 +        CraftPlayer player = this.getPlayer();
 +
@@ -1674,7 +1674,7 @@
 +        if (custompayloadc2spacket.getChannel().equals(CUSTOM_REGISTER)) {
 +            try {
 +                String channels = custompayloadc2spacket.getData().toString(com.google.common.base.Charsets.UTF_8);
-+                for (String channel : channels.split(" ")) {
++                for (String channel : channels.split("")) {
 +                    getPlayer().addChannel(channel);
 +                }
 +            } catch (Exception ex) {
@@ -1684,7 +1684,7 @@
 +        } else if (custompayloadc2spacket.getChannel().equals(CUSTOM_UNREGISTER)) {
 +            try {
 +                String channels = custompayloadc2spacket.getData().toString(com.google.common.base.Charsets.UTF_8);
-+                for (String channel : channels.split(" ")) {
++                for (String channel : channels.split("")) {
 +                    getPlayer().removeChannel(channel);
 +                }
 +            } catch (Exception ex) {

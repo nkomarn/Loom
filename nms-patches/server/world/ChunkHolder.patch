@@ -89,7 +89,7 @@
 +            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
 +                WorldChunk worldChunk = (WorldChunk) either.left().orElse(null);
 +                if (worldChunk != null) {
-+                    threadedanvilchunkstorage.callbackExecutor.execute(() -> worldChunk.loadCallback());
++                    // threadedanvilchunkstorage.callbackExecutor.execute(worldChunk::loadCallback);
 +                }
 +            }).exceptionally((throwable) -> {
 +                // ensure exceptions are printed, by default this is not the case
@@ -110,10 +110,10 @@
  
 +    // CraftBukkit start
 +    public Chunk getFullChunk() {
-+        if (!getLevelType(this.completedLevel).isAfter(ChunkHolder.LevelType.BORDER)) return null; // note: using oldTicketLevel for isLoaded checks
++        if (!getLevelType(this.lastTickLevel).isAfter(ChunkHolder.LevelType.BORDER)) return null; // note: using oldTicketLevel for isLoaded checks
 +        CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> statusFuture = this.getFuture(ChunkStatus.FULL);
-+        Either<Chunk, ChunkHolder.Unloaded> either = (Either<Chunk, ChunkHolder.Unloaded>) statusFuture.getNow(null);
-+        return either == null ? null : (Chunk) either.left().orElse(null);
++        Either<Chunk, ChunkHolder.Unloaded> either = statusFuture.getNow(null);
++        return either == null ? null : either.left().orElse(null);
 +    }
 +    // CraftBukkit end
 +

@@ -64,7 +64,17 @@
      private PlayerManager playerManager;
      private volatile boolean running;
      private boolean stopped;
-@@ -209,12 +225,27 @@
+@@ -181,6 +197,9 @@
+     private int worldHeight;
+     private int playerIdleTimeout;
+     public final long[] lastTickLengths;
++    public final TickTimes tickTimes5s = new TickTimes(100);
++    public final TickTimes tickTimes10s = new TickTimes(200);
++    public final TickTimes tickTimes60s = new TickTimes(1200);
+     @Nullable
+     private KeyPair keyPair;
+     @Nullable
+@@ -209,12 +228,85 @@
      private final MetricsData metricsData;
      private boolean enforceWhitelist;
      private float tickTime;
@@ -85,17 +95,75 @@
 +    public org.bukkit.command.ConsoleCommandSender console;
 +    public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
 +    public ConsoleReader reader;
-+    public static int currentTick = (int) (System.currentTimeMillis() / 50);
++    public static int currentTick = 0; // Loom - improve tick loop
 +    public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<>();
 +    public int autosavePeriod;
 +    public File bukkitDataPackFolder;
 +    public CommandManager vanillaCommandDispatcher;
 +    private boolean forceTicks;
 +    // CraftBukkit end
++
++    // Loom start - tick loop improvements borrowed from Spigot and Paper
++    public static final int TPS = 20;
++    public static final int TICK_TIME = 1000000000 / TPS;
++    private static final int SAMPLE_INTERVAL = 20;
++    private static final long SEC_IN_NANO = 1000000000;
++    private long lastTick = 0;
++    public final RollingAverage tps1 = new RollingAverage(60);
++    public final RollingAverage tps5 = new RollingAverage(60 * 5);
++    public final RollingAverage tps15 = new RollingAverage(60 * 15);
++
++    private static double calculateTps(double avg, double exp, double tps) {
++        return (avg * exp) + (tps * (1 - exp));
++    }
++
++    public static class RollingAverage {
++        private final int size;
++        private long time;
++        private java.math.BigDecimal total;
++        private int index = 0;
++        private final java.math.BigDecimal[] samples;
++        private final long[] times;
++
++        RollingAverage(int size) {
++            this.size = size;
++            this.time = size * SEC_IN_NANO;
++            this.total = dec(TPS).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
++            this.samples = new java.math.BigDecimal[size];
++            this.times = new long[size];
++            for (int i = 0; i < size; i++) {
++                this.samples[i] = dec(TPS);
++                this.times[i] = SEC_IN_NANO;
++            }
++        }
++
++        private static java.math.BigDecimal dec(long t) {
++            return new java.math.BigDecimal(t);
++        }
++
++        public void add(java.math.BigDecimal x, long t) {
++            time -= times[index];
++            total = total.subtract(samples[index].multiply(dec(times[index])));
++            samples[index] = x;
++            times[index] = t;
++            time += t;
++            total = total.add(x.multiply(dec(t)));
++            if (++index == size) {
++                index = 0;
++            }
++        }
++
++        public double getAverage() {
++            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
++        }
++    }
++
++    private static final java.math.BigDecimal TPS_BASE = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(SAMPLE_INTERVAL));
++    // Loom end
  
      public static <S extends MinecraftServer> S startServer(Function<Thread, S> function) {
          AtomicReference<S> atomicreference = new AtomicReference();
-@@ -225,21 +256,21 @@
+@@ -225,21 +317,21 @@
          thread.setUncaughtExceptionHandler((thread1, throwable) -> {
              MinecraftServer.LOGGER.error((Object) throwable);
          });
@@ -120,7 +188,7 @@
          this.running = true;
          this.lastTickLengths = new long[100];
          this.resourcePackUrl = "";
-@@ -265,6 +296,34 @@
+@@ -265,6 +357,34 @@
          this.structureManager = new StructureManager(serverresourcemanager.getResourceManager(), levelstorage_session, datafixer);
          this.serverThread = thread;
          this.workerExecutor = Util.getServerWorkerExecutor();
@@ -155,7 +223,7 @@
      }
  
      private void initScoreboard(PersistentStateManager persistentstatemanager) {
-@@ -278,7 +337,7 @@
+@@ -278,7 +398,7 @@
  
      public static void convertLevel(LevelStorage.Session levelstorage_session) {
          if (levelstorage_session.needsConversion()) {
@@ -164,7 +232,7 @@
              levelstorage_session.convert(new ProgressListener() {
                  private long lastProgressUpdate = Util.getMeasuringTimeMs();
  
-@@ -298,55 +357,196 @@
+@@ -298,55 +418,196 @@
  
      }
  
@@ -399,12 +467,13 @@
                  if (flag) {
                      this.setToDebugWorldProperties(this.saveProperties);
                  }
-@@ -362,36 +562,10 @@
+@@ -362,36 +623,10 @@
                  throw new CrashException(crashreport);
              }
  
 -            serverworldproperties.setInitialized(true);
--        }
++            serverWorldProperties.setInitialized(true);
+         }
 -
 -        this.getPlayerManager().setMainWorld(serverworld);
 -        if (this.saveProperties.getCustomBossEvents() != null) {
@@ -430,15 +499,14 @@
 -                worldborder.addListener(new WorldBorderListener.WorldBorderSyncer(serverworld1.getWorldBorder()));
 -                this.worlds.put(registrykey2, serverworld1);
 -            }
-+            serverWorldProperties.setInitialized(true);
-         }
+-        }
 -
      }
 +    // CraftBukkit end
  
      private static void setupSpawn(ServerWorld serverworld, ServerWorldProperties serverworldproperties, boolean flag, boolean flag1, boolean flag2) {
          ChunkGenerator chunkgenerator = serverworld.getChunkManager().getChunkGenerator();
-@@ -407,6 +581,22 @@
+@@ -407,6 +642,22 @@
              BlockPos blockpos = biomesource.locateBiome(0, serverworld.getSeaLevel(), 0, 256, list, random);
              ChunkPos chunkpos = blockpos == null ? new ChunkPos(0, 0) : new ChunkPos(blockpos);
  
@@ -461,7 +529,7 @@
              if (blockpos == null) {
                  MinecraftServer.LOGGER.warn("Unable to find spawn biome");
              }
-@@ -472,8 +662,15 @@
+@@ -472,8 +723,15 @@
          serverworldproperties.setGameMode(GameMode.SPECTATOR);
      }
  
@@ -479,7 +547,7 @@
  
          MinecraftServer.LOGGER.info("Preparing start region for dimension {}", (Object) serverworld.getRegistryKey().getValue());
          BlockPos blockpos = serverworld.getSpawnPos();
-@@ -486,17 +683,23 @@
+@@ -486,17 +744,23 @@
          serverchunkmanager.addTicket(ChunkTicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
  
          while (serverchunkmanager.getTotalChunksLoadedCount() != 441) {
@@ -514,7 +582,7 @@
  
              if (forcedchunkstate != null) {
                  LongIterator longiterator = forcedchunkstate.getChunks().iterator();
-@@ -510,11 +713,16 @@
+@@ -510,11 +774,16 @@
              }
          }
  
@@ -533,7 +601,7 @@
      }
  
      protected void loadWorldResourcePack() {
-@@ -559,12 +767,16 @@
+@@ -559,12 +828,16 @@
              serverworld.save((ProgressListener) null, flag1, serverworld.savingDisabled && !flag2);
          }
  
@@ -551,7 +619,7 @@
          return flag3;
      }
  
-@@ -572,8 +784,32 @@
+@@ -572,8 +845,32 @@
          this.shutdown();
      }
  
@@ -584,7 +652,7 @@
          if (this.getNetworkIo() != null) {
              this.getNetworkIo().stop();
          }
-@@ -582,6 +818,7 @@
+@@ -582,6 +879,7 @@
              MinecraftServer.LOGGER.info("Saving players");
              this.playerManager.saveAllPlayerData();
              this.playerManager.disconnectAllPlayers();
@@ -592,9 +660,16 @@
          }
  
          MinecraftServer.LOGGER.info("Saving worlds");
-@@ -659,14 +896,16 @@
+@@ -656,17 +954,33 @@
+                 this.metadata.setVersion(new ServerMetadata.Version(SharedConstants.getGameVersion().getName(), SharedConstants.getGameVersion().getProtocolVersion()));
+                 this.setFavicon(this.metadata);
+ 
++                // Loom start - Tick loop improvements from Spigot and Paper
++                long start = System.nanoTime(), currentTime, tickSection = start;
++                lastTick = start - TICK_TIME;
                  while (this.running) {
-                     long i = Util.getMeasuringTimeMs() - this.timeReference;
+-                    long i = Util.getMeasuringTimeMs() - this.timeReference;
++                    long i = ((currentTime = System.nanoTime()) / (1000L * 1000L)) - this.timeReference;
  
 -                    if (i > 2000L && this.timeReference - this.lastTimeReference >= 15000L) {
 +                    if (i > 5000L && this.timeReference - this.lastTimeReference >= 30000L) { // CraftBukkit
@@ -606,11 +681,22 @@
                          this.lastTimeReference = this.timeReference;
                      }
  
-+                    MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
++                    if (++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0) {
++                        final long diff = currentTime - tickSection;
++                        java.math.BigDecimal currentTps = TPS_BASE.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
++                        tps1.add(currentTps, diff);
++                        tps5.add(currentTps, diff);
++                        tps15.add(currentTps, diff);
++                        tickSection = currentTime;
++                    }
++
++                    // MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
++                    lastTick = currentTime;
++                    // Loom end
                      this.timeReference += 50L;
                      TickDurationMonitor tickdurationmonitor = TickDurationMonitor.create("Server");
  
-@@ -712,6 +951,12 @@
+@@ -712,6 +1026,12 @@
              } catch (Throwable throwable1) {
                  MinecraftServer.LOGGER.error("Exception stopping the server", throwable1);
              } finally {
@@ -623,7 +709,7 @@
                  this.exit();
              }
  
-@@ -720,7 +965,12 @@
+@@ -720,7 +1040,12 @@
      }
  
      private boolean shouldKeepTicking() {
@@ -637,7 +723,7 @@
      }
  
      protected void method_16208() {
-@@ -730,7 +980,7 @@
+@@ -730,7 +1055,7 @@
          });
      }
  
@@ -646,7 +732,7 @@
          return new ServerTask(this.ticks, runnable);
      }
  
-@@ -825,7 +1075,7 @@
+@@ -825,7 +1150,7 @@
              this.metadata.getPlayers().setSample(agameprofile);
          }
  
@@ -655,7 +741,16 @@
              MinecraftServer.LOGGER.debug("Autosave started");
              this.profiler.push("save");
              this.playerManager.saveAllPlayerData();
-@@ -855,22 +1105,39 @@
+@@ -850,27 +1175,48 @@
+         this.tickTime = this.tickTime * 0.8F + (float) l / 1000000.0F * 0.19999999F;
+         long i1 = Util.getMeasuringTimeNano();
+ 
++        tickTimes5s.add(this.ticks, l);
++        tickTimes10s.add(this.ticks, l);
++        tickTimes60s.add(this.ticks, l);
++
+         this.metricsData.pushSample(i1 - i);
+         this.profiler.pop();
      }
  
      protected void tickWorlds(BooleanSupplier booleansupplier) {
@@ -695,7 +790,7 @@
  
              this.profiler.push("tick");
  
-@@ -954,7 +1221,7 @@
+@@ -954,7 +1300,7 @@
      }
  
      public String getServerModName() {
@@ -704,7 +799,7 @@
      }
  
      public CrashReport populateCrashReport(CrashReport crashreport) {
-@@ -1299,11 +1566,11 @@
+@@ -1299,11 +1645,11 @@
  
      public CompletableFuture<Void> reloadResources(Collection<String> collection) {
          CompletableFuture<Void> completablefuture = CompletableFuture.supplyAsync(() -> {
@@ -718,7 +813,7 @@
          }, this).thenCompose((immutablelist) -> {
              return ServerResourceManager.reload(immutablelist, this.isDedicated() ? CommandManager.RegistrationEnvironment.DEDICATED : CommandManager.RegistrationEnvironment.INTEGRATED, this.getFunctionPermissionLevel(), this.workerExecutor, this);
          }).thenAcceptAsync((serverresourcemanager) -> {
-@@ -1719,15 +1986,22 @@
+@@ -1719,15 +2065,47 @@
          return this.saveProperties;
      }
  
@@ -743,7 +838,32 @@
 +    @Deprecated
 +    public static MinecraftServer getServer() {
 +        return (Bukkit.getServer() instanceof CraftServer) ? ((CraftServer) Bukkit.getServer()).getServer() : null;
-     }
++    }
 +    // CraftBukkit end
 +
++    // Loom start - tick time calculations from Paper
++    public static class TickTimes {
++        private final long[] times;
++
++        public TickTimes(int length) {
++            times = new long[length];
++        }
++
++        void add(int index, long time) {
++            times[index % times.length] = time;
++        }
++
++        public long[] getTimes() {
++            return times.clone();
++        }
++
++        public double getAverage() {
++            long total = 0L;
++            for (long value : times) {
++                total += value;
++            }
++            return ((double) total / (double) times.length) * 1.0E-6D;
++        }
+     }
++    // Loom end
  }
