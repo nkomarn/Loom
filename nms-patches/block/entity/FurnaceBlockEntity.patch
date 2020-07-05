@@ -1,0 +1,17 @@
+--- a/net/minecraft/block/entity/FurnaceBlockEntity.java
++++ b/net/minecraft/block/entity/FurnaceBlockEntity.java
+@@ -20,4 +20,14 @@
+     protected ScreenHandler createScreenHandler(int i, PlayerInventory playerinventory) {
+         return new FurnaceScreenHandler(i, playerinventory, this, this.propertyDelegate);
+     }
++
++    @Override
++    public int getMaxCountPerStack() {
++        return this.getMaxStackSize();
++    }
++
++    @Override
++    public void setMaxCountPerStack(int size) {
++        this.setMaxStackSize(size);
++    }
+ }
