@@ -327,7 +327,7 @@
                      }
                  }
  
-@@ -1186,17 +1306,43 @@
+@@ -1186,17 +1306,40 @@
      }
  
      public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos) {
@@ -336,10 +336,7 @@
 +    }
 +
 +    public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos, boolean force) {
-+        boolean canUseBed = world.getDimension().isBedWorking(); // Loom - bed explotion fix
-+        if (!canUseBed) return Either.left(SleepFailureReason.NOT_POSSIBLE_HERE); // Loom - bed explotion fix
 +        // CraftBukkit end
-+
          this.sleep(blockpos);
          this.sleepTimer = 0;
 -        return Either.right(Unit.INSTANCE);
@@ -372,7 +369,7 @@
          this.sleepTimer = flag ? 0 : 100;
      }
  
-@@ -1303,7 +1449,11 @@
+@@ -1303,7 +1446,11 @@
              this.setVelocity(vec3d2.x, d3 * 0.6D, vec3d2.z);
              this.flyingSpeed = f;
              this.fallDistance = 0.0F;
@@ -384,7 +381,7 @@
          } else {
              super.travel(vec3d);
          }
-@@ -1430,12 +1580,24 @@
+@@ -1430,12 +1577,24 @@
      }
  
      public void startFallFlying() {
@@ -409,7 +406,7 @@
      }
  
      protected void onSwimmingStart() {
-@@ -1611,7 +1773,7 @@
+@@ -1611,7 +1770,7 @@
      }
  
      public Iterable<ItemStack> getItemsHand() {
@@ -418,7 +415,7 @@
      }
  
      public Iterable<ItemStack> getArmorItems() {
-@@ -1638,26 +1800,31 @@
+@@ -1638,26 +1797,31 @@
  
      protected void dropShoulderEntities() {
          if (this.shoulderEntityAddedTime + 20L < this.world.getTime()) {
@@ -459,7 +456,7 @@
      }
  
      public abstract boolean isSpectator();
-@@ -1804,7 +1971,7 @@
+@@ -1804,7 +1968,7 @@
          return (CompoundTag) this.dataTracker.get(PlayerEntity.LEFT_SHOULDER_ENTITY);
      }
  
@@ -468,7 +465,7 @@
          this.dataTracker.set(PlayerEntity.LEFT_SHOULDER_ENTITY, compoundtag);
      }
  
-@@ -1812,7 +1979,7 @@
+@@ -1812,7 +1976,7 @@
          return (CompoundTag) this.dataTracker.get(PlayerEntity.RIGHT_SHOULDER_ENTITY);
      }
  

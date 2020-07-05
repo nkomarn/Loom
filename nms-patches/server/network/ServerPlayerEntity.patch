@@ -74,7 +74,7 @@
      public ServerPlayerEntity(MinecraftServer minecraftserver, ServerWorld serverworld, GameProfile gameprofile, ServerPlayerInteractionManager serverplayerinteractionmanager) {
          super(serverworld, serverworld.getSpawnPos(), gameprofile);
          this.spawnPointDimension = World.OVERWORLD;
-@@ -178,8 +219,56 @@
+@@ -178,7 +219,55 @@
          this.advancementTracker = minecraftserver.getPlayerManager().getAdvancementTracker(this);
          this.stepHeight = 1.0F;
          this.moveToSpawn(serverworld);
@@ -83,8 +83,8 @@
 +        this.displayName = this.getEntityName();
 +        this.pickUpLoot = true;
 +        this.maxHealthCache = this.getMaxHealth();
-     }
- 
++    }
++
 +    // Yes, this doesn't match Vanilla, but it's the best we can do for now.
 +    // If this is an issue, PRs are welcome
 +    public final BlockPos getSpawnPoint(ServerWorld worldserver) {
@@ -124,13 +124,12 @@
 +        }
 +
 +        return blockposition;
-+    }
+     }
 +    // CraftBukkit end
 +
-+
+ 
      private void moveToSpawn(ServerWorld serverworld) {
          BlockPos blockpos = serverworld.getSpawnPos();
- 
 @@ -248,11 +337,20 @@
          if (compoundtag.contains("recipeBook", 10)) {
              this.recipeBook.fromTag(compoundtag.getCompound("recipeBook"), this.server.getRecipeManager());
@@ -394,10 +393,12 @@
 +        if (this.isSleeping()) return this; // CraftBukkit - SPIGOT-3154
 +        // this.inTeleportationState = true; // CraftBukkit - Moved down and into PlayerList#changeDimension
          ServerWorld serverworld1 = this.getServerWorld();
-         RegistryKey<World> registrykey = serverworld1.getRegistryKey();
+-        RegistryKey<World> registrykey = serverworld1.getRegistryKey();
++        RegistryKey<DimensionType> registrykey = serverworld1.getDimensionRegistryKey();
  
-         if (registrykey == World.END && serverworld.getRegistryKey() == World.OVERWORLD) {
-+            this.inTeleportationState = true;
+-        if (registrykey == World.END && serverworld.getRegistryKey() == World.OVERWORLD) {
++        if (registrykey == DimensionType.THE_END_REGISTRY_KEY && serverworld != null && serverworld.getDimensionRegistryKey() == DimensionType.OVERWORLD_REGISTRY_KEY) { // CraftBukkit
++            this.inTeleportationState = true; // CraftBukkit - Moved down from above
              this.detach();
              this.getServerWorld().removePlayer(this);
              if (!this.notInAnyWorld) {
@@ -422,7 +423,26 @@
              double d0 = this.getX();
              double d1 = this.getY();
              double d2 = this.getZ();
-@@ -691,7 +909,26 @@
+@@ -665,7 +883,8 @@
+             serverworld1.getProfiler().push("moving");
+             double d3;
+ 
+-            if (serverworld.getRegistryKey() == World.END) {
++            if (serverworld == null) { } else // CraftBukkit - empty to fall through to null to event
++            if (serverworld.getDimensionRegistryKey() == DimensionType.THE_END_REGISTRY_KEY) {
+                 BlockPos blockpos = ServerWorld.END_SPAWN_POS;
+ 
+                 d0 = (double) blockpos.getX();
+@@ -674,7 +893,7 @@
+                 f1 = 90.0F;
+                 f = 0.0F;
+             } else {
+-                if (registrykey == World.OVERWORLD && serverworld.getRegistryKey() == World.NETHER) {
++                if (registrykey == DimensionType.OVERWORLD_REGISTRY_KEY && serverworld.getDimensionRegistryKey() == DimensionType.THE_NETHER_REGISTRY_KEY) { // CraftBukkit
+                     this.enteredNetherPos = this.getPos();
+                 }
+ 
+@@ -691,7 +910,26 @@
                  }
              }
  
@@ -430,7 +450,7 @@
 +            // CraftBukkit start
 +            Location enter = this.getBukkitEntity().getLocation();
 +            Location exit = (serverworld == null) ? null : new Location(serverworld.getCraftWorld(), d0, d1, d2, f1, f);
-+            PlayerPortalEvent event = new PlayerPortalEvent(this.getBukkitEntity(), enter, exit, cause, 128, true, registrykey == World.END ? 0 : 16);
++            PlayerPortalEvent event = new PlayerPortalEvent(this.getBukkitEntity(), enter, exit, cause, 128, true, registrykey == DimensionType.THE_END_REGISTRY_KEY ? 0 : 16);
 +            Bukkit.getServer().getPluginManager().callEvent(event);
 +            if (event.isCancelled() || event.getTo() == null) {
 +                return null;
@@ -450,16 +470,12 @@
              serverworld1.getProfiler().pop();
              serverworld1.getProfiler().push("placing");
              double d4 = Math.min(-2.9999872E7D, serverworld.getWorldBorder().getBoundWest() + 16.0D);
-@@ -702,29 +939,79 @@
+@@ -702,29 +940,79 @@
  
              d0 = MathHelper.clamp(d0, d4, d5);
              d2 = MathHelper.clamp(d2, d3, d6);
 -            this.refreshPositionAndAngles(d0, d1, d2, f1, f);
-+            // this.refreshPositionAndAngles(d0, d1, d2, f1, f); // CraftBukkit - PlayerTeleportEvent handles position changes
-+            // CraftBukkit start - PlayerPortalEvent implementation
-+            Vec3d exitVelocity = Vec3d.ZERO;
-+            BlockPos exitPosition = new BlockPos(d0, d1, d2);
-             if (serverworld.getRegistryKey() == World.END) {
+-            if (serverworld.getRegistryKey() == World.END) {
 -                int i = MathHelper.floor(this.getX());
 -                int j = MathHelper.floor(this.getY()) - 1;
 -                int k = MathHelper.floor(this.getZ());
@@ -470,6 +486,11 @@
 -            } else if (!serverworld.getPortalForcer().usePortal(this, f2)) {
 -                serverworld.getPortalForcer().createPortal(this);
 -                serverworld.getPortalForcer().usePortal(this, f2);
++            // this.refreshPositionAndAngles(d0, d1, d2, f1, f); // CraftBukkit - PlayerTeleportEvent handles position changes
++            // CraftBukkit start - PlayerPortalEvent implementation
++            Vec3d exitVelocity = Vec3d.ZERO;
++            BlockPos exitPosition = new BlockPos(d0, d1, d2);
++            if (serverworld.getDimensionRegistryKey() == DimensionType.THE_END_REGISTRY_KEY) {
 +
 +                int i = exitPosition.getX();
 +                int j = exitPosition.getY() - 1;
@@ -524,7 +545,7 @@
 +            PlayerManager playerlist = this.server.getPlayerManager();
 +
 +            playerlist.sendCommandTree(this);
-+            serverworld.removePlayer(this);
++            serverworld1.removePlayer(this); // TODO fix what here
 +            this.dead = false;
 +
 +            this.setVelocity(exitVelocity);
@@ -533,8 +554,8 @@
              serverworld.onPlayerChangeDimension(this);
              this.dimensionChanged(serverworld1);
 -            this.networkHandler.requestTeleport(this.getX(), this.getY(), this.getZ(), f1, f);
-+            this.networkHandler.teleport(exit);
-+            this.networkHandler.syncWithPlayerPosition();
++            this.networkHandler.teleport(exit); // CraftBukkit - use internal teleport without event
++            this.networkHandler.syncWithPlayerPosition(); // CraftBukkit - sync position after changing it (from PortalTravelAgent#findAndteleport)
              this.interactionManager.setWorld(serverworld);
              this.networkHandler.sendPacket(new PlayerAbilitiesS2CPacket(this.abilities));
 -            playermanager.sendWorldInfo(this, serverworld);
@@ -544,7 +565,7 @@
              Iterator iterator = this.getStatusEffects().iterator();
  
              while (iterator.hasNext()) {
-@@ -737,11 +1024,16 @@
+@@ -737,11 +1025,16 @@
              this.syncedExperience = -1;
              this.syncedHealth = -1.0F;
              this.syncedFoodLevel = -1;
@@ -562,7 +583,7 @@
          RegistryKey<World> registrykey = serverworld.getRegistryKey();
          RegistryKey<World> registrykey1 = this.world.getRegistryKey();
  
-@@ -776,9 +1068,7 @@
+@@ -776,9 +1069,7 @@
          this.currentScreenHandler.sendContentUpdates();
      }
  
@@ -573,7 +594,7 @@
          if (!this.isSleeping() && this.isAlive()) {
              if (!this.world.getDimension().isNatural()) {
                  return Either.left(PlayerEntity.SleepFailureReason.NOT_POSSIBLE_HERE);
-@@ -803,7 +1093,21 @@
+@@ -803,7 +1094,34 @@
                              return Either.left(PlayerEntity.SleepFailureReason.NOT_SAFE);
                          }
                      }
@@ -585,9 +606,22 @@
 +        }
 +    }
  
-+    public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos) {
++    public Either<PlayerEntity.SleepFailureReason, Unit> trySleep(BlockPos blockpos, boolean force) {
 +        Direction direction = (Direction) this.world.getBlockState(blockpos).get(HorizontalFacingBlock.FACING);
 +        Either<PlayerEntity.SleepFailureReason, Unit> bedResult = this.getBedResult(blockpos, direction);
++
++        if (bedResult.left().orElse(null) == PlayerEntity.SleepFailureReason.OTHER_PROBLEM) {
++            return bedResult; // return immediately if the result is not bypassable by plugins
++        }
++
++        if (force) {
++            bedResult = Either.right(Unit.INSTANCE);
++        }
++
++        bedResult = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerBedEnterEvent(this, blockpos, bedResult);
++        if (bedResult.left().isPresent()) {
++            return bedResult;
++        }
 +
 +        {
 +            {
@@ -595,7 +629,7 @@
                      Either<PlayerEntity.SleepFailureReason, Unit> either = super.trySleep(blockpos).ifRight((unit) -> {
                          this.incrementStat(Stats.SLEEP_IN_BED);
                          Criteria.SLEPT_IN_BED.trigger(this);
-@@ -813,9 +1117,8 @@
+@@ -813,9 +1131,8 @@
                      return either;
                  }
              }
@@ -606,7 +640,7 @@
      }
  
      public void sleep(BlockPos blockpos) {
-@@ -840,6 +1143,7 @@
+@@ -840,6 +1157,7 @@
      }
  
      public void wakeUp(boolean flag, boolean flag1) {
@@ -614,7 +648,7 @@
          if (this.isSleeping()) {
              this.getServerWorld().getChunkManager().sendToNearbyPlayers(this, new EntityAnimationS2CPacket(this, 2));
          }
-@@ -905,8 +1209,9 @@
+@@ -905,8 +1223,9 @@
          this.networkHandler.sendPacket(new SignEditorOpenS2CPacket(signblockentity.getPos()));
      }
  
@@ -625,7 +659,7 @@
      }
  
      public OptionalInt openHandledScreen(@Nullable NamedScreenHandlerFactory namedscreenhandlerfactory) {
-@@ -920,6 +1225,24 @@
+@@ -920,6 +1239,24 @@
              this.incrementScreenHandlerSyncId();
              ScreenHandler screenhandler = namedscreenhandlerfactory.createMenu(this.screenHandlerSyncId, this.inventory, this);
  
@@ -650,7 +684,7 @@
              if (screenhandler == null) {
                  if (this.isSpectator()) {
                      this.sendMessage((new TranslatableText("container.spectatorCantOpen")).formatted(Formatting.RED), true);
-@@ -927,7 +1250,7 @@
+@@ -927,7 +1264,7 @@
  
                  return OptionalInt.empty();
              } else {
@@ -659,7 +693,7 @@
                  screenhandler.addListener(this);
                  this.currentScreenHandler = screenhandler;
                  return OptionalInt.of(this.screenHandlerSyncId);
-@@ -940,13 +1263,24 @@
+@@ -940,13 +1277,24 @@
      }
  
      public void openHorseInventory(HorseBaseEntity horsebaseentity, Inventory inventory) {
@@ -686,7 +720,7 @@
          this.currentScreenHandler.addListener(this);
      }
  
-@@ -987,6 +1321,11 @@
+@@ -987,6 +1335,11 @@
      public void onHandlerRegistered(ScreenHandler screenhandler, DefaultedList<ItemStack> defaultedlist) {
          this.networkHandler.sendPacket(new InventoryS2CPacket(screenhandler.syncId, defaultedlist));
          this.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(-1, -1, this.inventory.getCursorStack()));
@@ -698,7 +732,7 @@
      }
  
      public void onPropertyUpdate(ScreenHandler screenhandler, int i, int j) {
-@@ -994,6 +1333,7 @@
+@@ -994,6 +1347,7 @@
      }
  
      public void closeHandledScreen() {
@@ -706,7 +740,7 @@
          this.networkHandler.sendPacket(new CloseScreenS2CPacket(this.currentScreenHandler.syncId));
          this.closeCurrentScreen();
      }
-@@ -1027,14 +1367,14 @@
+@@ -1027,14 +1381,14 @@
  
      public void increaseStat(Stat<?> stat, int i) {
          this.statHandler.increaseStat(this, stat, i);
@@ -723,25 +757,24 @@
      }
  
      public int unlockRecipes(Collection<Recipe<?>> collection) {
-@@ -1079,8 +1419,17 @@
+@@ -1079,7 +1433,16 @@
  
      public void markHealthDirty() {
          this.syncedHealth = -1.0E8F;
 +        this.lastExperienceScore = -1; // CraftBukkit - Added to reset
-     }
- 
++    }
++
 +    // CraftBukkit start - Support multi-line messages
 +    public void sendMessage(Text[] ichatbasecomponent) {
 +        for (Text component : ichatbasecomponent) {
 +            this.sendSystemMessage(component, Util.NIL_UUID);
 +        }
-+    }
+     }
 +    // CraftBukkit end
-+
+ 
      public void sendMessage(Text text, boolean flag) {
          this.networkHandler.sendPacket(new GameMessageS2CPacket(text, flag ? MessageType.GAME_INFO : MessageType.CHAT, Util.NIL_UUID));
-     }
-@@ -1131,12 +1480,14 @@
+@@ -1131,12 +1494,14 @@
          this.syncedExperience = -1;
          this.syncedHealth = -1.0F;
          this.syncedFoodLevel = -1;
@@ -757,7 +790,7 @@
      }
  
      protected void onStatusEffectApplied(StatusEffectInstance statuseffectinstance) {
-@@ -1195,6 +1546,18 @@
+@@ -1195,6 +1560,18 @@
      }
  
      public void setGameMode(GameMode gamemode) {
@@ -776,7 +809,7 @@
          this.interactionManager.method_30118(gamemode);
          this.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.GAME_MODE_CHANGED, (float) gamemode.getId()));
          if (gamemode == GameMode.SPECTATOR) {
-@@ -1241,7 +1604,19 @@
+@@ -1241,7 +1618,19 @@
          return s;
      }
  
@@ -796,7 +829,7 @@
          this.clientChatVisibility = clientsettingsc2spacket.getChatVisibility();
          this.clientChatColorsEnabled = clientsettingsc2spacket.hasChatColors();
          this.getDataTracker().set(ServerPlayerEntity.PLAYER_MODEL_PARTS, (byte) clientsettingsc2spacket.getPlayerModelBitMask());
-@@ -1282,7 +1657,7 @@
+@@ -1282,7 +1671,7 @@
      }
  
      public void onStartedTracking(Entity entity) {
@@ -805,7 +838,7 @@
      }
  
      protected void updatePotionVisibility() {
-@@ -1305,7 +1680,7 @@
+@@ -1305,7 +1694,7 @@
          this.cameraEntity = (Entity) (entity == null ? this : entity);
          if (entity1 != this.cameraEntity) {
              this.networkHandler.sendPacket(new SetCameraEntityS2CPacket(this.cameraEntity));
@@ -814,7 +847,7 @@
          }
  
      }
-@@ -1332,7 +1707,7 @@
+@@ -1332,7 +1721,7 @@
  
      @Nullable
      public Text getPlayerListName() {
@@ -823,7 +856,7 @@
      }
  
      public void swingHand(Hand hand) {
-@@ -1353,8 +1728,15 @@
+@@ -1353,8 +1742,15 @@
      }
  
      public void teleport(ServerWorld serverworld, double d0, double d1, double d2, float f, float f1) {
@@ -839,7 +872,7 @@
          if (serverworld == this.world) {
              this.networkHandler.requestTeleport(d0, d1, d2, f, f1);
          } else {
-@@ -1363,7 +1745,7 @@
+@@ -1363,7 +1759,7 @@
  
              this.networkHandler.sendPacket(new PlayerRespawnS2CPacket(serverworld.getDimensionRegistryKey(), serverworld.getRegistryKey(), BiomeAccess.hashSeed(serverworld.getSeed()), this.interactionManager.getGameMode(), this.interactionManager.method_30119(), serverworld.isDebugWorld(), serverworld.isFlat(), true));
              this.networkHandler.sendPacket(new DifficultyS2CPacket(worldproperties.getDifficulty(), worldproperties.isDifficultyLocked()));
@@ -848,7 +881,7 @@
              serverworld1.removePlayer(this);
              this.removed = false;
              this.refreshPositionAndAngles(d0, d1, d2, f, f1);
-@@ -1372,10 +1754,12 @@
+@@ -1372,10 +1768,12 @@
              this.dimensionChanged(serverworld1);
              this.networkHandler.requestTeleport(d0, d1, d2, f, f1);
              this.interactionManager.setWorld(serverworld);
@@ -864,7 +897,7 @@
      }
  
      @Nullable
-@@ -1458,4 +1842,144 @@
+@@ -1458,4 +1856,144 @@
              return itementity;
          }
      }
