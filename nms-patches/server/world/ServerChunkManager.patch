@@ -11,22 +11,84 @@
      private final long[] chunkPosCache = new long[4];
      private final ChunkStatus[] chunkStatusCache = new ChunkStatus[4];
      private final Chunk[] chunkCache = new Chunk[4];
-@@ -168,12 +168,12 @@
+@@ -81,6 +81,16 @@
+         this.initChunkCaches();
+     }
+ 
++    // CraftBukkit start - properly implement isChunkLoaded
++    public boolean isChunkLoaded(int chunkX, int chunkZ) {
++        ChunkHolder chunk = this.threadedAnvilChunkStorage.getChunkHolder(ChunkPos.toLong(chunkX, chunkZ));
++        if (chunk == null) {
++            return false;
++        }
++        return chunk.getFullChunk() != null;
++    }
++    // CraftBukkit end
++
+     public ServerLightingProvider getLightingProvider() {
+         return this.lightProvider;
+     }
+@@ -159,7 +169,9 @@
+                 if (k == this.chunkPosCache[l] && this.chunkStatusCache[l] == ChunkStatus.FULL) {
+                     Chunk chunk = this.chunkCache[l];
+ 
+-                    return chunk instanceof WorldChunk ? (WorldChunk) chunk : null;
++                    if (chunk != null) { // CraftBukkit - the chunk can become accessible in the meantime TODO for non-null chunks it might also make sense to check that the chunk's state hasn't changed in the meantime
++                        return (WorldChunk) chunk;
++                    }
+                 }
+             }
+ 
+@@ -168,12 +180,12 @@
              if (chunkholder == null) {
                  return null;
              } else {
 -                Either<Chunk, ChunkHolder.Unloaded> either = (Either) chunkholder.getNowFuture(ChunkStatus.FULL).getNow((Object) null);
-+                Either<Chunk, ChunkHolder.Unloaded> either = (Either) chunkholder.getNowFuture(ChunkStatus.FULL).getNow(null); // Loom - decompile error
++                Either<Chunk, ChunkHolder.Unloaded> either = (Either) chunkholder.getNowFuture(ChunkStatus.FULL).getNow(null); // CraftBukkit - decompile error
  
                  if (either == null) {
                      return null;
                  } else {
 -                    Chunk chunk1 = (Chunk) either.left().orElse((Object) null);
-+                    Chunk chunk1 = (Chunk) either.left().orElse(null); // Loom - decompile error
++                    Chunk chunk1 = (Chunk) either.left().orElse(null); // CraftBukkit - decompile error
  
                      if (chunk1 != null) {
                          this.putInCache(k, chunk1, ChunkStatus.FULL);
-@@ -263,7 +263,7 @@
+@@ -200,7 +212,16 @@
+         int l = 33 + ChunkStatus.getTargetGenerationRadius(chunkstatus);
+         ChunkHolder chunkholder = this.getChunkHolder(k);
+ 
+-        if (flag) {
++        // CraftBukkit start - don't add new ticket for currently unloading chunk
++        boolean currentlyUnloading = false;
++        if (chunkholder != null) {
++            ChunkHolder.LevelType oldChunkState = ChunkHolder.getLevelType(chunkholder.lastTickLevel);
++            ChunkHolder.LevelType currentChunkState = ChunkHolder.getLevelType(chunkholder.level);
++            currentlyUnloading = (oldChunkState.isAfter(ChunkHolder.LevelType.BORDER) && !currentChunkState.isAfter(ChunkHolder.LevelType.BORDER));
++        }
++
++        if (flag && !currentlyUnloading) {
++            // CraftBukkit end
+             this.ticketManager.addTicketWithLevel(ChunkTicketType.UNKNOWN, chunkpos, l, chunkpos);
+             if (this.isMissingForLevel(chunkholder, l)) {
+                 Profiler profiler = this.world.getProfiler();
+@@ -219,14 +240,7 @@
+     }
+ 
+     private boolean isMissingForLevel(@Nullable ChunkHolder chunkholder, int i) {
+-        return chunkholder == null || chunkholder.getLevel() > i;
+-    }
+-
+-    public boolean isChunkLoaded(int i, int j) {
+-        ChunkHolder chunkholder = this.getChunkHolder((new ChunkPos(i, j)).toLong());
+-        int k = 33 + ChunkStatus.getTargetGenerationRadius(ChunkStatus.FULL);
+-
+-        return !this.isMissingForLevel(chunkholder, k);
++        return chunkholder == null || chunkholder.lastTickLevel > i; // CraftBukkit using oldTicketLevel for isLoaded checks
+     }
+ 
+     public BlockView getChunk(int i, int j) {
+@@ -263,7 +277,7 @@
          return this.mainThreadExecutor.runTask();
      }
  
@@ -35,7 +97,55 @@
          boolean flag = this.ticketManager.tick(this.threadedAnvilChunkStorage);
          boolean flag1 = this.threadedAnvilChunkStorage.updateHolderMap();
  
-@@ -487,13 +487,7 @@
+@@ -309,11 +323,31 @@
+     }
+ 
+     public void close() throws IOException {
+-        this.save(true);
++        // CraftBukkit start
++        close(true);
++    }
++
++    public void close(boolean save) throws IOException {
++        if (save) {
++            this.save(true);
++        }
++        // CraftBukkit end
+         this.lightProvider.close();
+         this.threadedAnvilChunkStorage.close();
+     }
+ 
++    // CraftBukkit start - modelled on below
++    public void purgeUnload() {
++        this.world.getProfiler().push("purge");
++        this.ticketManager.purge();
++        this.tick();
++        this.world.getProfiler().swap("unload");
++        this.threadedAnvilChunkStorage.tick(() -> true);
++        this.world.getProfiler().pop();
++        this.initChunkCaches();
++    }
++    // CraftBukkit end
++
+     public void tick(BooleanSupplier booleansupplier) {
+         this.world.getProfiler().push("purge");
+         this.ticketManager.purge();
+@@ -333,12 +367,12 @@
+         this.lastMobSpawningTime = i;
+         WorldProperties worldproperties = this.world.getLevelProperties();
+         boolean flag = this.world.isDebugWorld();
+-        boolean flag1 = this.world.getGameRules().getBoolean(GameRules.DO_MOB_SPAWNING);
++        boolean flag1 = this.world.getGameRules().getBoolean(GameRules.DO_MOB_SPAWNING) && !world.getPlayers().isEmpty(); // CraftBukk
+ 
+         if (!flag) {
+             this.world.getProfiler().push("pollingChunks");
+             int k = this.world.getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
+-            boolean flag2 = worldproperties.getTime() % 400L == 0L;
++            boolean flag2 = world.ticksPerAnimalSpawns != 0L && worldproperties.getTime() % world.ticksPerAnimalSpawns == 0L; // CraftBukki
+ 
+             this.world.getProfiler().push("naturalSpawnCount");
+             int l = this.ticketManager.getSpawningChunkCount();
+@@ -487,13 +521,7 @@
          return this.spawnEntry;
      }
  
@@ -50,3 +160,22 @@
  
      final class MainThreadExecutor extends ThreadExecutor<Runnable> {
  
+@@ -523,12 +551,18 @@
+         }
+ 
+         protected boolean runTask() {
++        // CraftBukkit start - process pending Chunk loadCallback() and unloadCallback() after each run task
++        try {
+             if (ServerChunkManager.this.tick()) {
+                 return true;
+             } else {
+                 ServerChunkManager.this.lightProvider.tick();
+                 return super.runTask();
+             }
++        } finally {
++            threadedAnvilChunkStorage.callbackExecutor.run();
++        }
++        // CraftBukkit end
+         }
+ 
+         MainThreadExecutor(World world, Object object) {

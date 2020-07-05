@@ -43,16 +43,16 @@
 +
 +        @Override
 +        public void execute(Runnable runnable) {
-+            if (this.queued != null) {
++            if (queued != null) {
 +                throw new IllegalStateException("Already queued");
 +            }
-+            this.queued = runnable;
++            queued = runnable;
 +        }
 +
 +        @Override
 +        public void run() {
-+            Runnable task = this.queued;
-+            this.queued = null;
++            Runnable task = queued;
++            queued = null;
 +            if (task != null) {
 +                task.run();
 +            }
@@ -63,7 +63,7 @@
      public ThreadedAnvilChunkStorage(ServerWorld serverworld, LevelStorage.Session levelstorage_session, DataFixer datafixer, StructureManager structuremanager, Executor executor, ThreadExecutor<Runnable> threadexecutor, ChunkProvider chunkprovider, ChunkGenerator chunkgenerator, WorldGenerationProgressListener worldgenerationprogresslistener, Supplier<PersistentStateManager> supplier, int i, boolean flag) {
          super(new File(levelstorage_session.getWorldDirectory(serverworld.getRegistryKey()), "region"), datafixer, flag);
          this.chunkHolders = this.currentChunkHolders.clone();
-@@ -241,9 +270,10 @@
+@@ -241,9 +270,11 @@
  
          return completablefuture1.thenApply((list1) -> {
              List<Chunk> list2 = Lists.newArrayList();
@@ -72,11 +72,12 @@
  
 -            for (Iterator iterator = list1.iterator(); iterator.hasNext(); ++l1) {
 +            for (Iterator iterator = list1.iterator(); iterator.hasNext(); ++cnt) {
-+                final int l1 = cnt; // CraftBukkit end
++                final int l1 = cnt;
++                // CraftBukkit end
                  final Either<Chunk, ChunkHolder.Unloaded> either = (Either) iterator.next();
                  Optional<Chunk> optional = either.left();
  
-@@ -345,7 +375,7 @@
+@@ -345,7 +376,7 @@
              ThreadedAnvilChunkStorage.LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", (Object) this.saveDir.getName());
          } else {
              this.chunkHolders.values().stream().filter(ChunkHolder::isTicking).forEach((chunkholder) -> {
@@ -85,7 +86,7 @@
  
                  if (chunk instanceof ReadOnlyChunk || chunk instanceof WorldChunk) {
                      this.save(chunk);
-@@ -395,7 +425,7 @@
+@@ -395,7 +426,7 @@
  
      private void tryUnloadChunk(long i, ChunkHolder chunkholder) {
          CompletableFuture<Chunk> completablefuture = chunkholder.getFuture();
@@ -94,7 +95,7 @@
              CompletableFuture<Chunk> completablefuture1 = chunkholder.getFuture();
  
              if (completablefuture1 != completablefuture) {
-@@ -618,9 +648,17 @@
+@@ -618,9 +649,17 @@
                          while (iterator.hasNext()) {
                              Entity entity = (Entity) iterator.next();
  
@@ -114,7 +115,7 @@
                                  } else {
                                      list.add(entity);
                                  }
-@@ -829,7 +867,7 @@
+@@ -829,7 +868,7 @@
                  return chunk instanceof WorldChunk ? Optional.of((WorldChunk) chunk) : Optional.empty();
              });
  
@@ -123,7 +124,7 @@
                  return Stream.of(worldchunk.getEntitySectionArray()).mapToInt(TypeFilterableList::size).sum();
              }).orElse(0), optional1.map((worldchunk) -> {
                  return worldchunk.getBlockEntities().size();
-@@ -840,7 +878,7 @@
+@@ -840,7 +879,7 @@
  
      private static String getFutureStatus(CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>> completablefuture) {
          try {
@@ -132,7 +133,7 @@
  
              return either != null ? (String) either.map((worldchunk) -> {
                  return "done";
-@@ -858,7 +896,7 @@
+@@ -858,7 +897,7 @@
      private CompoundTag getUpdatedChunkTag(ChunkPos chunkpos) throws IOException {
          CompoundTag compoundtag = this.getNbt(chunkpos);
  
@@ -141,7 +142,7 @@
      }
  
      boolean isTooFarFromPlayersToSpawnMobs(ChunkPos chunkpos) {
-@@ -1180,16 +1218,16 @@
+@@ -1180,16 +1219,16 @@
          });
      }
  
@@ -161,7 +162,7 @@
              this.entity = entity;
              this.maxDistance = i;
              this.lastCameraPosition = ChunkSectionPos.from(entity);
-@@ -1242,7 +1280,7 @@
+@@ -1242,7 +1281,7 @@
  
          public void updateCameraPosition(ServerPlayerEntity serverplayerentity) {
              if (serverplayerentity != this.entity) {
@@ -170,7 +171,7 @@
                  int i = Math.min(this.getMaxTrackDistance(), (ThreadedAnvilChunkStorage.this.watchDistance - 1) * 16);
                  boolean flag = vec3d.x >= (double) (-i) && vec3d.x <= (double) i && vec3d.z >= (double) (-i) && vec3d.z <= (double) i && this.entity.canBeSpectated(serverplayerentity);
  
-@@ -1258,6 +1296,17 @@
+@@ -1258,6 +1297,17 @@
                          }
                      }
  

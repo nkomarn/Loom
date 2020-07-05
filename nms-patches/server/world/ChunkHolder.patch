@@ -9,6 +9,17 @@
  public class ChunkHolder {
  
      public static final Either<Chunk, ChunkHolder.Unloaded> UNLOADED_CHUNK = Either.right(ChunkHolder.Unloaded.INSTANCE);
+@@ -43,8 +45,8 @@
+     private volatile CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>> tickingFuture;
+     private volatile CompletableFuture<Either<WorldChunk, ChunkHolder.Unloaded>> entityTickingFuture;
+     private CompletableFuture<Chunk> future;
+-    private int lastTickLevel;
+-    private int level;
++    public int lastTickLevel; // Loom - public access
++    public int level; // Loom - public access
+     private int completedLevel;
+     private final ChunkPos pos;
+     private final short[] blockUpdatePositions;
 @@ -62,7 +64,7 @@
          this.borderFuture = ChunkHolder.UNLOADED_WORLD_CHUNK_FUTURE;
          this.tickingFuture = ChunkHolder.UNLOADED_WORLD_CHUNK_FUTURE;
@@ -89,7 +100,7 @@
 +            this.getFuture(ChunkStatus.FULL).thenAccept((either) -> {
 +                WorldChunk worldChunk = (WorldChunk) either.left().orElse(null);
 +                if (worldChunk != null) {
-+                    // threadedanvilchunkstorage.callbackExecutor.execute(worldChunk::loadCallback);
++                    threadedanvilchunkstorage.callbackExecutor.execute(worldChunk::loadCallback);
 +                }
 +            }).exceptionally((throwable) -> {
 +                // ensure exceptions are printed, by default this is not the case
