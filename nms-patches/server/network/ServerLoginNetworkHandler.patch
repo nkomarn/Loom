@@ -54,7 +54,7 @@
  
 -        if (text != null) {
 -            this.disconnect(text);
-+        if (s != null) {
++        if (s == null) {
 +            // this.disconnect(text);
 +            // CraftBukkit end
          } else {
