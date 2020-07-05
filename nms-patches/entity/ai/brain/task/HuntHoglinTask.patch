@@ -1,0 +1,15 @@
+--- a/net/minecraft/entity/ai/brain/task/HuntHoglinTask.java
++++ b/net/minecraft/entity/ai/brain/task/HuntHoglinTask.java
+@@ -28,11 +28,5 @@
+         PiglinBrain.rememberGroupHunting(e0);
+     }
+ 
+-    protected boolean shouldRun(ServerWorld serverworld, LivingEntity livingentity) {
+-        return this.shouldRun(serverworld, (PiglinEntity) livingentity);
+-    }
+-
+-    protected void run(ServerWorld serverworld, LivingEntity livingentity, long i) {
+-        this.run(serverworld, (PiglinEntity) livingentity, i);
+-    }
++    // Loom - decompile errors
+ }

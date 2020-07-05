@@ -1,14 +1,10 @@
 package org.loomdev.loom;
 
 import net.minecraft.server.MinecraftServer;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.loomdev.loom.command.TpsCommand;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
 
 public class LoomConfig {
     private static YamlConfiguration config;
@@ -29,7 +25,7 @@ public class LoomConfig {
         // TODO version checking shit
 
         // Register commands
-        MinecraftServer.getServer().server.getCommandMap().register("tps", "TPS", new TpsCommand());
+        MinecraftServer.getServer().server.getCommandMap().register("loom", new TpsCommand());
     }
 
 }
