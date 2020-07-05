@@ -47,8 +47,8 @@ public class TpsCommand extends Command {
         times.addAll(eval(server.tickTimes10s.getTimes()));
         times.addAll(eval(server.tickTimes60s.getTimes()));
 
-        sender.sendMessage(String.format("§6TPS from last 1m, 5m, 15m: " + StringUtils.join(tpsAvg, ", ")));
-        sender.sendMessage(String.format("§6Tick rates from last 5s, 10s, 15s:"));
+        sender.sendMessage("§6TPS from last 1m, 5m, 15m: " + StringUtils.join(tpsAvg, ", "));
+        sender.sendMessage("§6Tick rates from last 5s, 10s, 15s:");
         sender.sendMessage(String.format("%s§7/%s§7/%s§e, %s§7/%s§7/%s§e, %s§7/%s§7/%s", times.toArray()));
         return true;
     }

@@ -236,8 +236,8 @@ public final class CraftChatMessage {
     }
 
     private static Text fixComponent(Text component, Matcher matcher) {
-        if (component instanceof Text) {
-            LiteralText text = ((LiteralText) component);
+        if (component instanceof LiteralText) {
+            LiteralText text = (LiteralText) component;
             String msg = text.getRawString();
             if (matcher.reset(msg).find()) {
                 matcher.reset();
