@@ -26,7 +26,7 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.spigotmc</groupId>
+            <groupId>org.loomdev</groupId>
             <artifactId>minecraft-server</artifactId>
             <version>${minecraft.version}-SNAPSHOT</version>
             <scope>compile</scope>

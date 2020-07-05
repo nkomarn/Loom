@@ -57,3 +57,4 @@ dependency-reduced-pom.xml
 /server.properties
 /usercache.json
 /whitelist.json
+/permissions.yml
